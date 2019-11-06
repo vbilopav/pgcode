@@ -1,0 +1,13 @@
+.sf-main {
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    overflow: hidden;
+    display: grid;
+    grid-template-columns: 50px 250px 3px auto;
+    grid-template-rows: auto 20px;
+    grid-template-areas: 'sidebar left-panel main-splitter main-panel' 'footer  footer     footer        footer'
+}

@@ -1,0 +1,15 @@
+$body-color: default;
+@if $theme == "dark" {
+    $body-color: #C5C5C5;
+} 
+@if $theme == "light" {
+    $body-color: #1E1E1E;
+}
+
+$body-background-color: default;
+@if $theme == "dark" {
+    $body-background-color: #1E1E1E;
+} 
+@if $theme == "light" {
+    $body-background-color: #C5C5C5;
+}

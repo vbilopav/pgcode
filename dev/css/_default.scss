@@ -1,0 +1,14 @@
+@import 'vars.scss';
+
+html {
+    font-family: "Consolas", 'Courier New', "monospace";
+    font-size: 12px;
+    line-height: 1.15;
+}
+body {
+    margin: 0;
+    color: $body-color;
+    background-color: $body-background-color;
+}
+
+@import 'index.scss';
