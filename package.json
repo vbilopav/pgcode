@@ -1,0 +1,16 @@
+{
+  "name": "sfcode",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {},
+  "devDependencies": {
+    "ihjs": "^1.2.8",
+    "monaco-editor": "^0.18.1"
+  },
+  "scripts": {
+    "install": "node install.js",
+    "run-dev": "cd src && http-server -o",
+    "build": "build.bat",
+    "css": "node-sass --output-style compressed src/css/theme-dark.scss > src/css/theme-dark.css"
+  }
+}

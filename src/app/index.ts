@@ -1,4 +1,4 @@
-///<reference path="../../node_modules/ihjs/build/1.2.6/types/core.d.ts"/>
+///<reference path="../libs/ihjs/types/core.d.ts"/>
 
 import Main from "./main";
 

@@ -6,10 +6,13 @@
     <link rel="stylesheet" id="theme" type="text/css" href="css/theme-dark.css" />
 </head>
 <body>
+    <script>window.require = {paths: {'vs': 'libs/monaco-editor/min/vs'}};</script>
+
     <script 
         type="module" 
-        data-view-module="dev/app/index"
-        src="../node_modules/ihjs/build/1.2.6/ihjs.js">
+        data-view-module="app/index"
+        src="libs/ihjs/ihjs.js">
     </script>
+
 </body>
 </html>
