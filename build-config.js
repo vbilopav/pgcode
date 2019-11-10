@@ -12,6 +12,5 @@
     minifyDefault: true,
     minifyLoader: true,
     
-    appBundleModules: ["../../node_modules/monaco-editor/dev/vs/basic-languages/pgsql/pgsql.contribution.js"],
     minifyModules: {},
 })
