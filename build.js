@@ -15,22 +15,28 @@ function copy(obj, from, to) {
 rmdirSync("_build");
 mkDirByPathSync("_build");
 
-for (let obj of walkSync("src/css")) {
+for (let obj of walkSync("web/css")) {
     if (!obj.full.endsWith(".css")) {
         continue;
     }
-    copy(obj, "src/css", "_build/css");
+    copy(obj, "web/css", "_build/css");
 }
-for (let obj of walkSync("src/libs")) {
+for (let obj of walkSync("web/libs")) {
     if (obj.full.indexOf("ihjs") != -1) {
         continue;
     }
-    if (!(obj.full.endsWith(".js") || obj.full.endsWith(".css"))) {
+    if (
+        obj.file != "editor.main.js" && 
+        obj.file != "editor.main.css" && 
+        obj.file != "editor.main.nls.js" &&
+        obj.file != "workerMain.js" &&
+        obj.file != "pgsql.js" 
+    ) {
         continue;
     }
-    copy(obj, "src/libs", "_build/libs");
+    copy(obj, "web/libs", "_build/libs");
 }
-var from = "src/index.html";
+var from = "web/index.html";
 var to = "_build/index.html";
 console.log(`build >>> copying ${from} to ${to}`);
 

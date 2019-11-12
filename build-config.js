@@ -7,7 +7,7 @@
     bundleFile: 'index.js',
     copyNonJsFiles: false,
     bundleComment: 'build: ${this.timestamp}, version: ${this.version}',
-    appDir: "../../../src/app",
+    appDir: "../../../web/app",
     
     minifyDefault: true,
     minifyLoader: true,

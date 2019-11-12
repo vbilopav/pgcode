@@ -12,15 +12,15 @@ function copy(obj, from, to) {
     fs.copyFileSync(from, toFile);
 }
 
-rmdirSync("src/libs/ihjs");
+rmdirSync("web/libs/ihjs");
 for (let obj of walkSync("node_modules/ihjs/build/1.2.8")) {
-    copy(obj, "node_modules/ihjs/build/1.2.8", "src/libs/ihjs");
+    copy(obj, "node_modules/ihjs/build/1.2.8", "web/libs/ihjs");
 }
-rmdirSync("src/libs/monaco-editor");
+rmdirSync("web/libs/monaco-editor");
 for (let obj of walkSync("node_modules/monaco-editor/min")) {
-    copy(obj, "node_modules/monaco-editor/min", "src/libs/monaco-editor/min");
+    copy(obj, "node_modules/monaco-editor/min", "web/libs/monaco-editor/min");
 }
 var from = "node_modules/monaco-editor/monaco.d.ts";
-var to = "src/libs/monaco-editor/monaco.d.ts";
+var to = "web/libs/monaco-editor/monaco.d.ts";
 console.log(`install >>> copying ${from} to ${to}`);
 fs.copyFileSync(from, to);

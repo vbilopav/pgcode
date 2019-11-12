@@ -9,8 +9,8 @@
   },
   "scripts": {
     "install": "node install.js",
-    "run-dev": "cd src && http-server -o",
+    "run-dev": "cd web && http-server -o",
     "build": "build.bat",
-    "css": "node-sass --output-style compressed src/css/theme-dark.scss > src/css/theme-dark.css"
+    "css": "node-sass --output-style compressed web/css/theme-dark.scss > web/css/theme-dark.css"
   }
 }
