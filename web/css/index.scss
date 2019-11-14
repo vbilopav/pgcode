@@ -9,5 +9,8 @@
     display: grid;
     grid-template-columns: 50px 250px 3px auto;
     grid-template-rows: auto 20px;
-    grid-template-areas: 'sidebar left-panel main-splitter main-panel' 'footer  footer     footer        footer'
+    grid-template-areas:    'sidebar left-panel main-splitter main-panel' 
+                            'footer  footer     footer        footer'
 }
+
+

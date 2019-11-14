@@ -36,6 +36,9 @@ for (let obj of walkSync("web/libs")) {
     }
     copy(obj, "web/libs", "_build/libs");
 }
+for (let obj of walkSync("web/fonts")) {
+    copy(obj, "web/fonts", "_build/fonts");
+}
 var from = "web/index.html";
 var to = "_build/index.html";
 console.log(`build >>> copying ${from} to ${to}`);

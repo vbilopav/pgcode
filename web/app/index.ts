@@ -2,7 +2,7 @@
 
 import Main from "./main";
 
-export default class {
+export default class implements IView {
     model: {
         main: HTMLElement
     }

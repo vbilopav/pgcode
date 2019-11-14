@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Net.Mime;
 using System.Reflection;
 using System.Resources;
 using System.Threading.Tasks;
@@ -45,10 +46,11 @@ namespace pgcode
                         context.Response.Headers.Add("cache-control", new StringValues("max-age=3600"));
                         context.Response.Headers.Add("Connection", new StringValues("keep-alive"));
 
-                        //var content = Manager.GetString(resourceKey);
-                        //context.Response.Headers.Add("content-length", new StringValues(content.Length.ToString()));
+                        var content = Manager.GetString(resourceKey);
+                        var size = System.Text.Encoding.Default.GetByteCount(content);
+                        context.Response.Headers.Add("content-length", new StringValues(size.ToString()));
                         
-                        await context.Response.WriteAsync(Manager.GetString(resourceKey, CultureInfo.InvariantCulture));
+                        await context.Response.WriteAsync(content);
                     });
                 }
             });

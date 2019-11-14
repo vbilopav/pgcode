@@ -3,7 +3,7 @@
 
 import "vs/editor/editor.main";
 
-export default class {
+export default class  {
     constructor(element: HTMLElement){
         element.html("main area");
 
