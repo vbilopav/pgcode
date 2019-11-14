@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
+using System.Resources;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -28,13 +30,31 @@ namespace pgcode
 
             app.UseRouting();
 
+            app.UseResourceMiddleware();
+
+            /*
+            var assembly = Assembly.GetExecutingAssembly();
+            var names = assembly.GetManifestResourceNames();
+            var rm = new ResourceManager("pgcode.Properties.Resources", assembly);
+            var c = rm.GetString("/index.html");
+              */
+
+            /*
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapGet("/hello", async context =>
+                endpoints.MapGet("/", async context =>
+                {
+                    await context.Response.WriteAsync(c);
+                });
+
+                
+                endpoints.MapGet("/css/theme-dark.css", async context =>
                 {
                     await context.Response.WriteAsync("Hello World!");
                 });
+                
             });
+            */
         }
     }
 }
