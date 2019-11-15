@@ -42,7 +42,7 @@ namespace pgcode
                     "html" => ("text/html; charset=UTF-8", false),
                     "css" => ("text/css; charset=UTF-8", false),
                     "js" => ("application/javascript; charset=UTF-8", false),
-                    "ico" => ("image/x-icon; charset=utf-8", true),
+                    "ico" => ("image/x-icon; charset=UTF-8", true),
                     _ => throw new NotSupportedException()
                 };
                 if (isBinary)

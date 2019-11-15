@@ -1,15 +1,28 @@
 const fs = require("fs");
 const {walkSync, mkDirByPathSync, rmdirSync, cleanPath} = require("./node_modules/ihjs/tools/modules/utils");
 
-function copy(obj, from, to) {
+function copy(obj, from, to, stripSourceMapping=false) {
     var toFile = cleanPath(obj.full.replace(cleanPath(from), cleanPath(to)));
     var toDir = toFile.replace(obj.file, "");
     var from = obj.full;
 
     mkDirByPathSync(toDir);
     
-    console.log(`build >>> copying ${from} to ${toFile}`);
-    fs.copyFileSync(from, toFile);
+    if (stripSourceMapping && obj.full.endsWith(".js")) {
+        console.log(`build >>> copying ${from} to ${toFile} and removing sourceMappingURL...`);
+        let content = fs.readFileSync(from).toString();
+        let i = content.lastIndexOf("//# sourceMappingURL");
+        if (i === -1) {
+            fs.writeFileSync(toFile, content, "utf8");
+        } else {
+            let l = content.indexOf(".map", i);
+            content = content.slice(0, i) + content.slice(l + ".map".length, content.length);
+            fs.writeFileSync(toFile, content, "utf8");
+        }
+    } else {
+        console.log(`build >>> copying ${from} to ${toFile}`);
+        fs.copyFileSync(from, toFile);
+    }
 }
 
 rmdirSync("_build");
@@ -34,7 +47,7 @@ for (let obj of walkSync("web/libs")) {
     ) {
         continue;
     }
-    copy(obj, "web/libs", "_build/libs");
+    copy(obj, "web/libs", "_build/libs", true);
 }
 for (let obj of walkSync("web/fonts")) {
     copy(obj, "web/fonts", "_build/fonts");
