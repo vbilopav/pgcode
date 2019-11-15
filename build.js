@@ -48,3 +48,6 @@ content = content.replace(
     '<script type="module" data-view-module="app/index" src="libs/ihjs/ihjs.js"></script>',
     '<script type="module" data-view-module="/index" src="app/index.js"></script>')
 fs.writeFileSync(to, content, "utf8");
+
+
+fs.copyFileSync("web/favicon.ico", "_build/favicon.ico");

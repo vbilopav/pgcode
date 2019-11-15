@@ -61,7 +61,7 @@ namespace pgcode.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to /*build: 2019-11-14 22:43:44:919, version: 1*/
+        ///   Looks up a localized string similar to /*build: 2019-11-15 11:29:30:752, version: 1*/
         ///(function(){&quot;use strict&quot;;const e=this;&quot;object&quot;==typeof global&amp;&amp;global;var t;!function(t){t.global=e;class i{constructor(){this._detected=!1,this._isWindows=!1,this._isWebWorker=!1}get isWindows(){return this._detect(),this._isWindows}get isWebWorker(){return this._detect(),this._isWebWorker}_detect(){this._detected||(this._detected=!0,this._isWindows=i._isWindows(),this._isWebWorker=&quot;function&quot;==typeof t.global.importScripts)}static _isWindows(){return!!(&quot;undefi [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string _app_index_js {
@@ -77,6 +77,16 @@ namespace pgcode.Properties {
         internal static string _css_theme_dark_css {
             get {
                 return ResourceManager.GetString("/css/theme-dark.css", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] _favicon_ico {
+            get {
+                object obj = ResourceManager.GetObject("/favicon.ico", resourceCulture);
+                return ((byte[])(obj));
             }
         }
         

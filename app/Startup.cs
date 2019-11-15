@@ -29,32 +29,7 @@ namespace pgcode
             }
 
             app.UseRouting();
-
             app.UseResourceMiddleware();
-
-            /*
-            var assembly = Assembly.GetExecutingAssembly();
-            var names = assembly.GetManifestResourceNames();
-            var rm = new ResourceManager("pgcode.Properties.Resources", assembly);
-            var c = rm.GetString("/index.html");
-              */
-
-            /*
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapGet("/", async context =>
-                {
-                    await context.Response.WriteAsync(c);
-                });
-
-                
-                endpoints.MapGet("/css/theme-dark.css", async context =>
-                {
-                    await context.Response.WriteAsync("Hello World!");
-                });
-                
-            });
-            */
         }
     }
 }
