@@ -61,7 +61,7 @@ namespace pgcode.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to /*build: 2019-11-15 11:29:30:752, version: 1*/
+        ///   Looks up a localized string similar to /*build: 2019-11-15 20:34:50:101, version: 1*/
         ///(function(){&quot;use strict&quot;;const e=this;&quot;object&quot;==typeof global&amp;&amp;global;var t;!function(t){t.global=e;class i{constructor(){this._detected=!1,this._isWindows=!1,this._isWebWorker=!1}get isWindows(){return this._detect(),this._isWindows}get isWebWorker(){return this._detect(),this._isWebWorker}_detect(){this._detected||(this._detected=!0,this._isWindows=i._isWindows(),this._isWebWorker=&quot;function&quot;==typeof t.global.importScripts)}static _isWindows(){return!!(&quot;undefi [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string _app_index_js {
@@ -91,18 +91,28 @@ namespace pgcode.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] _fonts_icons_woff2 {
+            get {
+                object obj = ResourceManager.GetObject("/fonts/icons.woff2", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &lt;!DOCTYPE html&gt;
         ///&lt;html lang=&quot;en&quot;&gt;
         ///&lt;head&gt;
         ///    &lt;meta charset=&quot;utf-8&quot;&gt;
         ///    &lt;title&gt;&lt;/title&gt;
-        ///    &lt;link rel=&quot;icon&quot; type=&quot;image/x-icon&quot; href=&quot;favicon.ico&quot; /&gt;
+        ///    &lt;link rel=&quot;icon&quot; type=&quot;image/x-icon&quot; href=&quot;favicon.ico?2&quot; /&gt;
         ///    &lt;link rel=&quot;stylesheet&quot; id=&quot;theme&quot; type=&quot;text/css&quot; href=&quot;css/theme-dark.css&quot; /&gt;
         ///&lt;/head&gt;
         ///&lt;body&gt;
         ///    &lt;div id=&quot;loading&quot; style=&quot;margin-top: 15%; font-size: 10em; text-align: center;&quot;&gt;&amp;#8987;&lt;/div&gt;
         ///    &lt;script&gt;
-        ///        setTimeout(function() { var e = document.getElementById(&quot;loading&quot;); if (e) e.innerHTML = &quot;Please update to modern browser!&quot;; }, 3000); [rest of string was truncated]&quot;;.
+        ///        setTimeout(function() { var e = document.getElementById(&quot;loading&quot;); if (e) e.innerHTML = &quot;Please update to modern browser!&quot;; }, 3000 [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string _index_html {
             get {

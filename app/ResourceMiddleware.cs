@@ -28,9 +28,11 @@ namespace pgcode
             "/libs/monaco-editor/min/vs/basic-languages/pgsql/pgsql.js",
             "/libs/monaco-editor/min/vs/base/worker/workerMain.js",
             "/favicon.ico",
+            "/fonts/icons.woff2"
         };
 
-        private static readonly Dictionary<string, (string resourceId, string mimeType, string size, bool isBinary)> Maps = new Dictionary<string, (string, string, string, bool)>();
+        private static readonly Dictionary<string, (string resourceId, string mimeType, string size, bool isBinary)> Maps = 
+            new Dictionary<string, (string, string, string, bool)>();
 
         static ResourceMiddleware()
         {
@@ -43,6 +45,7 @@ namespace pgcode
                     "css" => ("text/css; charset=UTF-8", false),
                     "js" => ("application/javascript; charset=UTF-8", false),
                     "ico" => ("image/x-icon; charset=UTF-8", true),
+                    "woff2" => ("font/woff2; charset=UTF-8", true),
                     _ => throw new NotSupportedException()
                 };
                 if (isBinary)
