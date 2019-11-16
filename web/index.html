@@ -3,15 +3,17 @@
 <head>
     <meta charset="utf-8">
     <title></title>
-    <link rel="icon" type="image/x-icon" href="favicon.ico?2" />
+    <link rel="icon" type="image/x-icon" href="favicon.ico?v=1" />
     <link rel="stylesheet" id="theme" type="text/css" href="css/theme-dark.css" />
 </head>
 <body>
-    <div id="loading" style="margin-top: 15%; font-size: 10em; text-align: center;">&#8987;</div>
-    <script>
-        setTimeout(function() { var e = document.getElementById("loading"); if (e) e.innerHTML = "Please update to modern browser!"; }, 3000);
-        window.require = {paths: {'vs': 'libs/monaco-editor/min/vs'}};
-    </script>
-    <script type="module" data-view-module="app/index" src="libs/ihjs/ihjs.js"></script>
+    <div id="loading">
+        &#8987;
+        <script>
+            setTimeout(function() { var e = document.getElementById("loading"); if (e) e.innerHTML = "Please update to modern browser!"; }, 3000);
+            window.require = {paths: {'vs': 'libs/monaco-editor/min/vs'}};
+        </script>
+    </div>
+    <script type="module" data-view-module="app/index" src="libs/ihjs/ihjs.js"></script> 
 </body>
 </html>

@@ -61,7 +61,7 @@ namespace pgcode.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to /*build: 2019-11-15 20:34:50:101, version: 1*/
+        ///   Looks up a localized string similar to /*build: 2019-11-16 18:18:45:771, version: 1*/
         ///(function(){&quot;use strict&quot;;const e=this;&quot;object&quot;==typeof global&amp;&amp;global;var t;!function(t){t.global=e;class i{constructor(){this._detected=!1,this._isWindows=!1,this._isWebWorker=!1}get isWindows(){return this._detect(),this._isWindows}get isWebWorker(){return this._detect(),this._isWebWorker}_detect(){this._detected||(this._detected=!0,this._isWindows=i._isWindows(),this._isWebWorker=&quot;function&quot;==typeof t.global.importScripts)}static _isWindows(){return!!(&quot;undefi [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string _app_index_js {
@@ -71,12 +71,20 @@ namespace pgcode.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to html{font-family:&quot;Consolas&quot;, &apos;Courier New&apos;, &quot;monospace&quot;;font-size:12px;line-height:1.15}body{margin:0;color:#C5C5C5;background-color:#1E1E1E}.sf-main{position:absolute;left:0px;top:0px;width:100%;height:100%;z-index:-1;overflow:hidden;display:grid;grid-template-columns:50px 250px 3px auto;grid-template-rows:auto 20px;grid-template-areas:&apos;sidebar left-panel main-splitter main-panel&apos;  &apos;footer  footer     footer        footer&apos;}
-        ///.
+        ///   Looks up a localized string similar to html{font-family:&apos;Consolas&apos;, &apos;Courier New&apos;, &apos;monospace&apos;;font-size:12px;line-height:1.15}body{margin:0;color:#C5C5C5;background-color:#1E1E1E}#loading{position:absolute;left:0px;top:0px;width:100%;height:100%;justify-content:center;align-content:center;display:grid;font-size:10em;text-align:center}#app{position:absolute;left:0px;top:0px;width:100%;height:100%;z-index:-1;overflow:hidden;display:grid;grid-template-columns:50px 250px 3px auto;grid-template-rows:auto 20px;grid-template-areas:&apos;toolbar side-panel  [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string _css_theme_dark_css {
             get {
                 return ResourceManager.GetString("/css/theme-dark.css", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to html{font-family:&apos;Consolas&apos;, &apos;Courier New&apos;, &apos;monospace&apos;;font-size:12px;line-height:1.15}body{margin:0;color:#1E1E1E;background-color:#C5C5C5}#loading{position:absolute;left:0px;top:0px;width:100%;height:100%;justify-content:center;align-content:center;display:grid;font-size:10em;text-align:center}#app{position:absolute;left:0px;top:0px;width:100%;height:100%;z-index:-1;overflow:hidden;display:grid;grid-template-columns:50px 250px 3px auto;grid-template-rows:auto 20px;grid-template-areas:&apos;toolbar side-panel  [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string _css_theme_light_css {
+            get {
+                return ResourceManager.GetString("/css/theme-light.css", resourceCulture);
             }
         }
         
@@ -106,13 +114,15 @@ namespace pgcode.Properties {
         ///&lt;head&gt;
         ///    &lt;meta charset=&quot;utf-8&quot;&gt;
         ///    &lt;title&gt;&lt;/title&gt;
-        ///    &lt;link rel=&quot;icon&quot; type=&quot;image/x-icon&quot; href=&quot;favicon.ico?2&quot; /&gt;
+        ///    &lt;link rel=&quot;icon&quot; type=&quot;image/x-icon&quot; href=&quot;favicon.ico?v=1&quot; /&gt;
         ///    &lt;link rel=&quot;stylesheet&quot; id=&quot;theme&quot; type=&quot;text/css&quot; href=&quot;css/theme-dark.css&quot; /&gt;
         ///&lt;/head&gt;
         ///&lt;body&gt;
-        ///    &lt;div id=&quot;loading&quot; style=&quot;margin-top: 15%; font-size: 10em; text-align: center;&quot;&gt;&amp;#8987;&lt;/div&gt;
-        ///    &lt;script&gt;
-        ///        setTimeout(function() { var e = document.getElementById(&quot;loading&quot;); if (e) e.innerHTML = &quot;Please update to modern browser!&quot;; }, 3000 [rest of string was truncated]&quot;;.
+        ///    &lt;div id=&quot;loading&quot;&gt;
+        ///        &amp;#8987;
+        ///        &lt;script&gt;
+        ///            setTimeout(function() { var e = document.getElementById(&quot;loading&quot;); if (e) e.innerHTML = &quot;Please update to modern browser!&quot;; }, 3000);
+        ///            window.require = {paths: {&apos;vs&apos;:  [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string _index_html {
             get {

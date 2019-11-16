@@ -10,7 +10,7 @@
   "scripts": {
     "install": "node install.js",
     "tsc-watch": "tsc -w",
-    "css": "node-sass --output-style compressed web/css/theme-dark.scss > web/css/theme-dark.css",
+    "css": "node-sass --output-style compressed web/css/theme-dark.scss > web/css/theme-dark.css && node-sass --output-style compressed web/css/theme-light.scss > web/css/theme-light.css",
     "run-dev": "cd web && http-server -o",
     "build": "build.bat",
     "build-exe": "build-exe.bat"

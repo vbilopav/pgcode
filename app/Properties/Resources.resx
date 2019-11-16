@@ -127,6 +127,9 @@
   <data name="/css/theme-dark.css" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\..\_build\css\theme-dark.css;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
+  <data name="/css/theme-light.css" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\..\_build\css\theme-light.css;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
   <data name="/libs/monaco-editor/min/vs/editor/editor.main.js" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\..\_build\libs\monaco-editor\min\vs\editor\editor.main.js;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>

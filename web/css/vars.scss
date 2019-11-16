@@ -1,3 +1,6 @@
+//
+// BODY
+// 
 $body-color: default;
 @if $theme == "dark" {
     $body-color: #C5C5C5;
@@ -5,11 +8,82 @@ $body-color: default;
 @if $theme == "light" {
     $body-color: #1E1E1E;
 }
-
 $body-background-color: default;
 @if $theme == "dark" {
     $body-background-color: #1E1E1E;
 } 
 @if $theme == "light" {
     $body-background-color: #C5C5C5;
+}
+
+//
+// CONTROL
+// 
+$control-color: default;
+@if $theme == "dark" {
+    $control-color: #ADADAD;
+} 
+@if $theme == "light" {
+    $control-color: #ADADAD;
+}
+$control-background-color: default;
+@if $theme == "dark" {
+    $control-background-color: #333333;
+} 
+@if $theme == "light" {
+    $control-background-color: #333333;
+}
+
+//
+// FOOTER
+// 
+$footer-background-color: default;
+@if $theme == "dark" {
+    $footer-background-color: #007ACC;
+} 
+@if $theme == "light" {
+    $footer-background-color: #007ACC;
+}
+$footer-color: default;
+@if $theme == "dark" {
+    $footer-color: #ffffff;
+} 
+@if $theme == "light" {
+    $footer-color: #ffffff;
+}
+
+//
+// PANEL
+// 
+$panel-background-color: default;
+@if $theme == "dark" {
+    $panel-background-color: #252526;
+} 
+@if $theme == "light" {
+    $panel-background-color: #252526;
+}
+$panel-color: default;
+@if $theme == "dark" {
+    $panel-color: #C5C5C5;
+} 
+@if $theme == "light" {
+    $panel-color: #C5C5C5;
+}
+
+//
+// SPLITTER
+// 
+$splitter-background-color: default;
+@if $theme == "dark" {
+    $splitter-background-color: #252526;
+} 
+@if $theme == "light" {
+    $splitter-background-color: #C5C5C5;
+}
+$splitter-border-color: default;
+@if $theme == "dark" {
+    $splitter-border-color: #333333;
+} 
+@if $theme == "light" {
+    $splitter-border-color: #ebebeb;
 }
