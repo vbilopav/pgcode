@@ -1,6 +1,44 @@
-define(["require", "exports", "./ui/toolbar", "./ui/side-panel", "./ui/main-panel", "./ui/footer"], function (require, exports, toolbar_1, side_panel_1, main_panel_1, footer_1) {
+define(["require", "exports", "./_sys/storage", "./ui/toolbar", "./ui/side-panel", "./ui/main-panel", "./ui/footer"], function (require, exports, storage_1, toolbar_1, side_panel_1, main_panel_1, footer_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    storage_1.default.setDefaultNamespace("pgcode");
+    var Positions;
+    (function (Positions) {
+        Positions["left"] = "left";
+        Positions["right"] = "right";
+    })(Positions || (Positions = {}));
+    ;
+    var Themes;
+    (function (Themes) {
+        Themes["dark"] = "dark";
+        Themes["light"] = "light";
+    })(Themes || (Themes = {}));
+    ;
+    const storage = new storage_1.default({
+        toolbarPos: Positions.left,
+        sidePanelPos: Positions.left,
+        sidePanelWidth: "250",
+        theme: Themes.dark
+    }, "main");
+    const getGridTemplateData = () => {
+        let tpl = storage.toolbarPos === Positions.left, spl = storage.sidePanelPos === Positions.left, spw = storage.sidePanelWidth;
+        if (tpl && spl) {
+            return ["toolbar side-panel main-splitter main-panel", `50px ${spw}px 3px auto`];
+        }
+        if (tpl && !spl) {
+            return ["toolbar main-panel main-splitter side-panel", `50px auto 3px ${spw}px`];
+        }
+        if (!tpl && spl) {
+            return ["side-panel main-splitter main-panel toolbar", `${spw}px 3px auto 50px`];
+        }
+        if (!tpl && !spl) {
+            return ["main-panel main-splitter side-panel toolbar", `auto 3px ${spw}px 50px`];
+        }
+    };
+    const themeLink = document.getElementById("theme");
+    if (themeLink.attr("href") !== `css/theme-${storage.theme}.css`) {
+        themeLink.attr("href", `css/theme-${storage.theme}.css`);
+    }
     class default_1 {
         constructor(args) {
             args.options.model = null;
@@ -17,7 +55,10 @@ define(["require", "exports", "./ui/toolbar", "./ui/side-panel", "./ui/main-pane
         `;
         }
         rendered(arg) {
-            const child = arg.element.firstElementChild;
+            const child = arg.element.firstElementChild, [areas, columns] = getGridTemplateData();
+            this.container = child;
+            this.container.css("grid-template-areas", `'${areas}' 'footer footer footer footer`);
+            this.container.css("grid-template-columns", columns);
             new toolbar_1.default(child.children[0]);
             new side_panel_1.default(child.children[1]);
             new main_panel_1.default(child.children[3]);
