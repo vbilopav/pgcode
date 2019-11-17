@@ -87,3 +87,14 @@ $splitter-border-color: default;
 @if $theme == "light" {
     $splitter-border-color: #ebebeb;
 }
+
+//
+// ACTIVE COLOR
+//
+$active-color: default;
+@if $theme == "dark" {
+    $active-color: #ffffff;
+} 
+@if $theme == "light" {
+    $active-color: #252526;
+}

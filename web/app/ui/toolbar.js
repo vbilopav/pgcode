@@ -3,8 +3,13 @@ define(["require", "exports"], function (require, exports) {
     Object.defineProperty(exports, "__esModule", { value: true });
     class default_1 {
         constructor(element) {
-            element.addClass("toolbar");
-            console.log("toolbar", element);
+            element.addClass("toolbar").html(String.html `
+            <div class="icon-doc-text"></div>
+            <div class="icon-database"></div>
+            <div class="icon-search"></div>
+            <div class="icon-terminal"></div>
+        `);
+            console.log(element);
         }
     }
     exports.default = default_1;

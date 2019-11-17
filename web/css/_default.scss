@@ -23,7 +23,6 @@ body {
     text-align: center;
 }
 
-
 .main-split-v {
     cursor: ew-resize;
     background-color: $splitter-background-color;
@@ -35,9 +34,9 @@ body {
     border: 1px $splitter-border-color dashed;
 }
 
- @import '../app/index.scss';
- @import '../app/ui/toolbar.scss';
- @import '../app/ui/footer.scss';
- @import '../app/ui/main-panel.scss';
- @import '../app/ui/side-panel.scss';
- 
+@import 'icons.scss';
+@import '../app/index.scss';
+@import '../app/ui/toolbar.scss';
+@import '../app/ui/footer.scss';
+@import '../app/ui/main-panel.scss';
+@import '../app/ui/side-panel.scss';
