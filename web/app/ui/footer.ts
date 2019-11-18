@@ -1,5 +1,5 @@
 export default class  {
-    constructor(element: HTMLElement) {
+    constructor(element: Element) {
         element.addClass("footer");
         console.log("footer", element);
     }

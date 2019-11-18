@@ -4,13 +4,34 @@
     background-color: $control-background-color;
     height: 100%;
     display: grid;
-    grid-template-rows: 10px 42px 42px 42px auto 42px 10px;
+    grid-template-rows: 10px 42px 42px 42px 42px 42px auto 42px 10px;
+    row-gap: 4px;
 
     & > div {
         font-size: 28px;
         align-self: center;
         text-align: center;
         cursor: pointer;
+        position: relative;
+        user-select: none;
+    }
+    & > div.active {
+        color: $active-color;
+    }
+    & > div > div.lbl {
+        font-size: 8px;
+    }
+    & > div > div.marker {
+        top: -4px;
+        left: 0;
+        height: calc(100% + 4px);
+        width: 2px;
+        background-color: $active-color;
+        display: none;/*block;*/
+        position: absolute;
+    }
+    & > div.active > div.marker {
+        display: block;
     }
     & > div:hover {
         color: $active-color;
@@ -25,6 +46,12 @@
         grid-row: 4;
     }
     & > div:nth-child(4) {
+        grid-row: 5;
+    }
+    & > div:nth-child(5) {
         grid-row: 6;
+    }
+    & > div:nth-child(6) {
+        grid-row: 8;
     }
 }

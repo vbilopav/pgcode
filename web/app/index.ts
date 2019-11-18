@@ -51,7 +51,7 @@ if (themeLink.attr("href") !== `css/theme-${storage.theme}.css`) {
 }
 
 export default class implements IView {
-    private container: HTMLElement;
+    private container: Element;
     
     constructor(args: ViewConstructorArgs) {
         args.options.model = null;
@@ -73,13 +73,13 @@ export default class implements IView {
         const 
             child = arg.element.firstElementChild,
             [areas, columns] = getGridTemplateData();
-        this.container = child as HTMLElement;
+        this.container = child as Element;
         this.container.css("grid-template-areas", `'${areas}' 'footer footer footer footer`);
         this.container.css("grid-template-columns", columns);
 
-        new Toolbar(child.children[0] as HTMLElement);
-        new SidePanel(child.children[1] as HTMLElement);
-        new MainPanel(child.children[3] as HTMLElement);
-        new Footer(child.children[4] as HTMLElement);
+        new Toolbar(child.children[0]);
+        new SidePanel(child.children[1]);
+        new MainPanel(child.children[3]);
+        new Footer(child.children[4]);
     }
 }

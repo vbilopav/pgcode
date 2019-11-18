@@ -4,7 +4,7 @@
 import "vs/editor/editor.main";
 
 export default class  {
-    constructor(element: HTMLElement){
+    constructor(element: Element){
         element.addClass("main-panel");
         console.log("main-panel", element);
         /*

@@ -13,8 +13,8 @@ function copy(obj, from, to) {
 }
 
 rmdirSync("web/libs/ihjs");
-for (let obj of walkSync("node_modules/ihjs/build/1.2.8")) {
-    copy(obj, "node_modules/ihjs/build/1.2.8", "web/libs/ihjs");
+for (let obj of walkSync("node_modules/ihjs/build/1.3.0")) {
+    copy(obj, "node_modules/ihjs/build/1.3.0", "web/libs/ihjs");
 }
 rmdirSync("web/libs/monaco-editor");
 for (let obj of walkSync("node_modules/monaco-editor/min")) {

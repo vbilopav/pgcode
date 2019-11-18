@@ -1,15 +1,53 @@
 define(["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    const isToggle = e => e.dataAttr("toggle") === "1";
     class default_1 {
         constructor(element) {
             element.addClass("toolbar").html(String.html `
-            <div class="icon-doc-text"></div>
-            <div class="icon-database"></div>
-            <div class="icon-search"></div>
-            <div class="icon-terminal"></div>
+            <div class="icon-doc-text" data-name="docs" data-toggle="1">
+                <div class="marker"></div>
+                <div class="lbl">scripts</div>
+            </div>
+            <div class="icon-database"  data-name="tables" data-toggle="1">
+                <div class="marker"></div>
+                <div class="lbl">tables</div>
+            </div>
+            <div class="icon-database"  data-name="views" data-toggle="1">
+                <div class="marker"></div>
+                <div class="lbl">views</div>
+            </div>
+            <div class="icon-database"  data-name="funcs" data-toggle="1">
+                <div class="marker"></div>
+                <div class="lbl">funcs</div>
+            </div>
+            <div class="icon-search" data-name="search" data-toggle="1">
+                <div class="marker"></div>
+                <div class="lbl">search</div>
+            </div>
+            <div class="icon-terminal" data-name="terminal" data-toggle="0">
+                <div class="marker"></div>
+                <div class="lbl">psql</div>
+            </div>
         `);
-            console.log(element);
+            this.buttons = element.children;
+            this.buttons.on("click", (event) => {
+                const e = event.target;
+                this.buttonClicked(e, e.dataAttr("name"), isToggle(e));
+            });
+        }
+        buttonClicked(e, name, toggle) {
+            if (!toggle) {
+                e.toggleClass("active");
+            }
+            else {
+                for (let btn of this.buttons) {
+                    if (isToggle(btn) && btn.hasClass("active")) {
+                        btn.removeClass("active");
+                    }
+                }
+                e.toggleClass("active");
+            }
         }
     }
     exports.default = default_1;
