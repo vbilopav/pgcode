@@ -4,11 +4,11 @@
     background-color: $control-background-color;
     height: 100%;
     display: grid;
-    grid-template-rows: 10px 42px 42px 42px 42px 42px auto 42px 10px;
-    row-gap: 4px;
+    grid-template-rows: 4px 12px 42px 42px 42px 42px 42px auto 42px 4px;
+    grid-template-areas: 'gap1' 'schema' 'docs' 'tables' 'views' 'funcs' 'search' 'gap2' 'psql' 'gap3';
+    row-gap: 6px;
 
     & > div {
-        font-size: 28px;
         align-self: center;
         text-align: center;
         cursor: pointer;
@@ -20,7 +20,7 @@
     }
     & > div > div.lbl {
         font-size: 8px;
-    }
+    }    
     & > div > div.marker {
         top: -4px;
         left: 0;
@@ -36,22 +36,37 @@
     & > div:hover {
         color: $active-color;
     }
-    & > div:nth-child(1) {
-        grid-row: 2;
+
+    & > div.select-schema {
+        grid-area: schema;
+        font-size: 10px;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        padding-left: 2px;
     }
-    & > div:nth-child(2) {
-        grid-row: 3;
+    & > div.btn-docs {
+        grid-area: docs;
+        font-size: 28px;
     }
-    & > div:nth-child(3) {
-        grid-row: 4;
+    & > div.btn-tables {
+        grid-area: tables;
+        font-size: 28px;
     }
-    & > div:nth-child(4) {
-        grid-row: 5;
+    & > div.btn-views {
+        grid-area: views;
+        font-size: 28px;
     }
-    & > div:nth-child(5) {
-        grid-row: 6;
+    & > div.btn-funcs {
+        grid-area: funcs;
+        font-size: 28px;
     }
-    & > div:nth-child(6) {
-        grid-row: 8;
+    & > div.btn-search {
+        grid-area: search;
+        font-size: 28px;
+    }
+    & > div.btn-psql {
+        grid-area: psql;
+        font-size: 28px;
     }
 }

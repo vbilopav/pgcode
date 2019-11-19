@@ -5,27 +5,30 @@ define(["require", "exports"], function (require, exports) {
     class default_1 {
         constructor(element) {
             element.addClass("toolbar").html(String.html `
-            <div class="icon-doc-text" data-name="docs" data-toggle="1">
+            <div class="select-schema" data-name="schema">
+                public
+            </div>
+            <div class="icon-doc-text btn-docs" data-name="docs" data-toggle="1">
                 <div class="marker"></div>
                 <div class="lbl">scripts</div>
             </div>
-            <div class="icon-database"  data-name="tables" data-toggle="1">
+            <div class="icon-database btn-tables"  data-name="tables" data-toggle="1">
                 <div class="marker"></div>
                 <div class="lbl">tables</div>
             </div>
-            <div class="icon-database"  data-name="views" data-toggle="1">
+            <div class="icon-database btn-views"  data-name="views" data-toggle="1">
                 <div class="marker"></div>
                 <div class="lbl">views</div>
             </div>
-            <div class="icon-database"  data-name="funcs" data-toggle="1">
+            <div class="icon-database btn-funcs" data-name="funcs" data-toggle="1">
                 <div class="marker"></div>
                 <div class="lbl">funcs</div>
             </div>
-            <div class="icon-search" data-name="search" data-toggle="1">
+            <div class="icon-search btn-search" data-name="search" data-toggle="1">
                 <div class="marker"></div>
                 <div class="lbl">search</div>
             </div>
-            <div class="icon-terminal" data-name="terminal" data-toggle="0">
+            <div class="icon-terminal btn-psql" data-name="terminal" data-toggle="0">
                 <div class="marker"></div>
                 <div class="lbl">psql</div>
             </div>
