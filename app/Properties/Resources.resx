@@ -121,8 +121,8 @@
   <data name="/index.html" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\..\_build\index.html;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
-  <data name="/app/index.js" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\..\_build\app\index.js;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  <data name="/js/index.js" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\..\_build\js\index.js;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
   <data name="/css/theme-dark.css" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\..\_build\css\theme-dark.css;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>

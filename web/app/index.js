@@ -1,4 +1,4 @@
-define(["require", "exports", "./_sys/storage", "./ui/toolbar", "./ui/side-panel", "./ui/main-panel", "./ui/footer"], function (require, exports, storage_1, toolbar_1, side_panel_1, main_panel_1, footer_1) {
+define(["require", "exports", "app/_sys/storage", "app/ui/toolbar", "app/ui/side-panel", "app/ui/main-panel", "app/ui/footer"], function (require, exports, storage_1, toolbar_1, side_panel_1, main_panel_1, footer_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     storage_1.default.setDefaultNamespace("pgcode");
@@ -39,32 +39,22 @@ define(["require", "exports", "./_sys/storage", "./ui/toolbar", "./ui/side-panel
     if (themeLink.attr("href") !== `css/theme-${storage.theme}.css`) {
         themeLink.attr("href", `css/theme-${storage.theme}.css`);
     }
-    class default_1 {
-        constructor(args) {
-            args.options.model = null;
-        }
-        render() {
-            return String.html `
-        <div>
-            <div></div>
-            <div></div>
-            <div class="main-split-v"></div>
-            <div></div>
-            <div></div>
-        </div>
-        `;
-        }
-        rendered(arg) {
-            const child = arg.element.firstElementChild, [areas, columns] = getGridTemplateData();
-            this.container = child;
-            this.container.css("grid-template-areas", `'${areas}' 'footer footer footer footer`);
-            this.container.css("grid-template-columns", columns);
-            new toolbar_1.default(child.children[0]);
-            new side_panel_1.default(child.children[1]);
-            new main_panel_1.default(child.children[3]);
-            new footer_1.default(child.children[4]);
-        }
-    }
-    exports.default = default_1;
+    const element = document.body;
+    element.html(String.html `
+    <div>
+        <div></div>
+        <div></div>
+        <div class="main-split-v"></div>
+        <div></div>
+        <div></div>
+    </div>
+`);
+    const container = element.firstElementChild, [areas, columns] = getGridTemplateData();
+    container.css("grid-template-areas", `'${areas}' 'footer footer footer footer`);
+    container.css("grid-template-columns", columns);
+    new toolbar_1.default(container.children[0]);
+    new side_panel_1.default(container.children[1]);
+    new main_panel_1.default(container.children[3]);
+    new footer_1.default(container.children[4]);
 });
 //# sourceMappingURL=index.js.map

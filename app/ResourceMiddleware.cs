@@ -22,7 +22,7 @@ namespace pgcode
             "/",
             "/css/theme-dark.css",
             "/css/theme-light.css",
-            "/app/index.js",
+            "/js/index.js",
             "/libs/monaco-editor/min/vs/editor/editor.main.js",
             "/libs/monaco-editor/min/vs/editor/editor.main.css",
             "/libs/monaco-editor/min/vs/editor/editor.main.nls.js",

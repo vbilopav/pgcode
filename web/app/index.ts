@@ -1,15 +1,22 @@
-///<reference path="../libs/ihjs/types/core.d.ts"/>
 
-import Storage from "./_sys/storage";
-import Toolbar from "./ui/toolbar";
-import SidePanel from "./ui/side-panel";
-import MainPanel from "./ui/main-panel";
-import Footer from "./ui/footer";
+
+import Storage from "app/_sys/storage";
+import Toolbar from "app/ui/toolbar";
+import SidePanel from "app/ui/side-panel";
+import MainPanel from "app/ui/main-panel";
+import Footer from "app/ui/footer";
 
 Storage.setDefaultNamespace("pgcode");
 
 enum Positions { left = "left", right = "right" };
 enum Themes { dark = "dark", light = "light" };
+
+interface IStorage {
+    toolbarPos: Positions, 
+    sidePanelPos: string, 
+    sidePanelWidth: string, 
+    theme: Themes
+}
 
 const 
     storage = new Storage({ 
@@ -17,12 +24,7 @@ const
         sidePanelPos: Positions.left,
         sidePanelWidth: "250",
         theme: Themes.dark
-    }, "main") as any as {
-        toolbarPos: string, 
-        sidePanelPos: string, 
-        sidePanelWidth: string, 
-        theme: string
-    };
+    }, "main") as any as IStorage;
 
 const 
     getGridTemplateData: () => [string, string] = () => {
@@ -50,36 +52,26 @@ if (themeLink.attr("href") !== `css/theme-${storage.theme}.css`) {
     themeLink.attr("href", `css/theme-${storage.theme}.css`);
 }
 
-export default class implements IView {
-    private container: Element;
-    
-    constructor(args: ViewConstructorArgs) {
-        args.options.model = null;
-    }
+const element = document.body;
+element.html(String.html`
+    <div>
+        <div></div>
+        <div></div>
+        <div class="main-split-v"></div>
+        <div></div>
+        <div></div>
+    </div>
+`);
 
-    render() {
-        return String.html`
-        <div>
-            <div></div>
-            <div></div>
-            <div class="main-split-v"></div>
-            <div></div>
-            <div></div>
-        </div>
-        `;
-    }
+const 
+    container = element.firstElementChild,
+    [areas, columns] = getGridTemplateData();
 
-    rendered(arg: ViewMethodArgs) {
-        const 
-            child = arg.element.firstElementChild,
-            [areas, columns] = getGridTemplateData();
-        this.container = child as Element;
-        this.container.css("grid-template-areas", `'${areas}' 'footer footer footer footer`);
-        this.container.css("grid-template-columns", columns);
+container.css("grid-template-areas", `'${areas}' 'footer footer footer footer`);
+container.css("grid-template-columns", columns);
 
-        new Toolbar(child.children[0]);
-        new SidePanel(child.children[1]);
-        new MainPanel(child.children[3]);
-        new Footer(child.children[4]);
-    }
-}
+
+new Toolbar(container.children[0]);
+new SidePanel(container.children[1]);
+new MainPanel(container.children[3]);
+new Footer(container.children[4]);
