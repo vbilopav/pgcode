@@ -1,10 +1,8 @@
-
-
 import Storage from "app/_sys/storage";
-import Toolbar from "app/ui/toolbar";
-import SidePanel from "app/ui/side-panel";
-import MainPanel from "app/ui/main-panel";
-import Footer from "app/ui/footer";
+import Toolbar from "./ui/toolbar/toolbar";
+import SidePanel from "./ui/side-panel/side-panel";
+import MainPanel from "./ui/main-panel/main-panel";
+import Footer from "./ui/footer/footer";
 
 Storage.setDefaultNamespace("pgcode");
 
@@ -69,7 +67,6 @@ const
 
 container.css("grid-template-areas", `'${areas}' 'footer footer footer footer`);
 container.css("grid-template-columns", columns);
-
 
 new Toolbar(container.children[0]);
 new SidePanel(container.children[1]);

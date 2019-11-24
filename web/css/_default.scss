@@ -36,7 +36,8 @@ body {
 
 @import 'icons.scss';
 @import '../app/index.scss';
-@import '../app/ui/toolbar.scss';
-@import '../app/ui/footer.scss';
-@import '../app/ui/main-panel.scss';
-@import '../app/ui/side-panel.scss';
+@import '../app/ui/toolbar/style.scss';
+@import '../app/ui/footer/style.scss';
+@import '../app/ui/main-panel/style.scss';
+@import '../app/ui/side-panel/style.scss';
+ 

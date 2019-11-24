@@ -79,13 +79,17 @@ function getContent(filename, options){
 }
 
 function buildBundle() {
-    recreateOutputDir();
-    
+
     const sourceFile = config.entryPointFile;
     const bundleFile = config.bundleFile;
+    const loaderDir = path.dirname(config.loaderFile);
+    let bundleContent = " require.config({_modules:{";
+    let hasBundles = false;
+
+    recreateOutputDir();
 
     if (config.bundleComment) {
-        log('>>> Writting bundle comment header ...');
+        log('>>> Writing bundle comment header ...');
         fs.appendFileSync(bundleFile, "/*".concat(config.bundleComment).concat("*/\n"), "utf8");
     }
 
@@ -93,11 +97,6 @@ function buildBundle() {
     fs.appendFileSync(bundleFile, getContent(config.loaderFile, config.minifyLoader), "utf8");
     log();
 
-    const
-        loaderDir = path.dirname(config.loaderFile);
-    let
-        bundleContent = " require.config({_modules:{",
-        hasBundles = false;
 
     for (let frameworkItem of walkSync(config.frameworkDir)) {
         const 

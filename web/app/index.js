@@ -1,4 +1,4 @@
-define(["require", "exports", "app/_sys/storage", "app/ui/toolbar", "app/ui/side-panel", "app/ui/main-panel", "app/ui/footer"], function (require, exports, storage_1, toolbar_1, side_panel_1, main_panel_1, footer_1) {
+define(["require", "exports", "app/_sys/storage", "./ui/toolbar/toolbar", "./ui/side-panel/side-panel", "./ui/main-panel/main-panel", "./ui/footer/footer"], function (require, exports, storage_1, toolbar_1, side_panel_1, main_panel_1, footer_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     storage_1.default.setDefaultNamespace("pgcode");
