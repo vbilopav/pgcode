@@ -4,7 +4,6 @@ define(["require", "exports", "vs/editor/editor.main"], function (require, expor
     class default_1 {
         constructor(element) {
             element.addClass("main-panel");
-            console.log("main-panel", element);
         }
     }
     exports.default = default_1;

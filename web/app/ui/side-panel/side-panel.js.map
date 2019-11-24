@@ -1,1 +1,1 @@
-{"version":3,"file":"side-panel.js","sourceRoot":"","sources":["side-panel.ts"],"names":[],"mappings":";;;IAAA;QACI,YAAY,OAAgB;YACxB,OAAO,CAAC,QAAQ,CAAC,YAAY,CAAC,CAAC;YAC/B,OAAO,CAAC,GAAG,CAAC,YAAY,EAAE,OAAO,CAAC,CAAC;QACvC,CAAC;KACJ;IALD,4BAKC"}
+{"version":3,"file":"side-panel.js","sourceRoot":"","sources":["side-panel.ts"],"names":[],"mappings":";;;IAAA;QACI,YAAY,OAAgB;YACxB,OAAO,CAAC,QAAQ,CAAC,YAAY,CAAC,CAAC;QAEnC,CAAC;KACJ;IALD,4BAKC"}

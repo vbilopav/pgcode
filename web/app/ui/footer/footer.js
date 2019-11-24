@@ -4,7 +4,6 @@ define(["require", "exports"], function (require, exports) {
     class default_1 {
         constructor(element) {
             element.addClass("footer");
-            console.log("footer", element);
         }
     }
     exports.default = default_1;
