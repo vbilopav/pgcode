@@ -4,7 +4,6 @@ import SidePanel from "./ui/side-panel/side-panel";
 import MainPanel from "./ui/main-panel/main-panel";
 import Footer from "./ui/footer/footer";
 
-Storage.setDefaultNamespace("pgcode");
 
 enum Positions { left = "left", right = "right" };
 enum Themes { dark = "dark", light = "light" };
@@ -17,7 +16,9 @@ interface IStorage {
 }
 
 const storage = new Storage(
-    {toolbarPos: Positions.left, sidePanelPos: Positions.left, sidePanelWidth: "250", theme: Themes.dark}, 
+    {
+        toolbarPos: Positions.left, sidePanelPos: Positions.left, sidePanelWidth: "250", theme: Themes.dark
+    }, 
     "main") as any as IStorage;
 
 const getGridTemplateData: () => [string, string] = () => {

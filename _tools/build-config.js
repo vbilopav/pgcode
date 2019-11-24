@@ -24,4 +24,11 @@
 
     minifyDefault: true,
     minifyLoader: true,
+    
+    minifyHtml: {
+        removeAttributeQuotes: true,
+        removeComments: true,
+        removeEmptyAttributes: true,
+        collapseWhitespace: true
+    }
 })

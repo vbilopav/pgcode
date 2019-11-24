@@ -1,7 +1,6 @@
 define(["require", "exports", "app/_sys/storage", "./ui/toolbar/toolbar", "./ui/side-panel/side-panel", "./ui/main-panel/main-panel", "./ui/footer/footer"], function (require, exports, storage_1, toolbar_1, side_panel_1, main_panel_1, footer_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    storage_1.default.setDefaultNamespace("pgcode");
     var Positions;
     (function (Positions) {
         Positions["left"] = "left";
@@ -14,7 +13,9 @@ define(["require", "exports", "app/_sys/storage", "./ui/toolbar/toolbar", "./ui/
         Themes["light"] = "light";
     })(Themes || (Themes = {}));
     ;
-    const storage = new storage_1.default({ toolbarPos: Positions.left, sidePanelPos: Positions.left, sidePanelWidth: "250", theme: Themes.dark }, "main");
+    const storage = new storage_1.default({
+        toolbarPos: Positions.left, sidePanelPos: Positions.left, sidePanelWidth: "250", theme: Themes.dark
+    }, "main");
     const getGridTemplateData = () => {
         let tpl = storage.toolbarPos === Positions.left, spl = storage.sidePanelPos === Positions.left, spw = storage.sidePanelWidth;
         if (tpl && spl) {

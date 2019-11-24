@@ -4,15 +4,16 @@
   "private": true,
   "devDependencies": {
     "monaco-editor": "^0.18.1",
-    "uglify-es": "^3.3.9"
+    "uglify-es": "^3.3.9",
+    "html-minifier": "^4.0.0"
   },
   "scripts": {
     "install": "node _tools/install.js",
     "tsc-watch": "tsc -w",
-    "css-build-dev": "node-sass --output-style compressed web/css/theme-dark.scss > web/css/theme-dark.css && node-sass --output-style compressed web/css/theme-light.scss > web/css/theme-light.css",
+    "css-build-web": "node-sass --output-style compressed web/css/theme-dark.scss > web/css/theme-dark.css && node-sass --output-style compressed web/css/theme-light.scss > web/css/theme-light.css",
     "run-dev": "cd web && http-server -o",
     "run-build": "cd _build && http-server -o",
-    "build": "node .\\_tools\\build.js",
-    "build-exe": ".\\_tools\\build-exe.bat"
+    "build-web": "node .\\_tools\\build.js",
+    "build-app-exe": ".\\_tools\\build-exe.bat"
   }
 }

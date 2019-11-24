@@ -1,3 +1,5 @@
+const defaultNs = "pgcode";
+
 class ProtectedLocalStorage implements Storage {
     private dict = {} as {[name: string] : string; };
     private storage = localStorage;
@@ -37,23 +39,18 @@ class ProtectedLocalStorage implements Storage {
     }
 }
 
-const names = new Array<string>();
-var defaultNs: string;
-
 export default class {
     private storage: Storage = new ProtectedLocalStorage();
     private namespace: string;
-    private conversion: { [name: string]: (value: string) => string; };
+    private conversion: (name: string, value: string) => any;
+    private names: Array<string> = new Array<string>();
 
     constructor(
         model: Object, 
         namespace = "", 
-        conversion: {[name: string] : (value: string) => string; } = {},
+        conversion: (name: string, value: string) => any = (name, value) => value,
         storage: Storage = new ProtectedLocalStorage()) {
             this.storage = storage;
-            if (!defaultNs) {
-                throw new Error("default namespace cannot be empty or null");
-            }
             this.namespace = namespace;
             this.conversion = conversion;
             for(let [name, defaultValue] of Object.entries(model)) {
@@ -61,29 +58,15 @@ export default class {
             }
     }
 
-    public static setDefaultNamespace(name: string) {
-        defaultNs = name;
-    }
-
-    private create(name, defaultValue) {
+    private create(name: string, defaultValue: any) {
         let fullName = this.getName(name);
-        
-        if (names.indexOf(fullName) !== -1) {
-            throw new Error(`Name "${fullName}" is already been defined!`);
-        }
-        names.push(fullName);
-
         Object.defineProperty(this, name, {
             get: () => {
                 const value = this.storage.getItem(fullName);
                 if (value === null && defaultValue !== undefined) {
                     return defaultValue;
                 }
-                const conversion = this.conversion[name];
-                if (conversion) {
-                    return conversion(value);
-                }
-                return value;
+                return this.conversion(name, value);
             },
             set: value => {
                 if (value === null) {
@@ -93,6 +76,7 @@ export default class {
                 }
             }
         });
+        this.names.push(name);
         return this;
     }
 

@@ -1,6 +1,7 @@
 define(["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    const defaultNs = "pgcode";
     class ProtectedLocalStorage {
         constructor() {
             this.dict = {};
@@ -32,41 +33,26 @@ define(["require", "exports"], function (require, exports) {
             delete this.dict[name];
         }
     }
-    const names = new Array();
-    var defaultNs;
     class default_1 {
-        constructor(model, namespace = "", conversion = {}, storage = new ProtectedLocalStorage()) {
+        constructor(model, namespace = "", conversion = (name, value) => value, storage = new ProtectedLocalStorage()) {
             this.storage = new ProtectedLocalStorage();
+            this.names = new Array();
             this.storage = storage;
-            if (!defaultNs) {
-                throw new Error("default namespace cannot be empty or null");
-            }
             this.namespace = namespace;
             this.conversion = conversion;
             for (let [name, defaultValue] of Object.entries(model)) {
                 this.create(name, defaultValue);
             }
         }
-        static setDefaultNamespace(name) {
-            defaultNs = name;
-        }
         create(name, defaultValue) {
             let fullName = this.getName(name);
-            if (names.indexOf(fullName) !== -1) {
-                throw new Error(`Name "${fullName}" is already been defined!`);
-            }
-            names.push(fullName);
             Object.defineProperty(this, name, {
                 get: () => {
                     const value = this.storage.getItem(fullName);
                     if (value === null && defaultValue !== undefined) {
                         return defaultValue;
                     }
-                    const conversion = this.conversion[name];
-                    if (conversion) {
-                        return conversion(value);
-                    }
-                    return value;
+                    return this.conversion(name, value);
                 },
                 set: value => {
                     if (value === null) {
@@ -77,6 +63,7 @@ define(["require", "exports"], function (require, exports) {
                     }
                 }
             });
+            this.names.push(name);
             return this;
         }
         getName(name) {

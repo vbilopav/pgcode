@@ -45,8 +45,13 @@ const unsubscribe: (name: string, ref: number) => boolean = (name, ref) => {
     return true;
 }
 
+const BUTTON_CHANGED_OFF: (name: string) => string = name => `/button/changed/off/${name}`
+const BUTTON_CHANGED_ON: (name: string) => string = name => `/button/changed/on/${name}`
+
 export { 
     subscribe,
     publish,
-    unsubscribe
+    unsubscribe,
+    BUTTON_CHANGED_OFF,
+    BUTTON_CHANGED_ON
 };

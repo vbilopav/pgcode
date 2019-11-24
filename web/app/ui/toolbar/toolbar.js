@@ -1,4 +1,4 @@
-define(["require", "exports", "app/_sys/storage"], function (require, exports, storage_1) {
+define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub"], function (require, exports, storage_1, pubsub_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var ButtonRoles;
@@ -8,7 +8,10 @@ define(["require", "exports", "app/_sys/storage"], function (require, exports, s
     })(ButtonRoles || (ButtonRoles = {}));
     ;
     const isInRole = (e, role) => e.dataAttr("role") === role;
-    const storage = new storage_1.default({ btnDocs: false, btnTables: false, btnViews: false, btnFuncs: false, btnSearch: false, btnTerminal: false }, "toolbar");
+    const active = "active";
+    const storage = new storage_1.default({
+        btnDocs: false, btnTables: false, btnViews: false, btnFuncs: false, btnSearch: false, btnTerminal: false
+    }, "toolbar", (name, value) => JSON.parse(value));
     class default_1 {
         constructor(element) {
             element.addClass("toolbar").html(String.html `
@@ -40,26 +43,39 @@ define(["require", "exports", "app/_sys/storage"], function (require, exports, s
                 <div class="lbl">psql</div>
             </div>
         `);
-            this.buttons = element.children.on("click", (e) => this.buttonClicked(e));
+            this.buttons = element.children.on("click", (e) => this.buttonClicked(e.currentTarget));
             for (let e of this.buttons) {
+                const name = e.id.toCamelCase();
                 this[e.id.toCamelCase()] = e;
+                this.setButtonState(this[name], storage[name]);
             }
         }
-        buttonClicked(event) {
-            const e = event.target;
-            const active = "active";
+        setButtonState(e, state) {
+            const name = e.id.toCamelCase();
+            if (e.hasClass(active) && !state) {
+                e.removeClass(active);
+                pubsub_1.publish(pubsub_1.BUTTON_CHANGED_OFF(name));
+            }
+            else if (!e.hasClass(active) && state) {
+                e.addClass(active);
+                pubsub_1.publish(pubsub_1.BUTTON_CHANGED_ON(name));
+            }
+        }
+        buttonClicked(e) {
+            const name = e.id.toCamelCase();
             if (e.dataAttr("role") === undefined) {
-                console.log("publish", `/menu/on/${e.id.toCamelCase()}`);
                 return;
             }
             const toggle = () => {
                 if (e.hasClass(active)) {
                     e.removeClass(active);
-                    console.log("publish", `/button/changed/off/${e.id.toCamelCase()}`);
+                    storage[name] = false;
+                    pubsub_1.publish(pubsub_1.BUTTON_CHANGED_OFF(name));
                 }
                 else {
                     e.addClass(active);
-                    console.log("publish", `/button/changed/on/${e.id.toCamelCase()}`);
+                    storage[name] = true;
+                    pubsub_1.publish(pubsub_1.BUTTON_CHANGED_ON(name));
                 }
             };
             if (isInRole(e, ButtonRoles.toggle)) {
@@ -67,9 +83,15 @@ define(["require", "exports", "app/_sys/storage"], function (require, exports, s
             }
             else {
                 for (let btn of this.buttons) {
-                    if (isInRole(btn, ButtonRoles.switch) && btn.hasClass(active) && e.id !== btn.id) {
-                        btn.removeClass("active");
-                        console.log("publish", `/button/changed/off/${btn.id.toCamelCase()}`);
+                    if (isInRole(btn, ButtonRoles.switch) && e.id !== btn.id) {
+                        const name = btn.id.toCamelCase();
+                        if (storage[name]) {
+                            storage[name] = false;
+                        }
+                        if (btn.hasClass(active)) {
+                            btn.removeClass("active");
+                            pubsub_1.publish(pubsub_1.BUTTON_CHANGED_OFF(name));
+                        }
                     }
                 }
                 toggle();

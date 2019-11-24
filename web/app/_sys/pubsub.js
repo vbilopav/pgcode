@@ -50,5 +50,9 @@ define(["require", "exports"], function (require, exports) {
         return true;
     };
     exports.unsubscribe = unsubscribe;
+    const BUTTON_CHANGED_OFF = name => `/button/changed/off/${name}`;
+    exports.BUTTON_CHANGED_OFF = BUTTON_CHANGED_OFF;
+    const BUTTON_CHANGED_ON = name => `/button/changed/on/${name}`;
+    exports.BUTTON_CHANGED_ON = BUTTON_CHANGED_ON;
 });
 //# sourceMappingURL=pubsub.js.map

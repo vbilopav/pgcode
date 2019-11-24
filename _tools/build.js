@@ -1,6 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const uglifyEs = require("uglify-es");
+const  minifyHtml = require('html-minifier').minify;
 const {walkSync, rmdirSync, copy, getConfig, log, mkDirByPathSync, cleanPath, isSameDir} = require("./utils");
 
 const config = getConfig("_tools/build-config.js");
@@ -74,6 +75,31 @@ function minify(content, options) {
     return ret.code;
 }
 
+function minifyHtmlFromContent(content) {
+    if (!config.minifyHtml) {
+        return content;
+    }
+    const tag = "String.html`";
+    var result = "", len = tag.length, from = 0;
+    while (true) {
+        let i = content.indexOf(tag, from);
+        if (i === -1) {
+            break;
+        }
+        let j = content.indexOf("`", i + len);
+        if (j === -1) {
+            break;
+        }        
+        let html = minifyHtml(content.substring(i + len, j), config.minifyHtml)
+        result = result + content.substring(from, i + len) + html + "`";
+        from = j + 1;
+    }
+    if (from < content.length) {
+        result = result + content.substring(from, content.length);
+    }
+    return result;
+}
+
 function getContent(filename, options){
     return options ? minify(fs.readFileSync(filename).toString(), options) : fs.readFileSync(filename).toString();
 }
@@ -140,6 +166,10 @@ function buildBundle() {
             moduleContent = getContent(appFile, config.minifyDefault);
         let 
             moduleName = config.appModulePrefix + moduleNameClean.replace(new RegExp("\\"+path.sep, 'g'), "/").replace(".js", "");
+        
+        if (config.minifyHtml) {
+            moduleContent = minifyHtmlFromContent(moduleContent);
+        }
 
         log('>>> Bundling module ...', moduleName);
         bundleContent = bundleContent + `'${moduleName}': [`;
