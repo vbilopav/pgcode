@@ -6,7 +6,7 @@ define(["require", "exports"], function (require, exports) {
         const doSub = topic => {
             let entry = _entries[topic];
             if (!entry) {
-                entry = entry[topic] = [];
+                entry = _entries[topic] = [];
             }
             return _entries[topic].push(handler) - 1;
         };
@@ -50,9 +50,11 @@ define(["require", "exports"], function (require, exports) {
         return true;
     };
     exports.unsubscribe = unsubscribe;
-    const BUTTON_CHANGED_OFF = name => `/button/changed/off/${name}`;
-    exports.BUTTON_CHANGED_OFF = BUTTON_CHANGED_OFF;
-    const BUTTON_CHANGED_ON = name => `/button/changed/on/${name}`;
-    exports.BUTTON_CHANGED_ON = BUTTON_CHANGED_ON;
+    const STATE_CHANGED_ON = "state/changed/on/";
+    exports.STATE_CHANGED_ON = STATE_CHANGED_ON;
+    const STATE_CHANGED_OFF = "state/changed/off/";
+    exports.STATE_CHANGED_OFF = STATE_CHANGED_OFF;
+    const STATE_CHANGED = "state/changed/";
+    exports.STATE_CHANGED = STATE_CHANGED;
 });
 //# sourceMappingURL=pubsub.js.map

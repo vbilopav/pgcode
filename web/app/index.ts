@@ -15,9 +15,11 @@ interface IStorage {
     theme: Themes
 }
 
-const storage = new Storage(
-    {
-        toolbarPos: Positions.left, sidePanelPos: Positions.left, sidePanelWidth: "250", theme: Themes.dark
+const storage = new Storage({
+        toolbarPos: Positions.left, 
+        sidePanelPos: Positions.left, 
+        sidePanelWidth: "250", 
+        theme: Themes.dark
     }, 
     "main") as any as IStorage;
 

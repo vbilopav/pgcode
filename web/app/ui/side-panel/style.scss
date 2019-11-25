@@ -2,4 +2,9 @@
     grid-area: side-panel;
     background-color: $panel-background-color;
     color: $panel-color;
+
+    & > div {
+        display: none;
+        height: 100%;
+    }
 }

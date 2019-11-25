@@ -15,11 +15,12 @@
         position: relative;
         user-select: none;
     }
-    & > div.active {
+    & > div.active, & > div.active > div {
         color: $active-color;
     }
     & > div > div.lbl {
-        font-size: 8px;
+        font-size: 9px;
+        //color: $control-color;
     }    
     & > div > div.marker {
         top: -4px;

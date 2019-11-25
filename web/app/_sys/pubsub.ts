@@ -4,7 +4,7 @@ const subscribe: (name: string | Array<string>, handler: (...args: any[]) => voi
     const doSub: (topic: string) => number = topic => {
         let entry = _entries[topic];
         if (!entry) {
-            entry = entry[topic] = [];
+            entry = _entries[topic] = [];
         } 
         return _entries[topic].push(handler) - 1;
     };
@@ -45,13 +45,14 @@ const unsubscribe: (name: string, ref: number) => boolean = (name, ref) => {
     return true;
 }
 
-const BUTTON_CHANGED_OFF: (name: string) => string = name => `/button/changed/off/${name}`
-const BUTTON_CHANGED_ON: (name: string) => string = name => `/button/changed/on/${name}`
+const STATE_CHANGED_ON: string = "state/changed/on/"; // id: string, state: bool
+const STATE_CHANGED_OFF: string = "state/changed/off/"; // id: string, state: bool
+const STATE_CHANGED: string = "state/changed/"; // id: string, state: bool
 
 export { 
-    subscribe,
-    publish,
-    unsubscribe,
-    BUTTON_CHANGED_OFF,
-    BUTTON_CHANGED_ON
+    subscribe, publish, unsubscribe,
+
+    STATE_CHANGED_ON,
+    STATE_CHANGED_OFF,
+    STATE_CHANGED,
 };
