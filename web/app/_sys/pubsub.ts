@@ -24,7 +24,7 @@ const publish: (name: string | Array<string>, ...args: any[]) => void = (name, .
             return;
         }
         for(let callback of entry) {
-            callback(args);
+            callback(...args);
         }
     };
     if (name instanceof Array) {
@@ -48,6 +48,11 @@ const unsubscribe: (name: string, ref: number) => boolean = (name, ref) => {
 const STATE_CHANGED_ON: string = "state/changed/on/"; // id: string, state: bool
 const STATE_CHANGED_OFF: string = "state/changed/off/"; // id: string, state: bool
 const STATE_CHANGED: string = "state/changed/"; // id: string, state: bool
+const STATE_CHANGED_DOCS: string = "state/changed/docs"; // id: string, state: bool
+const STATE_CHANGED_TABLES: string = "state/changed/tables"; // id: string, state: bool
+const STATE_CHANGED_VIEWS: string = "state/changed/views"; // id: string, state: bool
+const STATE_CHANGED_FUNCS: string = "state/changed/funcs"; // id: string, state: bool
+const STATE_CHANGED_SEARCH: string = "state/changed/search"; // id: string, state: bool
 
 export { 
     subscribe, publish, unsubscribe,
@@ -55,4 +60,9 @@ export {
     STATE_CHANGED_ON,
     STATE_CHANGED_OFF,
     STATE_CHANGED,
+    STATE_CHANGED_DOCS,
+    STATE_CHANGED_TABLES,
+    STATE_CHANGED_VIEWS,
+    STATE_CHANGED_FUNCS,
+    STATE_CHANGED_SEARCH
 };

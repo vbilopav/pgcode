@@ -14,11 +14,11 @@ interface IStorage {
     terminal: boolean;
 }
 
-const storage = new Storage({
-    docs: false, tables: false, views: false, funcs: false, search: false, terminal: false
-}, 
-"state", 
-(name, value) => JSON.parse(value) as boolean) as any as IStorage;
+const storage = new Storage(
+    {docs: false, tables: false, views: false, funcs: false, search: false, terminal: false}, 
+    "state", 
+    (name, value) => JSON.parse(value) as boolean
+) as any as IStorage;
 
 export default class  {
     private buttons: HTMLCollection;
@@ -74,10 +74,10 @@ export default class  {
     private setButtonState(e: HTMLElement, state: boolean, key: string) {
         if (e.hasClass(active) && !state) {
             e.removeClass(active);
-            setTimeout(() => publish([STATE_CHANGED_OFF, STATE_CHANGED], key, false), 0);
+            setTimeout(() => publish([STATE_CHANGED_OFF, STATE_CHANGED, STATE_CHANGED + key], key, false), 0);
         } else if (!e.hasClass(active) && state) {
             e.addClass(active);
-            setTimeout(() => publish([STATE_CHANGED_ON, STATE_CHANGED], key, true), 0);
+            setTimeout(() => publish([STATE_CHANGED_ON, STATE_CHANGED, STATE_CHANGED + key], key, true), 0);
         }
     }
 
@@ -93,11 +93,11 @@ export default class  {
             if (e.hasClass(active)) {
                 e.removeClass(active);
                 storage[key] = false;
-                publish([STATE_CHANGED_OFF, STATE_CHANGED], key, false);
+                publish([STATE_CHANGED_OFF, STATE_CHANGED, STATE_CHANGED + key], key, false);
             } else {
                 e.addClass(active);
                 storage[key] = true;
-                publish([STATE_CHANGED_ON, STATE_CHANGED], key, true);
+                publish([STATE_CHANGED_ON, STATE_CHANGED, STATE_CHANGED + key], key, true);
             }
         };
         
@@ -112,7 +112,7 @@ export default class  {
                     }
                     if (btn.hasClass(active)) {
                         btn.removeClass("active");
-                        publish([STATE_CHANGED_OFF, STATE_CHANGED], key, false);
+                        publish([STATE_CHANGED_OFF, STATE_CHANGED, STATE_CHANGED + key], key, false);
                     }
                 }
             }

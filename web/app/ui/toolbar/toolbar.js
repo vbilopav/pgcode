@@ -9,9 +9,7 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub"], function (
     ;
     const isInRole = (e, role) => e.dataAttr("role") === role;
     const active = "active";
-    const storage = new storage_1.default({
-        docs: false, tables: false, views: false, funcs: false, search: false, terminal: false
-    }, "state", (name, value) => JSON.parse(value));
+    const storage = new storage_1.default({ docs: false, tables: false, views: false, funcs: false, search: false, terminal: false }, "state", (name, value) => JSON.parse(value));
     class default_1 {
         constructor(element) {
             element.addClass("toolbar").html(String.html `
@@ -52,11 +50,11 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub"], function (
         setButtonState(e, state, key) {
             if (e.hasClass(active) && !state) {
                 e.removeClass(active);
-                setTimeout(() => pubsub_1.publish([pubsub_1.STATE_CHANGED_OFF, pubsub_1.STATE_CHANGED], key, false), 0);
+                setTimeout(() => pubsub_1.publish([pubsub_1.STATE_CHANGED_OFF, pubsub_1.STATE_CHANGED, pubsub_1.STATE_CHANGED + key], key, false), 0);
             }
             else if (!e.hasClass(active) && state) {
                 e.addClass(active);
-                setTimeout(() => pubsub_1.publish([pubsub_1.STATE_CHANGED_ON, pubsub_1.STATE_CHANGED], key, true), 0);
+                setTimeout(() => pubsub_1.publish([pubsub_1.STATE_CHANGED_ON, pubsub_1.STATE_CHANGED, pubsub_1.STATE_CHANGED + key], key, true), 0);
             }
         }
         buttonClicked(e) {
@@ -68,12 +66,12 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub"], function (
                 if (e.hasClass(active)) {
                     e.removeClass(active);
                     storage[key] = false;
-                    pubsub_1.publish([pubsub_1.STATE_CHANGED_OFF, pubsub_1.STATE_CHANGED], key, false);
+                    pubsub_1.publish([pubsub_1.STATE_CHANGED_OFF, pubsub_1.STATE_CHANGED, pubsub_1.STATE_CHANGED + key], key, false);
                 }
                 else {
                     e.addClass(active);
                     storage[key] = true;
-                    pubsub_1.publish([pubsub_1.STATE_CHANGED_ON, pubsub_1.STATE_CHANGED], key, true);
+                    pubsub_1.publish([pubsub_1.STATE_CHANGED_ON, pubsub_1.STATE_CHANGED, pubsub_1.STATE_CHANGED + key], key, true);
                 }
             };
             if (isInRole(e, ButtonRoles.toggle)) {
@@ -88,7 +86,7 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub"], function (
                         }
                         if (btn.hasClass(active)) {
                             btn.removeClass("active");
-                            pubsub_1.publish([pubsub_1.STATE_CHANGED_OFF, pubsub_1.STATE_CHANGED], key, false);
+                            pubsub_1.publish([pubsub_1.STATE_CHANGED_OFF, pubsub_1.STATE_CHANGED, pubsub_1.STATE_CHANGED + key], key, false);
                         }
                     }
                 }

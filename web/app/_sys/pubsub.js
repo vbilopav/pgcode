@@ -27,7 +27,7 @@ define(["require", "exports"], function (require, exports) {
                 return;
             }
             for (let callback of entry) {
-                callback(args);
+                callback(...args);
             }
         };
         if (name instanceof Array) {
@@ -56,5 +56,15 @@ define(["require", "exports"], function (require, exports) {
     exports.STATE_CHANGED_OFF = STATE_CHANGED_OFF;
     const STATE_CHANGED = "state/changed/";
     exports.STATE_CHANGED = STATE_CHANGED;
+    const STATE_CHANGED_DOCS = "state/changed/docs";
+    exports.STATE_CHANGED_DOCS = STATE_CHANGED_DOCS;
+    const STATE_CHANGED_TABLES = "state/changed/tables";
+    exports.STATE_CHANGED_TABLES = STATE_CHANGED_TABLES;
+    const STATE_CHANGED_VIEWS = "state/changed/views";
+    exports.STATE_CHANGED_VIEWS = STATE_CHANGED_VIEWS;
+    const STATE_CHANGED_FUNCS = "state/changed/funcs";
+    exports.STATE_CHANGED_FUNCS = STATE_CHANGED_FUNCS;
+    const STATE_CHANGED_SEARCH = "state/changed/search";
+    exports.STATE_CHANGED_SEARCH = STATE_CHANGED_SEARCH;
 });
 //# sourceMappingURL=pubsub.js.map

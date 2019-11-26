@@ -13,12 +13,7 @@ define(["require", "exports", "app/_sys/storage", "./ui/toolbar/toolbar", "./ui/
         Themes["light"] = "light";
     })(Themes || (Themes = {}));
     ;
-    const storage = new storage_1.default({
-        toolbarPos: Positions.left,
-        sidePanelPos: Positions.left,
-        sidePanelWidth: "250",
-        theme: Themes.dark
-    }, "main");
+    const storage = new storage_1.default({ toolbarPos: Positions.left, sidePanelPos: Positions.left, sidePanelWidth: "250", theme: Themes.dark }, "main");
     const getGridTemplateData = () => {
         let tpl = storage.toolbarPos === Positions.left, spl = storage.sidePanelPos === Positions.left, spw = storage.sidePanelWidth;
         if (tpl && spl) {
