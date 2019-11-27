@@ -1,4 +1,4 @@
-define(["require", "exports", "app/_sys/storage", "./ui/toolbar/toolbar", "./ui/side-panel/side-panel", "./ui/main-panel/main-panel", "./ui/footer/footer"], function (require, exports, storage_1, toolbar_1, side_panel_1, main_panel_1, footer_1) {
+define(["require", "exports", "app/_sys/storage", "app/ui/toolbar/toolbar", "app/ui/side-panel/side-panel", "app/ui/main-panel/main-panel", "app/ui/footer/footer", "app/controls/splitter"], function (require, exports, storage_1, toolbar_1, side_panel_1, main_panel_1, footer_1, splitter_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var Positions;
@@ -36,11 +36,11 @@ define(["require", "exports", "app/_sys/storage", "./ui/toolbar/toolbar", "./ui/
     const element = document.body;
     element.html(String.html `
     <div>
-        <div></div>
-        <div></div>
-        <div class="main-split-v"></div>
-        <div></div>
-        <div></div>
+        <div></div><!-- toolbar -->
+        <div></div><!-- side panel -->
+        <div></div><!-- main splitter vertical -->
+        <div></div><!-- main panel -->
+        <div></div><!-- footer -->
     </div>
 `);
     const container = element.firstElementChild, [areas, columns] = getGridTemplateData();
@@ -50,5 +50,18 @@ define(["require", "exports", "app/_sys/storage", "./ui/toolbar/toolbar", "./ui/
     new side_panel_1.default(container.children[1]);
     new main_panel_1.default(container.children[3]);
     new footer_1.default(container.children[4]);
+    const splitter = new splitter_1.VerticalSplitter({
+        name: "v-splitter",
+        element: container.children[2],
+        container: container,
+        resizeIdx: 1,
+        autoIdx: 3,
+        events: {
+            docked: () => { },
+            undocked: () => { },
+            changed: () => { },
+        }
+    });
+    splitter.start();
 });
 //# sourceMappingURL=index.js.map

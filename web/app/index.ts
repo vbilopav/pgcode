@@ -1,8 +1,9 @@
 import Storage from "app/_sys/storage";
-import Toolbar from "./ui/toolbar/toolbar";
-import SidePanel from "./ui/side-panel/side-panel";
-import MainPanel from "./ui/main-panel/main-panel";
-import Footer from "./ui/footer/footer";
+import Toolbar from "app/ui/toolbar/toolbar";
+import SidePanel from "app/ui/side-panel/side-panel";
+import MainPanel from "app/ui/main-panel/main-panel";
+import Footer from "app/ui/footer/footer";
+import {VerticalSplitter, SplitterCtorArgs} from "app/controls/splitter";
 
 
 enum Positions { left = "left", right = "right" };
@@ -48,11 +49,11 @@ if (themeLink.attr("href") !== `css/theme-${storage.theme}.css`) {
 const element = document.body;
 element.html(String.html`
     <div>
-        <div></div>
-        <div></div>
-        <div class="main-split-v"></div>
-        <div></div>
-        <div></div>
+        <div></div><!-- toolbar -->
+        <div></div><!-- side panel -->
+        <div></div><!-- main splitter vertical -->
+        <div></div><!-- main panel -->
+        <div></div><!-- footer -->
     </div>
 `);
 
@@ -67,3 +68,17 @@ new Toolbar(container.children[0]);
 new SidePanel(container.children[1]);
 new MainPanel(container.children[3]);
 new Footer(container.children[4]);
+
+const splitter = new VerticalSplitter({
+    name: "v-splitter",
+    element: container.children[2],
+    container: container,
+    resizeIdx: 1,
+    autoIdx: 3,
+    events: {
+        docked: () => {}, //_app.pub("sidebar/docked", splitter),
+        undocked: () => {}, //_app.pub("sidebar/undocked", splitter),
+        changed: () => {}, //_app.pub("sidebar/changed", splitter)
+    }
+} as SplitterCtorArgs);
+splitter.start();
