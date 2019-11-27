@@ -78,6 +78,7 @@ abstract class Splitter {
         this.element.on("mousedown", (e: MouseEvent) => {
             this.offset = this.calculateOffset(e);
             document.body.css("cursor", this.element.css("cursor") as string);
+            this.element.addClass("split-moving");
         });
 
         document
@@ -93,6 +94,7 @@ abstract class Splitter {
                 }
                 const [_, prev] = this.setNewPositionAndGetValues();
                 this.storage.position = prev;
+                this.element.removeClass("split-moving");
             })
 
             .on("mousemove", (e: MouseEvent) => {
@@ -124,7 +126,7 @@ abstract class Splitter {
                         return false;
                     }
                 }
-
+                this.element.addClass("split-moving");
                 this.container.css(this.gridTemplateName, values.join(" "));
                 this.events.changed();
                 return false;
@@ -142,6 +144,7 @@ abstract class Splitter {
         this.storage.position = prev;
         this.container.css(this.gridTemplateName, values.join(" "));
         this.docked = true;
+        this.element.removeClass("split-moving");
         if (skipEventEmit) {
             return
         }
@@ -200,7 +203,7 @@ abstract class Splitter {
 class VerticalSplitter extends Splitter {
     constructor(args: SplitterCtorArgs) {
         super(args);
-        this.element.addClass("main-split-v");
+        this.element.addClass("main-split").addClass("main-split-v");
         this.mouseEventPositionProperty = "clientX";
         this.gridTemplateName = "grid-template-columns";
         this.adjust();
@@ -227,7 +230,7 @@ class VerticalSplitter extends Splitter {
 class HorizontalSplitter extends Splitter {
     constructor(args: SplitterCtorArgs) {
         super(args);
-        this.element.addClass("main-split-h");
+        this.element.addClass("main-split").addClass("main-split-h");
         this.mouseEventPositionProperty = "clientY";
         this.gridTemplateName = "grid-template-rows";
         this.adjust();

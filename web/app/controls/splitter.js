@@ -20,6 +20,7 @@ define(["require", "exports", "app/_sys/storage"], function (require, exports, s
             this.element.on("mousedown", (e) => {
                 this.offset = this.calculateOffset(e);
                 document.body.css("cursor", this.element.css("cursor"));
+                this.element.addClass("split-moving");
             });
             document
                 .on("mouseup", () => {
@@ -33,6 +34,7 @@ define(["require", "exports", "app/_sys/storage"], function (require, exports, s
                 }
                 const [_, prev] = this.setNewPositionAndGetValues();
                 this.storage.position = prev;
+                this.element.removeClass("split-moving");
             })
                 .on("mousemove", (e) => {
                 if (this.offset === null) {
@@ -62,6 +64,7 @@ define(["require", "exports", "app/_sys/storage"], function (require, exports, s
                         return false;
                     }
                 }
+                this.element.addClass("split-moving");
                 this.container.css(this.gridTemplateName, values.join(" "));
                 this.events.changed();
                 return false;
@@ -76,6 +79,7 @@ define(["require", "exports", "app/_sys/storage"], function (require, exports, s
             this.storage.position = prev;
             this.container.css(this.gridTemplateName, values.join(" "));
             this.docked = true;
+            this.element.removeClass("split-moving");
             if (skipEventEmit) {
                 return;
             }
@@ -127,7 +131,7 @@ define(["require", "exports", "app/_sys/storage"], function (require, exports, s
     class VerticalSplitter extends Splitter {
         constructor(args) {
             super(args);
-            this.element.addClass("main-split-v");
+            this.element.addClass("main-split").addClass("main-split-v");
             this.mouseEventPositionProperty = "clientX";
             this.gridTemplateName = "grid-template-columns";
             this.adjust();
@@ -151,7 +155,7 @@ define(["require", "exports", "app/_sys/storage"], function (require, exports, s
     class HorizontalSplitter extends Splitter {
         constructor(args) {
             super(args);
-            this.element.addClass("main-split-h");
+            this.element.addClass("main-split").addClass("main-split-h");
             this.mouseEventPositionProperty = "clientY";
             this.gridTemplateName = "grid-template-rows";
             this.adjust();
@@ -172,4 +176,4 @@ define(["require", "exports", "app/_sys/storage"], function (require, exports, s
     exports.HorizontalSplitter = HorizontalSplitter;
     ;
 });
-//# sourceMappingURL=Splitter.js.map
+//# sourceMappingURL=splitter.js.map

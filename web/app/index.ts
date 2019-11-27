@@ -27,16 +27,16 @@ const getGridTemplateData: () => [string, string] = () => {
         spl = storage.sidePanelPos === Positions.left,
         spw = storage.sidePanelWidth;
     if (tpl && spl) {
-        return ["toolbar side-panel main-splitter main-panel", `50px ${spw}px 3px auto`];
+        return ["toolbar side-panel main-splitter main-panel", `50px ${spw}px 5px auto`];
     }
     if (tpl && !spl) {
-        return ["toolbar main-panel main-splitter side-panel", `50px auto 3px ${spw}px`];
+        return ["toolbar main-panel main-splitter side-panel", `50px auto 5px ${spw}px`];
     }
     if (!tpl && spl) {
-        return ["side-panel main-splitter main-panel toolbar", `${spw}px 3px auto 50px`];
+        return ["side-panel main-splitter main-panel toolbar", `${spw}px 5px auto 50px`];
     }
     if (!tpl && !spl) {
-        return ["main-panel main-splitter side-panel toolbar", `auto 3px ${spw}px 50px`];
+        return ["main-panel main-splitter side-panel toolbar", `auto 5px ${spw}px 50px`];
     }
 };
 
