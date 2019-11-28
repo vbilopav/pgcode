@@ -57,9 +57,9 @@ export default class  {
                 <div class="marker"></div>
                 <div class="lbl">search</div>
             </div>
-            <div class="icon-terminal btn-psql" id="btn-terminal" data-key="terminal" data-role="${ButtonRoles.toggle}">
+            <div class="icon-terminal btn-pgcode" id="btn-terminal" data-key="terminal" data-role="${ButtonRoles.toggle}">
                 <div class="marker"></div>
-                <div class="lbl">psql</div>
+                <div class="lbl">pgcode</div>
             </div>
         `);
         

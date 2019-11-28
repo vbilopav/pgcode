@@ -5,8 +5,8 @@
     height: 100%;
     display: grid;
     grid-template-rows: 0px 14px 42px 42px 42px 42px 42px auto 42px 4px;
-    grid-template-areas: 'gap1' 'schema' 'docs' 'tables' 'views' 'funcs' 'search' 'gap2' 'psql' 'gap3';
-    row-gap: 6px;
+    grid-template-areas: 'gap1' 'schema' 'docs' 'tables' 'views' 'funcs' 'search' 'gap2' 'pgcode' 'gap3';
+    row-gap: 12px;
     user-select: none;
 
     & > div {
@@ -68,8 +68,8 @@
         grid-area: search;
         font-size: 28px;
     }
-    & > div.btn-psql {
-        grid-area: psql;
+    & > div.btn-pgcode {
+        grid-area: pgcode;
         font-size: 28px;
     }
 }
