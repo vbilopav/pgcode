@@ -139,18 +139,6 @@ abstract class Splitter {
         return this.docked;
     }
     
-    private dock(skipEventEmit=false): void {
-        const [values, prev] = this.setNewPositionAndGetValues(this.dockPosition + "px");
-        this.storage.position = prev;
-        this.container.css(this.gridTemplateName, values.join(" "));
-        this.docked = true;
-        this.element.removeClass("split-moving");
-        if (skipEventEmit) {
-            return
-        }
-        this.events.docked();
-    }
-
     protected adjust() : void {
         if (this.storage.position) {
             let [values, _] = this.setNewPositionAndGetValues(this.storage.position + "px");
@@ -166,6 +154,19 @@ abstract class Splitter {
         return e[this.mouseEventPositionProperty];
     }
 
+    private dock(skipEventEmit=false): void {
+        const [values, prev] = this.setNewPositionAndGetValues(this.dockPosition + "px");
+        this.storage.position = prev;
+        this.container.css(this.gridTemplateName, values.join(" "));
+        this.docked = true;
+        this.element.removeClass("split-moving");//.css("width", "0px");
+        
+        if (skipEventEmit) {
+            return
+        }
+        this.events.docked();
+    }
+
     private undock(skipEventEmit=false, pos=this.maxDelta): void {
         if (!this.docked) {
             return;
@@ -178,6 +179,7 @@ abstract class Splitter {
         }
         const [values, _] = this.setNewPositionAndGetValues(pos + "px");
         this.container.css(this.gridTemplateName, values.join(" "));
+        //this.element.css("width", "");
         this.docked = false;
         if (skipEventEmit) {
             return

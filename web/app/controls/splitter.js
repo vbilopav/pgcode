@@ -74,17 +74,6 @@ define(["require", "exports", "app/_sys/storage"], function (require, exports, s
         get isDocked() {
             return this.docked;
         }
-        dock(skipEventEmit = false) {
-            const [values, prev] = this.setNewPositionAndGetValues(this.dockPosition + "px");
-            this.storage.position = prev;
-            this.container.css(this.gridTemplateName, values.join(" "));
-            this.docked = true;
-            this.element.removeClass("split-moving");
-            if (skipEventEmit) {
-                return;
-            }
-            this.events.docked();
-        }
         adjust() {
             if (this.storage.position) {
                 let [values, _] = this.setNewPositionAndGetValues(this.storage.position + "px");
@@ -96,6 +85,17 @@ define(["require", "exports", "app/_sys/storage"], function (require, exports, s
         }
         getPositionFromMouseEvent(e) {
             return e[this.mouseEventPositionProperty];
+        }
+        dock(skipEventEmit = false) {
+            const [values, prev] = this.setNewPositionAndGetValues(this.dockPosition + "px");
+            this.storage.position = prev;
+            this.container.css(this.gridTemplateName, values.join(" "));
+            this.docked = true;
+            this.element.removeClass("split-moving");
+            if (skipEventEmit) {
+                return;
+            }
+            this.events.docked();
         }
         undock(skipEventEmit = false, pos = this.maxDelta) {
             if (!this.docked) {

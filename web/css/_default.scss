@@ -23,26 +23,10 @@ body {
     text-align: center;
 }
 
-.main-split {
-    background-color: $splitter-background-color;
-    width: 100%;
-    height: 100%;
-}
-.main-split-v {
-    cursor: ew-resize;
-    border-right: 1px $splitter-border-color dotted;
-}
-.main-split-h {
-    cursor: ns-resize;
-    border-top: 1px $splitter-border-color dotted;
-}
-.split-moving {
-    border-color: $panel-color;
-}
-
 @import 'icons.scss';
 @import '../app/index.scss';
 @import '../app/ui/toolbar/style.scss';
 @import '../app/ui/footer/style.scss';
 @import '../app/ui/main-panel/style.scss';
 @import '../app/ui/side-panel/style.scss';
+@import '../app/controls/splitter.scss';
