@@ -75,10 +75,27 @@ const splitter = new VerticalSplitter({
     container: container,
     resizeIdx: 1,
     autoIdx: 3,
+    maxResizeDelta: 100,
     events: {
         docked: () => {}, //_app.pub("sidebar/docked", splitter),
         undocked: () => {}, //_app.pub("sidebar/undocked", splitter),
         changed: () => {}, //_app.pub("sidebar/changed", splitter)
     }
 } as SplitterCtorArgs);
+
 splitter.start();
+
+/*
+window.on("resize", () => {
+    if (splitter.isDocked) {
+        return;
+    }
+    let v = splitter.getValues(),
+        w = window.innerWidth,
+        delta = w - last;
+        last = w;
+    if (w - v.prev < 100) {
+        splitter.move(delta, v);
+    }
+});
+*/

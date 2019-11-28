@@ -56,6 +56,7 @@ define(["require", "exports", "app/_sys/storage", "app/ui/toolbar/toolbar", "app
         container: container,
         resizeIdx: 1,
         autoIdx: 3,
+        maxResizeDelta: 100,
         events: {
             docked: () => { },
             undocked: () => { },

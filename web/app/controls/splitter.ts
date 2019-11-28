@@ -15,15 +15,24 @@ interface SplitterCtorArgs {
     autoIdx: number,
     maxDelta: number, 
     min: number,
-    events: SplitterEvents
+    events: SplitterEvents,
+    maxResizeDelta?: number;
+}
+
+interface INewPositionResult {
+    values: string[],
+    previousPosition: number
 }
 
 interface IStorage {
-    position: number
+    position: number,
+    docked: boolean
 }
 
+const createStorage = () => new Storage(defaultStorage, name, (name, value) => name == "docked" ? JSON.parse(value) as boolean : value) as any as IStorage;
+const defaultStorage: IStorage = {position: null, docked: false};
+
 abstract class Splitter {
-    
     private container: Element;
     private cursor: string;
     private dockPosition: number;
@@ -37,14 +46,15 @@ abstract class Splitter {
 
     protected element: Element;
     protected offset: number | [number, number];
+    protected maxResizeDelta?: number;
 
-    protected mouseEventPositionProperty: string; //_prop
-    protected gridTemplateName: string; //css
+    protected mouseEventPositionProperty: string;
+    protected gridTemplateName: string;
 
-    protected abstract calculateOffset(e: MouseEvent): number | [number, number]; //._calcOffset(e)
-    protected abstract calculatePosition(currentPos: number, e: MouseEvent): number; // _calcPos(pos, e)
-    protected abstract calculateDelta(rect: DOMRect, currentPos: number): number; //_calcDelta(rect, pos) 
-    protected abstract getMin(currentPos: number, calculatedPos: number): number; //_getMin(pos, calc)
+    protected abstract calculateOffset(e: MouseEvent): number | [number, number];
+    protected abstract calculatePosition(currentPos: number, e: MouseEvent): number;
+    protected abstract calculateDelta(rect: DOMRect, currentPos: number): number;
+    protected abstract getMin(currentPos: number, calculatedPos: number): number;
 
     constructor({
         name,
@@ -55,34 +65,44 @@ abstract class Splitter {
         autoIdx,
         maxDelta = 250, 
         min = 150,
-        events = { docked: (()=>{}), undocked: (()=>{}), changed: (()=>{}) }
+        events = { docked: (()=>{}), undocked: (()=>{}), changed: (()=>{}) },
+        maxResizeDelta
     }: SplitterCtorArgs) {
         this.element = element || (() => {throw new Error("element is required")})();
         this.container = container || (() => {throw new Error("container is required")})();
         this.cursor = document.body.css("cursor") as string;
         this.dockPosition = dockPosition;
         this.events = events;
-        //this.events.changed = this.events.changed || (()=>{});
-        this.storage = (name ? new Storage({position: null}, name) : {position: null}) as any as IStorage;
-
+        this.storage = (name ? createStorage() : defaultStorage);
         this.offset = null;
         this.docked = false;
         this.resizeIdx = resizeIdx || (() => {throw new Error("resizeIdx is required")})();
         this.autoIdx = autoIdx || (() => {throw new Error("autoIdx is required")})();
         this.maxDelta = maxDelta;
         this.min = min;
+        this.maxResizeDelta = maxResizeDelta;
     }
 
-    start() {
+    public start(): void {
 
-        this.element.on("mousedown", (e: MouseEvent) => {
-            this.offset = this.calculateOffset(e);
-            document.body.css("cursor", this.element.css("cursor") as string);
-            this.element.addClass("split-moving");
-        });
+        this.element
+            .on("mousedown", (e: MouseEvent) => {
+                this.offset = this.calculateOffset(e);
+                document.body.css("cursor", this.element.css("cursor") as string);
+                this.element.addClass("split-moving");
+            })
+            .on("mouseup", () => {
+                this.element.removeClass("split-moving");
+            })
+            .on("dblclick", () => {
+                if (this.isDocked) {
+                    this.undock();
+                } else {
+                    this.dock();
+                }
+            });
 
         document
-
             .on("mouseup", () => {
                 if (this.offset === null) {
                     return true;
@@ -92,11 +112,10 @@ abstract class Splitter {
                 if (this.docked) {
                     return true;
                 }
-                const [_, prev] = this.setNewPositionAndGetValues();
-                this.storage.position = prev;
+                const v = this.getValuesOrSetNewPos();
+                this.storage.position = v.previousPosition;
                 this.element.removeClass("split-moving");
             })
-
             .on("mousemove", (e: MouseEvent) => {
                 if (this.offset === null) {
                     return true;
@@ -106,7 +125,7 @@ abstract class Splitter {
     
                 const pos = this.getPositionFromMouseEvent(e);
                 const calc = this.calculatePosition(pos, e);
-                const [values, prev] = this.setNewPositionAndGetValues(calc + "px");
+                const v = this.getValuesOrSetNewPos(calc + "px");
                 const rect = this.container.getBoundingClientRect() as DOMRect;
 
                 if (this.calculateDelta(rect, pos) <= this.maxDelta) {
@@ -127,22 +146,35 @@ abstract class Splitter {
                     }
                 }
                 this.element.addClass("split-moving");
-                this.container.css(this.gridTemplateName, values.join(" "));
+                this.container.css(this.gridTemplateName, v.values.join(" "));
                 this.events.changed();
                 return false;
             });
-
-        return this;
     }
 
     public get isDocked() {
         return this.docked;
     }
-    
+
+    public move(delta: number, values: INewPositionResult) {
+        values = values || this.getValuesOrSetNewPos();
+        if (values.previousPosition <= this.min) {
+            return false;
+        }
+        const p = values.previousPosition + delta;
+        this.storage.position = p;
+        values.values[this.resizeIdx] = p + "px";
+        this.container.css(this.gridTemplateName, values.values.join(" "));
+    }
+
     protected adjust() : void {
-        if (this.storage.position) {
-            let [values, _] = this.setNewPositionAndGetValues(this.storage.position + "px");
-            this.container.css(this.gridTemplateName, values.join(" "));
+        if (this.storage.docked) {
+            this.dock();
+        } else {
+            if (this.storage.position) {
+                let v = this.getValuesOrSetNewPos(this.storage.position + "px");
+                this.container.css(this.gridTemplateName, v.values.join(" "));
+            }
         }
     }
 
@@ -150,16 +182,27 @@ abstract class Splitter {
         return Number(this.getValues()[this.resizeIdx].replace("px", ""));
     }
 
-    protected getPositionFromMouseEvent(e: MouseEvent) { //_getPos
+    protected getPositionFromMouseEvent(e: MouseEvent) {
         return e[this.mouseEventPositionProperty];
     }
 
+    protected getValuesOrSetNewPos(newPosition?: string): INewPositionResult {
+        const values = this.getValues();
+        const previousPosition = Number(values[this.resizeIdx].replace("px", ""));
+        if (newPosition) {
+            values[this.resizeIdx] = newPosition;
+            values[this.autoIdx] = "auto";
+        }
+        return {values, previousPosition};
+    }
+
     private dock(skipEventEmit=false): void {
-        const [values, prev] = this.setNewPositionAndGetValues(this.dockPosition + "px");
-        this.storage.position = prev;
-        this.container.css(this.gridTemplateName, values.join(" "));
+        const v = this.getValuesOrSetNewPos(this.dockPosition + "px");
+        this.storage.position = v.previousPosition;
+        this.container.css(this.gridTemplateName, v.values.join(" "));
         this.docked = true;
-        this.element.removeClass("split-moving");//.css("width", "0px");
+        this.storage.docked = true;
+        this.element.removeClass("split-moving");
         
         if (skipEventEmit) {
             return
@@ -177,10 +220,11 @@ abstract class Splitter {
         if (this.storage.position >= pos) {
             pos = this.storage.position;
         }
-        const [values, _] = this.setNewPositionAndGetValues(pos + "px");
-        this.container.css(this.gridTemplateName, values.join(" "));
-        //this.element.css("width", "");
+
+        const v = this.getValuesOrSetNewPos(pos + "px");
+        this.container.css(this.gridTemplateName, v.values.join(" "));
         this.docked = false;
+        this.storage.docked = false;
         if (skipEventEmit) {
             return
         }
@@ -189,16 +233,6 @@ abstract class Splitter {
 
     private getValues(): string[] {
         return (this.container.css(this.gridTemplateName) as string).split(" ");
-    }
-
-    private setNewPositionAndGetValues(newPosition?: string): [string[], number] { //_getValuesArray
-        const values = this.getValues();
-        const prev = Number(values[this.resizeIdx].replace("px", ""));
-        if (newPosition) {
-            values[this.resizeIdx] = newPosition;
-            values[this.autoIdx] = "auto";
-        }
-        return [values, prev];
     }
 }
 
@@ -209,6 +243,25 @@ class VerticalSplitter extends Splitter {
         this.mouseEventPositionProperty = "clientX";
         this.gridTemplateName = "grid-template-columns";
         this.adjust();
+    }
+
+    public start(): void {
+        super.start();
+        if (this.maxResizeDelta) {
+            let last = window.innerWidth;
+            window.on("resize", () => {
+                if (this.isDocked) {
+                    return;
+                }
+                let v = this.getValuesOrSetNewPos(),
+                    w = window.innerWidth,
+                    delta = w - last;
+                    last = w;
+                if (w - v.previousPosition < this.maxResizeDelta) {
+                    this.move(delta, v);
+                }
+            });
+        }
     }
 
     protected calculatePosition(currentPos: number, e: MouseEvent): number {
@@ -236,6 +289,11 @@ class HorizontalSplitter extends Splitter {
         this.mouseEventPositionProperty = "clientY";
         this.gridTemplateName = "grid-template-rows";
         this.adjust();
+    }
+
+    public start(): void {
+        super.start();
+        // ...
     }
 
     protected calculatePosition(currentPos: number, e: MouseEvent): number {

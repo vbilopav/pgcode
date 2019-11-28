@@ -1,26 +1,41 @@
 define(["require", "exports", "app/_sys/storage"], function (require, exports, storage_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    const createStorage = () => new storage_1.default(defaultStorage, name, (name, value) => name == "docked" ? JSON.parse(value) : value);
+    const defaultStorage = { position: null, docked: false };
     class Splitter {
-        constructor({ name, element, container, dockPosition = 0, resizeIdx, autoIdx, maxDelta = 250, min = 150, events = { docked: (() => { }), undocked: (() => { }), changed: (() => { }) } }) {
+        constructor({ name, element, container, dockPosition = 0, resizeIdx, autoIdx, maxDelta = 250, min = 150, events = { docked: (() => { }), undocked: (() => { }), changed: (() => { }) }, maxResizeDelta }) {
             this.element = element || (() => { throw new Error("element is required"); })();
             this.container = container || (() => { throw new Error("container is required"); })();
             this.cursor = document.body.css("cursor");
             this.dockPosition = dockPosition;
             this.events = events;
-            this.storage = (name ? new storage_1.default({ position: null }, name) : { position: null });
+            this.storage = (name ? createStorage() : defaultStorage);
             this.offset = null;
             this.docked = false;
             this.resizeIdx = resizeIdx || (() => { throw new Error("resizeIdx is required"); })();
             this.autoIdx = autoIdx || (() => { throw new Error("autoIdx is required"); })();
             this.maxDelta = maxDelta;
             this.min = min;
+            this.maxResizeDelta = maxResizeDelta;
         }
         start() {
-            this.element.on("mousedown", (e) => {
+            this.element
+                .on("mousedown", (e) => {
                 this.offset = this.calculateOffset(e);
                 document.body.css("cursor", this.element.css("cursor"));
                 this.element.addClass("split-moving");
+            })
+                .on("mouseup", () => {
+                this.element.removeClass("split-moving");
+            })
+                .on("dblclick", () => {
+                if (this.isDocked) {
+                    this.undock();
+                }
+                else {
+                    this.dock();
+                }
             });
             document
                 .on("mouseup", () => {
@@ -32,8 +47,8 @@ define(["require", "exports", "app/_sys/storage"], function (require, exports, s
                 if (this.docked) {
                     return true;
                 }
-                const [_, prev] = this.setNewPositionAndGetValues();
-                this.storage.position = prev;
+                const v = this.getValuesOrSetNewPos();
+                this.storage.position = v.previousPosition;
                 this.element.removeClass("split-moving");
             })
                 .on("mousemove", (e) => {
@@ -44,7 +59,7 @@ define(["require", "exports", "app/_sys/storage"], function (require, exports, s
                 e.stopPropagation();
                 const pos = this.getPositionFromMouseEvent(e);
                 const calc = this.calculatePosition(pos, e);
-                const [values, prev] = this.setNewPositionAndGetValues(calc + "px");
+                const v = this.getValuesOrSetNewPos(calc + "px");
                 const rect = this.container.getBoundingClientRect();
                 if (this.calculateDelta(rect, pos) <= this.maxDelta) {
                     return false;
@@ -65,19 +80,33 @@ define(["require", "exports", "app/_sys/storage"], function (require, exports, s
                     }
                 }
                 this.element.addClass("split-moving");
-                this.container.css(this.gridTemplateName, values.join(" "));
+                this.container.css(this.gridTemplateName, v.values.join(" "));
                 this.events.changed();
                 return false;
             });
-            return this;
         }
         get isDocked() {
             return this.docked;
         }
+        move(delta, values) {
+            values = values || this.getValuesOrSetNewPos();
+            if (values.previousPosition <= this.min) {
+                return false;
+            }
+            const p = values.previousPosition + delta;
+            this.storage.position = p;
+            values.values[this.resizeIdx] = p + "px";
+            this.container.css(this.gridTemplateName, values.values.join(" "));
+        }
         adjust() {
-            if (this.storage.position) {
-                let [values, _] = this.setNewPositionAndGetValues(this.storage.position + "px");
-                this.container.css(this.gridTemplateName, values.join(" "));
+            if (this.storage.docked) {
+                this.dock();
+            }
+            else {
+                if (this.storage.position) {
+                    let v = this.getValuesOrSetNewPos(this.storage.position + "px");
+                    this.container.css(this.gridTemplateName, v.values.join(" "));
+                }
             }
         }
         getCurrent() {
@@ -86,11 +115,21 @@ define(["require", "exports", "app/_sys/storage"], function (require, exports, s
         getPositionFromMouseEvent(e) {
             return e[this.mouseEventPositionProperty];
         }
+        getValuesOrSetNewPos(newPosition) {
+            const values = this.getValues();
+            const previousPosition = Number(values[this.resizeIdx].replace("px", ""));
+            if (newPosition) {
+                values[this.resizeIdx] = newPosition;
+                values[this.autoIdx] = "auto";
+            }
+            return { values, previousPosition };
+        }
         dock(skipEventEmit = false) {
-            const [values, prev] = this.setNewPositionAndGetValues(this.dockPosition + "px");
-            this.storage.position = prev;
-            this.container.css(this.gridTemplateName, values.join(" "));
+            const v = this.getValuesOrSetNewPos(this.dockPosition + "px");
+            this.storage.position = v.previousPosition;
+            this.container.css(this.gridTemplateName, v.values.join(" "));
             this.docked = true;
+            this.storage.docked = true;
             this.element.removeClass("split-moving");
             if (skipEventEmit) {
                 return;
@@ -107,9 +146,10 @@ define(["require", "exports", "app/_sys/storage"], function (require, exports, s
             if (this.storage.position >= pos) {
                 pos = this.storage.position;
             }
-            const [values, _] = this.setNewPositionAndGetValues(pos + "px");
-            this.container.css(this.gridTemplateName, values.join(" "));
+            const v = this.getValuesOrSetNewPos(pos + "px");
+            this.container.css(this.gridTemplateName, v.values.join(" "));
             this.docked = false;
+            this.storage.docked = false;
             if (skipEventEmit) {
                 return;
             }
@@ -117,15 +157,6 @@ define(["require", "exports", "app/_sys/storage"], function (require, exports, s
         }
         getValues() {
             return this.container.css(this.gridTemplateName).split(" ");
-        }
-        setNewPositionAndGetValues(newPosition) {
-            const values = this.getValues();
-            const prev = Number(values[this.resizeIdx].replace("px", ""));
-            if (newPosition) {
-                values[this.resizeIdx] = newPosition;
-                values[this.autoIdx] = "auto";
-            }
-            return [values, prev];
         }
     }
     class VerticalSplitter extends Splitter {
@@ -135,6 +166,22 @@ define(["require", "exports", "app/_sys/storage"], function (require, exports, s
             this.mouseEventPositionProperty = "clientX";
             this.gridTemplateName = "grid-template-columns";
             this.adjust();
+        }
+        start() {
+            super.start();
+            if (this.maxResizeDelta) {
+                let last = window.innerWidth;
+                window.on("resize", () => {
+                    if (this.isDocked) {
+                        return;
+                    }
+                    let v = this.getValuesOrSetNewPos(), w = window.innerWidth, delta = w - last;
+                    last = w;
+                    if (w - v.previousPosition < this.maxResizeDelta) {
+                        this.move(delta, v);
+                    }
+                });
+            }
         }
         calculatePosition(currentPos, e) {
             return currentPos + this.offset;
@@ -159,6 +206,9 @@ define(["require", "exports", "app/_sys/storage"], function (require, exports, s
             this.mouseEventPositionProperty = "clientY";
             this.gridTemplateName = "grid-template-rows";
             this.adjust();
+        }
+        start() {
+            super.start();
         }
         calculatePosition(currentPos, e) {
             return this.offset[1] + (this.offset[0] - this.getPositionFromMouseEvent(e));
