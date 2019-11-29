@@ -96,7 +96,7 @@ abstract class Splitter {
             })
             .on("dblclick", () => {
                 if (this.isDocked) {
-                    this.undock();
+                    this.undockInternal();
                 } else {
                     this.dock();
                 }
@@ -141,7 +141,7 @@ abstract class Splitter {
                     }
                 } else {
                     if (this.docked) {
-                        this.undock(false, this.min);
+                        this.undockInternal(false, this.min);
                         return false;
                     }
                 }
@@ -156,7 +156,46 @@ abstract class Splitter {
         return this.docked;
     }
 
-    public move(delta: number, values: INewPositionResult) {
+    public dock(skipEventEmit=false): void {
+        const v = this.getValuesOrSetNewPos(this.dockPosition + "px");
+        this.storage.position = v.previousPosition;
+        this.container.css(this.gridTemplateName, v.values.join(" "));
+        this.docked = true;
+        this.storage.docked = true;
+        this.element.removeClass("split-moving");
+        
+        if (skipEventEmit) {
+            return
+        }
+        this.events.docked();
+    }
+
+    public undock(skipEventEmit=false): void {
+        this.undockInternal(skipEventEmit, this.storage.position);
+    }
+
+    protected undockInternal(skipEventEmit=false, pos=this.maxDelta): void {
+        if (!this.docked) {
+            return;
+        }
+        if (pos === undefined) {
+            pos = this.storage.position;
+        }
+        if (this.storage.position >= pos) {
+            pos = this.storage.position;
+        }
+
+        const v = this.getValuesOrSetNewPos(pos + "px");
+        this.container.css(this.gridTemplateName, v.values.join(" "));
+        this.docked = false;
+        this.storage.docked = false;
+        if (skipEventEmit) {
+            return
+        }
+        this.events.undocked();
+    }
+
+    protected move(delta: number, values: INewPositionResult) {
         values = values || this.getValuesOrSetNewPos();
         if (values.previousPosition <= this.min) {
             return false;
@@ -194,41 +233,6 @@ abstract class Splitter {
             values[this.autoIdx] = "auto";
         }
         return {values, previousPosition};
-    }
-
-    private dock(skipEventEmit=false): void {
-        const v = this.getValuesOrSetNewPos(this.dockPosition + "px");
-        this.storage.position = v.previousPosition;
-        this.container.css(this.gridTemplateName, v.values.join(" "));
-        this.docked = true;
-        this.storage.docked = true;
-        this.element.removeClass("split-moving");
-        
-        if (skipEventEmit) {
-            return
-        }
-        this.events.docked();
-    }
-
-    private undock(skipEventEmit=false, pos=this.maxDelta): void {
-        if (!this.docked) {
-            return;
-        }
-        if (pos === undefined) {
-            pos = this.storage.position;
-        }
-        if (this.storage.position >= pos) {
-            pos = this.storage.position;
-        }
-
-        const v = this.getValuesOrSetNewPos(pos + "px");
-        this.container.css(this.gridTemplateName, v.values.join(" "));
-        this.docked = false;
-        this.storage.docked = false;
-        if (skipEventEmit) {
-            return
-        }
-        this.events.undocked();
     }
 
     private getValues(): string[] {

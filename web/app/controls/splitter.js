@@ -31,7 +31,7 @@ define(["require", "exports", "app/_sys/storage"], function (require, exports, s
             })
                 .on("dblclick", () => {
                 if (this.isDocked) {
-                    this.undock();
+                    this.undockInternal();
                 }
                 else {
                     this.dock();
@@ -75,7 +75,7 @@ define(["require", "exports", "app/_sys/storage"], function (require, exports, s
                 }
                 else {
                     if (this.docked) {
-                        this.undock(false, this.min);
+                        this.undockInternal(false, this.min);
                         return false;
                     }
                 }
@@ -87,6 +87,40 @@ define(["require", "exports", "app/_sys/storage"], function (require, exports, s
         }
         get isDocked() {
             return this.docked;
+        }
+        dock(skipEventEmit = false) {
+            const v = this.getValuesOrSetNewPos(this.dockPosition + "px");
+            this.storage.position = v.previousPosition;
+            this.container.css(this.gridTemplateName, v.values.join(" "));
+            this.docked = true;
+            this.storage.docked = true;
+            this.element.removeClass("split-moving");
+            if (skipEventEmit) {
+                return;
+            }
+            this.events.docked();
+        }
+        undock(skipEventEmit = false) {
+            this.undockInternal(skipEventEmit, this.storage.position);
+        }
+        undockInternal(skipEventEmit = false, pos = this.maxDelta) {
+            if (!this.docked) {
+                return;
+            }
+            if (pos === undefined) {
+                pos = this.storage.position;
+            }
+            if (this.storage.position >= pos) {
+                pos = this.storage.position;
+            }
+            const v = this.getValuesOrSetNewPos(pos + "px");
+            this.container.css(this.gridTemplateName, v.values.join(" "));
+            this.docked = false;
+            this.storage.docked = false;
+            if (skipEventEmit) {
+                return;
+            }
+            this.events.undocked();
         }
         move(delta, values) {
             values = values || this.getValuesOrSetNewPos();
@@ -123,37 +157,6 @@ define(["require", "exports", "app/_sys/storage"], function (require, exports, s
                 values[this.autoIdx] = "auto";
             }
             return { values, previousPosition };
-        }
-        dock(skipEventEmit = false) {
-            const v = this.getValuesOrSetNewPos(this.dockPosition + "px");
-            this.storage.position = v.previousPosition;
-            this.container.css(this.gridTemplateName, v.values.join(" "));
-            this.docked = true;
-            this.storage.docked = true;
-            this.element.removeClass("split-moving");
-            if (skipEventEmit) {
-                return;
-            }
-            this.events.docked();
-        }
-        undock(skipEventEmit = false, pos = this.maxDelta) {
-            if (!this.docked) {
-                return;
-            }
-            if (pos === undefined) {
-                pos = this.storage.position;
-            }
-            if (this.storage.position >= pos) {
-                pos = this.storage.position;
-            }
-            const v = this.getValuesOrSetNewPos(pos + "px");
-            this.container.css(this.gridTemplateName, v.values.join(" "));
-            this.docked = false;
-            this.storage.docked = false;
-            if (skipEventEmit) {
-                return;
-            }
-            this.events.undocked();
         }
         getValues() {
             return this.container.css(this.gridTemplateName).split(" ");

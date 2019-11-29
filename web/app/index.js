@@ -1,4 +1,4 @@
-define(["require", "exports", "app/_sys/storage", "app/ui/toolbar/toolbar", "app/ui/side-panel/side-panel", "app/ui/main-panel/main-panel", "app/ui/footer/footer", "app/controls/splitter"], function (require, exports, storage_1, toolbar_1, side_panel_1, main_panel_1, footer_1, splitter_1) {
+define(["require", "exports", "app/_sys/storage", "app/ui/toolbar/toolbar", "app/ui/side-panel/side-panel", "app/ui/main-panel/main-panel", "app/ui/footer/footer"], function (require, exports, storage_1, toolbar_1, side_panel_1, main_panel_1, footer_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var Positions;
@@ -13,7 +13,12 @@ define(["require", "exports", "app/_sys/storage", "app/ui/toolbar/toolbar", "app
         Themes["light"] = "light";
     })(Themes || (Themes = {}));
     ;
-    const storage = new storage_1.default({ toolbarPos: Positions.left, sidePanelPos: Positions.left, sidePanelWidth: "250", theme: Themes.dark }, "main");
+    const storage = new storage_1.default({
+        toolbarPos: Positions.left,
+        sidePanelPos: Positions.left,
+        sidePanelWidth: "250",
+        theme: Themes.dark
+    }, "main");
     const getGridTemplateData = () => {
         let tpl = storage.toolbarPos === Positions.left, spl = storage.sidePanelPos === Positions.left, spw = storage.sidePanelWidth;
         if (tpl && spl) {
@@ -47,22 +52,8 @@ define(["require", "exports", "app/_sys/storage", "app/ui/toolbar/toolbar", "app
     container.css("grid-template-areas", `'${areas}' 'footer footer footer footer`);
     container.css("grid-template-columns", columns);
     new toolbar_1.default(container.children[0]);
-    new side_panel_1.default(container.children[1]);
+    new side_panel_1.default(container.children[1], container.children[2], container);
     new main_panel_1.default(container.children[3]);
     new footer_1.default(container.children[4]);
-    const splitter = new splitter_1.VerticalSplitter({
-        name: "v-splitter",
-        element: container.children[2],
-        container: container,
-        resizeIdx: 1,
-        autoIdx: 3,
-        maxResizeDelta: 100,
-        events: {
-            docked: () => { },
-            undocked: () => { },
-            changed: () => { },
-        }
-    });
-    splitter.start();
 });
 //# sourceMappingURL=index.js.map

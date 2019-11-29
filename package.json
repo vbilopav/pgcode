@@ -15,5 +15,8 @@
     "run-build": "cd _build && http-server -o",
     "build-web": "node .\\_tools\\build.js",
     "build-app-exe": ".\\_tools\\build-exe.bat"
+  },
+  "dependencies": {
+    "node-sass": "^4.13.0"
   }
 }

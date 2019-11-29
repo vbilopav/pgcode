@@ -3,8 +3,6 @@ import Toolbar from "app/ui/toolbar/toolbar";
 import SidePanel from "app/ui/side-panel/side-panel";
 import MainPanel from "app/ui/main-panel/main-panel";
 import Footer from "app/ui/footer/footer";
-import {VerticalSplitter, SplitterCtorArgs} from "app/controls/splitter";
-
 
 enum Positions { left = "left", right = "right" };
 enum Themes { dark = "dark", light = "light" };
@@ -17,9 +15,13 @@ interface IStorage {
 }
 
 const storage = new Storage(
-    {toolbarPos: Positions.left, sidePanelPos: Positions.left, sidePanelWidth: "250", theme: Themes.dark}, 
-    "main"
-) as any as IStorage;
+    {   
+        toolbarPos: Positions.left, 
+        sidePanelPos: Positions.left, 
+        sidePanelWidth: "250", 
+        theme: Themes.dark
+    }, 
+    "main") as any as IStorage;
 
 const getGridTemplateData: () => [string, string] = () => {
     let 
@@ -65,37 +67,6 @@ container.css("grid-template-areas", `'${areas}' 'footer footer footer footer`);
 container.css("grid-template-columns", columns);
 
 new Toolbar(container.children[0]);
-new SidePanel(container.children[1]);
+new SidePanel(container.children[1], container.children[2], container);
 new MainPanel(container.children[3]);
 new Footer(container.children[4]);
-
-const splitter = new VerticalSplitter({
-    name: "v-splitter",
-    element: container.children[2],
-    container: container,
-    resizeIdx: 1,
-    autoIdx: 3,
-    maxResizeDelta: 100,
-    events: {
-        docked: () => {}, //_app.pub("sidebar/docked", splitter),
-        undocked: () => {}, //_app.pub("sidebar/undocked", splitter),
-        changed: () => {}, //_app.pub("sidebar/changed", splitter)
-    }
-} as SplitterCtorArgs);
-
-splitter.start();
-
-/*
-window.on("resize", () => {
-    if (splitter.isDocked) {
-        return;
-    }
-    let v = splitter.getValues(),
-        w = window.innerWidth,
-        delta = w - last;
-        last = w;
-    if (w - v.prev < 100) {
-        splitter.move(delta, v);
-    }
-});
-*/

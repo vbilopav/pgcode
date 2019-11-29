@@ -66,5 +66,9 @@ define(["require", "exports"], function (require, exports) {
     exports.STATE_CHANGED_FUNCS = STATE_CHANGED_FUNCS;
     const STATE_CHANGED_SEARCH = "state/changed/search";
     exports.STATE_CHANGED_SEARCH = STATE_CHANGED_SEARCH;
+    const SIDEBAR_DOCKED = "sidebar/docked/";
+    exports.SIDEBAR_DOCKED = SIDEBAR_DOCKED;
+    const SIDEBAR_UNDOCKED = "sidebar/undocked/";
+    exports.SIDEBAR_UNDOCKED = SIDEBAR_UNDOCKED;
 });
 //# sourceMappingURL=pubsub.js.map

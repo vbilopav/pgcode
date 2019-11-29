@@ -8,11 +8,11 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub"], function (
     })(ButtonRoles || (ButtonRoles = {}));
     ;
     const isInRole = (e, role) => e.dataAttr("role") === role;
-    const active = "active";
+    const active = "active", docked = "docked";
     const storage = new storage_1.default({ docs: false, tables: false, views: false, funcs: false, search: false, terminal: false }, "state", (name, value) => JSON.parse(value));
     class default_1 {
         constructor(element) {
-            element.addClass("toolbar").html(String.html `
+            this.toolbar = element.addClass("toolbar").html(String.html `
             <div class="select-schema" id="schema-menu">
                 public
             </div>
@@ -46,38 +46,44 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub"], function (
                 const key = e.dataAttr("key");
                 this.setButtonState(e, storage[key], key);
             }
+            pubsub_1.subscribe(pubsub_1.SIDEBAR_DOCKED, () => this.toolbar.addClass(docked));
+            pubsub_1.subscribe(pubsub_1.SIDEBAR_UNDOCKED, () => this.toolbar.removeClass(docked));
         }
         setButtonState(e, state, key) {
             if (e.hasClass(active) && !state) {
                 e.removeClass(active);
-                setTimeout(() => pubsub_1.publish([pubsub_1.STATE_CHANGED_OFF, pubsub_1.STATE_CHANGED, pubsub_1.STATE_CHANGED + key], key, false), 0);
+                setTimeout(() => pubsub_1.publish(pubsub_1.STATE_CHANGED + key, key, false), 0);
             }
             else if (!e.hasClass(active) && state) {
                 e.addClass(active);
-                setTimeout(() => pubsub_1.publish([pubsub_1.STATE_CHANGED_ON, pubsub_1.STATE_CHANGED, pubsub_1.STATE_CHANGED + key], key, true), 0);
+                setTimeout(() => pubsub_1.publish(pubsub_1.STATE_CHANGED + key, key, true), 0);
             }
         }
         buttonClicked(e) {
             const key = e.dataAttr("key");
-            if (e.dataAttr("role") === undefined) {
-                return;
-            }
-            const toggle = () => {
-                if (e.hasClass(active)) {
+            const toggle = (state) => {
+                if (state === undefined) {
+                    state = e.hasClass(active);
+                }
+                if (state) {
                     e.removeClass(active);
                     storage[key] = false;
-                    pubsub_1.publish([pubsub_1.STATE_CHANGED_OFF, pubsub_1.STATE_CHANGED, pubsub_1.STATE_CHANGED + key], key, false);
+                    pubsub_1.publish(pubsub_1.STATE_CHANGED + key, key, false);
                 }
                 else {
                     e.addClass(active);
                     storage[key] = true;
-                    pubsub_1.publish([pubsub_1.STATE_CHANGED_ON, pubsub_1.STATE_CHANGED, pubsub_1.STATE_CHANGED + key], key, true);
+                    pubsub_1.publish(pubsub_1.STATE_CHANGED + key, key, true);
                 }
             };
+            if (e.dataAttr("role") === undefined) {
+                return;
+            }
             if (isInRole(e, ButtonRoles.toggle)) {
                 toggle();
             }
             else {
+                const isDocked = this.toolbar.hasClass(docked);
                 for (let btn of this.buttons) {
                     if (isInRole(btn, ButtonRoles.switch) && e.id !== btn.id) {
                         const key = btn.dataAttr("key");
@@ -86,11 +92,20 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub"], function (
                         }
                         if (btn.hasClass(active)) {
                             btn.removeClass("active");
-                            pubsub_1.publish([pubsub_1.STATE_CHANGED_OFF, pubsub_1.STATE_CHANGED, pubsub_1.STATE_CHANGED + key], key, false);
+                            pubsub_1.publish(pubsub_1.STATE_CHANGED + key, key, false);
                         }
                     }
                 }
-                toggle();
+                if (isDocked) {
+                    toggle(false);
+                    pubsub_1.publish(pubsub_1.STATE_CHANGED_ON);
+                }
+                else {
+                    toggle();
+                    if (!e.hasClass(active)) {
+                        pubsub_1.publish(pubsub_1.STATE_CHANGED_OFF);
+                    }
+                }
             }
         }
     }

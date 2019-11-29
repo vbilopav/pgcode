@@ -18,6 +18,9 @@
     & > div.active, & > div.active > div {
         color: $active-color;
     }
+    & > div.active > div.marker {
+        display: block;
+    }
     & > div > div.lbl {
         font-size: 9px;
     }
@@ -30,13 +33,9 @@
         display: none;/*block;*/
         position: absolute;
     }
-    & > div.active > div.marker {
-        display: block;
-    }
     & > div:hover {
         color: $active-color;
     }
-
     & > div.select-schema {
         grid-area: schema;
         font-size: 10px;
@@ -73,3 +72,12 @@
         font-size: 28px;
     }
 }
+
+.toolbar.docked {
+    & > div.active, & > div.active > div {
+        color: $control-color;
+    }
+    & > div.active > div.marker {
+        display: none;
+    }
+} 
