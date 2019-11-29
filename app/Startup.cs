@@ -1,12 +1,6 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Resources;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -29,7 +23,25 @@ namespace pgcode
             }
 
             app.UseRouting();
+#if DEBUG
+            var parts = Directory.GetCurrentDirectory().Split(Path.DirectorySeparatorChar);
+            parts[^1] = "web";
+            var path = string.Join(Path.DirectorySeparatorChar.ToString(), parts);
+            var fileProvider = new PhysicalFileProvider(path);
+            DefaultFilesOptions options = new DefaultFilesOptions();
+            options.DefaultFileNames.Clear();
+            options.FileProvider = fileProvider;
+            options.DefaultFileNames.Add("index.html");
+            app.UseDefaultFiles(options);
+
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                FileProvider = fileProvider,
+                RequestPath = new PathString("")
+            });
+#else
             app.UseResourceMiddleware();
+#endif
         }
     }
 }
