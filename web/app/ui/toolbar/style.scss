@@ -4,8 +4,8 @@
     background-color: $control-background-color;
     height: 100%;
     display: grid;
-    grid-template-rows: 0px 14px 42px 42px 42px 42px 42px auto 42px 4px;
-    grid-template-areas: 'gap1' 'schema' 'docs' 'tables' 'views' 'funcs' 'search' 'gap2' 'pgcode' 'gap3';
+    grid-template-rows: 4px 42px 42px 42px 42px 42px auto 42px 4px;
+    grid-template-areas: 'gap1' 'docs' 'tables' 'views' 'funcs' 'search' 'gap2' 'pgcode' 'gap3';
     row-gap: 12px;
     user-select: none;
 
@@ -35,17 +35,6 @@
     }
     & > div:hover {
         color: $active-color;
-    }
-    & > div.select-schema {
-        grid-area: schema;
-        font-size: 10px;
-        overflow: hidden;
-        white-space: nowrap;
-        text-overflow: ellipsis;
-        padding-left: 2px;
-        background-color: $panel-background-color;
-        height: 100%;
-        line-height: 14px;
     }
     & > div.btn-docs {
         grid-area: docs;

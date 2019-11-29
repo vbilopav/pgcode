@@ -13,9 +13,6 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub"], function (
     class default_1 {
         constructor(element) {
             this.toolbar = element.addClass("toolbar").html(String.html `
-            <div class="select-schema" id="schema-menu">
-                public
-            </div>
             <div class="icon-doc-text btn-docs" id="btn-docs" data-key="docs" data-role="${ButtonRoles.switch}">
                 <div class="marker"></div>
                 <div class="lbl">scripts</div>
@@ -76,9 +73,6 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub"], function (
                     pubsub_1.publish(pubsub_1.STATE_CHANGED + key, key, true);
                 }
             };
-            if (e.dataAttr("role") === undefined) {
-                return;
-            }
             if (isInRole(e, ButtonRoles.toggle)) {
                 toggle();
             }

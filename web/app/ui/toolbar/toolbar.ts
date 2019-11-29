@@ -32,9 +32,6 @@ export default class  {
 
     constructor(element: Element){
         this.toolbar = element.addClass("toolbar").html(String.html`
-            <div class="select-schema" id="schema-menu">
-                public
-            </div>
             <div class="icon-doc-text btn-docs" id="btn-docs" data-key="docs" data-role="${ButtonRoles.switch}">
                 <div class="marker"></div>
                 <div class="lbl">scripts</div>
@@ -98,11 +95,6 @@ export default class  {
                 publish(STATE_CHANGED + key, key, true);
             }
         };
-
-        if (e.dataAttr("role") === undefined) {
-            // open schema menu
-            return;
-        }
 
         if (isInRole(e, ButtonRoles.toggle)) {
             toggle();
