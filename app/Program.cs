@@ -21,10 +21,6 @@ namespace pgcode
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
-                    //var parts = Directory.GetCurrentDirectory().Split(Path.DirectorySeparatorChar);
-                    //parts[^1] = "web";
-                    //var path = string.Join(Path.DirectorySeparatorChar.ToString(), parts);
-                    //webBuilder.UseWebRoot(path);
                     webBuilder.UseStartup<Startup>();
                 });
     }
