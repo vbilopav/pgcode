@@ -1,8 +1,8 @@
 define(["require", "exports", "app/_sys/storage"], function (require, exports, storage_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    const defaultStorage = { position: null, docked: true };
     const createStorage = () => new storage_1.default(defaultStorage, name, (name, value) => name == "docked" ? JSON.parse(value) : value);
-    const defaultStorage = { position: null, docked: false };
     class Splitter {
         constructor({ name, element, container, dockPosition = 0, resizeIdx, autoIdx, maxDelta = 250, min = 150, events = { docked: (() => { }), undocked: (() => { }), changed: (() => { }) }, maxResizeDelta }) {
             this.element = element || (() => { throw new Error("element is required"); })();
@@ -25,9 +25,12 @@ define(["require", "exports", "app/_sys/storage"], function (require, exports, s
                 this.offset = this.calculateOffset(e);
                 document.body.css("cursor", this.element.css("cursor"));
                 this.element.addClass("split-moving");
+                let v = this.getValuesOrSetNewPos(this.storage.position + "px");
+                this.startingPosition = v.previousPosition;
             })
                 .on("mouseup", () => {
                 this.element.removeClass("split-moving");
+                this.startingPosition = null;
             })
                 .on("dblclick", () => {
                 if (this.isDocked) {
@@ -90,7 +93,7 @@ define(["require", "exports", "app/_sys/storage"], function (require, exports, s
         }
         dock(skipEventEmit = false) {
             const v = this.getValuesOrSetNewPos(this.dockPosition + "px");
-            this.storage.position = v.previousPosition;
+            this.storage.position = this.startingPosition ? this.startingPosition : v.previousPosition;
             this.container.css(this.gridTemplateName, v.values.join(" "));
             this.docked = true;
             this.storage.docked = true;

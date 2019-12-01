@@ -29,8 +29,8 @@ interface IStorage {
     docked: boolean
 }
 
+const defaultStorage: IStorage = {position: null, docked: true};
 const createStorage = () => new Storage(defaultStorage, name, (name, value) => name == "docked" ? JSON.parse(value) as boolean : value) as any as IStorage;
-const defaultStorage: IStorage = {position: null, docked: false};
 
 abstract class Splitter {
     private container: Element;
@@ -43,6 +43,7 @@ abstract class Splitter {
     private autoIdx: number;
     private maxDelta: number;
     private min: number;
+    private startingPosition: number;
 
     protected element: Element;
     protected offset: number | [number, number];
@@ -90,9 +91,12 @@ abstract class Splitter {
                 this.offset = this.calculateOffset(e);
                 document.body.css("cursor", this.element.css("cursor") as string);
                 this.element.addClass("split-moving");
+                let v = this.getValuesOrSetNewPos(this.storage.position + "px");
+                this.startingPosition = v.previousPosition;
             })
             .on("mouseup", () => {
                 this.element.removeClass("split-moving");
+                this.startingPosition = null;
             })
             .on("dblclick", () => {
                 if (this.isDocked) {
@@ -158,12 +162,11 @@ abstract class Splitter {
 
     public dock(skipEventEmit=false): void {
         const v = this.getValuesOrSetNewPos(this.dockPosition + "px");
-        this.storage.position = v.previousPosition;
+        this.storage.position = this.startingPosition ? this.startingPosition : v.previousPosition;
         this.container.css(this.gridTemplateName, v.values.join(" "));
         this.docked = true;
         this.storage.docked = true;
         this.element.removeClass("split-moving");
-        
         if (skipEventEmit) {
             return
         }
