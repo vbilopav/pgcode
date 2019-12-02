@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace pgcode.Properties {
+namespace Pgcode.Properties {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace pgcode.Properties {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("pgcode.Properties.Resources", typeof(Resources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Pgcode.Properties.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -61,17 +61,7 @@ namespace pgcode.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to /*build: 2019-11-16 18:18:45:771, version: 1*/
-        ///(function(){&quot;use strict&quot;;const e=this;&quot;object&quot;==typeof global&amp;&amp;global;var t;!function(t){t.global=e;class i{constructor(){this._detected=!1,this._isWindows=!1,this._isWebWorker=!1}get isWindows(){return this._detect(),this._isWindows}get isWebWorker(){return this._detect(),this._isWebWorker}_detect(){this._detected||(this._detected=!0,this._isWindows=i._isWindows(),this._isWebWorker=&quot;function&quot;==typeof t.global.importScripts)}static _isWindows(){return!!(&quot;undefi [rest of string was truncated]&quot;;.
-        /// </summary>
-        internal static string _app_index_js {
-            get {
-                return ResourceManager.GetString("/app/index.js", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to html{font-family:&apos;Consolas&apos;, &apos;Courier New&apos;, &apos;monospace&apos;;font-size:12px;line-height:1.15}body{margin:0;color:#C5C5C5;background-color:#1E1E1E}#loading{position:absolute;left:0px;top:0px;width:100%;height:100%;justify-content:center;align-content:center;display:grid;font-size:10em;text-align:center}#app{position:absolute;left:0px;top:0px;width:100%;height:100%;z-index:-1;overflow:hidden;display:grid;grid-template-columns:50px 250px 3px auto;grid-template-rows:auto 20px;grid-template-areas:&apos;toolbar side-panel  [rest of string was truncated]&quot;;.
+        ///   Looks up a localized string similar to html{font-family:&apos;Consolas&apos;, &apos;Courier New&apos;, &apos;monospace&apos;;font-size:12px;line-height:1.15}body{margin:0;color:#C5C5C5;background-color:#1E1E1E}#loading{position:absolute;left:0px;top:0px;width:100%;height:100%;justify-content:center;align-content:center;display:grid;font-size:10em;text-align:center}@font-face{font-family:&apos;icons&apos;;src:url(&quot;../fonts/icons.woff2?57247429&quot;) format(&quot;woff2&quot;);font-weight:normal;font-style:normal}[class^=&quot;icon-&quot;]:before,[class*=&quot; icon-&quot;]:before{font-family:&quot;icons&quot;;font-style:normal;fo [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string _css_theme_dark_css {
             get {
@@ -80,7 +70,7 @@ namespace pgcode.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to html{font-family:&apos;Consolas&apos;, &apos;Courier New&apos;, &apos;monospace&apos;;font-size:12px;line-height:1.15}body{margin:0;color:#1E1E1E;background-color:#C5C5C5}#loading{position:absolute;left:0px;top:0px;width:100%;height:100%;justify-content:center;align-content:center;display:grid;font-size:10em;text-align:center}#app{position:absolute;left:0px;top:0px;width:100%;height:100%;z-index:-1;overflow:hidden;display:grid;grid-template-columns:50px 250px 3px auto;grid-template-rows:auto 20px;grid-template-areas:&apos;toolbar side-panel  [rest of string was truncated]&quot;;.
+        ///   Looks up a localized string similar to html{font-family:&apos;Consolas&apos;, &apos;Courier New&apos;, &apos;monospace&apos;;font-size:12px;line-height:1.15}body{margin:0;color:#1E1E1E;background-color:#C5C5C5}#loading{position:absolute;left:0px;top:0px;width:100%;height:100%;justify-content:center;align-content:center;display:grid;font-size:10em;text-align:center}@font-face{font-family:&apos;icons&apos;;src:url(&quot;../fonts/icons.woff2?57247429&quot;) format(&quot;woff2&quot;);font-weight:normal;font-style:normal}[class^=&quot;icon-&quot;]:before,[class*=&quot; icon-&quot;]:before{font-family:&quot;icons&quot;;font-style:normal;fo [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string _css_theme_light_css {
             get {
@@ -122,11 +112,23 @@ namespace pgcode.Properties {
         ///        &amp;#8987;
         ///        &lt;script&gt;
         ///            setTimeout(function() { var e = document.getElementById(&quot;loading&quot;); if (e) e.innerHTML = &quot;Please update to modern browser!&quot;; }, 3000);
-        ///            window.require = {paths: {&apos;vs&apos;:  [rest of string was truncated]&quot;;.
+        ///        &lt;/script&gt;
+        ///    &lt;/div&gt;
+        ///    &lt;script t [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string _index_html {
             get {
                 return ResourceManager.GetString("/index.html", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to /*build: 2019-12-01 15:56:09:829, version: 0.1, copyright VB-Consulting*/
+        ///(function(){&quot;use strict&quot;;const e=this;&quot;object&quot;==typeof global&amp;&amp;global;var t;!function(t){t.global=e;class i{constructor(){this._detected=!1,this._isWindows=!1,this._isWebWorker=!1}get isWindows(){return this._detect(),this._isWindows}get isWebWorker(){return this._detect(),this._isWebWorker}_detect(){this._detected||(this._detected=!0,this._isWindows=i._isWindows(),this._isWebWorker=&quot;function&quot;==typeof t.global.importScripts)}static _i [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string _js_index_js {
+            get {
+                return ResourceManager.GetString("/js/index.js", resourceCulture);
             }
         }
         

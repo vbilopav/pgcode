@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Primitives;
 
-namespace pgcode
+namespace Pgcode
 {
     public static class ResourceMiddleware
     {
