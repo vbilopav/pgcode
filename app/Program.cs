@@ -16,12 +16,6 @@ using Microsoft.Extensions.Logging;
 
 namespace Pgcode
 {
-    public class Config
-    {
-        public int Port { get; set; } = 5000;
-        public string Address { get; set; } = "localhost";
-    }
-
     public static class Program
     { 
 #if DEBUG
@@ -30,7 +24,7 @@ namespace Pgcode
         public const bool IsDebug = false;
 #endif
         public static IWebHostEnvironment Environment { get; private set; }
-        public static Config Config { get; private set; }
+        public static Settings Settings { get; private set; }
 
         public static async Task Main(string[] args)
         {
@@ -53,11 +47,13 @@ namespace Pgcode
                 .AddCommandLine(args)
                 .AddEnvironmentVariables("PGCODE_");
 
-            Config = new Config();
-            configBuilder.Build().Bind(Config);
+            Settings = new Settings();
+            var config = configBuilder.Build();
+            //config.GetConnectionString()
+            config.Bind(Settings);
 
             builder
-                .UseSetting("URLS", $"http://{Config.Address}:{Config.Port}")
+                .UseSetting("URLS", $"http://{Settings.Address}:{Settings.Port}")
                 .ConfigureAppConfiguration((ctx, config) =>
                 {
                     var env = ctx.HostingEnvironment;
@@ -71,8 +67,9 @@ namespace Pgcode
                         Console.ResetColor();
                     }
                 })
-                .ConfigureLogging((ctx, logging) =>
-                    logging.AddConsole().AddFilter("Microsoft", LogLevel.Warning).AddFilter("System", LogLevel.Warning))
+                .ConfigureLogging((ctx, logging) => logging.AddConsole()
+                    .AddFilter("Microsoft", LogLevel.Information).AddFilter("System", LogLevel.Information)
+                    .AddFilter("Microsoft", LogLevel.Warning).AddFilter("System", LogLevel.Warning))
                 .UseKestrel()
                 .ConfigureServices((ctx, services) => services.AddRouting())
                 .SuppressStatusMessages(true)
@@ -80,7 +77,6 @@ namespace Pgcode
                 .UseStartup<Startup>();
 
             var host = builder.Build();
-            //var config = host.Services.GetRequiredService<IConfiguration>();
 
             var url = PrintAvailableUrlsFromHost(host);
             if (url == null)
@@ -112,6 +108,11 @@ namespace Pgcode
             Console.ResetColor();
             Console.WriteLine("        Address to use [localhost]");
 
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.Write("  --connection=[connection]");
+            Console.ResetColor();
+            Console.WriteLine("  Connection name to use in this instance");
+
             Console.WriteLine("");
             Console.WriteLine("Additional options:");
 
@@ -127,7 +128,9 @@ namespace Pgcode
 
             Console.WriteLine("");
             Console.ForegroundColor = ConsoleColor.Gray;
-            Console.WriteLine("Note: key/values above can be set in appsettings.json file in root folder. Also, as environment variables with PGCODE_ prefix.");
+            Console.WriteLine("Note: ");
+
+            Console.WriteLine("Key/values above can be set in appsettings.json file in root folder. Also, as environment variables with PGCODE_ prefix.");
             Console.WriteLine("For multiple configuration sources, order of precedence is: 1) environment variables 2) command line arguments 3) configuration file.");
             Console.WriteLine("");
             Console.ResetColor();
@@ -181,7 +184,10 @@ namespace Pgcode
 
     public class Startup
     {
-        public void ConfigureServices(IServiceCollection services) { }
+        public void ConfigureServices(IServiceCollection services)
+        {
+            Services.Configure(services);
+        }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
