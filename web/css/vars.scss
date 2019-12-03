@@ -98,3 +98,15 @@ $active-color: default;
 @if $theme == "light" {
     $active-color: #252526;
 }
+
+
+//
+// SCROLL BAR COLOR
+//
+$scroll-color: default;
+@if $theme == "dark" {
+    $scroll-color: #7a7a7a;
+} 
+@if $theme == "light" {
+    $scroll-color: #252526;
+}
