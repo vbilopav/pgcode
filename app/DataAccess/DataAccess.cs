@@ -7,7 +7,7 @@ using Pgcode.DataAccess.Extensions;
 
 namespace Pgcode.DataAccess
 {
-    public partial class DataAccess : IDisposable, IDataAccess
+    public partial class DataAccess : IDisposable//, IDataAccess
     {
         private enum DbType
         {
@@ -38,23 +38,23 @@ namespace Pgcode.DataAccess
             convertsDbNull = dbType != DbType.Ms;
         }
 
-        public IDataAccess As(CommandType type)
+        public DataAccess As(CommandType type)
         {
             commandType = type;
             return this;
         }
 
-        public IDataAccess AsProcedure() => As(CommandType.StoredProcedure);
+        public DataAccess AsProcedure() => As(CommandType.StoredProcedure);
 
-        public IDataAccess AsText() => As(CommandType.Text);
+        public DataAccess AsText() => As(CommandType.Text);
 
-        public IDataAccess Timeout(int? timeout)
+        public DataAccess Timeout(int? timeout)
         {
             commandTimeout = timeout;
             return this;
         }
 
-        public IDataAccess WithJsonOptions(JsonSerializerOptions options)
+        public DataAccess WithJsonOptions(JsonSerializerOptions options)
         {
             this.jsonOptions = options;
             return this;

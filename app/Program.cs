@@ -19,16 +19,16 @@ namespace Pgcode
     public static class Program
     { 
 #if DEBUG
-        public const bool IsDebug = true;
+        public static bool IsDebug { get; set; } = true;
 #else
-        public const bool IsDebug = false;
+        public static bool IsDebug { get; set; } = false;
 #endif
-        public static IWebHostEnvironment Environment { get; private set; }
-        public static Settings Settings { get; private set; }
+        public static IWebHostEnvironment Environment { get; set; }
+        public static Settings Settings { get; set; }
 
         public static async Task Main(string[] args)
         {
-            if (args.Contains("-h") || args.Contains("--help"))
+            if (ArgsInclude(args, "-h", "--help"))
             {
                 PrintHelp();
                 return;
@@ -56,17 +56,14 @@ namespace Pgcode
 
             builder
                 .UseSetting("URLS", url)
-                .ConfigureAppConfiguration((ctx, config) =>
+                .ConfigureAppConfiguration((ctx, appConfigBuilder) =>
                 {
                     var env = ctx.HostingEnvironment;
                     env.EnvironmentName = IsDebug ? "Development" : "Production";
                     Environment = env;
-                    if (env.IsDevelopment())
+                    foreach (var source in configBuilder.Sources)
                     {
-                        config.AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true, reloadOnChange: false);
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine("Development build, serving from: {0}", DevelopmentMiddleware.DevelopmentPath);
-                        Console.ResetColor();
+                        appConfigBuilder.Add(source);
                     }
                 })
                 .ConfigureLogging((ctx, logging) => logging.AddConsole()
@@ -80,20 +77,28 @@ namespace Pgcode
 
             var host = builder.Build();
 
+            if (Environment.IsDevelopment())
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("Development build, serving from: {0}", DevelopmentMiddleware.DevelopmentPath);
+                Console.ResetColor();
+            }
+
             if (!PrintAvailableUrlsFromHost(host))
             {
                 return;
             }
 
             Console.WriteLine("Hit CTRL-C to stop the server");
-            if (args.Contains("-o") || args.Contains("--open") || Environment.IsDevelopment())
+
+            if (ArgsInclude(args, "-o", "--open") || Environment.IsDevelopment())
             {
                 OpenDefaultBrowser(url);
             }
             await host.RunAsync();
         }
 
-        public static void PrintHelp()
+        private static void PrintHelp()
         {
             Console.WriteLine("");
             Console.WriteLine("Usage: pgcode [options]");
@@ -135,14 +140,14 @@ namespace Pgcode
             Console.ResetColor();
         }
 
-        public static void PrintStartMessages()
+        private static void PrintStartMessages()
         {
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine("Starting up pgcode ...");
             Console.ResetColor();
         }
 
-        public static bool PrintAvailableUrlsFromHost(IWebHost host)
+        private static bool PrintAvailableUrlsFromHost(IWebHost host)
         {
             var address = host.ServerFeatures.Get<IServerAddressesFeature>().Addresses.FirstOrDefault();
             if (address == null)
@@ -161,7 +166,7 @@ namespace Pgcode
             return true;
         }
 
-        public static void OpenDefaultBrowser(string url)
+        private static void OpenDefaultBrowser(string url)
         {
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine("Launching default browser...");
@@ -182,6 +187,25 @@ namespace Pgcode
                 Process.Start("open", url);
             }
         }
+
+        private static bool ArgsInclude(string[] args, params string[] values)
+        {
+            var lower = values.Select(v => v.ToLower()).ToList();
+            var upper = values.Select(v => v.ToUpper()).ToList();
+            foreach (var arg in args)
+            {
+                if (lower.Contains(arg))
+                {
+                    return true;
+                }
+                if (upper.Contains(arg))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
     }
 
     public class Startup
@@ -194,7 +218,7 @@ namespace Pgcode
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             app.UseRouting();
-
+            app.UseCookieMiddleware();
             if (env.IsDevelopment())
             {
                 app.UseDevelopmentMiddleware();

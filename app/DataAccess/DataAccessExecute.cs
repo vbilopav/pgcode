@@ -4,7 +4,7 @@ namespace Pgcode.DataAccess
 {
     public partial class DataAccess
     {
-        public IDataAccess Execute(string command)
+        public DataAccess Execute(string command)
         {
             using var cmd = Connection.CreateCommand();
             SetCommand(cmd, command);
@@ -13,7 +13,7 @@ namespace Pgcode.DataAccess
             return this;
         }
 
-        public IDataAccess Execute(string command, params object[] parameters)
+        public DataAccess Execute(string command, params object[] parameters)
         {
             using var cmd = Connection.CreateCommand();
             SetCommand(cmd, command);
@@ -22,7 +22,7 @@ namespace Pgcode.DataAccess
             return this;
         }
 
-        public IDataAccess Execute(string command, params (string name, object value)[] parameters)
+        public DataAccess Execute(string command, params (string name, object value)[] parameters)
         {
             using var cmd = Connection.CreateCommand();
             SetCommand(cmd, command);

@@ -5,7 +5,7 @@ namespace Pgcode.DataAccess
 {
     public partial class DataAccess
     {
-        public async ValueTask<IDataAccess> ExecuteAsync(string command)
+        public async ValueTask<DataAccess> ExecuteAsync(string command)
         {
             await using var cmd = Connection.CreateCommand();
             SetCommand(cmd, command);
@@ -14,7 +14,7 @@ namespace Pgcode.DataAccess
             return this;
         }
 
-        public async ValueTask<IDataAccess> ExecuteAsync(string command, params object[] parameters)
+        public async ValueTask<DataAccess> ExecuteAsync(string command, params object[] parameters)
         {
             await using var cmd = Connection.CreateCommand();
             SetCommand(cmd, command);
@@ -23,7 +23,7 @@ namespace Pgcode.DataAccess
             return this;
         }
 
-        public async ValueTask<IDataAccess> ExecuteAsync(string command, params (string name, object value)[] parameters)
+        public async ValueTask<DataAccess> ExecuteAsync(string command, params (string name, object value)[] parameters)
         {
             await using var cmd = Connection.CreateCommand();
             SetCommand(cmd, command);
