@@ -76,39 +76,6 @@ module.exports = {
         )
     },
 
-    copy: (obj, from, to, stripSourceMapping=false) => {
-        var toFile = module.exports.cleanPath(obj.full.replace(module.exports.cleanPath(from), module.exports.cleanPath(to)));
-        var toDir = toFile.replace(obj.file, "");
-        var from = obj.full;
-    
-        module.exports.mkDirByPathSync(toDir);
-
-        if (stripSourceMapping && obj.full.endsWith(".js")) {
-            console.log(`>>> copying ${from} to ${toFile} and removing sourceMappingURL...`);
-            let content = fs.readFileSync(from).toString();
-            let i = content.lastIndexOf("//# sourceMappingURL");
-            if (i === -1) {
-                fs.writeFileSync(toFile, content, "utf8");
-            } else {
-                let l = content.indexOf(".map", i);
-                content = content.slice(0, i) + content.slice(l + ".map".length, content.length);
-                fs.writeFileSync(toFile, content, "utf8");
-            }
-        } else {
-            console.log(`>>> copying ${from} to ${toFile}`);
-            fs.copyFileSync(from, toFile);
-        }
-    },
-
-    log: function() {
-        if (!arguments.length) {
-            console.log('');
-        } else {
-            let args = [module.exports.getTimeStamp()].concat(...arguments);
-            console.log(...args);
-        }
-    },
-
     isSameDir: (dir1, dir2) => dir1 === dir2 || dir1 + path.sep === dir2 || dir1 === dir2 + path.sep || dir1 + path.sep === dir2 + path.sep,
 
     getConfig: function(configName) {

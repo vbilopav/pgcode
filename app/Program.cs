@@ -52,8 +52,10 @@ namespace Pgcode
             //config.GetConnectionString()
             config.Bind(Settings);
 
+            var url = $"http://{Settings.Address}:{Settings.Port}";
+
             builder
-                .UseSetting("URLS", $"http://{Settings.Address}:{Settings.Port}")
+                .UseSetting("URLS", url)
                 .ConfigureAppConfiguration((ctx, config) =>
                 {
                     var env = ctx.HostingEnvironment;
@@ -78,14 +80,11 @@ namespace Pgcode
 
             var host = builder.Build();
 
-            var url = PrintAvailableUrlsFromHost(host);
-            if (url == null)
+            if (!PrintAvailableUrlsFromHost(host))
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("ERROR: listening port is not configured properly");
-                Console.ResetColor();
                 return;
             }
+
             Console.WriteLine("Hit CTRL-C to stop the server");
             if (args.Contains("-o") || args.Contains("--open") || Environment.IsDevelopment())
             {
@@ -143,22 +142,23 @@ namespace Pgcode
             Console.ResetColor();
         }
 
-        public static string PrintAvailableUrlsFromHost(IWebHost host)
+        public static bool PrintAvailableUrlsFromHost(IWebHost host)
         {
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine("Listening on: ");
-            string firstUrl = null;
-            foreach (var address in host.ServerFeatures.Get<IServerAddressesFeature>().Addresses)
+            var address = host.ServerFeatures.Get<IServerAddressesFeature>().Addresses.FirstOrDefault();
+            if (address == null)
             {
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine(" {0}", address);
-                if (firstUrl == null)
-                {
-                    firstUrl = address;
-                }
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("ERROR: listening port is not configured properly");
+                Console.ResetColor();
+                return false;
             }
+
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.Write("Listening on: ");
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine(address);
             Console.ResetColor();
-            return firstUrl;
+            return true;
         }
 
         public static void OpenDefaultBrowser(string url)
@@ -172,7 +172,9 @@ namespace Pgcode
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
+                //
                 // TODO: Unhandled exception. System.ComponentModel.Win32Exception (2): No such file or directory
+                //
                 Process.Start("xdg-open", url);
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))

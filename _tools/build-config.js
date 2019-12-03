@@ -1,7 +1,8 @@
 
 ({
-    version: "0.1",
-
+    version: "${(((1+Math.random())*0x10000)|0).toString(16).substring(1)}",
+    silent: true,
+    
     targetDir: "_build",
     sourceDir: "web",
 

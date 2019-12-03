@@ -14,7 +14,8 @@
     "run-dev": "cd web && http-server -o",
     "run-build": "cd _build && http-server -o",
     "build-web": "node .\\_tools\\build.js",
-    "build-app-exe": ".\\_tools\\build-exe.bat"
+    "build-all-exe": ".\\_tools\\build-exe.bat",
+    "build-win-exe-only": "dotnet clean app && dotnet publish -r win10-x64 -c Release /p:PublishSingleFile=true /p:PublishTrimmed=true -o __exe\\win10-x64 --nologo app"
   },
   "dependencies": {
     "node-sass": "^4.13.0"

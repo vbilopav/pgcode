@@ -9,7 +9,7 @@
         loaderUrl = "js/loader/loader.js",
         startModule = "js/_main",
         config = {
-            urlArgs: "",
+            urlArgs: "", //auto
             baseUrl: "",
             paths: {
                 "vs": "libs/monaco-editor/min/vs",

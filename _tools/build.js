@@ -2,9 +2,45 @@ const fs = require("fs");
 const path = require("path");
 const uglifyEs = require("uglify-es");
 const  minifyHtml = require('html-minifier').minify;
-const {walkSync, rmdirSync, copy, getConfig, log, mkDirByPathSync, cleanPath, isSameDir} = require("./utils");
+const {walkSync, rmdirSync, getConfig, mkDirByPathSync, cleanPath, isSameDir, getTimeStamp} = require("./utils");
 
 const config = getConfig("_tools/build-config.js");
+
+function log() {
+    if (config.silent) {
+        return;
+    }
+    if (!arguments.length) {
+        console.log('');
+    } else {
+        let args = [getTimeStamp()].concat(...arguments);
+        console.log(...args);
+    }
+}
+
+function copy(obj, from, to, stripSourceMapping=false) {
+    var toFile = cleanPath(obj.full.replace(cleanPath(from), cleanPath(to)));
+    var toDir = toFile.replace(obj.file, "");
+    var from = obj.full;
+
+    mkDirByPathSync(toDir);
+
+    if (stripSourceMapping && obj.full.endsWith(".js")) {
+        log(`>>> copying ${from} to ${toFile} and removing sourceMappingURL...`);
+        let content = fs.readFileSync(from).toString();
+        let i = content.lastIndexOf("//# sourceMappingURL");
+        if (i === -1) {
+            fs.writeFileSync(toFile, content, "utf8");
+        } else {
+            let l = content.indexOf(".map", i);
+            content = content.slice(0, i) + content.slice(l + ".map".length, content.length);
+            fs.writeFileSync(toFile, content, "utf8");
+        }
+    } else {
+        log(`>>> copying ${from} to ${toFile}`);
+        fs.copyFileSync(from, toFile);
+    }
+}
 
 function recreateTargetDir() {
     rmdirSync(config.targetDir);
@@ -52,13 +88,14 @@ function copyRootFiles() {
     var from = cleanPath(config.sourceDir + "/" + "index.html");
     var to = cleanPath(config.targetDir + "/" + "index.html");
     
-    console.log(`>>> copying ${from} to ${to}`);
-    fs.copyFileSync(from, to);
+    log(`>>> copying ${from} to ${to}`);
+    let content = fs.readFileSync(from).toString().replace("js/index.js", "js/index.js" + "?" + config.version);
+    fs.writeFileSync(to, content, "utf8");
 
     var from = cleanPath(config.sourceDir + "/" + "favicon.ico");
     var to = (config.targetDir + "/" + "favicon.ico");
     
-    console.log(`>>> copying ${from} to ${to}`);
+    log(`>>> copying ${from} to ${to}`);
     fs.copyFileSync(from, to);
 }
 
@@ -101,7 +138,12 @@ function minifyHtmlFromContent(content) {
 }
 
 function getContent(filename, options){
-    return options ? minify(fs.readFileSync(filename).toString(), options) : fs.readFileSync(filename).toString();
+    if (filename === config.entryPointFile) {
+        let content = fs.readFileSync(filename).toString().replace('urlArgs: "", //auto', 'urlArgs: "' + config.version + '",');
+        return options ? minify(content, options) : content;
+    } else {
+        return options ? minify(fs.readFileSync(filename).toString(), options) : fs.readFileSync(filename).toString();
+    }
 }
 
 function buildBundle() {
@@ -191,9 +233,13 @@ function buildBundle() {
     log();
 }
 
+var isSilent = config.silent;
+config.silent = false;
 console.log("");
-console.log("configuration:\n", config);
 log("STARTED");
+config.silent = isSilent;
+console.log("configuration:\n", config);
+console.log("");
 
 recreateTargetDir();
 copyCss();
@@ -202,3 +248,5 @@ copyFonts();
 copyRootFiles();
 buildBundle();
 
+config.silent = false;
+log("BUILD FINISHED");
