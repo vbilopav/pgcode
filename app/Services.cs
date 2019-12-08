@@ -10,7 +10,7 @@ namespace Pgcode
     {
         public static void Configure(IServiceCollection services)
         {
-
+            services.AddSingleton<ConnectionManager, ConnectionManager>();
         }
     }
 }

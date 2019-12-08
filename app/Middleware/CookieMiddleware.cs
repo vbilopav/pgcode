@@ -9,20 +9,20 @@ namespace Pgcode
 {
     public class CookieUserProfileModel
     {
-        public string User { get; set; } = Program.Settings.RunAsUser;
-        public string Schema { get; set; }
-        public string Connection { get; set; }
+        public string User { get; set; }
     }
 
     public static class CookieMiddleware
     {
         public const string CookieName = "pgcode";
+
         private static readonly JsonSerializerOptions JsonOptions = new JsonSerializerOptions
         {
             IgnoreNullValues = false,
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
             WriteIndented = false
         };
+
         private static readonly CookieOptions CookieOptions = new CookieOptions
         {
             IsEssential = true,
@@ -42,7 +42,7 @@ namespace Pgcode
                         cookieModel = JsonSerializer.Deserialize<CookieUserProfileModel>(value, JsonOptions);
 
                         //
-                        // TODO update current profile
+                        // TODO update current profile for a change
                         //
                     }
                     else
@@ -50,9 +50,13 @@ namespace Pgcode
                         cookieModel = new CookieUserProfileModel();
                         if (string.IsNullOrEmpty(cookieModel.User))
                         {
-                            cookieModel.User =
-                                $"{Guid.NewGuid().ToString().Substring(0, 8)}{DateTime.UtcNow.Millisecond}";
+                            cookieModel.User = $"{Guid.NewGuid().ToString().Substring(0, 8)}";
                         }
+                    }
+
+                    if (!string.IsNullOrEmpty(Program.Settings.RunAsUser))
+                    {
+                        cookieModel.User = Program.Settings.RunAsUser;
                     }
                     context.User = new ClaimsPrincipal();
                     context.User.AddIdentity(new GenericIdentity(cookieModel.User));

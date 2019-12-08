@@ -55,6 +55,7 @@ const STATE_CHANGED_FUNCS: string = "state/changed/funcs"; // id: string, state:
 const STATE_CHANGED_SEARCH: string = "state/changed/search"; // id: string, state: bool
 const SIDEBAR_DOCKED: string = "sidebar/docked/"; //void
 const SIDEBAR_UNDOCKED: string = "sidebar/undocked/"; //void
+const CLOSE_CONTEXT_MENU: string = "context-menu/close/"; //id
 
 export { 
     subscribe, publish, unsubscribe,
@@ -68,5 +69,6 @@ export {
     STATE_CHANGED_FUNCS,
     STATE_CHANGED_SEARCH,
     SIDEBAR_DOCKED,
-    SIDEBAR_UNDOCKED
+    SIDEBAR_UNDOCKED,
+    CLOSE_CONTEXT_MENU
 };

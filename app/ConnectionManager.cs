@@ -1,32 +1,84 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Npgsql;
+using Pgcode.DataAccess.Extensions;
 
 namespace Pgcode
 {
-    public class ConnectionManager
+    public sealed class ConnectionManager : IDisposable
     {
-        private static NpgsqlConnection _connection;
+        private static ImmutableDictionary<string, NpgsqlConnection> _connections;
 
-        public static async ValueTask TryConnection(Settings settings, IConfiguration configuration)
+        public static void Initialize(IConfiguration configuration)
         {
-            if (string.IsNullOrEmpty(settings.Connection))
-            {
-                //
-            }
+            var connections = new Dictionary<string, NpgsqlConnection>();
+            var visible = Console.CursorVisible;
+            Console.CursorVisible = false;
+            Console.Write("Initializing connections... ");
+            var left = Console.CursorLeft;
 
-            var connectionString = configuration.GetConnectionString(settings.Connection);
-            if (string.IsNullOrEmpty(connectionString))
+            var children = configuration.GetSection("ConnectionStrings").GetChildren().ToList();
+            var count = children.Count;
+            int current = 0;
+            foreach (var section in children)
             {
-                //
+                Console.CursorLeft = left;
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.Write($"{current++} of {count}");
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.ResetColor();
+                Console.Write(" - ");
+                Console.Write($"{section.Key}{new string(' ', 15)}");
+                var connection = InitializeConnection(configuration, section.Value);
+                connections.Add(section.Key, connection);
             }
+            Console.CursorLeft = left;
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine($"{current} of {count} Done!{new string(' ', 15)}");
+            Console.ResetColor();
+            Console.CursorVisible = visible;
+            _connections = connections.ToImmutableDictionary();
+        }
 
-            _connection = new NpgsqlConnection(connectionString);
-            //_connection.CloneWith()
-            await _connection.OpenAsync();
+        private static NpgsqlConnection InitializeConnection(IConfiguration configuration, string connectionString)
+        {
+            var connection = new NpgsqlConnection(connectionString);
+            try
+            {
+                connection.Open();
+                // Initialize schema
+                return connection;
+            }
+            finally
+            {
+                connection.Close();
+            }
+        }
+
+        private static void ReleaseUnmanagedResources()
+        {
+            foreach (var (_, connection) in _connections)
+            {
+                connection.EnsureIsClose();
+            }
+        }
+
+        public ConnectionManager()
+        {
+        }
+
+        public void Dispose()
+        {
+            ReleaseUnmanagedResources();
+            GC.SuppressFinalize(this);
+        }
+
+        ~ConnectionManager()
+        {
+            ReleaseUnmanagedResources();
         }
     }
 }

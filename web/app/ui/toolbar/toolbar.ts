@@ -3,6 +3,7 @@ import {
     publish, subscribe, 
     STATE_CHANGED_ON, STATE_CHANGED_OFF, STATE_CHANGED, SIDEBAR_DOCKED, SIDEBAR_UNDOCKED
 } from "app/_sys/pubsub";
+//import { MonacoContextMenu, ContextMenuCtorArgs } from "app/controls/context-menu";
 
 enum ButtonRoles { switch="switch", toggle="toggle" };
 const isInRole: (e: Element, role: ButtonRoles) => boolean = (e, role) => e.dataAttr("role") === role;
@@ -67,6 +68,22 @@ export default class  {
 
         subscribe(SIDEBAR_DOCKED, () => this.toolbar.addClass(docked));
         subscribe(SIDEBAR_UNDOCKED, () => this.toolbar.removeClass(docked));
+
+        /*
+        new MonacoContextMenu({
+            id: "ctx-menu-toolbar", 
+            items: [{
+                text: "item1"
+            }, {
+                text: "item2"
+            }, {
+                splitter: true
+            }, {
+                text: "item3"
+            }],
+            target: element
+        } as ContextMenuCtorArgs);
+        */
     }
 
     private setButtonState(e: HTMLElement, state: boolean, key: string) {

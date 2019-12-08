@@ -361,6 +361,6 @@ interface String {
     /**
      * Builds Element from HTML markup in a string
      */
-    dom(): Element
+    toElement(): Element
 }
 

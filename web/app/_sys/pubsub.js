@@ -70,5 +70,7 @@ define(["require", "exports"], function (require, exports) {
     exports.SIDEBAR_DOCKED = SIDEBAR_DOCKED;
     const SIDEBAR_UNDOCKED = "sidebar/undocked/";
     exports.SIDEBAR_UNDOCKED = SIDEBAR_UNDOCKED;
+    const CLOSE_CONTEXT_MENU = "context-menu/close/";
+    exports.CLOSE_CONTEXT_MENU = CLOSE_CONTEXT_MENU;
 });
 //# sourceMappingURL=pubsub.js.map

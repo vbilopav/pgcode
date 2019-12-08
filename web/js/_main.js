@@ -6,7 +6,7 @@ define(["js/extensions/apply"], ({loadExtensions, applyExtensions, applyExtensio
             "hideElement", "html", "off", "on", "overflownX", "overflownY", "removeAttr", "removeClass", "setFocus", "showElement", 
             "toggleClass", "trigger", "visible"
         ],
-        "String": ["hashCode", "html", "dom", "toCamelCase", "createElement"]
+        "String": ["hashCode", "html", "toElement", "toCamelCase", "createElement"]
     }).then(() => {
     
         applyExtensionsExcept("NodeList", "HTMLElement", ["find", "findAll"], true);

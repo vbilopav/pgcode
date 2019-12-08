@@ -49,10 +49,11 @@ namespace Pgcode
 
             Settings = new Settings();
             var config = configBuilder.Build();
-            //config.GetConnectionString()
             config.Bind(Settings);
 
-            var url = $"http://{Settings.Address}:{Settings.Port}";
+            ConnectionManager.Initialize(config);
+
+            var url = $"http://{Settings.Host}:{Settings.Port}";
 
             builder
                 .UseSetting("URLS", url)
@@ -69,7 +70,7 @@ namespace Pgcode
                 .ConfigureLogging((ctx, logging) => logging.AddConsole()
                     .AddFilter("Microsoft", LogLevel.Information).AddFilter("System", LogLevel.Information)
                     .AddFilter("Microsoft", LogLevel.Warning).AddFilter("System", LogLevel.Warning))
-                .UseKestrel()
+                .UseKestrel(ko => ko.AddServerHeader = false)
                 .ConfigureServices((ctx, services) => services.AddRouting())
                 .SuppressStatusMessages(true)
                 .CaptureStartupErrors(true)
@@ -108,7 +109,7 @@ namespace Pgcode
             Console.WriteLine("              Port to use [5000]");
 
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.Write("  --address=[address]");
+            Console.Write("  --host=[host address]");
             Console.ResetColor();
             Console.WriteLine("        Address to use [localhost]");
 
@@ -149,8 +150,7 @@ namespace Pgcode
 
         private static bool PrintAvailableUrlsFromHost(IWebHost host)
         {
-            var address = host.ServerFeatures.Get<IServerAddressesFeature>().Addresses.FirstOrDefault();
-            if (address == null)
+            if (!host.ServerFeatures.Get<IServerAddressesFeature>().Addresses.Any())
             {
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("ERROR: listening port is not configured properly");
@@ -158,10 +158,14 @@ namespace Pgcode
                 return false;
             }
 
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.Write("Listening on: ");
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine(address);
+            foreach (var address in host.ServerFeatures.Get<IServerAddressesFeature>().Addresses)
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.Write("Listening on: ");
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine(address);
+            }
+
             Console.ResetColor();
             return true;
         }

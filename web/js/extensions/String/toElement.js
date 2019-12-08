@@ -1,8 +1,8 @@
 define(["js/extensions/html", "js/extensions/test-proto"], (html, test) => {
 
-    test(String, ["dom"]);
+    test(String, ["toElement"]);
 
-    String.prototype.dom = function() {
+    String.prototype.toElement = function() {
         return html.strToElement(this);
     }
 });
