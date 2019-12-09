@@ -43,7 +43,7 @@ namespace Pgcode
 
             var builder = new WebHostBuilder();
             var configBuilder = new ConfigurationBuilder()
-                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: false)
+                .AddJsonFile(Path.Join(Directory.GetCurrentDirectory(), "appsettings.json"), optional: false, reloadOnChange: false)
                 .AddCommandLine(args)
                 .AddEnvironmentVariables("PGCODE_");
 
@@ -80,7 +80,7 @@ namespace Pgcode
 
             if (Environment.IsDevelopment())
             {
-                Console.ForegroundColor = ConsoleColor.Red;
+                Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine("Development build, serving from: {0}", DevelopmentMiddleware.DevelopmentPath);
                 Console.ResetColor();
             }
@@ -162,7 +162,7 @@ namespace Pgcode
             {
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.Write("Listening on: ");
-                Console.ForegroundColor = ConsoleColor.Green;
+                Console.ForegroundColor = ConsoleColor.Cyan;
                 Console.WriteLine(address);
             }
 
