@@ -85,7 +85,7 @@ define(["require", "exports", "app/_sys/pubsub"], function (require, exports, pu
             return String.html `
             <li class="action-item" role="presentation">
                 <a class="action-label" role="menuitem" tabindex="0">${text}</a>
-                ${keyBindingsInfo ? `<span class="keybinding">${keyBindingsInfo}</span>` : ""}
+                ${keyBindingsInfo ? '<span class="keybinding">' + keyBindingsInfo + '</span>' : ""}
             </li>`.toElement();
         }
     }

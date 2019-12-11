@@ -8,7 +8,7 @@ using Pgcode.DataAccess.Extensions;
 
 namespace Pgcode
 {
-    public sealed class ConnectionManager : IDisposable
+    public sealed partial class ConnectionManager : IDisposable
     {
         private static ImmutableDictionary<string, NpgsqlConnection> _connections;
 
@@ -153,21 +153,6 @@ namespace Pgcode
             {
                 connection.EnsureIsClose();
             }
-        }
-
-        public ConnectionManager()
-        {
-        }
-
-        public void Dispose()
-        {
-            ReleaseUnmanagedResources();
-            GC.SuppressFinalize(this);
-        }
-
-        ~ConnectionManager()
-        {
-            ReleaseUnmanagedResources();
         }
     }
 }

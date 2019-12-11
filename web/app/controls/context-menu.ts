@@ -137,7 +137,7 @@ class MonacoContextMenu extends ContextMenu {
         return String.html`
             <li class="action-item" role="presentation">
                 <a class="action-label" role="menuitem" tabindex="0">${text}</a>
-                ${keyBindingsInfo ? `<span class="keybinding">${keyBindingsInfo}</span>` : ""}
+                ${keyBindingsInfo ? '<span class="keybinding">'  + keyBindingsInfo + '</span>' : ""}
             </li>`.toElement();
     }
 }
