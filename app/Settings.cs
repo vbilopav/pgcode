@@ -6,5 +6,6 @@ namespace Pgcode
         public string Host { get; set; } = "localhost";
         public string Connection { get; set; }
         public string RunAsUser { get; set; }
+        public string PgCodeSchema { get; set; } = "pgcode";
     }
 }

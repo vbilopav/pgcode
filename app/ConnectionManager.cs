@@ -12,11 +12,23 @@ namespace Pgcode
     {
         private static ImmutableDictionary<string, NpgsqlConnection> _connections;
 
-        public static void Initialize(IConfiguration configuration)
+        public static bool Initialize(IConfiguration configuration)
         {
             var connections = new Dictionary<string, NpgsqlConnection>();
             var visible = Console.CursorVisible;
             Console.CursorVisible = false;
+
+            var passwords = configuration.GetSection("Passwords").GetChildren().ToDictionary(s => s.Key, s => s.Value);
+            foreach (var key in passwords.Keys.ToArray())
+            {
+                if (string.IsNullOrEmpty(passwords[key]))
+                {
+                    Console.WriteLine();
+                    Console.Write("Password for: {0}: ", key);
+                    passwords[key] = GetPasswordFromConsole();
+                }
+            }
+            Console.WriteLine();
 
             var children = configuration.GetSection("ConnectionStrings").GetChildren().ToList();
             var count = children.Count;
@@ -33,7 +45,7 @@ namespace Pgcode
                 NpgsqlConnection connection;
                 try
                 {
-                    connection = InitializeConnection(section.Value, section.Key);
+                    connection = InitializeConnection(section.Value, section.Key, passwords);
                 }
                 catch (Exception e)
                 {
@@ -52,10 +64,24 @@ namespace Pgcode
                 Console.ResetColor();
             }
             Console.CursorVisible = visible;
+            if (connections.Keys.Count == 0)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("Error: no available connections, exiting...");
+                Console.ResetColor();
+                return false;
+            }
+
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine("Total {0} connection(s) available: {1}", connections.Keys.Count, string.Join(", ", connections.Keys));
+            Console.WriteLine();
+            Console.ResetColor();
+
             _connections = connections.ToImmutableDictionary();
+            return true;
         }
 
-        private static NpgsqlConnection InitializeConnection(string connectionString, string name)
+        private static NpgsqlConnection InitializeConnection(string connectionString, string name, IDictionary<string, string> passwords)
         {
             var builder = new NpgsqlConnectionStringBuilder(connectionString);
             if (string.IsNullOrEmpty(builder.Password))
@@ -64,11 +90,20 @@ namespace Pgcode
                 Console.Write("Password for: {0}: ", name);
                 builder.Password = GetPasswordFromConsole();
             }
+            else
+            {
+                if (passwords.ContainsKey(builder.Password))
+                {
+                    builder.Password = passwords[builder.Password];
+                }
+            }
             var connection = new NpgsqlConnection(builder.ToString());
             try
             {
                 connection.Open();
+                
                 // Initialize schema
+                
                 return connection;
             }
             finally
@@ -83,6 +118,7 @@ namespace Pgcode
             Console.CursorVisible = true;
             Console.ForegroundColor = ConsoleColor.Yellow;
             var pass = "";
+            
             do
             {
                 var key = Console.ReadKey(true);
@@ -90,7 +126,7 @@ namespace Pgcode
                 if (key.Key != ConsoleKey.Backspace && key.Key != ConsoleKey.Enter)
                 {
                     pass += key.KeyChar;
-                    Console.Write(" ");
+                    Console.Write("*");
                 }
                 else
                 {

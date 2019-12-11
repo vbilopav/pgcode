@@ -51,7 +51,10 @@ namespace Pgcode
             var config = configBuilder.Build();
             config.Bind(Settings);
 
-            ConnectionManager.Initialize(config);
+            if (!ConnectionManager.Initialize(config))
+            {
+                return;
+            }
 
             var url = $"http://{Settings.Host}:{Settings.Port}";
 
