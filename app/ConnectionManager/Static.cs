@@ -5,6 +5,7 @@ using System.Linq;
 using Microsoft.Extensions.Configuration;
 using Npgsql;
 using Pgcode.DataAccess.Extensions;
+using Pgcode.Migrations;
 
 namespace Pgcode
 {
@@ -101,9 +102,18 @@ namespace Pgcode
             try
             {
                 connection.Open();
-                
-                // Initialize schema
-                
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                if (Program.IsDebug)
+                {
+                    connection.Notice += (sender, args) =>
+                    {
+                        Console.WriteLine();
+                        Console.WriteLine(args.Notice.MessageText);
+                    };
+                }
+                new MigrationRunner(connection, Program.Settings).Up();
+                Console.ResetColor();
+
                 return connection;
             }
             finally

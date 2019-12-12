@@ -36,28 +36,19 @@ namespace Pgcode
             {
                 if (context.Request.Path == "/")
                 {
-                    CookieUserProfileModel cookieModel;
-                    if (context.Request.Cookies.TryGetValue(CookieName, out var value))
-                    {
-                        cookieModel = JsonSerializer.Deserialize<CookieUserProfileModel>(value, JsonOptions);
-
-                        //
-                        // TODO update current profile for a change
-                        //
-                    }
-                    else
-                    {
-                        cookieModel = new CookieUserProfileModel();
-                        if (string.IsNullOrEmpty(cookieModel.User))
-                        {
-                            cookieModel.User = $"{Guid.NewGuid().ToString().Substring(0, 8)}";
-                        }
-                    }
+                    var cookieModel = context.Request.Cookies.TryGetValue(CookieName, out var value) ? 
+                        JsonSerializer.Deserialize<CookieUserProfileModel>(value, JsonOptions) : 
+                        new CookieUserProfileModel();
 
                     if (!string.IsNullOrEmpty(Program.Settings.RunAsUser))
                     {
                         cookieModel.User = Program.Settings.RunAsUser;
                     }
+                    if (string.IsNullOrEmpty(cookieModel.User))
+                    {
+                        cookieModel.User = $"{Guid.NewGuid().ToString().Substring(0, 8)}";
+                    }
+
                     context.User = new ClaimsPrincipal();
                     context.User.AddIdentity(new GenericIdentity(cookieModel.User));
                     context.Response.Cookies.Append(CookieName, JsonSerializer.Serialize(cookieModel, JsonOptions), CookieOptions);

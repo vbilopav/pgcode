@@ -6,7 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Pgcode
 {
-    public class Services
+    public static class Services
     {
         public static void Configure(IServiceCollection services)
         {
