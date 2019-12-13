@@ -35,13 +35,29 @@ namespace Pgcode.Migrations
                 data json not null default '{{}}'
             );
 
-            raise info 'applying migration version %', _version;
-            
+            create table scripts
+            (
+                id int not null generated always as identity primary key,
+                title varchar(128) not null default '',
+                schema varchar(128) not null default 'public',
+                content text not null default '',
+                view_state json null
+            );
+
             insert into schema_version (version) values (_version) on conflict do nothing;
+
+            raise info 'migration % up', _version;
         end
         $$;
         ";
 
-        public string Down(Settings settings) => $"drop schema {settings.PgCodeSchema} cascade;";
+        public string Down(Settings settings) => @$"
+        do $$
+        declare _version int = {Version};
+        begin
+            drop schema {settings.PgCodeSchema} cascade;
+            raise info 'migration % down', _version;
+        end
+        $$;";
     }
 }

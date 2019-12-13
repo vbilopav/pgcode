@@ -34,8 +34,6 @@ namespace Pgcode
                 return;
             }
 
-            PrintStartMessages();
-
             //
             // see source code for default config
             // https://github.com/aspnet/AspNetCore/tree/master/src/DefaultBuilder/src
@@ -50,6 +48,19 @@ namespace Pgcode
             Settings = new Settings();
             var config = configBuilder.Build();
             config.Bind(Settings);
+
+            if (args.Length > 0 && args[0].StartsWith("--schema-upgrade"))
+            {
+                ConnectionManager.MigrationsUp(config);
+                return;
+            }
+            if (args.Length > 0 && args[0].StartsWith("--schema-downgrade"))
+            {
+                ConnectionManager.MigrationsDown(config);
+                return;
+            }
+
+            PrintStartMessages();
 
             if (!ConnectionManager.Initialize(config))
             {

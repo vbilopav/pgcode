@@ -1,7 +1,8 @@
+@echo off
 REM building scripts...
 node _tools\build.js
 
-REM statrting buil...
+REM statrting build...
 REM see more on targets on rid catalog: https://docs.microsoft.com/en-us/dotnet/core/rid-catalog
 REM also, check out wrap global tool: https://github.com/Hubert-Rybak/dotnet-warp
 
