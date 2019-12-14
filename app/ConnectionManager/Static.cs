@@ -9,13 +9,21 @@ using Pgcode.Migrations;
 
 namespace Pgcode
 {
+    public class ConnectionData
+    {
+        public int? SchemaVersion { get; set; }
+        public string ServerVersion { get; set; }
+        public string Name { get; set; }
+        public NpgsqlConnection Connection { get; set; }
+    }
+
     public sealed partial class ConnectionManager : IDisposable
     {
-        private static ImmutableDictionary<string, NpgsqlConnection> _connections;
+        private static ImmutableDictionary<string, ConnectionData> _connections;
 
         public static bool Initialize(IConfiguration configuration)
         {
-            var connections = new Dictionary<string, NpgsqlConnection>();
+            var connections = new Dictionary<string, ConnectionData>();
             var visible = Console.CursorVisible;
             Console.CursorVisible = false;
 
@@ -37,15 +45,18 @@ namespace Pgcode
 
                 var connection = CreateConnection(section, passwords);
                 var migrations = new MigrationRunner(connection, Program.Settings);
-
+                int? schemaVersion;
+                string serverVersion;
                 try
                 {
                     connection.Open();
                     Console.ResetColor();
                     Console.Write(" ... ");
                     Console.ForegroundColor = ConsoleColor.Green;
-                    var (schemaVersion, availableVersion) = migrations.GetSchemaVersions();
-                    Console.Write("success, server version {0}", connection.ServerVersion);
+                    int availableVersion;
+                    (schemaVersion, availableVersion) = migrations.GetSchemaVersions();
+                    serverVersion = connection.ServerVersion;
+                    Console.Write("success, server version {0}", serverVersion);
                     if (schemaVersion == availableVersion)
                     {
                         Console.WriteLine(", schema version {0}", schemaVersion);
@@ -54,9 +65,19 @@ namespace Pgcode
                     {
                         Console.WriteLine();
                         Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine("Some migrations appear to be missing for connection {0}.", section.Key);
-                        Console.WriteLine("Current schema version is {0}, latest available is {1}. Some features may not be available.", 
-                            schemaVersion, availableVersion);
+                        
+                        if (schemaVersion == null)
+                        {
+                            Console.WriteLine(
+                                "No migration applied for connection {0}, latest available is {1}. Some features may not be available.",
+                                section.Key, availableVersion);
+                        }
+                        else
+                        {
+                            Console.WriteLine("Some migrations appear to be missing for connection {0}.", section.Key);
+                            Console.WriteLine("Current schema version is {0}, latest available is {1}. Some features may not be available.",
+                                schemaVersion, availableVersion);
+                        }
                         Console.WriteLine("Run --schema-upgrade parameter to apply latest schema version.");
                     }
                     Console.ResetColor();
@@ -75,7 +96,13 @@ namespace Pgcode
                     connection.Close();
                 }
 
-                connections.Add(section.Key, connection);
+                connections.Add(section.Key, new ConnectionData
+                {
+                    Connection = connection,
+                    Name = section.Key,
+                    SchemaVersion = schemaVersion,
+                    ServerVersion = serverVersion
+                });
                 
             }
 
@@ -96,6 +123,80 @@ namespace Pgcode
 
             _connections = connections.ToImmutableDictionary();
             return true;
+        }
+
+        public static void MigrationsInfo(IConfiguration configuration)
+        {
+            RunMigrations(configuration, runner =>
+            {
+                var (schemaVersion, availableVersion) = runner.GetSchemaVersions();
+                Console.ResetColor();
+                Console.Write("Schema version is ");
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine(schemaVersion);
+                Console.ResetColor();
+                Console.Write("Available version is ");
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine(availableVersion);
+            });
+        }
+
+        public static void MigrationsUp(IConfiguration configuration, int? upToVersion = null) =>
+            RunMigrations(configuration, runner => runner.Up(upToVersion));
+
+        public static void MigrationsDown(IConfiguration configuration, int? downToVersion = null) =>
+            RunMigrations(configuration, runner => runner.Down(downToVersion));
+
+        private static void RunMigrations(IConfiguration configuration, Action<MigrationRunner> action)
+        {
+            var children = configuration.GetSection("ConnectionStrings").GetChildren().ToList();
+            var passwords = GetPasswordDict(configuration);
+            foreach (var section in children)
+            {
+                var connection = CreateConnection(section, passwords);
+                var migrations = new MigrationRunner(connection, Program.Settings);
+                Console.ResetColor();
+                Console.Write("Connection: ");
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine(section.Key);
+                
+                Console.ResetColor();
+                try
+                {
+                    connection.Open();
+
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    if (Program.IsDebug)
+                    {
+                        connection.Notice += (sender, args) =>
+                        {
+                            Console.WriteLine(args.Notice.MessageText);
+                        };
+                    }
+
+                    try
+                    {
+                        action(migrations);
+                    }
+                    catch (MigrationRunnerException e)
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine("Failed to apply migration for connection {0}, version {1}", section.Key, e.Version);
+                        Console.WriteLine("Error: {0}", e.PostgresException.Message);
+                        if (e.PostgresException.Detail != null)
+                        {
+                            Console.WriteLine("Detail: {0}", e.PostgresException.Detail);
+                        }
+                        Console.ResetColor();
+                    }
+                    Console.ResetColor();
+                }
+                finally
+                {
+                    connection.Close();
+                }
+                Console.WriteLine();
+            }
         }
 
         private static NpgsqlConnection CreateConnection(IConfigurationSection section, Dictionary<string, string> passwords)
@@ -135,60 +236,6 @@ namespace Pgcode
             return passwords;
         }
 
-        public static void MigrationsUp(IConfiguration configuration, int? upToVersion = null) =>
-            RunMigrations(configuration, runner => runner.Up(upToVersion));
-
-        public static void MigrationsDown(IConfiguration configuration, int? downToVersion = null) =>
-            RunMigrations(configuration, runner => runner.Down(downToVersion));
-
-        private static void RunMigrations(IConfiguration configuration, Action<MigrationRunner> action)
-        {
-            var children = configuration.GetSection("ConnectionStrings").GetChildren().ToList();
-            var passwords = GetPasswordDict(configuration);
-            foreach (var section in children)
-            {
-                var connection = CreateConnection(section, passwords);
-                var migrations = new MigrationRunner(connection, Program.Settings);
-                Console.ResetColor();
-                Console.Write("Running migrations for: ");
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine(section.Key);
-                Console.WriteLine();
-                Console.ResetColor();
-                try
-                {
-                    connection.Open();
-
-                    Console.ForegroundColor = ConsoleColor.Yellow;
-                    if (Program.IsDebug)
-                    {
-                        connection.Notice += (sender, args) =>
-                        {
-                            Console.WriteLine(args.Notice.MessageText);
-                        };
-                    }
-
-                    try
-                    {
-                        action(migrations);
-                    }
-                    catch (MigrationRunnerException e)
-                    {
-                        Console.ForegroundColor = ConsoleColor.Yellow;
-                        Console.WriteLine("Failed to apply migration for connection {0}", section.Key);
-                        Console.WriteLine("Error: {0}", e.Message);
-                        Console.ResetColor();
-                    }
-                    Console.ResetColor();
-                }
-                finally
-                {
-                    connection.Close();
-                }
-                Console.WriteLine();
-            }
-        }
-
         private static string GetPasswordFromConsole()
         {
             var visible = Console.CursorVisible;
@@ -226,9 +273,9 @@ namespace Pgcode
 
         private static void ReleaseUnmanagedResources()
         {
-            foreach (var (_, connection) in _connections)
+            foreach (var (_, data) in _connections)
             {
-                connection.EnsureIsClose();
+                data.Connection.EnsureIsClose();
             }
         }
     }

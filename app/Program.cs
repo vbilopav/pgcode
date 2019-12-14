@@ -51,12 +51,17 @@ namespace Pgcode
 
             if (args.Length > 0 && args[0].StartsWith("--schema-upgrade"))
             {
-                ConnectionManager.MigrationsUp(config);
+                ConnectionManager.MigrationsUp(config, ExtractNullableIntFromArgs(args, 0));
                 return;
             }
             if (args.Length > 0 && args[0].StartsWith("--schema-downgrade"))
             {
-                ConnectionManager.MigrationsDown(config);
+                ConnectionManager.MigrationsDown(config, ExtractNullableIntFromArgs(args, 0));
+                return;
+            }
+            if (args.Length > 0 && args[0].StartsWith("--schema-info"))
+            {
+                ConnectionManager.MigrationsInfo(config);
                 return;
             }
 
@@ -113,6 +118,15 @@ namespace Pgcode
             await host.RunAsync();
         }
 
+        private static int? ExtractNullableIntFromArgs(string[] args, int position)
+        {
+            if (int.TryParse(args[position].Split('=').Last(), out var result))
+            {
+                return result;
+            }
+            return null;
+        }
+
         private static void PrintHelp()
         {
             Console.WriteLine("");
@@ -120,17 +134,17 @@ namespace Pgcode
             Console.ForegroundColor = ConsoleColor.Green;
             Console.Write("  --port=[port]");
             Console.ResetColor();
-            Console.WriteLine("              Port to use [5000]");
+            Console.WriteLine("                   Port to use [5000]");
 
             Console.ForegroundColor = ConsoleColor.Green;
             Console.Write("  --host=[host address]");
             Console.ResetColor();
-            Console.WriteLine("        Address to use [localhost]");
+            Console.WriteLine("           Address to use [localhost]");
 
             Console.ForegroundColor = ConsoleColor.Green;
             Console.Write("  --connection=[connection]");
             Console.ResetColor();
-            Console.WriteLine("  Connection name to use in this instance");
+            Console.WriteLine("       Connection name to use in this instance");
 
             Console.WriteLine("");
             Console.WriteLine("Additional options:");
@@ -138,12 +152,37 @@ namespace Pgcode
             Console.ForegroundColor = ConsoleColor.Green;
             Console.Write("  -o --open");
             Console.ResetColor();
-            Console.WriteLine("                  Try to open default browser window after starting the server");
+            Console.WriteLine("                       Try to open default browser window after starting the server");
+
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.Write("  --schema-upgrade");
+            Console.ResetColor();
+            Console.WriteLine("                Run migrations up to upgrade database schema version and exit program");
+
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.Write("  --schema-downgrade");
+            Console.ResetColor();
+            Console.WriteLine("              Run migrations down to downgrade database schema version and exit program");
+
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.Write("  --schema-upgrade=[version]");
+            Console.ResetColor();
+            Console.WriteLine("      Run migrations up to specific version to upgrade database schema version and exit program");
+
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.Write("  --schema-downgrade=[version]");
+            Console.ResetColor();
+            Console.WriteLine("    Run migrations down to specific version downgrade database schema version and exit program");
+
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.Write("  --schema-info");
+            Console.ResetColor();
+            Console.WriteLine("                   See schema migration info - current and available version.");
 
             Console.ForegroundColor = ConsoleColor.Green;
             Console.Write("  -h --help");
             Console.ResetColor();
-            Console.WriteLine("                  Print this list and exit.");
+            Console.WriteLine("                       Print this list and exit.");
 
             Console.WriteLine("");
             Console.ForegroundColor = ConsoleColor.Gray;
@@ -230,12 +269,14 @@ namespace Pgcode
     {
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddControllers();
             Services.Configure(services);
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             app.UseRouting();
+            app.UseEndpoints(endpoints => endpoints.MapControllers());
             app.UseCookieMiddleware();
             if (env.IsDevelopment())
             {

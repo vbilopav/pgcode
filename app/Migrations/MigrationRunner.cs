@@ -2,16 +2,21 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using System.Threading.Tasks;
 using Norm.Extensions;
+using Norm.Extensions.PostgreSQL;
 using Npgsql;
+using Npgsql.TypeHandlers.NetworkHandlers;
 
 namespace Pgcode.Migrations
 {
     public class MigrationRunnerException : Exception
     {
-        public MigrationRunnerException(string message) : base(message)
+        public int Version { get; }
+        public PostgresException PostgresException { get; }
+        public MigrationRunnerException(int version, PostgresException exception)
         {
+            Version = version;
+            PostgresException = exception;
         }
     }
 
@@ -34,22 +39,14 @@ namespace Pgcode.Migrations
 
         public int? CurrentSchemaVersion()
         {
-            var schema = _connection
-                .Execute($"set search_path to {_settings.PgCodeSchema}")
-                .Single<string>("select current_schema()");
+            var schema = _connection.TrySearchPathSchema(_settings.PgCodeSchema);
 
             if (schema == null)
             {
                 return null;
             }
 
-            if (_connection.Single(@"
-                select 1 
-                from 
-                    information_schema.tables
-                where 
-                    table_schema = @schema and table_name = @table", 
-                    _settings.PgCodeSchema, "schema_version").Count == 0)
+            if (!_connection.TableExists("schema_version", _settings.PgCodeSchema))
             {
                 return null;
             }
@@ -58,6 +55,8 @@ namespace Pgcode.Migrations
         }
 
         public int AvailableSchemaVersion() => _migrations.Keys.Max();
+
+        public static int SchemaVersion() => new MigrationRunner(null, null).AvailableSchemaVersion();
 
         public (int?, int) GetSchemaVersions() => (CurrentSchemaVersion(), AvailableSchemaVersion());
 
@@ -76,7 +75,7 @@ namespace Pgcode.Migrations
                 }
                 catch (PostgresException e)
                 {
-                    throw new MigrationRunnerException($"Failed to apply up migration version {key}. Error: {e.MessageText}");
+                    throw new MigrationRunnerException(key, e);
                 }
             }
         }
@@ -96,7 +95,7 @@ namespace Pgcode.Migrations
                 }
                 catch (PostgresException e)
                 {
-                    throw new MigrationRunnerException($"Failed to apply down migration version {key}. Error: {e.MessageText}");
+                    throw new MigrationRunnerException(key, e);
                 }
             }
         }

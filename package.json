@@ -15,7 +15,7 @@
     "run-build": "cd _build && http-server -o",
     "build-web": "node .\\_tools\\build.js",
     "build-all-exe": ".\\_tools\\build-exe.bat",
-    "build-win-exe-only": "dotnet clean app && dotnet publish -r win10-x64 -c Release /p:PublishSingleFile=true /p:PublishTrimmed=true -o __exe\\win10-x64 --nologo app"
+    "build-win-exe-only": "dotnet clean app\\pgcode.csproj && dotnet publish -r win10-x64 -c Release /p:PublishSingleFile=true /p:PublishTrimmed=true -o __exe\\win10-x64 --nologo app\\pgcode.csproj"
   },
   "dependencies": {
     "node-sass": "^4.13.0"

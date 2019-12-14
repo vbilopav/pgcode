@@ -10,11 +10,13 @@ namespace Pgcode
     public class CookieUserProfileModel
     {
         public string User { get; set; }
+        public string InstanceId { get; set; }
     }
 
     public static class CookieMiddleware
     {
-        public const string CookieName = "pgcode";
+        private const string CookieName = "pgcode";
+        private static readonly string InstanceId = Guid.NewGuid().ToString().Substring(0, 8);
 
         private static readonly JsonSerializerOptions JsonOptions = new JsonSerializerOptions
         {
@@ -51,6 +53,7 @@ namespace Pgcode
 
                     context.User = new ClaimsPrincipal();
                     context.User.AddIdentity(new GenericIdentity(cookieModel.User));
+                    cookieModel.InstanceId = InstanceId; 
                     context.Response.Cookies.Append(CookieName, JsonSerializer.Serialize(cookieModel, JsonOptions), CookieOptions);
 
                 }
