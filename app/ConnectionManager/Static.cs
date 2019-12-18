@@ -125,7 +125,7 @@ namespace Pgcode
             return true;
         }
 
-        public static void MigrationsInfo(IConfiguration configuration)
+        public static void MigrationsInfo(IConfiguration configuration, string forConnection = null)
         {
             RunMigrations(configuration, runner =>
             {
@@ -138,21 +138,25 @@ namespace Pgcode
                 Console.Write("Available version is ");
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine(availableVersion);
-            });
+            }, forConnection);
         }
 
-        public static void MigrationsUp(IConfiguration configuration, int? upToVersion = null) =>
-            RunMigrations(configuration, runner => runner.Up(upToVersion));
+        public static void MigrationsUp(IConfiguration configuration, int? upToVersion = null, string forConnection = null) =>
+            RunMigrations(configuration, runner => runner.Up(upToVersion), forConnection);
 
-        public static void MigrationsDown(IConfiguration configuration, int? downToVersion = null) =>
-            RunMigrations(configuration, runner => runner.Down(downToVersion));
+        public static void MigrationsDown(IConfiguration configuration, int? downToVersion = null, string forConnection = null) =>
+            RunMigrations(configuration, runner => runner.Down(downToVersion), forConnection);
 
-        private static void RunMigrations(IConfiguration configuration, Action<MigrationRunner> action)
+        private static void RunMigrations(IConfiguration configuration, Action<MigrationRunner> action, string forConnection = null)
         {
             var children = configuration.GetSection("ConnectionStrings").GetChildren().ToList();
             var passwords = GetPasswordDict(configuration);
             foreach (var section in children)
             {
+                if (forConnection != null && section.Key != forConnection)
+                {
+                    continue;
+                }
                 var connection = CreateConnection(section, passwords);
                 var migrations = new MigrationRunner(connection, Program.Settings);
                 Console.ResetColor();

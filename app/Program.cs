@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -51,17 +52,20 @@ namespace Pgcode
 
             if (args.Length > 0 && args[0].StartsWith("--schema-upgrade"))
             {
-                ConnectionManager.MigrationsUp(config, ExtractNullableIntFromArgs(args, 0));
+                var forConnection = args.Length > 1 ? args[1] : null;
+                ConnectionManager.MigrationsUp(config, ExtractNullableIntFromArgs(args, 0), forConnection);
                 return;
             }
             if (args.Length > 0 && args[0].StartsWith("--schema-downgrade"))
             {
-                ConnectionManager.MigrationsDown(config, ExtractNullableIntFromArgs(args, 0));
+                var forConnection = args.Length > 1 ? args[1] : null;
+                ConnectionManager.MigrationsDown(config, ExtractNullableIntFromArgs(args, 0), forConnection);
                 return;
             }
             if (args.Length > 0 && args[0].StartsWith("--schema-info"))
             {
-                ConnectionManager.MigrationsInfo(config);
+                var forConnection = args.Length > 1 ? args[1] : null;
+                ConnectionManager.MigrationsInfo(config, forConnection);
                 return;
             }
 
@@ -134,17 +138,17 @@ namespace Pgcode
             Console.ForegroundColor = ConsoleColor.Green;
             Console.Write("  --port=[port]");
             Console.ResetColor();
-            Console.WriteLine("                   Port to use [5000]");
+            Console.WriteLine("               Port to use [5000]");
 
             Console.ForegroundColor = ConsoleColor.Green;
             Console.Write("  --host=[host address]");
             Console.ResetColor();
-            Console.WriteLine("           Address to use [localhost]");
+            Console.WriteLine("       Address to use [localhost]");
 
             Console.ForegroundColor = ConsoleColor.Green;
             Console.Write("  --connection=[connection]");
             Console.ResetColor();
-            Console.WriteLine("       Connection name to use in this instance");
+            Console.WriteLine("   Connection name to use in this instance");
 
             Console.WriteLine("");
             Console.WriteLine("Additional options:");
@@ -152,37 +156,29 @@ namespace Pgcode
             Console.ForegroundColor = ConsoleColor.Green;
             Console.Write("  -o --open");
             Console.ResetColor();
-            Console.WriteLine("                       Try to open default browser window after starting the server");
+            Console.WriteLine("                   Try to open default browser window after starting the server");
 
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.Write("  --schema-upgrade");
+            Console.WriteLine("  --schema-upgrade[=version] [connection]");
             Console.ResetColor();
-            Console.WriteLine("                Run migrations up to upgrade database schema version and exit program");
+            Console.WriteLine("                              Run migrations up to upgrade database schema version and exit program");
+            Console.WriteLine("                              Optionally provide a specific version or connection name to upgrade.");
 
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.Write("  --schema-downgrade");
+            Console.WriteLine("  --schema-downgrade[=version] [connection]");
             Console.ResetColor();
-            Console.WriteLine("              Run migrations down to downgrade database schema version and exit program");
+            Console.WriteLine("                              Run migrations down to downgrade database schema version and exit program");
+            Console.WriteLine("                              Optionally provide a specific version or connection name to downgrade.");
 
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.Write("  --schema-upgrade=[version]");
+            Console.Write("  --schema-info [connection]");
             Console.ResetColor();
-            Console.WriteLine("      Run migrations up to specific version to upgrade database schema version and exit program");
-
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.Write("  --schema-downgrade=[version]");
-            Console.ResetColor();
-            Console.WriteLine("    Run migrations down to specific version downgrade database schema version and exit program");
-
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.Write("  --schema-info");
-            Console.ResetColor();
-            Console.WriteLine("                   See schema migration info - current and available version.");
+            Console.WriteLine("  See schema migration info - current and available version.");
 
             Console.ForegroundColor = ConsoleColor.Green;
             Console.Write("  -h --help");
             Console.ResetColor();
-            Console.WriteLine("                       Print this list and exit.");
+            Console.WriteLine("                   Print this list and exit.");
 
             Console.WriteLine("");
             Console.ForegroundColor = ConsoleColor.Gray;
