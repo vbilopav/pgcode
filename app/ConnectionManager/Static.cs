@@ -9,14 +9,6 @@ using Pgcode.Migrations;
 
 namespace Pgcode
 {
-    public class ConnectionData
-    {
-        public int? SchemaVersion { get; set; }
-        public string ServerVersion { get; set; }
-        public string Name { get; set; }
-        public NpgsqlConnection Connection { get; set; }
-    }
-
     public sealed partial class ConnectionManager : IDisposable
     {
         private static ImmutableDictionary<string, ConnectionData> _connections;
