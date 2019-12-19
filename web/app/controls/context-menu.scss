@@ -1,0 +1,23 @@
+.pgmenu-container {
+    position: absolute;
+    z-index: 2000;
+    box-shadow: 0 2px 8px #000;
+    color: $ctx-menu-color;
+    background-color: $ctx-menu-bck-color;
+
+    & .pgaction {
+        flex: 1 1 auto;
+        text-decoration: none;
+        line-height: 1.1em;
+        background: none;
+        height: 2em;
+        display: flex !important;
+        align-items: center;
+        position: relative !important;
+        margin: 1px;
+    }
+    
+    & .pgaction:hover:not(.disabled) {
+        background-color: $ctx-menu-hover-color;
+    }
+}

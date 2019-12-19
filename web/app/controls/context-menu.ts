@@ -43,7 +43,7 @@ abstract class ContextMenu {
             element = this.menuElement(id) as ElementResult;
             document.body.append(element);
         }
-        const container = element.find(".actions-container");
+        const container = element.find("ul");
         const splitter = this.menuSplitterElement();
         const clear = () => {
             element.hideElement();
@@ -112,33 +112,31 @@ abstract class ContextMenu {
 class MonacoContextMenu extends ContextMenu {
 
     protected menuElement(id: string): Element {
-        // TODO: compensate for different themes e.g. vs-dark, vs-light
         return String.html`
-            <div id="${id}" class="vs-dark" style="display: none; position: absolute;">
-                <div class="context-view monaco-menu-container" aria-hidden="false">
-                    <div class="monaco-menu">
-                        <div class="monaco-action-bar animated vertical">
-                            <ul class="actions-container" role="menubar"></ul>
-                        </div>
+        <div id="${id}" style="display: none; position: fixed;">
+            <div class="context-view monaco-menu-container pgmenu-container ">
+                <div class="monaco-menu">
+                    <div class="monaco-action-bar animated vertical">
+                        <ul class="actions-container"></ul>
                     </div>
                 </div>
             </div>
-        `.toElement();
+        </div>`.toElement();
     }
 
     protected menuSplitterElement(): Element {
         return String.html`
-            <li class="action-item disabled" role="presentation">
-                <a class="action-label icon separator disabled" role="presentation"></a>
-            </li>`.toElement();
+        <li class="action-item pgaction disabled">
+            <a class="action-label icon separator disabled"></a>
+        </li>`.toElement();
     }
     
     protected menuItemElement(text: string, keyBindingsInfo?: string): Element {
         return String.html`
-            <li class="action-item" role="presentation">
-                <a class="action-label" role="menuitem" tabindex="0">${text}</a>
-                ${keyBindingsInfo ? '<span class="keybinding">'  + keyBindingsInfo + '</span>' : ""}
-            </li>`.toElement();
+        <li class="action-item pgaction">
+            <a class="action-label" tabindex="0">${text}</a>
+            ${keyBindingsInfo ? '<span class="keybinding">'  + keyBindingsInfo + '</span>' : ""}
+        </li>`.toElement();
     }
 }
 

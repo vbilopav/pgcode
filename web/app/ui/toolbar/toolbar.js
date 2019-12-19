@@ -1,4 +1,4 @@
-define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub"], function (require, exports, storage_1, pubsub_1) {
+define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/controls/context-menu"], function (require, exports, storage_1, pubsub_1, context_menu_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var ButtonRoles;
@@ -45,6 +45,23 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub"], function (
             }
             pubsub_1.subscribe(pubsub_1.SIDEBAR_DOCKED, () => this.toolbar.addClass(docked));
             pubsub_1.subscribe(pubsub_1.SIDEBAR_UNDOCKED, () => this.toolbar.removeClass(docked));
+            new context_menu_1.MonacoContextMenu({
+                id: "ctx-menu-toolbar",
+                items: [{
+                        text: "item1",
+                        keyBindingsInfo: "F1",
+                        action: () => console.log("item1")
+                    }, {
+                        text: "item2",
+                        action: () => console.log("item2")
+                    }, {
+                        splitter: true
+                    }, {
+                        text: "item3",
+                        action: () => console.log("item3")
+                    }],
+                target: element
+            });
         }
         setButtonState(e, state, key) {
             if (e.hasClass(active) && !state) {

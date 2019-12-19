@@ -9,7 +9,7 @@ define(["require", "exports", "app/_sys/pubsub"], function (require, exports, pu
                 element = this.menuElement(id);
                 document.body.append(element);
             }
-            const container = element.find(".actions-container");
+            const container = element.find("ul");
             const splitter = this.menuSplitterElement();
             const clear = () => {
                 element.hideElement();
@@ -64,29 +64,28 @@ define(["require", "exports", "app/_sys/pubsub"], function (require, exports, pu
     class MonacoContextMenu extends ContextMenu {
         menuElement(id) {
             return String.html `
-            <div id="${id}" class="vs-dark" style="display: none; position: absolute;">
-                <div class="context-view monaco-menu-container" aria-hidden="false">
-                    <div class="monaco-menu">
-                        <div class="monaco-action-bar animated vertical">
-                            <ul class="actions-container" role="menubar"></ul>
-                        </div>
+        <div id="${id}" style="display: none; position: fixed;">
+            <div class="context-view monaco-menu-container pgmenu-container ">
+                <div class="monaco-menu">
+                    <div class="monaco-action-bar animated vertical">
+                        <ul class="actions-container"></ul>
                     </div>
                 </div>
             </div>
-        `.toElement();
+        </div>`.toElement();
         }
         menuSplitterElement() {
             return String.html `
-            <li class="action-item disabled" role="presentation">
-                <a class="action-label icon separator disabled" role="presentation"></a>
-            </li>`.toElement();
+        <li class="action-item pgaction disabled">
+            <a class="action-label icon separator disabled"></a>
+        </li>`.toElement();
         }
         menuItemElement(text, keyBindingsInfo) {
             return String.html `
-            <li class="action-item" role="presentation">
-                <a class="action-label" role="menuitem" tabindex="0">${text}</a>
-                ${keyBindingsInfo ? '<span class="keybinding">' + keyBindingsInfo + '</span>' : ""}
-            </li>`.toElement();
+        <li class="action-item pgaction">
+            <a class="action-label" tabindex="0">${text}</a>
+            ${keyBindingsInfo ? '<span class="keybinding">' + keyBindingsInfo + '</span>' : ""}
+        </li>`.toElement();
         }
     }
     exports.MonacoContextMenu = MonacoContextMenu;

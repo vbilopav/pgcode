@@ -48,12 +48,14 @@ define(["require", "exports", "app/_sys/storage", "app/ui/toolbar/toolbar", "app
         <div></div><!-- footer -->
     </div>
 `);
-    const container = element.firstElementChild, [areas, columns] = getGridTemplateData();
+    const container = element.firstElementChild;
+    const [areas, columns] = getGridTemplateData();
     container.css("grid-template-areas", `'${areas}' 'footer footer footer footer`);
     container.css("grid-template-columns", columns);
     new toolbar_1.default(container.children[0]);
     new side_panel_1.default(container.children[1], container.children[2], container);
     new main_panel_1.default(container.children[3]);
     new footer_1.default(container.children[4]);
+    document.body.on("contextmenu", e => e.preventDefault());
 });
 //# sourceMappingURL=index.js.map

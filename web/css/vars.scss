@@ -110,3 +110,36 @@ $scroll-color: default;
 @if $theme == "light" {
     $scroll-color: #252526;
 }
+
+//
+// CONTEXT MENU COLOR
+//
+$ctx-menu-color: default;
+@if $theme == "dark" {
+    $ctx-menu-color: #f0f0f0;
+} 
+@if $theme == "light" {
+    $ctx-menu-color: #252526;
+}
+
+//
+// CONTEXT MENU BACKGROUND COLOR
+//
+$ctx-menu-bck-color: default;
+@if $theme == "dark" {
+    $ctx-menu-bck-color: #3c3c3c;
+} 
+@if $theme == "light" {
+    $ctx-menu-bck-color: #f0f0f0;
+}
+
+//
+// CONTEXT MENU HOVER COLOR
+//
+$ctx-menu-hover-color: default;
+@if $theme == "dark" {
+    $ctx-menu-hover-color: #094771;
+} 
+@if $theme == "light" {
+    $ctx-menu-hover-color: #094771;
+}

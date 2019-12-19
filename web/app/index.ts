@@ -59,9 +59,8 @@ element.html(String.html`
     </div>
 `);
 
-const 
-    container = element.firstElementChild,
-    [areas, columns] = getGridTemplateData();
+const container = element.firstElementChild;
+const [areas, columns] = getGridTemplateData();
 
 container.css("grid-template-areas", `'${areas}' 'footer footer footer footer`);
 container.css("grid-template-columns", columns);
@@ -70,3 +69,5 @@ new Toolbar(container.children[0]);
 new SidePanel(container.children[1], container.children[2], container);
 new MainPanel(container.children[3]);
 new Footer(container.children[4]);
+
+document.body.on("contextmenu", e => e.preventDefault());

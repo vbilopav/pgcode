@@ -1,7 +1,8 @@
 @import 'vars.scss';
 
 html {
-    font-family: 'Consolas', 'Courier New', 'monospace'; 
+    //font-family: 'Consolas', 'Courier New', 'monospace'; 
+    font-family: "Segoe UI", sans-serif;
     font-size: 12px; 
     line-height: 1.15
 }
@@ -30,3 +31,4 @@ body {
 @import '../app/ui/main-panel/style.scss';
 @import '../app/ui/side-panel/style.scss';
 @import '../app/controls/splitter.scss';
+@import '../app/controls/context-menu.scss';
