@@ -27,11 +27,11 @@ const
     active = "active", 
     docked = "docked",
     items = [
-        {id: "btn-docs", icon: "icon-doc-text", key: "docs", label: "scripts", text: "Scripts", keyBinding: "Ctrl+Shift+S", role: ButtonRoles.switch},
-        {id: "btn-tables", icon: "icon-database", key: "tables", label: "tables", text: "Tables", keyBinding: "Ctrl+Shift+T", role: ButtonRoles.switch},
-        {id: "btn-views", icon: "icon-database", key: "views", label: "views", text: "Views", keyBinding: "Ctrl+Shift+V", role: ButtonRoles.switch},
-        {id: "btn-funcs", icon: "icon-database", key: "funcs", label: "routines", text: "Routines", keyBinding: "Ctrl+Shift+R", role: ButtonRoles.switch},
-        {id: "btn-search", icon: "icon-search", key: "search", label: "search", text: "Search", keyBinding: "Ctrl+Shift+F", role: ButtonRoles.switch},
+        {id: "btn-docs", icon: "icon-doc-text", key: "docs", label: "scripts", text: "Scripts", keyBinding: "Ctrl+S", role: ButtonRoles.switch},
+        {id: "btn-tables", icon: "icon-database", key: "tables", label: "tables", text: "Tables", keyBinding: "Ctrl+T", role: ButtonRoles.switch},
+        {id: "btn-views", icon: "icon-database", key: "views", label: "views", text: "Views", keyBinding: "Ctrl+V", role: ButtonRoles.switch},
+        {id: "btn-funcs", icon: "icon-database", key: "funcs", label: "routines", text: "Routines", keyBinding: "Ctrl+R", role: ButtonRoles.switch},
+        {id: "btn-search", icon: "icon-search", key: "search", label: "search", text: "Search", keyBinding: "Ctrl+F", role: ButtonRoles.switch},
         {id: "btn-pgcode", icon: "icon-terminal", key: "pgcode", label: "pgcode", text: null, keyBinding: null, role: ButtonRoles.toggle}
     ]
 
@@ -59,6 +59,7 @@ export default class  {
             }
         }
         this.toolbar = element.addClass("toolbar").html(html);
+
         menuItems.push({ 
             splitter: true 
         }, {
@@ -66,7 +67,9 @@ export default class  {
             text: "Move Toolbar to Right"
         } as MenuItemType);
         this.menu = new MonacoContextMenu({id: "ctx-menu-toolbar", items: menuItems, target: element} as ContextMenuCtorArgs);
+        
         this.buttons = this.toolbar.children.on("click", (e: Event) => this.buttonClicked(e.currentTarget as HTMLElement));
+        
         for(let e of this.buttons) {
             const key = e.dataAttr("key");
             this.setButtonState(e as HTMLElement, storage[key], key);
