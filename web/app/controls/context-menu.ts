@@ -7,10 +7,13 @@ interface ContextMenuBase {
 interface ContextMenuItem extends ContextMenuBase {
     id?: string, 
     text: string, 
+    checked?: boolean, 
     keyBindingsInfo?: string, 
     args?: any, 
     action: (args?: any) => any
 }
+
+type MenuItemType = ContextMenuItem | ContextMenuSplitter;
 
 interface ContextMenuSplitter extends ContextMenuBase {
     splitter: boolean
@@ -18,17 +21,17 @@ interface ContextMenuSplitter extends ContextMenuBase {
 
 interface ContextMenuCtorArgs {
     id: string,
-    items: Array<ContextMenuItem | ContextMenuSplitter>,
+    items: Array<MenuItemType>,
     target: Element,
-    menuItemsCallback: (items: Array<ContextMenuItem | ContextMenuSplitter>) => Array<ContextMenuItem | ContextMenuSplitter>
+    menuItemsCallback: (items: Array<MenuItemType>) => Array<MenuItemType>
 }
 
 abstract class ContextMenu {
 
-    protected items: Array<ContextMenuItem | ContextMenuSplitter>;
+    protected items: Array<MenuItemType>;
     protected abstract menuElement(id: string): Element;
     protected abstract menuSplitterElement(): Element;
-    protected abstract menuItemElement(text: string, keyBindingsInfo?: string): Element
+    protected abstract menuItemElement(menuItem: ContextMenuItem): Element
 
     constructor({
         id,
@@ -56,7 +59,7 @@ abstract class ContextMenu {
                 item.element = splitter;
                 continue;
             } 
-            item.element = this.menuItemElement(menuItem.text, menuItem.keyBindingsInfo).on("click", () => {
+            item.element = this.menuItemElement(menuItem).on("click", () => {
                 menuItem.action(menuItem.args);
             });
         }
@@ -131,13 +134,14 @@ class MonacoContextMenu extends ContextMenu {
         </li>`.toElement();
     }
     
-    protected menuItemElement(text: string, keyBindingsInfo?: string): Element {
+    protected menuItemElement(menuItem: ContextMenuItem): Element {
         return String.html`
         <li class="action-item pgaction">
-            <a class="action-label" tabindex="0">${text}</a>
-            ${keyBindingsInfo ? '<span class="keybinding">'  + keyBindingsInfo + '</span>' : ""}
+            ${menuItem.checked ? '<span class="checked">&check;</span>' : ""}
+            <a class="action-label" tabindex="0">${menuItem.text}</a>
+            ${menuItem.keyBindingsInfo ? '<span class="keybinding">'  + menuItem.keyBindingsInfo + '</span>' : ""}
         </li>`.toElement();
     }
 }
 
-export {MonacoContextMenu, ContextMenuCtorArgs};
+export {MonacoContextMenu, ContextMenuCtorArgs, MenuItemType };

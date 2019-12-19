@@ -3,14 +3,10 @@ import {
     publish, subscribe, 
     STATE_CHANGED_ON, STATE_CHANGED_OFF, STATE_CHANGED, SIDEBAR_DOCKED, SIDEBAR_UNDOCKED
 } from "app/_sys/pubsub";
-import { MonacoContextMenu, ContextMenuCtorArgs } from "app/controls/context-menu";
+import { MonacoContextMenu, ContextMenuCtorArgs, MenuItemType } from "app/controls/context-menu";
 
 enum ButtonRoles { switch="switch", toggle="toggle" };
 const isInRole: (e: Element, role: ButtonRoles) => boolean = (e, role) => e.dataAttr("role") === role;
-
-const 
-    active = "active", 
-    docked = "docked";
 
 interface IStorage {
     docs: boolean;
@@ -27,40 +23,50 @@ const storage = new Storage(
     (name, value) => JSON.parse(value) as boolean
 ) as any as IStorage;
 
+const 
+    active = "active", 
+    docked = "docked",
+    items = [
+        {id: "btn-docs", icon: "icon-doc-text", key: "docs", label: "scripts", text: "Scripts", keyBinding: "Ctrl+Shift+S", role: ButtonRoles.switch},
+        {id: "btn-tables", icon: "icon-database", key: "tables", label: "tables", text: "Tables", keyBinding: "Ctrl+Shift+T", role: ButtonRoles.switch},
+        {id: "btn-views", icon: "icon-database", key: "views", label: "views", text: "Views", keyBinding: "Ctrl+Shift+V", role: ButtonRoles.switch},
+        {id: "btn-funcs", icon: "icon-database", key: "funcs", label: "routines", text: "Routines", keyBinding: "Ctrl+Shift+R", role: ButtonRoles.switch},
+        {id: "btn-search", icon: "icon-search", key: "search", label: "search", text: "Search", keyBinding: "Ctrl+Shift+F", role: ButtonRoles.switch},
+        {id: "btn-pgcode", icon: "icon-terminal", key: "pgcode", label: "pgcode", text: null, keyBinding: null, role: ButtonRoles.toggle}
+    ]
+
 export default class  {
     private buttons: HTMLCollection;
     private toolbar: Element;
+    private menu: MonacoContextMenu;
 
-    constructor(element: Element){
-        this.toolbar = element.addClass("toolbar").html(String.html`
-            <div class="icon-doc-text btn-docs" id="btn-docs" data-key="docs" data-role="${ButtonRoles.switch}">
+    constructor(element: Element) {
+        let html = "";
+        let menuItems = new Array<MenuItemType>();
+        for(let item of items) {
+            html = html + String.html`
+            <div class="${item.icon} ${item.id}" id="${item.id}" data-key="${item.key}" data-role="${item.role}">
                 <div class="marker"></div>
-                <div class="lbl">scripts</div>
+                <div class="lbl">${item.label}</div>
             </div>
-            <div class="icon-database btn-tables" id="btn-tables" data-key="tables" data-role="${ButtonRoles.switch}">
-                <div class="marker"></div>
-                <div class="lbl">tables</div>
-            </div>
-            <div class="icon-database btn-views" id="btn-views" data-key="views" data-role="${ButtonRoles.switch}">
-                <div class="marker"></div>
-                <div class="lbl">views</div>
-            </div>
-            <div class="icon-database btn-funcs" id="btn-funcs" data-key="funcs" data-role="${ButtonRoles.switch}">
-                <div class="marker"></div>
-                <div class="lbl">funcs</div>
-            </div>
-            <div class="icon-search btn-search" id="btn-search" data-key="search" data-role="${ButtonRoles.switch}">
-                <div class="marker"></div>
-                <div class="lbl">search</div>
-            </div>
-            <div class="icon-terminal btn-pgcode" id="btn-terminal" data-key="terminal" data-role="${ButtonRoles.toggle}">
-                <div class="marker"></div>
-                <div class="lbl">pgcode</div>
-            </div>
-        `);
-        
-        this.buttons = element.children.on("click", (e: Event) => this.buttonClicked(e.currentTarget as HTMLElement));
-
+            `;
+            if (item.text) {
+                menuItems.push({
+                    id: item.key,
+                    text: item.text,
+                    keyBindingsInfo: item.keyBinding
+                } as MenuItemType);
+            }
+        }
+        this.toolbar = element.addClass("toolbar").html(html);
+        menuItems.push({ 
+            splitter: true 
+        }, {
+            id: "move",
+            text: "Move Toolbar to Right"
+        } as MenuItemType);
+        this.menu = new MonacoContextMenu({id: "ctx-menu-toolbar", items: menuItems, target: element} as ContextMenuCtorArgs);
+        this.buttons = this.toolbar.children.on("click", (e: Event) => this.buttonClicked(e.currentTarget as HTMLElement));
         for(let e of this.buttons) {
             const key = e.dataAttr("key");
             this.setButtonState(e as HTMLElement, storage[key], key);
@@ -68,26 +74,6 @@ export default class  {
 
         subscribe(SIDEBAR_DOCKED, () => this.toolbar.addClass(docked));
         subscribe(SIDEBAR_UNDOCKED, () => this.toolbar.removeClass(docked));
-
-        
-        new MonacoContextMenu({
-            id: "ctx-menu-toolbar", 
-            items: [{
-                text: "item1",
-                keyBindingsInfo: "F1",
-                action: () => console.log("item1")
-            }, {
-                text: "item2",
-                action: () => console.log("item2")
-            }, {
-                splitter: true
-            }, {
-                text: "item3",
-                action: () => console.log("item3")
-            }],
-            target: element
-        } as ContextMenuCtorArgs);
-        
     }
 
     private setButtonState(e: HTMLElement, state: boolean, key: string) {

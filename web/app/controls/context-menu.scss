@@ -16,8 +16,12 @@
         position: relative !important;
         margin: 1px;
     }
-    
+
     & .pgaction:hover:not(.disabled) {
         background-color: $ctx-menu-hover-color;
+    }
+
+    & .checked {
+        margin-right: 5px;
     }
 }

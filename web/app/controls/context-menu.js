@@ -21,7 +21,7 @@ define(["require", "exports", "app/_sys/pubsub"], function (require, exports, pu
                     item.element = splitter;
                     continue;
                 }
-                item.element = this.menuItemElement(menuItem.text, menuItem.keyBindingsInfo).on("click", () => {
+                item.element = this.menuItemElement(menuItem).on("click", () => {
                     menuItem.action(menuItem.args);
                 });
             }
@@ -80,11 +80,12 @@ define(["require", "exports", "app/_sys/pubsub"], function (require, exports, pu
             <a class="action-label icon separator disabled"></a>
         </li>`.toElement();
         }
-        menuItemElement(text, keyBindingsInfo) {
+        menuItemElement(menuItem) {
             return String.html `
         <li class="action-item pgaction">
-            <a class="action-label" tabindex="0">${text}</a>
-            ${keyBindingsInfo ? '<span class="keybinding">' + keyBindingsInfo + '</span>' : ""}
+            ${menuItem.checked ? '<span class="checked">&check;</span>' : ""}
+            <a class="action-label" tabindex="0">${menuItem.text}</a>
+            ${menuItem.keyBindingsInfo ? '<span class="keybinding">' + menuItem.keyBindingsInfo + '</span>' : ""}
         </li>`.toElement();
         }
     }
