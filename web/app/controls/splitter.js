@@ -2,7 +2,7 @@ define(["require", "exports", "app/_sys/storage"], function (require, exports, s
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     const defaultStorage = { position: null, docked: true };
-    const createStorage = () => new storage_1.default(defaultStorage, name, (name, value) => name == "docked" ? JSON.parse(value) : value);
+    const createStorage = (name) => new storage_1.default(defaultStorage, name, (name, value) => name == "docked" ? JSON.parse(value) : value);
     class Splitter {
         constructor({ name, element, container, dockPosition = 0, resizeIdx, autoIdx, maxDelta = 250, min = 150, events = { docked: (() => { }), undocked: (() => { }), changed: (() => { }) }, maxResizeDelta }) {
             this.element = element || (() => { throw new Error("element is required"); })();
@@ -10,7 +10,7 @@ define(["require", "exports", "app/_sys/storage"], function (require, exports, s
             this.cursor = document.body.css("cursor");
             this.dockPosition = dockPosition;
             this.events = events;
-            this.storage = (name ? createStorage() : defaultStorage);
+            this.storage = (name ? createStorage(name) : defaultStorage);
             this.offset = null;
             this.docked = false;
             this.resizeIdx = resizeIdx || (() => { throw new Error("resizeIdx is required"); })();

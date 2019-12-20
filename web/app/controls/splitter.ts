@@ -30,7 +30,7 @@ interface IStorage {
 }
 
 const defaultStorage: IStorage = {position: null, docked: true};
-const createStorage = () => new Storage(defaultStorage, name, (name, value) => name == "docked" ? JSON.parse(value) as boolean : value) as any as IStorage;
+const createStorage = (name: string) => new Storage(defaultStorage, name, (name, value) => name == "docked" ? JSON.parse(value) as boolean : value) as any as IStorage;
 
 abstract class Splitter {
     private container: Element;
@@ -74,7 +74,7 @@ abstract class Splitter {
         this.cursor = document.body.css("cursor") as string;
         this.dockPosition = dockPosition;
         this.events = events;
-        this.storage = (name ? createStorage() : defaultStorage);
+        this.storage = (name ? createStorage(name) : defaultStorage);
         this.offset = null;
         this.docked = false;
         this.resizeIdx = resizeIdx || (() => {throw new Error("resizeIdx is required")})();

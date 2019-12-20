@@ -8,7 +8,14 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/contro
     })(ButtonRoles || (ButtonRoles = {}));
     ;
     const isInRole = (e, role) => e.dataAttr("role") === role;
-    const storage = new storage_1.default({ docs: false, tables: false, views: false, funcs: false, search: false, terminal: false }, "state", (name, value) => JSON.parse(value));
+    const storage = new storage_1.default({
+        docs: false, tables: false, views: false, funcs: false, search: false, previousKey: null, terminal: false
+    }, "state", (name, value) => {
+        if (name !== "previousKey") {
+            return JSON.parse(value);
+        }
+        return value;
+    });
     const active = "active", docked = "docked", items = [
         { id: "btn-docs", icon: "icon-doc-text", key: "docs", label: "scripts", text: "Scripts", keyBinding: "Ctrl+S", role: ButtonRoles.switch },
         { id: "btn-tables", icon: "icon-database", key: "tables", label: "tables", text: "Tables", keyBinding: "Ctrl+T", role: ButtonRoles.switch },
@@ -50,7 +57,31 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/contro
                 this.setButtonState(e, storage[key], key);
             }
             pubsub_1.subscribe(pubsub_1.SIDEBAR_DOCKED, () => this.toolbar.addClass(docked));
-            pubsub_1.subscribe(pubsub_1.SIDEBAR_UNDOCKED, () => this.toolbar.removeClass(docked));
+            pubsub_1.subscribe(pubsub_1.SIDEBAR_UNDOCKED, () => {
+                let hasActive = false;
+                for (let item of items) {
+                    if (item.role !== ButtonRoles.switch) {
+                        continue;
+                    }
+                    let btn = this.buttons.namedItem(item.id);
+                    if (btn.hasClass(active)) {
+                        hasActive = true;
+                        break;
+                    }
+                }
+                if (!hasActive && storage.previousKey) {
+                    let key = storage.previousKey;
+                    for (let btn of this.buttons) {
+                        if (btn.dataAttr("key") === key) {
+                            btn.addClass(active);
+                            storage[key] = true;
+                            pubsub_1.publish(pubsub_1.STATE_CHANGED + key, key, true);
+                            break;
+                        }
+                    }
+                }
+                this.toolbar.removeClass(docked);
+            });
         }
         setButtonState(e, state, key) {
             if (e.hasClass(active) && !state) {
@@ -70,6 +101,7 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/contro
                 }
                 if (state) {
                     e.removeClass(active);
+                    storage.previousKey = key;
                     storage[key] = false;
                     pubsub_1.publish(pubsub_1.STATE_CHANGED + key, key, false);
                 }

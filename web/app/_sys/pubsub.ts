@@ -48,11 +48,13 @@ const unsubscribe: (name: string, ref: number) => boolean = (name, ref) => {
 const STATE_CHANGED_ON: string = "state/changed/on/"; // id: string
 const STATE_CHANGED_OFF: string = "state/changed/off/"; // id: string
 const STATE_CHANGED: string = "state/changed/"; // helper, id: string, state: bool
+
 const STATE_CHANGED_DOCS: string = "state/changed/docs"; // id: string, state: bool
 const STATE_CHANGED_TABLES: string = "state/changed/tables"; // id: string, state: bool
 const STATE_CHANGED_VIEWS: string = "state/changed/views"; // id: string, state: bool
 const STATE_CHANGED_FUNCS: string = "state/changed/funcs"; // id: string, state: bool
 const STATE_CHANGED_SEARCH: string = "state/changed/search"; // id: string, state: bool
+
 const SIDEBAR_DOCKED: string = "sidebar/docked/"; //void
 const SIDEBAR_UNDOCKED: string = "sidebar/undocked/"; //void
 const CLOSE_CONTEXT_MENU: string = "context-menu/close/"; //id

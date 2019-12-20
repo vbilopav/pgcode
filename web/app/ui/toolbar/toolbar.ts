@@ -14,13 +14,20 @@ interface IStorage {
     views: boolean;
     funcs: boolean;
     search: boolean;
+    previousKey: string;
     terminal: boolean;
 }
 
-const storage = new Storage(
-    {docs: false, tables: false, views: false, funcs: false, search: false, terminal: false}, 
+const storage = new Storage({
+        docs: false, tables: false, views: false, funcs: false, search: false, previousKey: null, terminal: false
+    }, 
     "state", 
-    (name, value) => JSON.parse(value) as boolean
+    (name, value) => {
+        if (name !== "previousKey") {
+            return JSON.parse(value) as boolean;
+        }
+        return value;
+    }
 ) as any as IStorage;
 
 const 
@@ -76,7 +83,31 @@ export default class  {
         }
 
         subscribe(SIDEBAR_DOCKED, () => this.toolbar.addClass(docked));
-        subscribe(SIDEBAR_UNDOCKED, () => this.toolbar.removeClass(docked));
+        subscribe(SIDEBAR_UNDOCKED, () => {
+            let hasActive = false
+            for(let item of items) {
+                if (item.role !== ButtonRoles.switch) {
+                    continue;
+                }
+                let btn = this.buttons.namedItem(item.id);
+                if (btn.hasClass(active)) {
+                    hasActive = true;
+                    break;
+                }
+            }
+            if (!hasActive && storage.previousKey) {
+                let key = storage.previousKey;
+                for(let btn of this.buttons) {
+                    if (btn.dataAttr("key") === key) {
+                        btn.addClass(active);
+                        storage[key] = true;
+                        publish(STATE_CHANGED + key, key, true);
+                        break;
+                    }
+                }
+            }
+            this.toolbar.removeClass(docked);
+        });
     }
 
     private setButtonState(e: HTMLElement, state: boolean, key: string) {
@@ -97,6 +128,7 @@ export default class  {
             }
             if (state) {
                 e.removeClass(active);
+                storage.previousKey = key;
                 storage[key] = false;
                 publish(STATE_CHANGED + key, key, false);
             } else {

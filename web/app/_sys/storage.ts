@@ -40,49 +40,53 @@ class ProtectedLocalStorage implements Storage {
 }
 
 export default class {
-    private storage: Storage = new ProtectedLocalStorage();
-    private namespace: string;
-    private conversion: (name: string, value: string) => any;
-    private names: Array<string> = new Array<string>();
+    private _storage: Storage = new ProtectedLocalStorage();
+    private _namespace: string;
+    private _conversion: (name: string, value: string) => any;
+    private _names: Array<string> = new Array<string>();
 
     constructor(
         model: Object, 
         namespace = "", 
         conversion: (name: string, value: string) => any = (name, value) => value,
         storage: Storage = new ProtectedLocalStorage()) {
-            this.storage = storage;
-            this.namespace = namespace;
-            this.conversion = conversion;
+            this._storage = storage;
+            this._namespace = namespace;
+            this._conversion = conversion;
             for(let [name, defaultValue] of Object.entries(model)) {
                 this.create(name, defaultValue);
             }
+    }
+
+    public get storageKeys(): Array<string> {
+        return this._names;
     }
 
     private create(name: string, defaultValue: any) {
         let fullName = this.getName(name);
         Object.defineProperty(this, name, {
             get: () => {
-                const value = this.storage.getItem(fullName);
+                const value = this._storage.getItem(fullName);
                 if (value === null && defaultValue !== undefined) {
                     return defaultValue;
                 }
-                return this.conversion(name, value);
+                return this._conversion(name, value);
             },
             set: value => {
                 if (value === null) {
-                    this.storage.removeItem(fullName);
+                    this._storage.removeItem(fullName);
                 } else {
-                    this.storage.setItem(fullName, value);
+                    this._storage.setItem(fullName, value);
                 }
             }
         });
-        this.names.push(name);
+        this._names.push(name);
         return this;
     }
 
     private getName(name: string) : string {
-        if (this.namespace) {
-            return `${defaultNs}.${this.namespace}.${name}`;
+        if (this._namespace) {
+            return `${defaultNs}.${this._namespace}.${name}`;
         } else {
             return `${defaultNs}.${name}`;
         }
