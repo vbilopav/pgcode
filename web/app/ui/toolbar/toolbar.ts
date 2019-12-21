@@ -18,7 +18,8 @@ interface IStorage {
     terminal: boolean;
 }
 
-const storage = new Storage({
+const 
+    storage = new Storage({
         docs: false, tables: false, views: false, funcs: false, search: false, previousKey: null, terminal: false
     }, 
     "state", 
@@ -27,8 +28,7 @@ const storage = new Storage({
             return JSON.parse(value) as boolean;
         }
         return value;
-    }
-) as any as IStorage;
+    }) as any as IStorage;
 
 const 
     active = "active", 
@@ -40,7 +40,7 @@ const
         {id: "btn-funcs", icon: "icon-database", key: "funcs", label: "routines", text: "Routines", keyBinding: "Ctrl+R", role: ButtonRoles.switch},
         {id: "btn-search", icon: "icon-search", key: "search", label: "search", text: "Search", keyBinding: "Ctrl+F", role: ButtonRoles.switch},
         {id: "btn-pgcode", icon: "icon-terminal", key: "pgcode", label: "pgcode", text: null, keyBinding: null, role: ButtonRoles.toggle}
-    ]
+    ];
 
 export default class  {
     private buttons: HTMLCollection;
@@ -52,16 +52,16 @@ export default class  {
         let menuItems = new Array<MenuItemType>();
         for(let item of items) {
             html = html + String.html`
-            <div class="${item.icon} ${item.id}" id="${item.id}" data-key="${item.key}" data-role="${item.role}">
+            <div class="${item.icon} ${item.id}" id="${item.id}" data-key="${item.key}" data-role="${item.role}" title="${item.label} (${item.keyBinding})">
                 <div class="marker"></div>
                 <div class="lbl">${item.label}</div>
-            </div>
-            `;
+            </div>`;
             if (item.text) {
                 menuItems.push({
                     id: item.key,
                     text: item.text,
-                    keyBindingsInfo: item.keyBinding
+                    keyBindingsInfo: item.keyBinding,
+                    action: () => element.find("#" + item.id).trigger("click")
                 } as MenuItemType);
             }
         }
@@ -82,33 +82,46 @@ export default class  {
             this.setButtonState(e as HTMLElement, storage[key], key);
         }
 
-        subscribe(SIDEBAR_DOCKED, () => this.toolbar.addClass(docked));
-        subscribe(SIDEBAR_UNDOCKED, () => {
-            let hasActive = false
-            for(let item of items) {
-                if (item.role !== ButtonRoles.switch) {
-                    continue;
-                }
-                let btn = this.buttons.namedItem(item.id);
-                if (btn.hasClass(active)) {
-                    hasActive = true;
+        subscribe(SIDEBAR_DOCKED, () => this.sidebarDocked());
+        subscribe(SIDEBAR_UNDOCKED, () => this.sidebarUndocked());
+    }
+
+    private sidebarDocked() {
+        this.toolbar.addClass(docked);
+        for(let btn of this.buttons) {
+            if (btn.hasClass(active)) {
+                this.menu.updateMenuItem(btn.dataAttr("key"), {checked: false});
+            }
+        }
+    }
+
+    private sidebarUndocked() {
+        let hasActive = false
+        for(let item of items) {
+            if (item.role !== ButtonRoles.switch) {
+                continue;
+            }
+            let btn = this.buttons.namedItem(item.id);
+            if (btn.hasClass(active)) {
+                hasActive = true;
+                this.menu.updateMenuItem(btn.dataAttr("key"), {checked: true});
+                break;
+            }
+        }
+        if (!hasActive && storage.previousKey) {
+            let key = storage.previousKey;
+            for(let btn of this.buttons) {
+                if (btn.dataAttr("key") === key) {
+                    btn.addClass(active);
+                    storage[key] = true;
+                    publish(STATE_CHANGED + key, key, true);
+                    this.menu.updateMenuItem(key, {checked: true});
                     break;
                 }
             }
-            if (!hasActive && storage.previousKey) {
-                let key = storage.previousKey;
-                for(let btn of this.buttons) {
-                    if (btn.dataAttr("key") === key) {
-                        btn.addClass(active);
-                        storage[key] = true;
-                        publish(STATE_CHANGED + key, key, true);
-                        break;
-                    }
-                }
-            }
-            this.toolbar.removeClass(docked);
-        });
-    }
+        }
+        this.toolbar.removeClass(docked);
+    } 
 
     private setButtonState(e: HTMLElement, state: boolean, key: string) {
         if (e.hasClass(active) && !state) {
@@ -117,6 +130,9 @@ export default class  {
         } else if (!e.hasClass(active) && state) {
             e.addClass(active);
             setTimeout(() => publish(STATE_CHANGED + key, key, true), 0);
+        }
+        if (e.dataAttr("role") === ButtonRoles.switch) {
+            this.menu.updateMenuItem(key, {checked: state});
         }
     }
 
@@ -129,13 +145,13 @@ export default class  {
             if (state) {
                 e.removeClass(active);
                 storage.previousKey = key;
-                storage[key] = false;
-                publish(STATE_CHANGED + key, key, false);
             } else {
                 e.addClass(active);
-                storage[key] = true;
-                publish(STATE_CHANGED + key, key, true);
             }
+            state = !state;
+            storage[key] = state;
+            publish(STATE_CHANGED + key, key, state);
+            this.menu.updateMenuItem(key, {checked: state});
         };
 
         if (isInRole(e, ButtonRoles.toggle)) {
@@ -152,6 +168,7 @@ export default class  {
                     if (btn.hasClass(active)) {
                         btn.removeClass("active");
                         publish(STATE_CHANGED + key, key, false);
+                        this.menu.updateMenuItem(key, {checked: false});
                     }
                 }
             }

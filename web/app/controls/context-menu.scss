@@ -15,6 +15,8 @@
         align-items: center;
         position: relative !important;
         margin: 1px;
+
+        padding-left: 10px !important;
     }
 
     & .pgaction:hover:not(.disabled) {
@@ -22,6 +24,6 @@
     }
 
     & .checked {
-        margin-right: 5px;
+        position: absolute;
     }
 }

@@ -3,27 +3,23 @@ define(["require", "exports", "app/_sys/pubsub"], function (require, exports, pu
     Object.defineProperty(exports, "__esModule", { value: true });
     class ContextMenu {
         constructor({ id, items, target, menuItemsCallback = items => items, }) {
-            this.items = items;
             let element = document.body.find("#" + id);
             if (!element.length) {
                 element = this.menuElement(id);
                 document.body.append(element);
             }
             const container = element.find("ul");
-            const splitter = this.menuSplitterElement();
             const clear = () => {
                 element.hideElement();
                 container.html("");
             };
-            for (let item of this.items) {
+            this.items = {};
+            let count = 0;
+            for (let item of items) {
+                item.order = count++;
+                this.updateItemElement(item);
                 let menuItem = item;
-                if (item.splitter) {
-                    item.element = splitter;
-                    continue;
-                }
-                item.element = this.menuItemElement(menuItem).on("click", () => {
-                    menuItem.action(menuItem.args);
-                });
+                this.items[!menuItem.id ? count.toString() : menuItem.id] = item;
             }
             element.on("click", () => clear());
             window.on("resize", () => clear());
@@ -38,7 +34,7 @@ define(["require", "exports", "app/_sys/pubsub"], function (require, exports, pu
             });
             target.on("contextmenu", (e) => {
                 container.html("");
-                for (let item of menuItemsCallback(items)) {
+                for (let item of menuItemsCallback(Object.values(this.items).sort((a, b) => a.order - b.order))) {
                     container.append(item.element);
                 }
                 element.css("top", e.y + "px").css("left", e.x + "px").showElement();
@@ -54,10 +50,27 @@ define(["require", "exports", "app/_sys/pubsub"], function (require, exports, pu
             pubsub_1.subscribe(pubsub_1.CLOSE_CONTEXT_MENU, () => clear());
         }
         triggerById(id, args) {
-            for (let item of this.items) {
-                if (item.id === id) {
-                    item.action(args);
-                }
+            const item = this.items[id];
+            if (item) {
+                item.action(args);
+            }
+        }
+        updateMenuItem(id, data) {
+            const item = this.items[id];
+            const newItem = { ...(item ? item : {}), ...data };
+            this.updateItemElement(newItem);
+            this.items[id] = newItem;
+            return this;
+        }
+        updateItemElement(item) {
+            let menuItem = item;
+            if (item.splitter) {
+                item.element = this.menuSplitterElement();
+            }
+            else {
+                item.element = this.menuItemElement(menuItem).on("click", () => {
+                    menuItem.action(menuItem.args);
+                });
             }
         }
     }

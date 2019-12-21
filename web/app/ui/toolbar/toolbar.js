@@ -30,16 +30,16 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/contro
             let menuItems = new Array();
             for (let item of items) {
                 html = html + String.html `
-            <div class="${item.icon} ${item.id}" id="${item.id}" data-key="${item.key}" data-role="${item.role}">
+            <div class="${item.icon} ${item.id}" id="${item.id}" data-key="${item.key}" data-role="${item.role}" title="${item.label} (${item.keyBinding})">
                 <div class="marker"></div>
                 <div class="lbl">${item.label}</div>
-            </div>
-            `;
+            </div>`;
                 if (item.text) {
                     menuItems.push({
                         id: item.key,
                         text: item.text,
-                        keyBindingsInfo: item.keyBinding
+                        keyBindingsInfo: item.keyBinding,
+                        action: () => element.find("#" + item.id).trigger("click")
                     });
                 }
             }
@@ -56,32 +56,43 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/contro
                 const key = e.dataAttr("key");
                 this.setButtonState(e, storage[key], key);
             }
-            pubsub_1.subscribe(pubsub_1.SIDEBAR_DOCKED, () => this.toolbar.addClass(docked));
-            pubsub_1.subscribe(pubsub_1.SIDEBAR_UNDOCKED, () => {
-                let hasActive = false;
-                for (let item of items) {
-                    if (item.role !== ButtonRoles.switch) {
-                        continue;
-                    }
-                    let btn = this.buttons.namedItem(item.id);
-                    if (btn.hasClass(active)) {
-                        hasActive = true;
+            pubsub_1.subscribe(pubsub_1.SIDEBAR_DOCKED, () => this.sidebarDocked());
+            pubsub_1.subscribe(pubsub_1.SIDEBAR_UNDOCKED, () => this.sidebarUndocked());
+        }
+        sidebarDocked() {
+            this.toolbar.addClass(docked);
+            for (let btn of this.buttons) {
+                if (btn.hasClass(active)) {
+                    this.menu.updateMenuItem(btn.dataAttr("key"), { checked: false });
+                }
+            }
+        }
+        sidebarUndocked() {
+            let hasActive = false;
+            for (let item of items) {
+                if (item.role !== ButtonRoles.switch) {
+                    continue;
+                }
+                let btn = this.buttons.namedItem(item.id);
+                if (btn.hasClass(active)) {
+                    hasActive = true;
+                    this.menu.updateMenuItem(btn.dataAttr("key"), { checked: true });
+                    break;
+                }
+            }
+            if (!hasActive && storage.previousKey) {
+                let key = storage.previousKey;
+                for (let btn of this.buttons) {
+                    if (btn.dataAttr("key") === key) {
+                        btn.addClass(active);
+                        storage[key] = true;
+                        pubsub_1.publish(pubsub_1.STATE_CHANGED + key, key, true);
+                        this.menu.updateMenuItem(key, { checked: true });
                         break;
                     }
                 }
-                if (!hasActive && storage.previousKey) {
-                    let key = storage.previousKey;
-                    for (let btn of this.buttons) {
-                        if (btn.dataAttr("key") === key) {
-                            btn.addClass(active);
-                            storage[key] = true;
-                            pubsub_1.publish(pubsub_1.STATE_CHANGED + key, key, true);
-                            break;
-                        }
-                    }
-                }
-                this.toolbar.removeClass(docked);
-            });
+            }
+            this.toolbar.removeClass(docked);
         }
         setButtonState(e, state, key) {
             if (e.hasClass(active) && !state) {
@@ -91,6 +102,9 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/contro
             else if (!e.hasClass(active) && state) {
                 e.addClass(active);
                 setTimeout(() => pubsub_1.publish(pubsub_1.STATE_CHANGED + key, key, true), 0);
+            }
+            if (e.dataAttr("role") === ButtonRoles.switch) {
+                this.menu.updateMenuItem(key, { checked: state });
             }
         }
         buttonClicked(e) {
@@ -102,14 +116,14 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/contro
                 if (state) {
                     e.removeClass(active);
                     storage.previousKey = key;
-                    storage[key] = false;
-                    pubsub_1.publish(pubsub_1.STATE_CHANGED + key, key, false);
                 }
                 else {
                     e.addClass(active);
-                    storage[key] = true;
-                    pubsub_1.publish(pubsub_1.STATE_CHANGED + key, key, true);
                 }
+                state = !state;
+                storage[key] = state;
+                pubsub_1.publish(pubsub_1.STATE_CHANGED + key, key, state);
+                this.menu.updateMenuItem(key, { checked: state });
             };
             if (isInRole(e, ButtonRoles.toggle)) {
                 toggle();
@@ -125,6 +139,7 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/contro
                         if (btn.hasClass(active)) {
                             btn.removeClass("active");
                             pubsub_1.publish(pubsub_1.STATE_CHANGED + key, key, false);
+                            this.menu.updateMenuItem(key, { checked: false });
                         }
                     }
                 }

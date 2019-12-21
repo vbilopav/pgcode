@@ -1,7 +1,8 @@
 import { subscribe, CLOSE_CONTEXT_MENU } from "app/_sys/pubsub";
 
 interface ContextMenuBase {
-    element?: Element
+    order?: number;
+    element?: Element;
 }
 
 interface ContextMenuItem extends ContextMenuBase {
@@ -28,7 +29,7 @@ interface ContextMenuCtorArgs {
 
 abstract class ContextMenu {
 
-    protected items: Array<MenuItemType>;
+    protected items: {[id: string] : MenuItemType};
     protected abstract menuElement(id: string): Element;
     protected abstract menuSplitterElement(): Element;
     protected abstract menuItemElement(menuItem: ContextMenuItem): Element
@@ -40,30 +41,25 @@ abstract class ContextMenu {
         menuItemsCallback = items => items,
     }: ContextMenuCtorArgs) {
 
-        this.items = items;
         let element = document.body.find("#" + id);
         if (!element.length) {
             element = this.menuElement(id) as ElementResult;
             document.body.append(element);
         }
         const container = element.find("ul");
-        const splitter = this.menuSplitterElement();
         const clear = () => {
             element.hideElement();
             container.html("");
         };
 
-        for(let item of this.items) {
+        this.items = {};
+        let count = 0;
+        for(let item of items) {
+            item.order = count++;
+            this.updateItemElement(item);
             let menuItem: ContextMenuItem = item as ContextMenuItem;
-            if ((item as ContextMenuSplitter).splitter) {
-                item.element = splitter;
-                continue;
-            } 
-            item.element = this.menuItemElement(menuItem).on("click", () => {
-                menuItem.action(menuItem.args);
-            });
+            this.items[!menuItem.id ? count.toString() : menuItem.id] = item;
         }
-        
 
         element.on("click", () => clear());
         window.on("resize", () => clear());
@@ -80,7 +76,7 @@ abstract class ContextMenu {
 
         target.on("contextmenu", (e: MouseEvent) => {
             container.html("");
-            for(let item of menuItemsCallback(items)) {
+            for(let item of menuItemsCallback(Object.values(this.items).sort((a, b) => a.order - b.order))) {
                 container.append(item.element);
             }
             ((element.css("top", e.y + "px") as Element).css("left", e.x + "px") as Element).showElement();
@@ -104,16 +100,33 @@ abstract class ContextMenu {
     }
 
     public triggerById(id: string, args?: any) {
-        for(let item of this.items as Array<ContextMenuItem>) {
-            if (item.id === id) {
-                item.action(args);
-            }
+        const item = this.items[id] as ContextMenuItem;
+        if (item) {
+            item.action(args);
+        }
+    }
+
+    public updateMenuItem(id: string, data: {}) {
+        const item = this.items[id];
+        const newItem = {...(item ? item : {}), ...data} as ContextMenuItem;
+        this.updateItemElement(newItem);
+        this.items[id] = newItem;
+        return this;
+    }
+
+    private updateItemElement(item: MenuItemType) {
+        let menuItem: ContextMenuItem = item as ContextMenuItem;
+        if ((item as ContextMenuSplitter).splitter) {
+            item.element = this.menuSplitterElement();
+        } else {
+            item.element = this.menuItemElement(menuItem).on("click", () => {
+                menuItem.action(menuItem.args);
+            });
         }
     }
 }
 
 class MonacoContextMenu extends ContextMenu {
-
     protected menuElement(id: string): Element {
         return String.html`
         <div id="${id}" style="display: none; position: fixed;">
