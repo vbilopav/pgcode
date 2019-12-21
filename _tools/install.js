@@ -1,5 +1,17 @@
 const fs = require("fs");
-const {walkSync, rmdirSync, copy} = require("./utils");
+const {walkSync, rmdirSync, cleanPath, mkDirByPathSync} = require("./utils");
+
+
+function copy(obj, from, to) {
+    var toFile = cleanPath(obj.full.replace(cleanPath(from), cleanPath(to)));
+    var toDir = toFile.replace(obj.file, "");
+    var from = obj.full;
+
+    mkDirByPathSync(toDir);
+
+    console.log(`>>> copying ${from} to ${toFile}`);
+    fs.copyFileSync(from, toFile);
+}
 
 
 rmdirSync("web/libs/monaco-editor");
