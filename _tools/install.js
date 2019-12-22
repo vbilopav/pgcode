@@ -9,7 +9,7 @@ function copy(obj, from, to) {
 
     mkDirByPathSync(toDir);
 
-    console.log(`>>> copying ${from} to ${toFile}`);
+    console.log(`install >>> copying ${from} to ${toFile}`);
     fs.copyFileSync(from, toFile);
 }
 
