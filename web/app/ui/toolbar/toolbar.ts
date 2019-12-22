@@ -4,6 +4,7 @@ import {
     STATE_CHANGED_ON, STATE_CHANGED_OFF, STATE_CHANGED, SIDEBAR_DOCKED, SIDEBAR_UNDOCKED
 } from "app/_sys/pubsub";
 import { MonacoContextMenu, ContextMenuCtorArgs, MenuItemType } from "app/controls/context-menu";
+import { Positions } from "app/enums";
 
 enum ButtonRoles { switch="switch", toggle="toggle" };
 const isInRole: (e: Element, role: ButtonRoles) => boolean = (e, role) => e.dataAttr("role") === role;
@@ -47,7 +48,7 @@ export default class  {
     private toolbar: Element;
     private menu: MonacoContextMenu;
 
-    constructor(element: Element) {
+    constructor(element: Element, position: Positions) {
         let html = "";
         let menuItems = new Array<MenuItemType>();
         for(let item of items) {
@@ -65,7 +66,7 @@ export default class  {
                 } as MenuItemType);
             }
         }
-        this.toolbar = element.addClass("toolbar").html(html);
+        this.toolbar = element.addClass("toolbar").addClass(position).html(html);
 
         menuItems.push({ 
             splitter: true 

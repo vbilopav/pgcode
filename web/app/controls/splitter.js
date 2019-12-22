@@ -4,7 +4,7 @@ define(["require", "exports", "app/_sys/storage"], function (require, exports, s
     const defaultStorage = { position: null, docked: true };
     const createStorage = (name) => new storage_1.default(defaultStorage, name, (name, value) => name == "docked" ? JSON.parse(value) : value);
     class Splitter {
-        constructor({ name, element, container, dockPosition = 0, resizeIdx, autoIdx, maxDelta = 250, min = 150, events = { docked: (() => { }), undocked: (() => { }), changed: (() => { }) }, maxResizeDelta }) {
+        constructor({ name, element, container, dockPosition = 0, resizeIndex: resizeIdx, maxDelta = 250, min = 150, events = { docked: (() => { }), undocked: (() => { }), changed: (() => { }) }, maxResizeDelta }) {
             this.element = element || (() => { throw new Error("element is required"); })();
             this.container = container || (() => { throw new Error("container is required"); })();
             this.cursor = document.body.css("cursor");
@@ -13,8 +13,7 @@ define(["require", "exports", "app/_sys/storage"], function (require, exports, s
             this.storage = (name ? createStorage(name) : defaultStorage);
             this.offset = null;
             this.docked = false;
-            this.resizeIdx = resizeIdx || (() => { throw new Error("resizeIdx is required"); })();
-            this.autoIdx = autoIdx || (() => { throw new Error("autoIdx is required"); })();
+            this.resizeIndex = resizeIdx !== undefined ? resizeIdx : (() => { throw new Error("resizeIdx is required"); })();
             this.maxDelta = maxDelta;
             this.min = min;
             this.maxResizeDelta = maxResizeDelta;
@@ -87,6 +86,7 @@ define(["require", "exports", "app/_sys/storage"], function (require, exports, s
                 this.events.changed();
                 return false;
             });
+            return this;
         }
         get isDocked() {
             return this.docked;
@@ -132,7 +132,7 @@ define(["require", "exports", "app/_sys/storage"], function (require, exports, s
             }
             const p = values.previousPosition + delta;
             this.storage.position = p;
-            values.values[this.resizeIdx] = p + "px";
+            values.values[this.resizeIndex] = p + "px";
             this.container.css(this.gridTemplateName, values.values.join(" "));
         }
         adjust() {
@@ -147,17 +147,17 @@ define(["require", "exports", "app/_sys/storage"], function (require, exports, s
             }
         }
         getCurrent() {
-            return Number(this.getValues()[this.resizeIdx].replace("px", ""));
+            return Number(this.getValues()[this.resizeIndex].replace("px", ""));
         }
         getPositionFromMouseEvent(e) {
             return e[this.mouseEventPositionProperty];
         }
         getValuesOrSetNewPos(newPosition) {
             const values = this.getValues();
-            const previousPosition = Number(values[this.resizeIdx].replace("px", ""));
+            const previousPosition = Number(values[this.resizeIndex].replace("px", ""));
             if (newPosition) {
-                values[this.resizeIdx] = newPosition;
-                values[this.autoIdx] = "auto";
+                values[this.resizeIndex] = newPosition;
+                values[this.autoIndex] = "auto";
             }
             return { values, previousPosition };
         }
@@ -171,6 +171,7 @@ define(["require", "exports", "app/_sys/storage"], function (require, exports, s
             this.element.addClass("main-split").addClass("main-split-v");
             this.mouseEventPositionProperty = "clientX";
             this.gridTemplateName = "grid-template-columns";
+            this.autoIndex = this.container.css(this.gridTemplateName).split(" ").indexOf("auto");
             this.adjust();
         }
         start() {
@@ -188,6 +189,7 @@ define(["require", "exports", "app/_sys/storage"], function (require, exports, s
                     }
                 });
             }
+            return this;
         }
         calculatePosition(currentPos, e) {
             return currentPos + this.offset;
@@ -211,10 +213,12 @@ define(["require", "exports", "app/_sys/storage"], function (require, exports, s
             this.element.addClass("main-split").addClass("main-split-h");
             this.mouseEventPositionProperty = "clientY";
             this.gridTemplateName = "grid-template-rows";
+            this.autoIndex = this.container.css(this.gridTemplateName).split(" ").indexOf("auto");
             this.adjust();
         }
         start() {
             super.start();
+            return this;
         }
         calculatePosition(currentPos, e) {
             return this.offset[1] + (this.offset[0] - this.getPositionFromMouseEvent(e));

@@ -11,8 +11,7 @@ interface SplitterCtorArgs {
     element: HTMLElement,
     container: HTMLElement,
     dockPosition: number,
-    resizeIdx: number,
-    autoIdx: number,
+    resizeIndex: number,
     maxDelta: number, 
     min: number,
     events: SplitterEvents,
@@ -33,18 +32,18 @@ const defaultStorage: IStorage = {position: null, docked: true};
 const createStorage = (name: string) => new Storage(defaultStorage, name, (name, value) => name == "docked" ? JSON.parse(value) as boolean : value) as any as IStorage;
 
 abstract class Splitter {
-    private container: Element;
     private cursor: string;
     private dockPosition: number;
     private events: SplitterEvents;
     private storage: IStorage;
     private docked: boolean;
-    private resizeIdx: number;
-    private autoIdx: number;
+    private resizeIndex: number;
     private maxDelta: number;
     private min: number;
     private startingPosition: number;
 
+    protected container: Element;
+    protected autoIndex: number;
     protected element: Element;
     protected offset: number | [number, number];
     protected maxResizeDelta?: number;
@@ -62,8 +61,7 @@ abstract class Splitter {
         element,
         container,
         dockPosition = 0,
-        resizeIdx,
-        autoIdx,
+        resizeIndex: resizeIdx,
         maxDelta = 250, 
         min = 150,
         events = { docked: (()=>{}), undocked: (()=>{}), changed: (()=>{}) },
@@ -77,14 +75,13 @@ abstract class Splitter {
         this.storage = (name ? createStorage(name) : defaultStorage);
         this.offset = null;
         this.docked = false;
-        this.resizeIdx = resizeIdx || (() => {throw new Error("resizeIdx is required")})();
-        this.autoIdx = autoIdx || (() => {throw new Error("autoIdx is required")})();
+        this.resizeIndex = resizeIdx !== undefined ? resizeIdx : (() => {throw new Error("resizeIdx is required")})();
         this.maxDelta = maxDelta;
         this.min = min;
         this.maxResizeDelta = maxResizeDelta;
     }
 
-    public start(): void {
+    public start(): Splitter {
 
         this.element
             .on("mousedown", (e: MouseEvent) => {
@@ -154,6 +151,7 @@ abstract class Splitter {
                 this.events.changed();
                 return false;
             });
+        return this;
     }
 
     public get isDocked() {
@@ -205,7 +203,7 @@ abstract class Splitter {
         }
         const p = values.previousPosition + delta;
         this.storage.position = p;
-        values.values[this.resizeIdx] = p + "px";
+        values.values[this.resizeIndex] = p + "px";
         this.container.css(this.gridTemplateName, values.values.join(" "));
     }
 
@@ -221,7 +219,7 @@ abstract class Splitter {
     }
 
     protected getCurrent(): number {
-        return Number(this.getValues()[this.resizeIdx].replace("px", ""));
+        return Number(this.getValues()[this.resizeIndex].replace("px", ""));
     }
 
     protected getPositionFromMouseEvent(e: MouseEvent) {
@@ -230,10 +228,10 @@ abstract class Splitter {
 
     protected getValuesOrSetNewPos(newPosition?: string): INewPositionResult {
         const values = this.getValues();
-        const previousPosition = Number(values[this.resizeIdx].replace("px", ""));
+        const previousPosition = Number(values[this.resizeIndex].replace("px", ""));
         if (newPosition) {
-            values[this.resizeIdx] = newPosition;
-            values[this.autoIdx] = "auto";
+            values[this.resizeIndex] = newPosition;
+            values[this.autoIndex] = "auto";
         }
         return {values, previousPosition};
     }
@@ -249,10 +247,11 @@ class VerticalSplitter extends Splitter {
         this.element.addClass("main-split").addClass("main-split-v");
         this.mouseEventPositionProperty = "clientX";
         this.gridTemplateName = "grid-template-columns";
+        this.autoIndex = (this.container.css(this.gridTemplateName) as string).split(" ").indexOf("auto");
         this.adjust();
     }
 
-    public start(): void {
+    public start(): Splitter {
         super.start();
         if (this.maxResizeDelta) {
             let last = window.innerWidth;
@@ -269,6 +268,7 @@ class VerticalSplitter extends Splitter {
                 }
             });
         }
+        return this;
     }
 
     protected calculatePosition(currentPos: number, e: MouseEvent): number {
@@ -295,12 +295,14 @@ class HorizontalSplitter extends Splitter {
         this.element.addClass("main-split").addClass("main-split-h");
         this.mouseEventPositionProperty = "clientY";
         this.gridTemplateName = "grid-template-rows";
+        this.autoIndex = (this.container.css(this.gridTemplateName) as string).split(" ").indexOf("auto");
         this.adjust();
     }
 
-    public start(): void {
+    public start(): Splitter {
         super.start();
         // ...
+        return this;
     }
 
     protected calculatePosition(currentPos: number, e: MouseEvent): number {

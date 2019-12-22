@@ -25,7 +25,7 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/contro
         { id: "btn-pgcode", icon: "icon-terminal", key: "pgcode", label: "pgcode", text: null, keyBinding: null, role: ButtonRoles.toggle }
     ];
     class default_1 {
-        constructor(element) {
+        constructor(element, position) {
             let html = "";
             let menuItems = new Array();
             for (let item of items) {
@@ -43,7 +43,7 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/contro
                     });
                 }
             }
-            this.toolbar = element.addClass("toolbar").html(html);
+            this.toolbar = element.addClass("toolbar").addClass(position).html(html);
             menuItems.push({
                 splitter: true
             }, {

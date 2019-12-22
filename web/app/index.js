@@ -1,61 +1,74 @@
-define(["require", "exports", "app/_sys/storage", "app/ui/toolbar/toolbar", "app/ui/side-panel/side-panel", "app/ui/main-panel/main-panel", "app/ui/footer/footer"], function (require, exports, storage_1, toolbar_1, side_panel_1, main_panel_1, footer_1) {
+define(["require", "exports", "app/_sys/storage", "app/ui/toolbar/toolbar", "app/ui/side-panel/side-panel", "app/ui/main-panel/main-panel", "app/ui/footer/footer", "app/controls/splitter", "app/enums", "app/_sys/pubsub"], function (require, exports, storage_1, toolbar_1, side_panel_1, main_panel_1, footer_1, splitter_1, enums_1, pubsub_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    var Positions;
-    (function (Positions) {
-        Positions["left"] = "left";
-        Positions["right"] = "right";
-    })(Positions || (Positions = {}));
-    ;
-    var Themes;
-    (function (Themes) {
-        Themes["dark"] = "dark";
-        Themes["light"] = "light";
-    })(Themes || (Themes = {}));
-    ;
     const storage = new storage_1.default({
-        toolbarPos: Positions.left,
-        sidePanelPos: Positions.left,
+        toolbarPos: enums_1.Positions.left,
+        sidePanelPos: enums_1.Positions.left,
         sidePanelWidth: "250",
-        theme: Themes.dark
+        theme: enums_1.Themes.dark
     }, "main");
     const getGridTemplateData = () => {
-        let tpl = storage.toolbarPos === Positions.left, spl = storage.sidePanelPos === Positions.left, spw = storage.sidePanelWidth;
+        let tpl = storage.toolbarPos === enums_1.Positions.left, spl = storage.sidePanelPos === enums_1.Positions.left, spw = storage.sidePanelWidth;
         if (tpl && spl) {
-            return ["toolbar side-panel main-splitter main-panel", `50px ${spw}px 5px auto`];
+            return ["toolbar side-panel main-splitter main-panel", `50px ${spw}px 5px auto`, 1];
         }
         if (tpl && !spl) {
-            return ["toolbar main-panel main-splitter side-panel", `50px auto 5px ${spw}px`];
+            return ["toolbar main-panel main-splitter side-panel", `50px auto 5px ${spw}px`, 3];
         }
         if (!tpl && spl) {
-            return ["side-panel main-splitter main-panel toolbar", `${spw}px 5px auto 50px`];
+            return ["side-panel main-splitter main-panel toolbar", `${spw}px 5px auto 50px`, 0];
         }
         if (!tpl && !spl) {
-            return ["main-panel main-splitter side-panel toolbar", `auto 5px ${spw}px 50px`];
+            return ["main-panel main-splitter side-panel toolbar", `auto 5px ${spw}px 50px`, 2];
         }
     };
-    const themeLink = document.getElementById("theme");
-    if (themeLink.attr("href") !== `css/theme-${storage.theme}.css`) {
-        themeLink.attr("href", `css/theme-${storage.theme}.css`);
-    }
-    const element = document.body;
-    element.html(String.html `
-    <div>
-        <div></div><!-- toolbar -->
-        <div></div><!-- side panel -->
-        <div></div><!-- main splitter vertical -->
-        <div></div><!-- main panel -->
-        <div></div><!-- footer -->
-    </div>
-`);
-    const container = element.firstElementChild;
-    const [areas, columns] = getGridTemplateData();
-    container.css("grid-template-areas", `'${areas}' 'footer footer footer footer`);
-    container.css("grid-template-columns", columns);
-    new toolbar_1.default(container.children[0]);
-    new side_panel_1.default(container.children[1], container.children[2], container);
-    new main_panel_1.default(container.children[3]);
-    new footer_1.default(container.children[4]);
-    document.body.on("contextmenu", e => e.preventDefault());
+    new (class {
+        constructor() {
+            this.themeLink = document.getElementById("theme");
+            if (this.themeLink.attr("href") !== `css/theme-${storage.theme}.css`) {
+                this.themeLink.attr("href", `css/theme-${storage.theme}.css`);
+            }
+            document.body.html(String.html `
+            <div>
+                <div></div><!-- toolbar -->
+                <div></div><!-- side panel -->
+                <div></div><!-- main splitter vertical -->
+                <div></div><!-- main panel -->
+                <div></div><!-- footer -->
+            </div>
+        `);
+            this.container = document.body.firstElementChild;
+            const [areas, columns, resizeIndex] = getGridTemplateData();
+            this.container.css("grid-template-areas", `'${areas}' 'footer footer footer footer`);
+            this.container.css("grid-template-columns", columns);
+            this.toolbar = new toolbar_1.default(this.container.children[0], storage.toolbarPos);
+            this.sidePanel = new side_panel_1.default(this.container.children[1]);
+            this.mainPanel = new main_panel_1.default(this.container.children[3]);
+            this.footer = new footer_1.default(this.container.children[4]);
+            this.splitter = new splitter_1.VerticalSplitter({
+                name: "v-splitter",
+                element: this.container.children[2],
+                container: this.container,
+                resizeIndex: resizeIndex,
+                maxResizeDelta: 100,
+                events: {
+                    docked: () => pubsub_1.publish(pubsub_1.SIDEBAR_DOCKED),
+                    undocked: () => pubsub_1.publish(pubsub_1.SIDEBAR_UNDOCKED),
+                    changed: () => { },
+                }
+            }).start();
+            pubsub_1.subscribe(pubsub_1.STATE_CHANGED_ON, () => {
+                if (this.splitter.isDocked) {
+                    this.splitter.undock();
+                }
+            });
+            pubsub_1.subscribe(pubsub_1.STATE_CHANGED_OFF, () => {
+                if (!this.splitter.isDocked) {
+                    this.splitter.dock();
+                }
+            });
+            document.body.on("contextmenu", e => e.preventDefault());
+        }
+    })();
 });
 //# sourceMappingURL=index.js.map
