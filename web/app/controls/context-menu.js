@@ -39,11 +39,13 @@ define(["require", "exports", "app/_sys/pubsub"], function (require, exports, pu
                 }
                 element.css("top", e.y + "px").css("left", e.x + "px").showElement();
                 const rect = container.getBoundingClientRect(), winWidth = window.innerWidth, winHeight = window.innerHeight, right = e.x + rect.width, bottom = rect.top + rect.height;
-                if (right >= winWidth) {
-                    element.css("left", (winWidth - rect.width - 1) + "px");
+                if (right >= (winWidth + 1)) {
+                    let left = (winWidth - rect.width - 1);
+                    element.css("left", (left > 0 ? left : 0) + "px");
                 }
-                if (bottom >= winHeight) {
-                    element.css("top", (e.y - rect.height - 1) + "px");
+                if (bottom >= (winHeight + 1)) {
+                    let top = e.y - rect.height - 1;
+                    element.css("top", (top > 0 ? top : 0) + "px");
                 }
                 e.preventDefault();
             });
