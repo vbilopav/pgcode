@@ -4,9 +4,10 @@ define(["require", "exports", "app/_sys/storage", "app/ui/toolbar/toolbar", "app
     const storage = new storage_1.default({
         toolbarPos: enums_1.Positions.left,
         sidePanelPos: enums_1.Positions.left,
-        sidePanelWidth: "250",
+        sidePanelWidth: 250,
+        sidePanelDocked: true,
         theme: enums_1.Themes.dark
-    }, "main");
+    }, "main", (name, value) => name == "sidePanelDocked" ? JSON.parse(value) : value);
     const getGridTemplateData = () => {
         let tpl = storage.toolbarPos === enums_1.Positions.left, spl = storage.sidePanelPos === enums_1.Positions.left, spw = storage.sidePanelWidth;
         if (tpl && spl) {
@@ -46,7 +47,6 @@ define(["require", "exports", "app/_sys/storage", "app/ui/toolbar/toolbar", "app
             this.mainPanel = new main_panel_1.default(this.container.children[3]);
             this.footer = new footer_1.default(this.container.children[4]);
             this.splitter = new splitter_1.VerticalSplitter({
-                name: "v-splitter",
                 element: this.container.children[2],
                 container: this.container,
                 resizeIndex: resizeIndex,
@@ -55,6 +55,20 @@ define(["require", "exports", "app/_sys/storage", "app/ui/toolbar/toolbar", "app
                     docked: () => pubsub_1.publish(pubsub_1.SIDEBAR_DOCKED),
                     undocked: () => pubsub_1.publish(pubsub_1.SIDEBAR_UNDOCKED),
                     changed: () => { },
+                },
+                storage: {
+                    get position() {
+                        return storage.sidePanelWidth;
+                    },
+                    set position(value) {
+                        storage.sidePanelWidth = value;
+                    },
+                    get docked() {
+                        return storage.sidePanelDocked;
+                    },
+                    set docked(value) {
+                        storage.sidePanelDocked = value;
+                    }
                 }
             }).start();
             pubsub_1.subscribe(pubsub_1.STATE_CHANGED_ON, () => {

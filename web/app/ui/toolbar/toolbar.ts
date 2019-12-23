@@ -7,7 +7,9 @@ import { MonacoContextMenu, ContextMenuCtorArgs, MenuItemType } from "app/contro
 import { Positions } from "app/enums";
 
 enum ButtonRoles { switch="switch", toggle="toggle" };
-const isInRole: (e: Element, role: ButtonRoles) => boolean = (e, role) => e.dataAttr("role") === role;
+const 
+    isInRole: (e: Element, role: ButtonRoles) => boolean = (e, role) => e.dataAttr("role") === role,
+    moveText = (position: Positions) => position === Positions.left ? "Move Toolbar to Right" : "Move Toolbar to Left";
 
 interface IStorage {
     docs: boolean;
@@ -66,14 +68,12 @@ export default class  {
                 } as MenuItemType);
             }
         }
-        this.toolbar = element.addClass("toolbar").addClass(position).html(html);
+        this.toolbar = element.addClass("toolbar").html(html);
+        if (position === Positions.right) {
+            this.toolbar.addClass("right")
+        }
 
-        menuItems.push({ 
-            splitter: true 
-        }, {
-            id: "move",
-            text: "Move Toolbar to Right"
-        } as MenuItemType);
+        menuItems.push({ splitter: true }, {id: "move", text: moveText(position)} as MenuItemType);
         this.menu = new MonacoContextMenu({id: "ctx-menu-toolbar", items: menuItems, target: element} as ContextMenuCtorArgs);
         
         this.buttons = this.toolbar.children.on("click", (e: Event) => this.buttonClicked(e.currentTarget as HTMLElement));

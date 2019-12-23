@@ -1,5 +1,13 @@
 import Storage from "app/_sys/storage";
 
+interface IStorage {
+    position: number,
+    docked: boolean
+}
+
+const defaultStorage: IStorage = {position: null, docked: true};
+const createStorage = (name: string) => new Storage(defaultStorage, name, (name, value) => name == "docked" ? JSON.parse(value) as boolean : value) as any as IStorage;
+
 interface SplitterEvents {
     docked: ()=>void;
     undocked: ()=>void;
@@ -15,21 +23,14 @@ interface SplitterCtorArgs {
     maxDelta: number, 
     min: number,
     events: SplitterEvents,
-    maxResizeDelta?: number;
+    maxResizeDelta?: number,
+    storage?: IStorage
 }
 
 interface INewPositionResult {
     values: string[],
     previousPosition: number
 }
-
-interface IStorage {
-    position: number,
-    docked: boolean
-}
-
-const defaultStorage: IStorage = {position: null, docked: true};
-const createStorage = (name: string) => new Storage(defaultStorage, name, (name, value) => name == "docked" ? JSON.parse(value) as boolean : value) as any as IStorage;
 
 abstract class Splitter {
     private cursor: string;
@@ -65,14 +66,15 @@ abstract class Splitter {
         maxDelta = 250, 
         min = 150,
         events = { docked: (()=>{}), undocked: (()=>{}), changed: (()=>{}) },
-        maxResizeDelta
+        maxResizeDelta,
+        storage
     }: SplitterCtorArgs) {
         this.element = element || (() => {throw new Error("element is required")})();
         this.container = container || (() => {throw new Error("container is required")})();
         this.cursor = document.body.css("cursor") as string;
         this.dockPosition = dockPosition;
         this.events = events;
-        this.storage = (name ? createStorage(name) : defaultStorage);
+        this.storage = storage ? storage : (name ? createStorage(name) : defaultStorage);
         this.offset = null;
         this.docked = false;
         this.resizeIndex = resizeIdx !== undefined ? resizeIdx : (() => {throw new Error("resizeIdx is required")})();

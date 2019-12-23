@@ -13,7 +13,8 @@ import {
 interface IStorage {
     toolbarPos: Positions, 
     sidePanelPos: string, 
-    sidePanelWidth: string, 
+    sidePanelWidth: number, 
+    sidePanelDocked: boolean,
     theme: Themes
 }
 
@@ -21,9 +22,12 @@ const
     storage = new Storage({
         toolbarPos: Positions.left, 
         sidePanelPos: Positions.left, 
-        sidePanelWidth: "250", 
+        sidePanelWidth: 250, 
+        sidePanelDocked: true,
         theme: Themes.dark
-    }, "main") as any as IStorage;
+    }, 
+    "main",
+    (name, value) => name == "sidePanelDocked" ? JSON.parse(value) as boolean : value) as any as IStorage;
 
 const 
     getGridTemplateData: () => [string, string, number] = () => {
@@ -82,7 +86,6 @@ new (class {
         this.footer = new Footer(this.container.children[4]);
 
         this.splitter = new VerticalSplitter({
-            name: "v-splitter",
             element: this.container.children[2],
             container: this.container,
             resizeIndex: resizeIndex,
@@ -91,7 +94,21 @@ new (class {
                 docked: () => publish(SIDEBAR_DOCKED),
                 undocked: () => publish(SIDEBAR_UNDOCKED),
                 changed: () => {}, //_app.pub("sidebar/changed", splitter)
-            }
+            },
+            storage: {
+                get position() {
+                    return storage.sidePanelWidth
+                },
+                set position(value: number) {
+                    storage.sidePanelWidth = value;
+                },
+                get docked() {
+                    return storage.sidePanelDocked
+                },
+                set docked(value: boolean) {
+                    storage.sidePanelDocked = value;
+                }
+            } as any
         } as SplitterCtorArgs).start() as VerticalSplitter;
 
         subscribe(STATE_CHANGED_ON, () => {

@@ -63,6 +63,13 @@
     }
 }
 
+.toolbar.right {
+    & > div > div.marker {
+        right: 0;
+        left: initial;
+    }
+}
+
 .toolbar.docked {
     & > div.active, & > div.active > div {
         color: $control-color;
