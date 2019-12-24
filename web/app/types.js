@@ -16,4 +16,4 @@ define(["require", "exports"], function (require, exports) {
     exports.Themes = Themes;
     ;
 });
-//# sourceMappingURL=enums.js.map
+//# sourceMappingURL=types.js.map

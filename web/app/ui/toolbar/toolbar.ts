@@ -4,7 +4,7 @@ import {
     STATE_CHANGED_ON, STATE_CHANGED_OFF, STATE_CHANGED, SIDEBAR_DOCKED, SIDEBAR_UNDOCKED
 } from "app/_sys/pubsub";
 import { MonacoContextMenu, ContextMenuCtorArgs, MenuItemType } from "app/controls/context-menu";
-import { Positions } from "app/enums";
+import { Positions, IMain } from "app/types";
 
 enum ButtonRoles { switch="switch", toggle="toggle" };
 const 
@@ -50,7 +50,7 @@ export default class  {
     private toolbar: Element;
     private menu: MonacoContextMenu;
 
-    constructor(element: Element, position: Positions) {
+    constructor(element: Element, position: Positions, index: IMain) {
         let html = "";
         let menuItems = new Array<MenuItemType>();
         for(let item of items) {
@@ -70,10 +70,25 @@ export default class  {
         }
         this.toolbar = element.addClass("toolbar").html(html);
         if (position === Positions.right) {
-            this.toolbar.addClass("right")
+            this.toolbar.addClass("right");
         }
 
-        menuItems.push({ splitter: true }, {id: "move", text: moveText(position)} as MenuItemType);
+        menuItems.push({ splitter: true }, {
+            id: "move", 
+            text: moveText(position), 
+            action: () => {
+                let newPosition = position == Positions.left ? Positions.right : Positions.left;
+                if (index.moveToolbar(newPosition)) {
+                    position = newPosition;
+                    if (position === Positions.right) {
+                        this.toolbar.addClass("right");
+                    } else {
+                        this.toolbar.removeClass("right");
+                    }
+                    this.menu.updateMenuItem("move", {text: moveText(position)});
+                }
+            }
+        } as MenuItemType);
         this.menu = new MonacoContextMenu({id: "ctx-menu-toolbar", items: menuItems, target: element} as ContextMenuCtorArgs);
         
         this.buttons = this.toolbar.children.on("click", (e: Event) => this.buttonClicked(e.currentTarget as HTMLElement));

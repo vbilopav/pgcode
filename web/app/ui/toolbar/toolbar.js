@@ -1,4 +1,4 @@
-define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/controls/context-menu", "app/enums"], function (require, exports, storage_1, pubsub_1, context_menu_1, enums_1) {
+define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/controls/context-menu", "app/types"], function (require, exports, storage_1, pubsub_1, context_menu_1, types_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var ButtonRoles;
@@ -7,7 +7,7 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/contro
         ButtonRoles["toggle"] = "toggle";
     })(ButtonRoles || (ButtonRoles = {}));
     ;
-    const isInRole = (e, role) => e.dataAttr("role") === role, moveText = (position) => position === enums_1.Positions.left ? "Move Toolbar to Right" : "Move Toolbar to Left";
+    const isInRole = (e, role) => e.dataAttr("role") === role, moveText = (position) => position === types_1.Positions.left ? "Move Toolbar to Right" : "Move Toolbar to Left";
     const storage = new storage_1.default({
         docs: false, tables: false, views: false, funcs: false, search: false, previousKey: null, terminal: false
     }, "state", (name, value) => {
@@ -25,7 +25,7 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/contro
         { id: "btn-pgcode", icon: "icon-terminal", key: "pgcode", label: "pgcode", text: null, keyBinding: null, role: ButtonRoles.toggle }
     ];
     class default_1 {
-        constructor(element, position) {
+        constructor(element, position, index) {
             let html = "";
             let menuItems = new Array();
             for (let item of items) {
@@ -44,10 +44,26 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/contro
                 }
             }
             this.toolbar = element.addClass("toolbar").html(html);
-            if (position === enums_1.Positions.right) {
+            if (position === types_1.Positions.right) {
                 this.toolbar.addClass("right");
             }
-            menuItems.push({ splitter: true }, { id: "move", text: moveText(position) });
+            menuItems.push({ splitter: true }, {
+                id: "move",
+                text: moveText(position),
+                action: () => {
+                    let newPosition = position == types_1.Positions.left ? types_1.Positions.right : types_1.Positions.left;
+                    if (index.moveToolbar(newPosition)) {
+                        position = newPosition;
+                        if (position === types_1.Positions.right) {
+                            this.toolbar.addClass("right");
+                        }
+                        else {
+                            this.toolbar.removeClass("right");
+                        }
+                        this.menu.updateMenuItem("move", { text: moveText(position) });
+                    }
+                }
+            });
             this.menu = new context_menu_1.MonacoContextMenu({ id: "ctx-menu-toolbar", items: menuItems, target: element });
             this.buttons = this.toolbar.children.on("click", (e) => this.buttonClicked(e.currentTarget));
             for (let e of this.buttons) {

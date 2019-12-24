@@ -1,15 +1,15 @@
-define(["require", "exports", "app/_sys/storage", "app/ui/toolbar/toolbar", "app/ui/side-panel/side-panel", "app/ui/main-panel/main-panel", "app/ui/footer/footer", "app/controls/splitter", "app/enums", "app/_sys/pubsub"], function (require, exports, storage_1, toolbar_1, side_panel_1, main_panel_1, footer_1, splitter_1, enums_1, pubsub_1) {
+define(["require", "exports", "app/_sys/storage", "app/ui/toolbar/toolbar", "app/ui/side-panel/side-panel", "app/ui/main-panel/main-panel", "app/ui/footer/footer", "app/controls/splitter", "app/types", "app/_sys/pubsub"], function (require, exports, storage_1, toolbar_1, side_panel_1, main_panel_1, footer_1, splitter_1, types_1, pubsub_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     const storage = new storage_1.default({
-        toolbarPos: enums_1.Positions.left,
-        sidePanelPos: enums_1.Positions.left,
+        toolbarPosition: types_1.Positions.left,
+        sidePanelPosition: types_1.Positions.left,
         sidePanelWidth: 250,
         sidePanelDocked: true,
-        theme: enums_1.Themes.dark
+        theme: types_1.Themes.dark
     }, "main", (name, value) => name == "sidePanelDocked" ? JSON.parse(value) : value);
     const getGridTemplateData = () => {
-        let tpl = storage.toolbarPos === enums_1.Positions.left, spl = storage.sidePanelPos === enums_1.Positions.left, spw = storage.sidePanelWidth;
+        let tpl = storage.toolbarPosition === types_1.Positions.left, spl = storage.sidePanelPosition === types_1.Positions.left, spw = storage.sidePanelWidth;
         if (tpl && spl) {
             return ["toolbar side-panel main-splitter main-panel", `50px ${spw}px 5px auto`, 1];
         }
@@ -25,10 +25,39 @@ define(["require", "exports", "app/_sys/storage", "app/ui/toolbar/toolbar", "app
     };
     new (class {
         constructor() {
-            this.themeLink = document.getElementById("theme");
-            if (this.themeLink.attr("href") !== `css/theme-${storage.theme}.css`) {
-                this.themeLink.attr("href", `css/theme-${storage.theme}.css`);
+            this.initTheme();
+            this.initContainer();
+            const resizeIndex = this.initGrid();
+            this.toolbar = new toolbar_1.default(this.container.children[0], storage.toolbarPosition, this);
+            this.sidePanel = new side_panel_1.default(this.container.children[1]);
+            this.mainPanel = new main_panel_1.default(this.container.children[3]);
+            this.footer = new footer_1.default(this.container.children[4]);
+            this.initSplitter(resizeIndex);
+            this.subscribeEvents();
+        }
+        moveToolbar(position) {
+            if (storage.toolbarPosition === position) {
+                return false;
             }
+            storage.toolbarPosition = position;
+            const resizeIndex = this.initGrid();
+            this.splitter.updateIndexesAndAdjust(resizeIndex);
+            return true;
+        }
+        subscribeEvents() {
+            pubsub_1.subscribe(pubsub_1.STATE_CHANGED_ON, () => {
+                if (this.splitter.isDocked) {
+                    this.splitter.undock();
+                }
+            });
+            pubsub_1.subscribe(pubsub_1.STATE_CHANGED_OFF, () => {
+                if (!this.splitter.isDocked) {
+                    this.splitter.dock();
+                }
+            });
+            document.body.on("contextmenu", e => e.preventDefault());
+        }
+        initContainer() {
             document.body.html(String.html `
             <div>
                 <div></div><!-- toolbar -->
@@ -39,13 +68,20 @@ define(["require", "exports", "app/_sys/storage", "app/ui/toolbar/toolbar", "app
             </div>
         `);
             this.container = document.body.firstElementChild;
+        }
+        initGrid() {
             const [areas, columns, resizeIndex] = getGridTemplateData();
             this.container.css("grid-template-areas", `'${areas}' 'footer footer footer footer`);
             this.container.css("grid-template-columns", columns);
-            this.toolbar = new toolbar_1.default(this.container.children[0], storage.toolbarPos);
-            this.sidePanel = new side_panel_1.default(this.container.children[1]);
-            this.mainPanel = new main_panel_1.default(this.container.children[3]);
-            this.footer = new footer_1.default(this.container.children[4]);
+            return resizeIndex;
+        }
+        initTheme() {
+            this.themeLink = document.getElementById("theme");
+            if (this.themeLink.attr("href") !== `css/theme-${storage.theme}.css`) {
+                this.themeLink.attr("href", `css/theme-${storage.theme}.css`);
+            }
+        }
+        initSplitter(resizeIndex) {
             this.splitter = new splitter_1.VerticalSplitter({
                 element: this.container.children[2],
                 container: this.container,
@@ -71,17 +107,6 @@ define(["require", "exports", "app/_sys/storage", "app/ui/toolbar/toolbar", "app
                     }
                 }
             }).start();
-            pubsub_1.subscribe(pubsub_1.STATE_CHANGED_ON, () => {
-                if (this.splitter.isDocked) {
-                    this.splitter.undock();
-                }
-            });
-            pubsub_1.subscribe(pubsub_1.STATE_CHANGED_OFF, () => {
-                if (!this.splitter.isDocked) {
-                    this.splitter.dock();
-                }
-            });
-            document.body.on("contextmenu", e => e.preventDefault());
         }
     })();
 });

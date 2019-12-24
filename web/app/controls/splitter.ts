@@ -62,7 +62,7 @@ abstract class Splitter {
         element,
         container,
         dockPosition = 0,
-        resizeIndex: resizeIdx,
+        resizeIndex,
         maxDelta = 250, 
         min = 150,
         events = { docked: (()=>{}), undocked: (()=>{}), changed: (()=>{}) },
@@ -77,10 +77,18 @@ abstract class Splitter {
         this.storage = storage ? storage : (name ? createStorage(name) : defaultStorage);
         this.offset = null;
         this.docked = false;
-        this.resizeIndex = resizeIdx !== undefined ? resizeIdx : (() => {throw new Error("resizeIdx is required")})();
+        this.resizeIndex = resizeIndex !== undefined ? resizeIndex : (() => {throw new Error("resizeIndex is required")})();
         this.maxDelta = maxDelta;
         this.min = min;
         this.maxResizeDelta = maxResizeDelta;
+    }
+
+    public updateIndexesAndAdjust(resizeIndex?: number) {
+        if (resizeIndex !== undefined) {
+            this.resizeIndex = resizeIndex;
+        }
+        this.autoIndex = (this.container.css(this.gridTemplateName) as string).split(" ").indexOf("auto");
+        this.adjust();
     }
 
     public start(): Splitter {
@@ -249,8 +257,7 @@ class VerticalSplitter extends Splitter {
         this.element.addClass("main-split").addClass("main-split-v");
         this.mouseEventPositionProperty = "clientX";
         this.gridTemplateName = "grid-template-columns";
-        this.autoIndex = (this.container.css(this.gridTemplateName) as string).split(" ").indexOf("auto");
-        this.adjust();
+        this.updateIndexesAndAdjust();
     }
 
     public start(): Splitter {
@@ -297,8 +304,7 @@ class HorizontalSplitter extends Splitter {
         this.element.addClass("main-split").addClass("main-split-h");
         this.mouseEventPositionProperty = "clientY";
         this.gridTemplateName = "grid-template-rows";
-        this.autoIndex = (this.container.css(this.gridTemplateName) as string).split(" ").indexOf("auto");
-        this.adjust();
+        this.updateIndexesAndAdjust();
     }
 
     public start(): Splitter {
@@ -325,4 +331,4 @@ class HorizontalSplitter extends Splitter {
 };
 
 
-export {VerticalSplitter, HorizontalSplitter, SplitterCtorArgs};
+export {Splitter, VerticalSplitter, HorizontalSplitter, SplitterCtorArgs};
