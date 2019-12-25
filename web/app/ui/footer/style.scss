@@ -1,5 +1,53 @@
 .footer {
     grid-area: footer;
+    font-size: 0.9em;
     color: $footer-color;
     background-color: $footer-background-color;
+    user-select: none;
+    display: grid;
+    /*grid-template-columns: auto auto auto;*/
+    grid-template-columns: auto auto 27px;
+    grid-template-areas: 'conns gap feed';
+
+    & > div.clickable {
+        cursor: pointer;
+    }
+    & > div.clickable:hover {
+        background-color: $clickable-footer-background-color;
+    }
+
+    & > div {
+        line-height: 19px;
+        height: 100%;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow-x: hidden;
+    }
+
+    & > div.conns {
+        grid-area: conns;
+        padding-left: 10px;
+        padding-right: 10px;
+        background-color: $connections-selector-background-color;
+        color:  $connections-selector-color;
+        cursor: pointer;
+        width: fit-content;
+        max-width: 155px;
+    }
+    & > div.conns:hover {
+        background-color: $connections-selector-hover-background-color;
+    }
+    & > div.conns > span {
+        margin-right: 3px;
+    }
+
+    & > div.feed {
+        grid-area: feed;
+        text-align: center;
+        opacity: 0.5;
+        width: 27px;
+    }
+    & > div.feed:hover {
+        opacity: 1;
+    }
 }

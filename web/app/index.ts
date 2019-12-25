@@ -96,8 +96,8 @@ new (class implements IMain {
                 <div></div><!-- footer -->
             </div>
         `);
-        this.overlay = document.body.find("div.overlay");
-        this.container = document.body.find("div.container");
+        this.overlay = document.body.children[0];
+        this.container = document.body.children[1];
     }
 
     private initGrid() : number {

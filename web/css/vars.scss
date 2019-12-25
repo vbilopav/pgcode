@@ -51,6 +51,39 @@ $footer-color: default;
 @if $theme == "light" {
     $footer-color: #ffffff;
 }
+$clickable-footer-background-color: default;
+@if $theme == "dark" {
+    $clickable-footer-background-color: #1f8ad2;
+} 
+@if $theme == "light" {
+    $clickable-footer-background-color: #1f8ad2;
+}
+
+//
+// CONNECTION SELECT
+// 
+$connections-selector-background-color: default;
+@if $theme == "dark" {
+    $connections-selector-background-color: #16825d;
+} 
+@if $theme == "light" {
+    $connections-selector-background-color: #16825d;
+}
+$connections-selector-hover-background-color: default;
+@if $theme == "dark" {
+    $connections-selector-hover-background-color: #329171;
+} 
+@if $theme == "light" {
+    $connections-selector-hover-background-color: #329171;
+}
+$connections-selector-color: default;
+@if $theme == "dark" {
+    $connections-selector-color: #c1c1c1;
+} 
+@if $theme == "light" {
+    $connections-selector-color: #c1c1c1;
+}
+
 
 //
 // PANEL

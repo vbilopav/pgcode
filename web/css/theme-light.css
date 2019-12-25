@@ -155,8 +155,44 @@ body > div.container {
 
 .footer {
   grid-area: footer;
+  font-size: 0.9em;
   color: #ffffff;
-  background-color: #007ACC; }
+  background-color: #007ACC;
+  user-select: none;
+  display: grid;
+  /*grid-template-columns: auto auto auto;*/
+  grid-template-columns: auto auto 27px;
+  grid-template-areas: 'conns gap feed'; }
+  .footer > div.clickable {
+    cursor: pointer; }
+  .footer > div.clickable:hover {
+    background-color: #1f8ad2; }
+  .footer > div {
+    line-height: 19px;
+    height: 100%;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow-x: hidden; }
+  .footer > div.conns {
+    grid-area: conns;
+    padding-left: 10px;
+    padding-right: 5px;
+    background-color: #16825d;
+    color: #c1c1c1;
+    cursor: pointer;
+    width: fit-content;
+    max-width: 155px; }
+  .footer > div.conns:hover {
+    background-color: #329171; }
+  .footer > div.conns > span {
+    margin-right: 3px; }
+  .footer > div.feed {
+    grid-area: feed;
+    text-align: center;
+    opacity: 0.5;
+    width: 27px; }
+  .footer > div.feed:hover {
+    opacity: 1; }
 
 .main-panel {
   grid-area: main-panel; }
