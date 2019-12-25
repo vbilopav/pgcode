@@ -1,13 +1,22 @@
-@echo off
-REM building css...
-call node-sass --output-style compressed web/css/theme-dark.scss ^> web/css/theme-dark.css
-call node-sass --output-style compressed web/css/theme-light.scss ^> web/css/theme-light.css
+@echo on
+
+REM building typescript...
+call tsc
 
 REM building scripts...
-node _tools\build.js
+call node _tools\build.js
 
+REM building theme-dark.css...
+call node-sass --output-style compressed web/css/theme-dark.scss > _build/css/theme-dark.css
 
-REM statrting build...
+@echo on
+
+REM building theme-light.css...
+call node-sass --output-style compressed web/css/theme-light.scss > _build/css/theme-light.css
+
+@echo on
+
+REM starting main build...
 REM see more on targets on rid catalog: https://docs.microsoft.com/en-us/dotnet/core/rid-catalog
 REM also, check out wrap global tool: https://github.com/Hubert-Rybak/dotnet-warp
 
