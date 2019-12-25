@@ -11,11 +11,11 @@
   "scripts": {
     "install": "node _tools/install.js",
     "tsc-watch": "tsc -w",
-    "css-build-web": "node-sass --output-style compressed web/css/theme-dark.scss > web/css/theme-dark.css && node-sass --output-style compressed web/css/theme-light.scss > web/css/theme-light.css",
+    "css-build-web": "node-sass web/css/theme-dark.scss > web/css/theme-dark.css && node-sass web/css/theme-light.scss > web/css/theme-light.css",
     "run-dev": "cd web && http-server -o",
     "run-build": "cd _build && http-server -o",
     "build-web": "node .\\_tools\\build.js",
-    "build-all-exe": ".\\_tools\\build-exe.bat",
+    "build-all": ".\\_tools\\build-exe.bat",
     "build-win-exe-only": "dotnet clean app\\pgcode.csproj && dotnet publish -r win10-x64 -c Release /p:PublishSingleFile=true /p:PublishTrimmed=true -o __exe\\win10-x64 --nologo app\\pgcode.csproj"
   }
 }

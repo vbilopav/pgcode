@@ -1,6 +1,11 @@
 @echo off
+REM building css...
+call node-sass --output-style compressed web/css/theme-dark.scss ^> web/css/theme-dark.css
+call node-sass --output-style compressed web/css/theme-light.scss ^> web/css/theme-light.css
+
 REM building scripts...
 node _tools\build.js
+
 
 REM statrting build...
 REM see more on targets on rid catalog: https://docs.microsoft.com/en-us/dotnet/core/rid-catalog
