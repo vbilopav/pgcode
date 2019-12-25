@@ -160,4 +160,4 @@ class MonacoContextMenu extends ContextMenu {
     }
 }
 
-export {MonacoContextMenu, ContextMenuCtorArgs, MenuItemType };
+export {MonacoContextMenu, ContextMenuCtorArgs, MenuItemType};

@@ -26,14 +26,11 @@ define(["require", "exports", "app/_sys/storage", "app/ui/toolbar/toolbar", "app
     new (class {
         constructor() {
             this.initTheme();
-            this.initContainer();
-            const resizeIndex = this.initGrid();
-            this.toolbar = new toolbar_1.default(this.container.children[0], storage.toolbarPosition, this);
-            this.sidePanel = new side_panel_1.default(this.container.children[1]);
-            this.mainPanel = new main_panel_1.default(this.container.children[3]);
-            this.footer = new footer_1.default(this.container.children[4]);
-            this.initSplitter(resizeIndex);
+            this.initElements();
+            this.initSplitter(this.initGrid());
+            this.initComponents();
             this.subscribeEvents();
+            document.title = "pgcode";
         }
         moveToolbar(position) {
             if (storage.toolbarPosition === position) {
@@ -44,22 +41,16 @@ define(["require", "exports", "app/_sys/storage", "app/ui/toolbar/toolbar", "app
             this.splitter.updateIndexesAndAdjust(resizeIndex);
             return true;
         }
-        subscribeEvents() {
-            pubsub_1.subscribe(pubsub_1.STATE_CHANGED_ON, () => {
-                if (this.splitter.isDocked) {
-                    this.splitter.undock();
-                }
-            });
-            pubsub_1.subscribe(pubsub_1.STATE_CHANGED_OFF, () => {
-                if (!this.splitter.isDocked) {
-                    this.splitter.dock();
-                }
-            });
-            document.body.on("contextmenu", e => e.preventDefault());
+        initTheme() {
+            this.themeLink = document.getElementById("theme");
+            if (this.themeLink.attr("href") !== `css/theme-${storage.theme}.css`) {
+                this.themeLink.attr("href", `css/theme-${storage.theme}.css`);
+            }
         }
-        initContainer() {
+        initElements() {
             document.body.html(String.html `
-            <div>
+            <div class="overlay"></div>
+            <div class="container">
                 <div></div><!-- toolbar -->
                 <div></div><!-- side panel -->
                 <div></div><!-- main splitter vertical -->
@@ -67,19 +58,14 @@ define(["require", "exports", "app/_sys/storage", "app/ui/toolbar/toolbar", "app
                 <div></div><!-- footer -->
             </div>
         `);
-            this.container = document.body.firstElementChild;
+            this.overlay = document.body.find("div.overlay");
+            this.container = document.body.find("div.container");
         }
         initGrid() {
             const [areas, columns, resizeIndex] = getGridTemplateData();
             this.container.css("grid-template-areas", `'${areas}' 'footer footer footer footer`);
             this.container.css("grid-template-columns", columns);
             return resizeIndex;
-        }
-        initTheme() {
-            this.themeLink = document.getElementById("theme");
-            if (this.themeLink.attr("href") !== `css/theme-${storage.theme}.css`) {
-                this.themeLink.attr("href", `css/theme-${storage.theme}.css`);
-            }
         }
         initSplitter(resizeIndex) {
             this.splitter = new splitter_1.VerticalSplitter({
@@ -107,6 +93,25 @@ define(["require", "exports", "app/_sys/storage", "app/ui/toolbar/toolbar", "app
                     }
                 }
             }).start();
+        }
+        initComponents() {
+            this.toolbar = new toolbar_1.default(this.container.children[0], storage.toolbarPosition, this);
+            this.sidePanel = new side_panel_1.default(this.container.children[1]);
+            this.mainPanel = new main_panel_1.default(this.container.children[3]);
+            this.footer = new footer_1.default(this.container.children[4]);
+        }
+        subscribeEvents() {
+            pubsub_1.subscribe(pubsub_1.STATE_CHANGED_ON, () => {
+                if (this.splitter.isDocked) {
+                    this.splitter.undock();
+                }
+            });
+            pubsub_1.subscribe(pubsub_1.STATE_CHANGED_OFF, () => {
+                if (!this.splitter.isDocked) {
+                    this.splitter.dock();
+                }
+            });
+            document.body.on("contextmenu", e => e.preventDefault());
         }
     })();
 });

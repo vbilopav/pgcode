@@ -52,6 +52,7 @@ const
 new (class implements IMain {
     private themeLink: Element;
     private container: Element;
+    private overlay: Element;
     private toolbar: Toolbar;
     private sidePanel: SidePanel
     private splitter: Splitter;
@@ -60,16 +61,11 @@ new (class implements IMain {
 
     constructor() {
         this.initTheme();
-        this.initContainer();
-        const resizeIndex = this.initGrid();
-
-        this.toolbar = new Toolbar(this.container.children[0], storage.toolbarPosition, this);
-        this.sidePanel = new SidePanel(this.container.children[1]);
-        this.mainPanel = new MainPanel(this.container.children[3]);
-        this.footer = new Footer(this.container.children[4]);
-
-        this.initSplitter(resizeIndex);
+        this.initElements();
+        this.initSplitter(this.initGrid());
+        this.initComponents();
         this.subscribeEvents();
+        document.title = "pgcode";
     }
 
     public moveToolbar(position: Positions) : boolean {
@@ -82,23 +78,17 @@ new (class implements IMain {
         return true;
     }
 
-    private subscribeEvents() {
-        subscribe(STATE_CHANGED_ON, () => {
-            if (this.splitter.isDocked) {
-                this.splitter.undock();
-            }
-        });
-        subscribe(STATE_CHANGED_OFF, () => {
-            if (!this.splitter.isDocked) {
-                this.splitter.dock();
-            }
-        });
-        document.body.on("contextmenu", e => e.preventDefault());
+    private initTheme() {
+        this.themeLink = document.getElementById("theme");
+        if (this.themeLink.attr("href") !== `css/theme-${storage.theme}.css`) {
+            this.themeLink.attr("href", `css/theme-${storage.theme}.css`);
+        }
     }
 
-    private initContainer() {
+    private initElements() {
         document.body.html(String.html`
-            <div>
+            <div class="overlay"></div>
+            <div class="container">
                 <div></div><!-- toolbar -->
                 <div></div><!-- side panel -->
                 <div></div><!-- main splitter vertical -->
@@ -106,7 +96,8 @@ new (class implements IMain {
                 <div></div><!-- footer -->
             </div>
         `);
-        this.container = document.body.firstElementChild;
+        this.overlay = document.body.find("div.overlay");
+        this.container = document.body.find("div.container");
     }
 
     private initGrid() : number {
@@ -114,13 +105,6 @@ new (class implements IMain {
         this.container.css("grid-template-areas", `'${areas}' 'footer footer footer footer`);
         this.container.css("grid-template-columns", columns);
         return resizeIndex;
-    }
-
-    private initTheme() {
-        this.themeLink = document.getElementById("theme");
-        if (this.themeLink.attr("href") !== `css/theme-${storage.theme}.css`) {
-            this.themeLink.attr("href", `css/theme-${storage.theme}.css`);
-        }
     }
 
     private initSplitter(resizeIndex: number) {
@@ -149,6 +133,27 @@ new (class implements IMain {
                 }
             } as any
         } as SplitterCtorArgs).start() as VerticalSplitter;
+    }
+
+    private initComponents() {
+        this.toolbar = new Toolbar(this.container.children[0], storage.toolbarPosition, this);
+        this.sidePanel = new SidePanel(this.container.children[1]);
+        this.mainPanel = new MainPanel(this.container.children[3]);
+        this.footer = new Footer(this.container.children[4]);
+    }
+
+    private subscribeEvents() {
+        subscribe(STATE_CHANGED_ON, () => {
+            if (this.splitter.isDocked) {
+                this.splitter.undock();
+            }
+        });
+        subscribe(STATE_CHANGED_OFF, () => {
+            if (!this.splitter.isDocked) {
+                this.splitter.dock();
+            }
+        });
+        document.body.on("contextmenu", e => e.preventDefault());
     }
 })();
 
