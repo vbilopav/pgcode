@@ -2,16 +2,18 @@ define(["require", "exports", "app/_sys/pubsub"], function (require, exports, pu
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class ContextMenu {
-        constructor({ id, items, target, menuItemsCallback = items => items, }) {
-            let element = document.body.find("#" + id);
-            if (!element.length) {
-                element = this.menuElement(id);
-                document.body.append(element);
+        constructor({ id, items, target, event = "contextmenu", menuItemsCallback = items => items, }) {
+            this.element = document.body.find("#" + id);
+            if (!this.element.length) {
+                this.element = this.menuElement(id);
+                document.body.append(this.element);
             }
-            const container = element.find("ul");
+            this.actions = this.getActionsContainerElement(this.element);
             const clear = () => {
-                element.hideElement();
-                container.html("");
+                if (this.isVisible) {
+                    this.element.hideElement();
+                    this.actions.html("");
+                }
             };
             this.items = {};
             let count = 0;
@@ -21,10 +23,14 @@ define(["require", "exports", "app/_sys/pubsub"], function (require, exports, pu
                 let menuItem = item;
                 this.items[!menuItem.id ? count.toString() : menuItem.id] = item;
             }
-            element.on("click", () => clear());
+            this.element.on("click", () => clear());
             window.on("resize", () => clear());
+            let skipOpen = false;
             window.on("mousedown", () => {
-                if (!element.find(":hover").length) {
+                if (!this.element.find(":hover").length) {
+                    if (this.target.find(":hover").length && this.isVisible && event === "click") {
+                        skipOpen = true;
+                    }
                     clear();
                 }
             }).on("keyup", (e) => {
@@ -32,25 +38,23 @@ define(["require", "exports", "app/_sys/pubsub"], function (require, exports, pu
                     clear();
                 }
             });
-            target.on("contextmenu", (e) => {
-                container.html("");
+            this.target = target.on(event, (e) => {
+                if (skipOpen) {
+                    skipOpen = false;
+                    return;
+                }
+                this.actions.html("");
                 for (let item of menuItemsCallback(Object.values(this.items).sort((a, b) => a.order - b.order))) {
-                    container.append(item.element);
+                    this.actions.append(item.element);
                 }
-                element.css("top", e.y + "px").css("left", e.x + "px").showElement();
-                const rect = container.getBoundingClientRect(), winWidth = window.innerWidth, winHeight = window.innerHeight, right = e.x + rect.width, bottom = rect.top + rect.height;
-                if (right >= (winWidth + 1)) {
-                    let left = (winWidth - rect.width - 1);
-                    element.css("left", (left > 0 ? left : 0) + "px");
-                }
-                if (bottom >= (winHeight + 1)) {
-                    let top = e.y - rect.height - 1;
-                    element.css("top", (top > 0 ? top : 0) + "px");
-                }
+                this.element.css("top", e.y + "px").css("left", e.x + "px").showElement();
+                this.adjust(e);
                 e.preventDefault();
             });
             pubsub_1.subscribe(pubsub_1.CLOSE_CONTEXT_MENU, () => clear());
         }
+        menuSplitterElement() { return new Element(); }
+        ;
         triggerById(id, args) {
             const item = this.items[id];
             if (item) {
@@ -64,6 +68,23 @@ define(["require", "exports", "app/_sys/pubsub"], function (require, exports, pu
             this.items[id] = newItem;
             return this;
         }
+        adjust(e) {
+            const rect = this.actions.getBoundingClientRect(), winWidth = window.innerWidth, winHeight = window.innerHeight, right = e.x + rect.width, bottom = rect.top + rect.height;
+            if (right >= (winWidth + 1)) {
+                let left = (winWidth - rect.width - 1);
+                this.element.css("left", (left > 0 ? left : 0) + "px");
+            }
+            if (bottom >= (winHeight + 1)) {
+                let top = e.y - rect.height - 1;
+                this.element.css("top", (top > 0 ? top : 0) + "px");
+            }
+        }
+        getActionsContainerElement(element) {
+            return element;
+        }
+        get isVisible() {
+            return this.element.css("display") !== "none";
+        }
         updateItemElement(item) {
             let menuItem = item;
             if (item.splitter) {
@@ -76,7 +97,11 @@ define(["require", "exports", "app/_sys/pubsub"], function (require, exports, pu
             }
         }
     }
+    exports.ContextMenu = ContextMenu;
     class MonacoContextMenu extends ContextMenu {
+        getActionsContainerElement(element) {
+            return element.find("ul");
+        }
         menuElement(id) {
             return String.html `
         <div id="${id}" style="display: none; position: fixed;">

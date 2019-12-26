@@ -7,7 +7,7 @@
     display: grid;
     /*grid-template-columns: auto auto auto;*/
     grid-template-columns: auto auto 27px;
-    grid-template-areas: 'conns gap feed';
+    grid-template-areas: 'connections gap feed';
 
     & > div.clickable {
         cursor: pointer;
@@ -24,8 +24,8 @@
         overflow-x: hidden;
     }
 
-    & > div.conns {
-        grid-area: conns;
+    & > div.connections {
+        grid-area: connections;
         padding-left: 10px;
         padding-right: 10px;
         background-color: $connections-selector-background-color;
@@ -34,10 +34,13 @@
         width: fit-content;
         max-width: 155px;
     }
-    & > div.conns:hover {
+    & > div.connections:hover {
         background-color: $connections-selector-hover-background-color;
     }
-    & > div.conns > span {
+    & > div.connections > span.icon-database {
+        margin-right: 3px;
+    }
+    & > div.connections > span.icon-database {
         margin-right: 3px;
     }
 
@@ -50,4 +53,12 @@
     & > div.feed:hover {
         opacity: 1;
     }
+}
+
+.footer-menu {
+    display: none; 
+    position: fixed;
+    background-color: $connections-selector-background-color;
+    color:  $connections-selector-color;
+    display: grid;
 }

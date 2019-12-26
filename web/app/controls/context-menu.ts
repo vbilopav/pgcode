@@ -24,32 +24,39 @@ interface ContextMenuCtorArgs {
     id: string,
     items: Array<MenuItemType>,
     target: Element,
+    event: "contextmenu" | "click",
     menuItemsCallback: (items: Array<MenuItemType>) => Array<MenuItemType>
 }
 
 abstract class ContextMenu {
 
     protected items: {[id: string] : MenuItemType};
+    protected element: Element;
+    protected actions: Element;
+    protected target: Element;
     protected abstract menuElement(id: string): Element;
-    protected abstract menuSplitterElement(): Element;
-    protected abstract menuItemElement(menuItem: ContextMenuItem): Element
+    protected menuSplitterElement(): Element { return new Element() };
+    protected abstract menuItemElement(menuItem: ContextMenuItem): Element;
 
     constructor({
         id,
         items,
         target,
+        event = "contextmenu",
         menuItemsCallback = items => items,
     }: ContextMenuCtorArgs) {
 
-        let element = document.body.find("#" + id);
-        if (!element.length) {
-            element = this.menuElement(id) as ElementResult;
-            document.body.append(element);
+        this.element = document.body.find("#" + id);
+        if (!(this.element as ElementResult).length) {
+            this.element = this.menuElement(id) as ElementResult;
+            document.body.append(this.element);
         }
-        const container = element.find("ul");
+        this.actions = this.getActionsContainerElement(this.element);
         const clear = () => {
-            element.hideElement();
-            container.html("");
+            if (this.isVisible) {
+                this.element.hideElement();
+                this.actions.html("");
+            }
         };
 
         this.items = {};
@@ -61,11 +68,14 @@ abstract class ContextMenu {
             this.items[!menuItem.id ? count.toString() : menuItem.id] = item;
         }
 
-        element.on("click", () => clear());
+        this.element.on("click", () => clear());
         window.on("resize", () => clear());
-
+        let skipOpen = false;
         window.on("mousedown", () => {
-            if (!element.find(":hover").length) {
+            if (!this.element.find(":hover").length) {
+                if (this.target.find(":hover").length && this.isVisible && event === "click") {
+                    skipOpen = true;
+                }
                 clear();
             }
         }).on("keyup", (e: KeyboardEvent) => {
@@ -74,28 +84,17 @@ abstract class ContextMenu {
             }
         });
 
-        target.on("contextmenu", (e: MouseEvent) => {
-            container.html("");
+        this.target = target.on(event, (e: MouseEvent) => {
+            if (skipOpen) {
+                skipOpen = false;
+                return;
+            }
+            this.actions.html("");
             for(let item of menuItemsCallback(Object.values(this.items).sort((a, b) => a.order - b.order))) {
-                container.append(item.element);
+                this.actions.append(item.element);
             }
-            ((element.css("top", e.y + "px") as Element).css("left", e.x + "px") as Element).showElement();
-            
-            const
-                rect = container.getBoundingClientRect(),
-                winWidth = window.innerWidth,
-                winHeight = window.innerHeight,
-                right = e.x + rect.width,
-                bottom = rect.top + rect.height;
-            
-            if (right >= (winWidth + 1)) {
-                let left = (winWidth - rect.width - 1);
-                element.css("left", (left > 0 ? left : 0) + "px");
-            }
-            if (bottom >= (winHeight + 1)) {
-                let top = e.y - rect.height - 1;
-                element.css("top", (top > 0 ? top : 0) + "px");
-            }
+            ((this.element.css("top", e.y + "px") as Element).css("left", e.x + "px") as Element).showElement();
+            this.adjust(e);
             e.preventDefault();
         });
 
@@ -117,6 +116,32 @@ abstract class ContextMenu {
         return this;
     }
 
+    protected adjust(e: MouseEvent) {
+        const
+            rect = this.actions.getBoundingClientRect(),
+            winWidth = window.innerWidth,
+            winHeight = window.innerHeight,
+            right = e.x + rect.width,
+            bottom = rect.top + rect.height;
+        
+        if (right >= (winWidth + 1)) {
+            let left = (winWidth - rect.width - 1);
+            this.element.css("left", (left > 0 ? left : 0) + "px");
+        }
+        if (bottom >= (winHeight + 1)) {
+            let top = e.y - rect.height - 1;
+            this.element.css("top", (top > 0 ? top : 0) + "px");
+        }
+    }
+
+    protected getActionsContainerElement(element: Element): Element {
+        return element;
+    }
+
+    protected get isVisible() : boolean {
+        return this.element.css("display") !== "none";
+    }
+
     private updateItemElement(item: MenuItemType) {
         let menuItem: ContextMenuItem = item as ContextMenuItem;
         if ((item as ContextMenuSplitter).splitter) {
@@ -130,6 +155,10 @@ abstract class ContextMenu {
 }
 
 class MonacoContextMenu extends ContextMenu {
+    protected getActionsContainerElement(element: Element): Element {
+        return element.find("ul");
+    }
+
     protected menuElement(id: string): Element {
         return String.html`
         <div id="${id}" style="display: none; position: fixed;">
@@ -160,4 +189,4 @@ class MonacoContextMenu extends ContextMenu {
     }
 }
 
-export {MonacoContextMenu, ContextMenuCtorArgs, MenuItemType};
+export {ContextMenu, MonacoContextMenu, ContextMenuCtorArgs, MenuItemType, ContextMenuItem};
