@@ -9,6 +9,7 @@ import { Positions, IMain } from "app/types";
 enum ButtonRoles { switch="switch", toggle="toggle" };
 const 
     isInRole: (e: Element, role: ButtonRoles) => boolean = (e, role) => e.dataAttr("role") === role,
+    isSwitch: (e: Element) => boolean = e => isInRole(e, ButtonRoles.switch),
     moveText = (position: Positions) => position === Positions.left ? "Move Toolbar to Right" : "Move Toolbar to Left";
 
 interface IStorage {
@@ -18,12 +19,18 @@ interface IStorage {
     funcs: boolean;
     search: boolean;
     previousKey: string;
-    terminal: boolean;
+    pgcode: boolean;
 }
 
 const 
     storage = new Storage({
-        docs: false, tables: false, views: false, funcs: false, search: false, previousKey: null, terminal: false
+        docs: false, 
+        tables: false, 
+        views: false,
+        funcs: false, 
+        search: false, 
+        previousKey: "docs", 
+        pgcode: false
     }, 
     "state", 
     (name, value) => {
@@ -105,7 +112,7 @@ export default class  {
     private sidebarDocked() {
         this.toolbar.addClass(docked);
         for(let btn of this.buttons) {
-            if (btn.hasClass(active)) {
+            if (btn.hasClass(active) && isSwitch(btn)) {
                 this.menu.updateMenuItem(btn.dataAttr("key"), {checked: false});
             }
         }
@@ -147,36 +154,42 @@ export default class  {
             e.addClass(active);
             setTimeout(() => publish(STATE_CHANGED + key, key, true), 0);
         }
-        if (e.dataAttr("role") === ButtonRoles.switch) {
+        if (isSwitch(e)) {
             this.menu.updateMenuItem(key, {checked: state});
         }
     }
 
     private buttonClicked(e: HTMLElement) {
         const key = e.dataAttr("key");
+        let switchRole = isSwitch(e);
+        
         const toggle = (state?: boolean): void => {
             if (state === undefined) {
                 state = e.hasClass(active);
             }
             if (state) {
                 e.removeClass(active);
-                storage.previousKey = key;
+                if (switchRole) {
+                    storage.previousKey = key;
+                }
             } else {
                 e.addClass(active);
             }
             state = !state;
             storage[key] = state;
             publish(STATE_CHANGED + key, key, state);
-            this.menu.updateMenuItem(key, {checked: state});
+            if (switchRole) {
+                this.menu.updateMenuItem(key, {checked: state});
+            }
         };
 
-        if (isInRole(e, ButtonRoles.toggle)) {
+        if (!switchRole) {
             toggle();
         } else {
             const isDocked = this.toolbar.hasClass(docked);
 
             for(let btn of this.buttons) {
-                if (isInRole(btn, ButtonRoles.switch) && e.id !== btn.id) {
+                if (isSwitch(btn) && e.id !== btn.id) {
                     const key = btn.dataAttr("key");
                     if (storage[key]) {
                         storage[key] = false;

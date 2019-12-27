@@ -136,10 +136,10 @@ body > div.container {
   right: 0;
   left: initial; }
 
-.toolbar.docked > div.active, .toolbar.docked > div.active > div {
+.toolbar.docked > div.active:not(.btn-pgcode), .toolbar.docked > div.active > div {
   color: #ADADAD; }
 
-.toolbar.docked > div.active > div.marker {
+.toolbar.docked > div.active:not(.btn-pgcode) > div.marker {
   display: none; }
 
 .toolbar::-webkit-scrollbar {

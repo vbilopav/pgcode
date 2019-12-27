@@ -7,9 +7,15 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/contro
         ButtonRoles["toggle"] = "toggle";
     })(ButtonRoles || (ButtonRoles = {}));
     ;
-    const isInRole = (e, role) => e.dataAttr("role") === role, moveText = (position) => position === types_1.Positions.left ? "Move Toolbar to Right" : "Move Toolbar to Left";
+    const isInRole = (e, role) => e.dataAttr("role") === role, isSwitch = e => isInRole(e, ButtonRoles.switch), moveText = (position) => position === types_1.Positions.left ? "Move Toolbar to Right" : "Move Toolbar to Left";
     const storage = new storage_1.default({
-        docs: false, tables: false, views: false, funcs: false, search: false, previousKey: null, terminal: false
+        docs: false,
+        tables: false,
+        views: false,
+        funcs: false,
+        search: false,
+        previousKey: "docs",
+        pgcode: false
     }, "state", (name, value) => {
         if (name !== "previousKey") {
             return JSON.parse(value);
@@ -76,7 +82,7 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/contro
         sidebarDocked() {
             this.toolbar.addClass(docked);
             for (let btn of this.buttons) {
-                if (btn.hasClass(active)) {
+                if (btn.hasClass(active) && isSwitch(btn)) {
                     this.menu.updateMenuItem(btn.dataAttr("key"), { checked: false });
                 }
             }
@@ -117,19 +123,22 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/contro
                 e.addClass(active);
                 setTimeout(() => pubsub_1.publish(pubsub_1.STATE_CHANGED + key, key, true), 0);
             }
-            if (e.dataAttr("role") === ButtonRoles.switch) {
+            if (isSwitch(e)) {
                 this.menu.updateMenuItem(key, { checked: state });
             }
         }
         buttonClicked(e) {
             const key = e.dataAttr("key");
+            let switchRole = isSwitch(e);
             const toggle = (state) => {
                 if (state === undefined) {
                     state = e.hasClass(active);
                 }
                 if (state) {
                     e.removeClass(active);
-                    storage.previousKey = key;
+                    if (switchRole) {
+                        storage.previousKey = key;
+                    }
                 }
                 else {
                     e.addClass(active);
@@ -137,15 +146,17 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/contro
                 state = !state;
                 storage[key] = state;
                 pubsub_1.publish(pubsub_1.STATE_CHANGED + key, key, state);
-                this.menu.updateMenuItem(key, { checked: state });
+                if (switchRole) {
+                    this.menu.updateMenuItem(key, { checked: state });
+                }
             };
-            if (isInRole(e, ButtonRoles.toggle)) {
+            if (!switchRole) {
                 toggle();
             }
             else {
                 const isDocked = this.toolbar.hasClass(docked);
                 for (let btn of this.buttons) {
-                    if (isInRole(btn, ButtonRoles.switch) && e.id !== btn.id) {
+                    if (isSwitch(btn) && e.id !== btn.id) {
                         const key = btn.dataAttr("key");
                         if (storage[key]) {
                             storage[key] = false;

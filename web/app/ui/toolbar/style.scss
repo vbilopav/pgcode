@@ -71,10 +71,10 @@
 }
 
 .toolbar.docked {
-    & > div.active, & > div.active > div {
+    & > div.active:not(.btn-pgcode), & > div.active > div {
         color: $control-color;
     }
-    & > div.active > div.marker {
+    & > div.active:not(.btn-pgcode) > div.marker {
         display: none;
     }
 } 
@@ -87,6 +87,6 @@
     background: transparent;
 }
 .toolbar::-webkit-scrollbar-thumb {
-    box-shadow: inset 0 0 5px $scroll-color; 
+    box-shadow: inset 0 0 5px $scroll-color;   
     border-radius: 2px;
 } 
