@@ -26,10 +26,13 @@ interface Element {
      */
     attr(key: string, value?: string , toggle?: boolean): String | Element
     /**
-     * - If `property` is only parameter, returns value of instance css property (does not apply to `NodeList` and `HTMLModelArray`).
-     * - If `value` is present, sets instance css property to that value and returns same instance.
+     * returns value of instance css property (does not apply to `NodeList` and `HTMLModelArray`).
      */
-    css(property: string, value?: string): String | Element
+    css(property: string): String
+    /**
+     * sets instance css property to value and returns same instance.
+     */
+    css(property: string, value: string): Element
     /**
      * - If `key` is only parameter, returns value of instance of data attribute (does not apply to `NodeList` and `HTMLModelArray`).
      * - If `value` is present, sets instance css property to that value and returns same instance.

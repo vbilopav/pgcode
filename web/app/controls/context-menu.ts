@@ -52,13 +52,7 @@ abstract class ContextMenu {
             document.body.append(this.element);
         }
         this.actions = this.getActionsContainerElement(this.element);
-        const clear = () => {
-            if (this.isVisible) {
-                this.element.hideElement();
-                this.actions.html("");
-            }
-        };
-
+        
         this.items = {};
         let count = 0;
         for(let item of items) {
@@ -68,37 +62,42 @@ abstract class ContextMenu {
             this.items[!menuItem.id ? count.toString() : menuItem.id] = item;
         }
 
-        this.element.on("click", () => clear());
-        window.on("resize", () => clear());
-        let skipOpen = false;
-        window.on("mousedown", () => {
-            if (!this.element.find(":hover").length) {
-                if (this.target.find(":hover").length && this.isVisible && event === "click") {
-                    skipOpen = true;
-                }
-                clear();
+        this.element.on("click", () => this.close());
+        window.on("resize", () => this.close());
+        window.on("mousedown", (e: MouseEvent) => {
+            let path = e.composedPath();
+            if (!path.includes(this.element) && !path.includes(this.target)) {
+                this.close();
             }
         }).on("keyup", (e: KeyboardEvent) => {
             if (e.keyCode === 27) {
-                clear();
+                this.close();
             }
         });
 
         this.target = target.on(event, (e: MouseEvent) => {
-            if (skipOpen) {
-                skipOpen = false;
+            if (this.isVisible) {
+                this.close();
                 return;
             }
             this.actions.html("");
             for(let item of menuItemsCallback(Object.values(this.items).sort((a, b) => a.order - b.order))) {
                 this.actions.append(item.element);
             }
-            ((this.element.css("top", e.y + "px") as Element).css("left", e.x + "px") as Element).showElement();
+            this.element.css("top", e.y + "px").css("left", e.x + "px").showElement();
             this.adjust(e);
             e.preventDefault();
         });
 
-        subscribe(CLOSE_CONTEXT_MENU, () => clear());
+        subscribe(CLOSE_CONTEXT_MENU, () => this.close());
+    }
+
+    public close() : void {
+        if (!this.isVisible) {
+            return;
+        }
+        this.element.hideElement();
+        this.actions.html("");
     }
 
     public triggerById(id: string, args?: any) {
@@ -139,7 +138,10 @@ abstract class ContextMenu {
     }
 
     protected get isVisible() : boolean {
-        return this.element.css("display") !== "none";
+        if (this.actions.childNodes.length === 1 && this.actions.childNodes[0].nodeType === Node.TEXT_NODE) {
+            return false;
+        }
+        return this.element.css("display") !== "none" && this.actions.childNodes.length !== 0;
     }
 
     private updateItemElement(item: MenuItemType) {

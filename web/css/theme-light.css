@@ -160,7 +160,6 @@ body > div.container {
   background-color: #007ACC;
   user-select: none;
   display: grid;
-  /*grid-template-columns: auto auto auto;*/
   grid-template-columns: auto auto 27px;
   grid-template-areas: 'connections gap feed'; }
   .footer > div.clickable {
@@ -186,8 +185,6 @@ body > div.container {
     background-color: #329171; }
   .footer > div.connections > span.icon-database {
     margin-right: 3px; }
-  .footer > div.connections > span.icon-database {
-    margin-right: 3px; }
   .footer > div.feed {
     grid-area: feed;
     text-align: center;
@@ -201,7 +198,30 @@ body > div.container {
   position: fixed;
   background-color: #16825d;
   color: #c1c1c1;
-  display: grid; }
+  display: grid;
+  max-width: 155px;
+  width: fit-content;
+  box-shadow: 0 2px 8px #000;
+  clip-path: inset(-5px -5px 0 -5px); }
+
+.footer-menu-item {
+  line-height: 1.9em;
+  background: none;
+  height: 2em;
+  align-items: center;
+  margin: 1px;
+  padding-right: 10px;
+  padding-left: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  cursor: pointer; }
+
+.footer-menu-item:hover:not(.disabled) {
+  background-color: #094771; }
+
+#feed-footer-menu.footer-menu {
+  background-color: #007ACC; }
 
 .main-panel {
   grid-area: main-panel; }

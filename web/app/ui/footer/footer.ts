@@ -4,20 +4,21 @@ class FooterContextMenu extends ContextMenu {
     protected adjust() {
         const target = this.target.getBoundingClientRect();
         const element = this.element.getBoundingClientRect();
-        (this.element.css("top", (target.top - element.height) + "px") as Element).css("left", target.left + "px");
+        let left: number;
+        if (target.left + element.width > window.innerWidth) {
+            left = window.innerWidth - element.width;
+        } else {
+            left = target.left;
+        }
+        this.element.css("top", (target.top - element.height) + "px").css("left", left + "px").css("min-width", target.width + "px");
     }
 
     protected menuElement(id: string): Element {
-        return String.html`
-        <div id="${id}" class="footer-menu">
-        </div>`.toElement();
+        return String.html`<div id="${id}" class="footer-menu"></div>`.toElement();
     }
 
     protected menuItemElement(menuItem: ContextMenuItem): Element {
-        return String.html`
-        <div class="footer-menu-item">
-            ${menuItem.text}
-        </div>`.toElement();
+        return String.html`<div class="footer-menu-item">${menuItem.text}</div>`.toElement();
     }
 }
 
@@ -38,7 +39,14 @@ export default class  {
             id: "conn-footer-menu",
             event: "click",
             target: btnConnections,
-            items: [{text: "item1"}, {text: "item2"}, {text: "item3"}, {text: "item4"}]
+            items: [{text: "item1", action: ()=>{}}, {text: "item2", action: ()=>{}}, {text: "item3", action: ()=>{}}, {text: "item4", action: ()=>{}}]
+        } as ContextMenuCtorArgs);
+
+        new FooterContextMenu({
+            id: "feed-footer-menu",
+            event: "click",
+            target: btnFeed,
+            items: [{text: "Open New Issue", action: ()=>{}}, {text: "Tweet Your Feedback", action: ()=>{}}]
         } as ContextMenuCtorArgs);
     }
 }

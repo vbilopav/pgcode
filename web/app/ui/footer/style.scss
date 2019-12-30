@@ -5,7 +5,6 @@
     background-color: $footer-background-color;
     user-select: none;
     display: grid;
-    /*grid-template-columns: auto auto auto;*/
     grid-template-columns: auto auto 27px;
     grid-template-areas: 'connections gap feed';
 
@@ -40,9 +39,6 @@
     & > div.connections > span.icon-database {
         margin-right: 3px;
     }
-    & > div.connections > span.icon-database {
-        margin-right: 3px;
-    }
 
     & > div.feed {
         grid-area: feed;
@@ -61,4 +57,30 @@
     background-color: $connections-selector-background-color;
     color:  $connections-selector-color;
     display: grid;
+    max-width: 155px;
+    width: fit-content;
+    box-shadow: 0 2px 8px #000;
+    clip-path: inset(-5px -5px 0 -5px);
+}
+
+.footer-menu-item {
+    line-height: 1.9em;
+    background: none;
+    height: 2em;
+    align-items: center;
+    margin: 1px;
+    padding-right: 10 px;
+    padding-left: 10px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.footer-menu-item:hover:not(.disabled) {
+    background-color: $ctx-menu-hover-color;
+}
+
+#feed-footer-menu.footer-menu {
+    background-color: $footer-background-color;
 }

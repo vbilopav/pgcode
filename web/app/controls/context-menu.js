@@ -9,12 +9,6 @@ define(["require", "exports", "app/_sys/pubsub"], function (require, exports, pu
                 document.body.append(this.element);
             }
             this.actions = this.getActionsContainerElement(this.element);
-            const clear = () => {
-                if (this.isVisible) {
-                    this.element.hideElement();
-                    this.actions.html("");
-                }
-            };
             this.items = {};
             let count = 0;
             for (let item of items) {
@@ -23,24 +17,21 @@ define(["require", "exports", "app/_sys/pubsub"], function (require, exports, pu
                 let menuItem = item;
                 this.items[!menuItem.id ? count.toString() : menuItem.id] = item;
             }
-            this.element.on("click", () => clear());
-            window.on("resize", () => clear());
-            let skipOpen = false;
-            window.on("mousedown", () => {
-                if (!this.element.find(":hover").length) {
-                    if (this.target.find(":hover").length && this.isVisible && event === "click") {
-                        skipOpen = true;
-                    }
-                    clear();
+            this.element.on("click", () => this.close());
+            window.on("resize", () => this.close());
+            window.on("mousedown", (e) => {
+                let path = e.composedPath();
+                if (!path.includes(this.element) && !path.includes(this.target)) {
+                    this.close();
                 }
             }).on("keyup", (e) => {
                 if (e.keyCode === 27) {
-                    clear();
+                    this.close();
                 }
             });
             this.target = target.on(event, (e) => {
-                if (skipOpen) {
-                    skipOpen = false;
+                if (this.isVisible) {
+                    this.close();
                     return;
                 }
                 this.actions.html("");
@@ -51,10 +42,17 @@ define(["require", "exports", "app/_sys/pubsub"], function (require, exports, pu
                 this.adjust(e);
                 e.preventDefault();
             });
-            pubsub_1.subscribe(pubsub_1.CLOSE_CONTEXT_MENU, () => clear());
+            pubsub_1.subscribe(pubsub_1.CLOSE_CONTEXT_MENU, () => this.close());
         }
         menuSplitterElement() { return new Element(); }
         ;
+        close() {
+            if (!this.isVisible) {
+                return;
+            }
+            this.element.hideElement();
+            this.actions.html("");
+        }
         triggerById(id, args) {
             const item = this.items[id];
             if (item) {
@@ -83,7 +81,10 @@ define(["require", "exports", "app/_sys/pubsub"], function (require, exports, pu
             return element;
         }
         get isVisible() {
-            return this.element.css("display") !== "none";
+            if (this.actions.childNodes.length === 1 && this.actions.childNodes[0].nodeType === Node.TEXT_NODE) {
+                return false;
+            }
+            return this.element.css("display") !== "none" && this.actions.childNodes.length !== 0;
         }
         updateItemElement(item) {
             let menuItem = item;
