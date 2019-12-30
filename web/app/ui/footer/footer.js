@@ -42,7 +42,13 @@ define(["require", "exports", "app/controls/context-menu"], function (require, e
                 id: "feed-footer-menu",
                 event: "click",
                 target: btnFeed,
-                items: [{ text: "Open New Issue", action: () => { } }, { text: "Tweet Your Feedback", action: () => { } }]
+                items: [{
+                        text: "Open New Issue",
+                        action: () => window.open("https://github.com/vbilopav/sfcode/issues/new", "_blank").focus()
+                    }, {
+                        text: "Tweet Your Feedback",
+                        action: () => window.open("https://twitter.com/intent/tweet?text=" + encodeURI("Say something about @pgcode") + "&hashtags=pgcode", "_blank").focus()
+                    }]
             });
         }
     }
