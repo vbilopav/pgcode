@@ -8,6 +8,7 @@ interface ContextMenuBase {
 interface ContextMenuItem extends ContextMenuBase {
     id?: string, 
     text: string, 
+    data?: string, 
     checked?: boolean, 
     keyBindingsInfo?: string, 
     args?: any, 
@@ -25,7 +26,9 @@ interface ContextMenuCtorArgs {
     items: Array<MenuItemType>,
     target: Element,
     event: "contextmenu" | "click",
-    menuItemsCallback: (items: Array<MenuItemType>) => Array<MenuItemType>
+    menuItemsCallback: (items: Array<MenuItemType>) => Array<MenuItemType>,
+    onOpen: () => any,
+    onClose: () => any;
 }
 
 abstract class ContextMenu {
@@ -37,6 +40,7 @@ abstract class ContextMenu {
     protected abstract menuElement(id: string): Element;
     protected menuSplitterElement(): Element { return new Element() };
     protected abstract menuItemElement(menuItem: ContextMenuItem): Element;
+    protected onClose: () => any;
 
     constructor({
         id,
@@ -44,6 +48,8 @@ abstract class ContextMenu {
         target,
         event = "contextmenu",
         menuItemsCallback = items => items,
+        onOpen = () => {},
+        onClose = () => {}
     }: ContextMenuCtorArgs) {
 
         this.element = document.body.find("#" + id);
@@ -52,7 +58,7 @@ abstract class ContextMenu {
             document.body.append(this.element);
         }
         this.actions = this.getActionsContainerElement(this.element);
-        
+        this.onClose = onClose;
         this.items = {};
         let count = 0;
         for(let item of items) {
@@ -87,6 +93,7 @@ abstract class ContextMenu {
             this.element.css("top", e.y + "px").css("left", e.x + "px").showElement();
             this.adjust(e);
             e.preventDefault();
+            onOpen();
         });
 
         subscribe(CLOSE_CONTEXT_MENU, () => this.close());
@@ -98,6 +105,7 @@ abstract class ContextMenu {
         }
         this.element.hideElement();
         this.actions.html("");
+        this.onClose();
     }
 
     public triggerById(id: string, args?: any) {

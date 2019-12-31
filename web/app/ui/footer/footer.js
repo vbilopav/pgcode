@@ -48,7 +48,9 @@ define(["require", "exports", "app/controls/context-menu"], function (require, e
                     }, {
                         text: "Tweet Your Feedback",
                         action: () => window.open("https://twitter.com/intent/tweet?text=" + encodeURI("Say something about @pgcode") + "&hashtags=pgcode", "_blank").focus()
-                    }]
+                    }],
+                onOpen: () => btnFeed.html("&#128522;"),
+                onClose: () => btnFeed.html("&#128526;")
             });
         }
     }

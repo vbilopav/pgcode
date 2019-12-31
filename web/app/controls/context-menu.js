@@ -2,13 +2,14 @@ define(["require", "exports", "app/_sys/pubsub"], function (require, exports, pu
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class ContextMenu {
-        constructor({ id, items, target, event = "contextmenu", menuItemsCallback = items => items, }) {
+        constructor({ id, items, target, event = "contextmenu", menuItemsCallback = items => items, onOpen = () => { }, onClose = () => { } }) {
             this.element = document.body.find("#" + id);
             if (!this.element.length) {
                 this.element = this.menuElement(id);
                 document.body.append(this.element);
             }
             this.actions = this.getActionsContainerElement(this.element);
+            this.onClose = onClose;
             this.items = {};
             let count = 0;
             for (let item of items) {
@@ -41,6 +42,7 @@ define(["require", "exports", "app/_sys/pubsub"], function (require, exports, pu
                 this.element.css("top", e.y + "px").css("left", e.x + "px").showElement();
                 this.adjust(e);
                 e.preventDefault();
+                onOpen();
             });
             pubsub_1.subscribe(pubsub_1.CLOSE_CONTEXT_MENU, () => this.close());
         }
@@ -52,6 +54,7 @@ define(["require", "exports", "app/_sys/pubsub"], function (require, exports, pu
             }
             this.element.hideElement();
             this.actions.html("");
+            this.onClose();
         }
         triggerById(id, args) {
             const item = this.items[id];
