@@ -2,15 +2,16 @@ import { ContextMenu, ContextMenuCtorArgs, ContextMenuItem } from "app/controls/
 
 class FooterContextMenu extends ContextMenu {
     protected adjust() {
+        this.element.css("top", "0").css("left", "0").visible(false).showElement();
         const target = this.target.getBoundingClientRect();
         const element = this.element.getBoundingClientRect();
         let left: number;
-        if (target.left + element.width > window.innerWidth) {
+        if (target.left + element.width >= window.innerWidth) {
             left = window.innerWidth - element.width;
         } else {
             left = target.left;
         }
-        this.element.css("top", (target.top - element.height) + "px").css("left", left + "px").css("min-width", target.width + "px");
+        this.element.css("top", (target.top - element.height) + "px").css("left", left + "px").css("min-width", target.width + "px").visible(true);
     }
 
     protected menuElement(id: string): Element {

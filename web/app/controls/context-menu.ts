@@ -72,7 +72,7 @@ abstract class ContextMenu {
         window.on("resize", () => this.close());
         window.on("mousedown", (e: MouseEvent) => {
             let path = e.composedPath();
-            if (!path.includes(this.element) && !path.includes(this.target)) {
+            if ((!path.includes(this.element) && !path.includes(this.target) && event === "click") || (!path.includes(this.element) && event !== "click")) {
                 this.close();
             }
         }).on("keyup", (e: KeyboardEvent) => {
@@ -90,7 +90,6 @@ abstract class ContextMenu {
             for(let item of menuItemsCallback(Object.values(this.items).sort((a, b) => a.order - b.order))) {
                 this.actions.append(item.element);
             }
-            this.element.css("top", e.y + "px").css("left", e.x + "px").showElement();
             this.adjust(e);
             e.preventDefault();
             onOpen();
@@ -124,13 +123,15 @@ abstract class ContextMenu {
     }
 
     protected adjust(e: MouseEvent) {
+        this.element.css("top", e.y + "px").css("left", e.x + "px").visible(false).showElement();
+
         const
             rect = this.actions.getBoundingClientRect(),
             winWidth = window.innerWidth,
             winHeight = window.innerHeight,
             right = e.x + rect.width,
             bottom = rect.top + rect.height;
-        
+
         if (right >= (winWidth + 1)) {
             let left = (winWidth - rect.width - 1);
             this.element.css("left", (left > 0 ? left : 0) + "px");
@@ -139,6 +140,7 @@ abstract class ContextMenu {
             let top = e.y - rect.height - 1;
             this.element.css("top", (top > 0 ? top : 0) + "px");
         }
+        this.element.visible(true);
     }
 
     protected getActionsContainerElement(element: Element): Element {

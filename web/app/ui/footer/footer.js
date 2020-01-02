@@ -3,16 +3,17 @@ define(["require", "exports", "app/controls/context-menu"], function (require, e
     Object.defineProperty(exports, "__esModule", { value: true });
     class FooterContextMenu extends context_menu_1.ContextMenu {
         adjust() {
+            this.element.css("top", "0").css("left", "0").visible(false).showElement();
             const target = this.target.getBoundingClientRect();
             const element = this.element.getBoundingClientRect();
             let left;
-            if (target.left + element.width > window.innerWidth) {
+            if (target.left + element.width >= window.innerWidth) {
                 left = window.innerWidth - element.width;
             }
             else {
                 left = target.left;
             }
-            this.element.css("top", (target.top - element.height) + "px").css("left", left + "px").css("min-width", target.width + "px");
+            this.element.css("top", (target.top - element.height) + "px").css("left", left + "px").css("min-width", target.width + "px").visible(true);
         }
         menuElement(id) {
             return String.html `<div id="${id}" class="footer-menu"></div>`.toElement();

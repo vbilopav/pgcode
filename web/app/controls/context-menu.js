@@ -22,7 +22,7 @@ define(["require", "exports", "app/_sys/pubsub"], function (require, exports, pu
             window.on("resize", () => this.close());
             window.on("mousedown", (e) => {
                 let path = e.composedPath();
-                if (!path.includes(this.element) && !path.includes(this.target)) {
+                if ((!path.includes(this.element) && !path.includes(this.target) && event === "click") || (!path.includes(this.element) && event !== "click")) {
                     this.close();
                 }
             }).on("keyup", (e) => {
@@ -39,7 +39,6 @@ define(["require", "exports", "app/_sys/pubsub"], function (require, exports, pu
                 for (let item of menuItemsCallback(Object.values(this.items).sort((a, b) => a.order - b.order))) {
                     this.actions.append(item.element);
                 }
-                this.element.css("top", e.y + "px").css("left", e.x + "px").showElement();
                 this.adjust(e);
                 e.preventDefault();
                 onOpen();
@@ -70,6 +69,7 @@ define(["require", "exports", "app/_sys/pubsub"], function (require, exports, pu
             return this;
         }
         adjust(e) {
+            this.element.css("top", e.y + "px").css("left", e.x + "px").visible(false).showElement();
             const rect = this.actions.getBoundingClientRect(), winWidth = window.innerWidth, winHeight = window.innerHeight, right = e.x + rect.width, bottom = rect.top + rect.height;
             if (right >= (winWidth + 1)) {
                 let left = (winWidth - rect.width - 1);
@@ -79,6 +79,7 @@ define(["require", "exports", "app/_sys/pubsub"], function (require, exports, pu
                 let top = e.y - rect.height - 1;
                 this.element.css("top", (top > 0 ? top : 0) + "px");
             }
+            this.element.visible(true);
         }
         getActionsContainerElement(element) {
             return element;
