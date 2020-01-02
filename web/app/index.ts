@@ -4,14 +4,14 @@ import SidePanel from "app/ui/side-panel/side-panel";
 import MainPanel from "app/ui/main-panel/main-panel";
 import Footer from "app/ui/footer/footer";
 import {Splitter, VerticalSplitter, SplitterCtorArgs} from "app/controls/splitter";
-import { Positions, Themes, IMain } from "app/types";
+import { Position, Themes, AppStatus, IMain } from "app/types";
 import { 
     subscribe, publish, SIDEBAR_DOCKED, SIDEBAR_UNDOCKED, STATE_CHANGED_ON, STATE_CHANGED_OFF
 } from "app/_sys/pubsub";
 
 
 interface IStorage {
-    toolbarPosition: Positions, 
+    toolbarPosition: Position, 
     sidePanelPosition: string, 
     sidePanelWidth: number, 
     sidePanelDocked: boolean,
@@ -20,8 +20,8 @@ interface IStorage {
 
 const 
     storage = new Storage({
-        toolbarPosition: Positions.left, 
-        sidePanelPosition: Positions.left, 
+        toolbarPosition: Position.left, 
+        sidePanelPosition: Position.left, 
         sidePanelWidth: 250, 
         sidePanelDocked: true,
         theme: Themes.dark
@@ -32,8 +32,8 @@ const
 const 
     getGridTemplateData: () => [string, string, number] = () => {
         let 
-            tpl = storage.toolbarPosition === Positions.left, 
-            spl = storage.sidePanelPosition === Positions.left,
+            tpl = storage.toolbarPosition === Position.left, 
+            spl = storage.sidePanelPosition === Position.left,
             spw = storage.sidePanelWidth;
         if (tpl && spl) {
             return ["toolbar side-panel main-splitter main-panel", `50px ${spw}px 5px auto`, 1];
@@ -49,6 +49,13 @@ const
         }
     };
 
+const 
+    loadingTitle = {
+        interval: 225, 
+        counter: 0, 
+        frames: ["∙ ∙ ∙ ∙ ∙", "● ∙ ∙ ∙ ∙", "∙ ● ∙ ∙ ∙", "∙ ∙ ● ∙ ∙", "∙ ∙ ∙ ● ∙", "∙ ∙ ∙  ∙ ●"]
+    };
+
 new (class implements IMain {
     private themeLink: Element;
     private container: Element;
@@ -58,6 +65,9 @@ new (class implements IMain {
     private splitter: Splitter;
     private mainPanel: MainPanel;
     private footer: Footer;
+    private defaultTitle: string = "pgcode";
+    private previousTitle: string;
+    private loadingTimeout: number;
 
     constructor() {
         this.initTheme();
@@ -65,10 +75,10 @@ new (class implements IMain {
         this.initSplitter(this.initGrid());
         this.initComponents();
         this.subscribeEvents();
-        document.title = "pgcode";
+        document.title = this.defaultTitle;
     }
 
-    public moveToolbar(position: Positions) : boolean {
+    public moveToolbar(position: Position) : boolean {
         if (storage.toolbarPosition === position) {
             return false;
         }
@@ -76,6 +86,25 @@ new (class implements IMain {
         const resizeIndex = this.initGrid();
         this.splitter.updateIndexesAndAdjust(resizeIndex);
         return true;
+    }
+
+    public setStatus(status: AppStatus) : void {
+        if (status == AppStatus.ready) {
+            this.overlay.hideElement();
+            clearInterval(this.loadingTimeout);
+            document.title = this.previousTitle || this.defaultTitle;
+        } else if (status == AppStatus.busy) {
+            this.overlay.showElement();
+            this.previousTitle = document.title;
+            clearInterval(this.loadingTimeout);
+            this.loadingTimeout = setInterval(() => {
+                document.title = loadingTitle.frames[loadingTitle.counter];
+                loadingTitle.counter++;
+                if (loadingTitle.counter == loadingTitle.frames.length) {
+                    loadingTitle.counter = 0;
+                }
+            }, loadingTitle.interval);
+        }
     }
 
     private initTheme() {
@@ -139,7 +168,7 @@ new (class implements IMain {
         this.toolbar = new Toolbar(this.container.children[0], storage.toolbarPosition, this);
         this.sidePanel = new SidePanel(this.container.children[1]);
         this.mainPanel = new MainPanel(this.container.children[3]);
-        this.footer = new Footer(this.container.children[4]);
+        this.footer = new Footer(this.container.children[4], this);
     }
 
     private subscribeEvents() {

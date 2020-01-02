@@ -1,4 +1,4 @@
-define(["require", "exports", "app/controls/context-menu"], function (require, exports, context_menu_1) {
+define(["require", "exports", "app/controls/context-menu", "app/types"], function (require, exports, context_menu_1, types_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class FooterContextMenu extends context_menu_1.ContextMenu {
@@ -19,11 +19,13 @@ define(["require", "exports", "app/controls/context-menu"], function (require, e
             return String.html `<div id="${id}" class="footer-menu"></div>`.toElement();
         }
         menuItemElement(menuItem) {
-            return String.html `<div class="footer-menu-item">${menuItem.text}</div>`.toElement();
+            return String.html `<div class="footer-menu-item" title="${menuItem.data}">${menuItem.text}</div>`.toElement();
         }
     }
     class default_1 {
-        constructor(element) {
+        constructor(element, index) {
+            this.index = index;
+            index.setStatus(types_1.AppStatus.busy);
             element.addClass("footer").html(String.html `
             <div class="connections">
                 <span class="icon-database"></span>
@@ -31,27 +33,30 @@ define(["require", "exports", "app/controls/context-menu"], function (require, e
             </div>
             <div class="feed clickable" title="Send feedback">&#128526;</div>
         `);
-            let btnConnections = element.children[0];
-            let btnFeed = element.children[1];
-            new FooterContextMenu({
-                id: "conn-footer-menu",
-                event: "click",
-                target: btnConnections,
-                items: [{ text: "item1", action: () => { } }, { text: "item2", action: () => { } }, { text: "item3", action: () => { } }, { text: "item4", action: () => { } }]
-            });
+            this.initConnectionsMenu(element.children[0]);
+            this.initFeedbackMenu(element.children[1]);
+        }
+        async initConnectionsMenu(btn) {
+            var result = await (await fetch("connections")).json();
+            this.index.setStatus(types_1.AppStatus.ready);
+            console.log(result);
+        }
+        initFeedbackMenu(btn) {
             new FooterContextMenu({
                 id: "feed-footer-menu",
                 event: "click",
-                target: btnFeed,
+                target: btn,
                 items: [{
                         text: "Open New Issue",
+                        data: "Opens a new window to create a new issue on GitHub repository",
                         action: () => window.open("https://github.com/vbilopav/sfcode/issues/new", "_blank").focus()
                     }, {
                         text: "Tweet Your Feedback",
+                        data: "Opens a new window to send a Tweeter feedback",
                         action: () => window.open("https://twitter.com/intent/tweet?text=" + encodeURI("Say something about @pgcode") + "&hashtags=pgcode", "_blank").focus()
                     }],
-                onOpen: () => btnFeed.html("&#128522;"),
-                onClose: () => btnFeed.html("&#128526;")
+                onOpen: () => btn.html("&#128522;"),
+                onClose: () => btn.html("&#128526;")
             });
         }
     }

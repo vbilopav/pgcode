@@ -67,7 +67,7 @@ body > div.overlay {
   z-index: 9999;
   opacity: 0.5;
   background-color: black;
-  display: none; }
+  /*display: none;*/ }
 
 body > div.container {
   position: absolute;

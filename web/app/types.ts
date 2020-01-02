@@ -1,8 +1,10 @@
-enum Positions { left = "left", right = "right" };
+enum Position { left = "left", right = "right" };
 enum Themes { dark = "dark", light = "light" };
+enum AppStatus { ready = 0, busy = 1 };
 
 interface IMain {
-    moveToolbar(position: Positions) : boolean
+    moveToolbar(position: Position) : boolean
+    setStatus(status: AppStatus) : void
 }
 
-export { Positions, Themes, IMain }
+export { Position, Themes, AppStatus, IMain }

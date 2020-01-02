@@ -1,12 +1,12 @@
 define(["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    var Positions;
-    (function (Positions) {
-        Positions["left"] = "left";
-        Positions["right"] = "right";
-    })(Positions || (Positions = {}));
-    exports.Positions = Positions;
+    var Position;
+    (function (Position) {
+        Position["left"] = "left";
+        Position["right"] = "right";
+    })(Position || (Position = {}));
+    exports.Position = Position;
     ;
     var Themes;
     (function (Themes) {
@@ -14,6 +14,13 @@ define(["require", "exports"], function (require, exports) {
         Themes["light"] = "light";
     })(Themes || (Themes = {}));
     exports.Themes = Themes;
+    ;
+    var AppStatus;
+    (function (AppStatus) {
+        AppStatus[AppStatus["ready"] = 0] = "ready";
+        AppStatus[AppStatus["busy"] = 1] = "busy";
+    })(AppStatus || (AppStatus = {}));
+    exports.AppStatus = AppStatus;
     ;
 });
 //# sourceMappingURL=types.js.map

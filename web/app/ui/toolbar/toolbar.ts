@@ -4,13 +4,13 @@ import {
     STATE_CHANGED_ON, STATE_CHANGED_OFF, STATE_CHANGED, SIDEBAR_DOCKED, SIDEBAR_UNDOCKED
 } from "app/_sys/pubsub";
 import { MonacoContextMenu, ContextMenuCtorArgs, MenuItemType } from "app/controls/context-menu";
-import { Positions, IMain } from "app/types";
+import { Position, IMain } from "app/types";
 
 enum ButtonRoles { switch="switch", toggle="toggle" };
 const 
     isInRole: (e: Element, role: ButtonRoles) => boolean = (e, role) => e.dataAttr("role") === role,
     isSwitch: (e: Element) => boolean = e => isInRole(e, ButtonRoles.switch),
-    moveText = (position: Positions) => position === Positions.left ? "Move Toolbar to Right" : "Move Toolbar to Left";
+    moveText = (position: Position) => position === Position.left ? "Move Toolbar to Right" : "Move Toolbar to Left";
 
 interface IStorage {
     docs: boolean;
@@ -57,7 +57,7 @@ export default class  {
     private toolbar: Element;
     private menu: MonacoContextMenu;
 
-    constructor(element: Element, position: Positions, index: IMain) {
+    constructor(element: Element, position: Position, index: IMain) {
         let html = "";
         let menuItems = new Array<MenuItemType>();
         for(let item of items) {
@@ -76,7 +76,7 @@ export default class  {
             }
         }
         this.toolbar = element.addClass("toolbar").html(html);
-        if (position === Positions.right) {
+        if (position === Position.right) {
             this.toolbar.addClass("right");
         }
 
@@ -84,10 +84,10 @@ export default class  {
             id: "move", 
             text: moveText(position), 
             action: () => {
-                let newPosition = position == Positions.left ? Positions.right : Positions.left;
+                let newPosition = position == Position.left ? Position.right : Position.left;
                 if (index.moveToolbar(newPosition)) {
                     position = newPosition;
-                    if (position === Positions.right) {
+                    if (position === Position.right) {
                         this.toolbar.addClass("right");
                     } else {
                         this.toolbar.removeClass("right");

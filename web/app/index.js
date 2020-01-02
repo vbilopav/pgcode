@@ -2,14 +2,14 @@ define(["require", "exports", "app/_sys/storage", "app/ui/toolbar/toolbar", "app
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     const storage = new storage_1.default({
-        toolbarPosition: types_1.Positions.left,
-        sidePanelPosition: types_1.Positions.left,
+        toolbarPosition: types_1.Position.left,
+        sidePanelPosition: types_1.Position.left,
         sidePanelWidth: 250,
         sidePanelDocked: true,
         theme: types_1.Themes.dark
     }, "main", (name, value) => name == "sidePanelDocked" ? JSON.parse(value) : value);
     const getGridTemplateData = () => {
-        let tpl = storage.toolbarPosition === types_1.Positions.left, spl = storage.sidePanelPosition === types_1.Positions.left, spw = storage.sidePanelWidth;
+        let tpl = storage.toolbarPosition === types_1.Position.left, spl = storage.sidePanelPosition === types_1.Position.left, spw = storage.sidePanelWidth;
         if (tpl && spl) {
             return ["toolbar side-panel main-splitter main-panel", `50px ${spw}px 5px auto`, 1];
         }
@@ -23,14 +23,20 @@ define(["require", "exports", "app/_sys/storage", "app/ui/toolbar/toolbar", "app
             return ["main-panel main-splitter side-panel toolbar", `auto 5px ${spw}px 50px`, 2];
         }
     };
+    const loadingTitle = {
+        interval: 225,
+        counter: 0,
+        frames: ["∙ ∙ ∙ ∙ ∙", "● ∙ ∙ ∙ ∙", "∙ ● ∙ ∙ ∙", "∙ ∙ ● ∙ ∙", "∙ ∙ ∙ ● ∙", "∙ ∙ ∙  ∙ ●"]
+    };
     new (class {
         constructor() {
+            this.defaultTitle = "pgcode";
             this.initTheme();
             this.initElements();
             this.initSplitter(this.initGrid());
             this.initComponents();
             this.subscribeEvents();
-            document.title = "pgcode";
+            document.title = this.defaultTitle;
         }
         moveToolbar(position) {
             if (storage.toolbarPosition === position) {
@@ -40,6 +46,25 @@ define(["require", "exports", "app/_sys/storage", "app/ui/toolbar/toolbar", "app
             const resizeIndex = this.initGrid();
             this.splitter.updateIndexesAndAdjust(resizeIndex);
             return true;
+        }
+        setStatus(status) {
+            if (status == types_1.AppStatus.ready) {
+                this.overlay.hideElement();
+                clearInterval(this.loadingTimeout);
+                document.title = this.previousTitle || this.defaultTitle;
+            }
+            else if (status == types_1.AppStatus.busy) {
+                this.overlay.showElement();
+                this.previousTitle = document.title;
+                clearInterval(this.loadingTimeout);
+                this.loadingTimeout = setInterval(() => {
+                    document.title = loadingTitle.frames[loadingTitle.counter];
+                    loadingTitle.counter++;
+                    if (loadingTitle.counter == loadingTitle.frames.length) {
+                        loadingTitle.counter = 0;
+                    }
+                }, loadingTitle.interval);
+            }
         }
         initTheme() {
             this.themeLink = document.getElementById("theme");
@@ -98,7 +123,7 @@ define(["require", "exports", "app/_sys/storage", "app/ui/toolbar/toolbar", "app
             this.toolbar = new toolbar_1.default(this.container.children[0], storage.toolbarPosition, this);
             this.sidePanel = new side_panel_1.default(this.container.children[1]);
             this.mainPanel = new main_panel_1.default(this.container.children[3]);
-            this.footer = new footer_1.default(this.container.children[4]);
+            this.footer = new footer_1.default(this.container.children[4], this);
         }
         subscribeEvents() {
             pubsub_1.subscribe(pubsub_1.STATE_CHANGED_ON, () => {
