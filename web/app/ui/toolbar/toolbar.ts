@@ -203,12 +203,14 @@ export default class  {
             }
             if (isDocked) {
                 toggle(false);
-                publish(STATE_CHANGED_ON);
             } else {
                 toggle();
-                if (!e.hasClass(active)) {
-                    publish(STATE_CHANGED_OFF);
-                }
+            }
+
+            if (!e.hasClass(active)) {
+                publish(STATE_CHANGED_OFF);
+            } else {
+                publish(STATE_CHANGED_ON);
             }
         }
     }

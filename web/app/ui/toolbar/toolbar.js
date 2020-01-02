@@ -169,13 +169,15 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/contro
                 }
                 if (isDocked) {
                     toggle(false);
-                    pubsub_1.publish(pubsub_1.STATE_CHANGED_ON);
                 }
                 else {
                     toggle();
-                    if (!e.hasClass(active)) {
-                        pubsub_1.publish(pubsub_1.STATE_CHANGED_OFF);
-                    }
+                }
+                if (!e.hasClass(active)) {
+                    pubsub_1.publish(pubsub_1.STATE_CHANGED_OFF);
+                }
+                else {
+                    pubsub_1.publish(pubsub_1.STATE_CHANGED_ON);
                 }
             }
         }
