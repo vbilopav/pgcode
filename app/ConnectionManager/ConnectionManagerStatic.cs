@@ -9,7 +9,7 @@ using Pgcode.Migrations;
 
 namespace Pgcode
 {
-    public sealed partial class ConnectionManager : IDisposable
+    public sealed partial class ConnectionManager
     {
         private static ImmutableDictionary<string, ConnectionData> _connections;
 
