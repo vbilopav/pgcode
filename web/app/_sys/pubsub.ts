@@ -59,6 +59,8 @@ const SIDEBAR_DOCKED: string = "sidebar/docked/"; //void
 const SIDEBAR_UNDOCKED: string = "sidebar/undocked/"; //void
 const CLOSE_CONTEXT_MENU: string = "context-menu/close/"; //id
 
+const SET_APP_STATUS: string = "app/status/"; //status: AppStatus, text?: string
+
 export { 
     subscribe, publish, unsubscribe,
 
@@ -72,5 +74,6 @@ export {
     STATE_CHANGED_SEARCH,
     SIDEBAR_DOCKED,
     SIDEBAR_UNDOCKED,
-    CLOSE_CONTEXT_MENU
+    CLOSE_CONTEXT_MENU,
+    SET_APP_STATUS
 };

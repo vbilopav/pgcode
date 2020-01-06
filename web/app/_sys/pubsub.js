@@ -72,5 +72,7 @@ define(["require", "exports"], function (require, exports) {
     exports.SIDEBAR_UNDOCKED = SIDEBAR_UNDOCKED;
     const CLOSE_CONTEXT_MENU = "context-menu/close/";
     exports.CLOSE_CONTEXT_MENU = CLOSE_CONTEXT_MENU;
+    const SET_APP_STATUS = "app/status/";
+    exports.SET_APP_STATUS = SET_APP_STATUS;
 });
 //# sourceMappingURL=pubsub.js.map

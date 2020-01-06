@@ -6,7 +6,7 @@ import Footer from "app/ui/footer/footer";
 import {Splitter, VerticalSplitter, SplitterCtorArgs} from "app/controls/splitter";
 import { Position, Themes, AppStatus, IMain } from "app/types";
 import { 
-    subscribe, publish, SIDEBAR_DOCKED, SIDEBAR_UNDOCKED, STATE_CHANGED_ON, STATE_CHANGED_OFF
+    subscribe, publish, SIDEBAR_DOCKED, SIDEBAR_UNDOCKED, STATE_CHANGED_ON, STATE_CHANGED_OFF, SET_APP_STATUS
 } from "app/_sys/pubsub";
 
 
@@ -68,10 +68,12 @@ new (class implements IMain {
     private defaultTitle: string = "pgcode";
     private previousTitle: string;
     private loadingTimeout: number;
+    private status: AppStatus;
 
     constructor() {
         this.initTheme();
         this.initElements();
+        this.setStatus(AppStatus.busy);
         this.initSplitter(this.initGrid());
         this.initComponents();
         this.subscribeEvents();
@@ -88,12 +90,21 @@ new (class implements IMain {
         return true;
     }
 
-    public setStatus(status: AppStatus) : void {
+    public setStatus(status: AppStatus, ...args: any[]) : void {
         if (status == AppStatus.ready) {
+            if (this.status == AppStatus.ready) {
+                return;
+            }
+            this.status = status;
             this.overlay.hideElement();
             clearInterval(this.loadingTimeout);
             document.title = this.previousTitle || this.defaultTitle;
+
         } else if (status == AppStatus.busy) {
+            if (this.status == AppStatus.busy) {
+                return;
+            }
+            this.status = status;
             this.overlay.showElement();
             this.previousTitle = document.title;
             clearInterval(this.loadingTimeout);
@@ -104,6 +115,17 @@ new (class implements IMain {
                     loadingTitle.counter = 0;
                 }
             }, loadingTitle.interval);
+
+        }  else if (status == AppStatus.error) {
+            if (this.status == AppStatus.error) {
+                return;
+            }
+            this.status = status;
+            this.overlay.showElement();
+            this.previousTitle = document.title;
+            clearInterval(this.loadingTimeout);
+            document.title = args[0] ? `NETWORK ERROR (${args[0]})` : "NETWORK ERROR";
+
         }
     }
 
@@ -145,7 +167,7 @@ new (class implements IMain {
             events: {
                 docked: () => publish(SIDEBAR_DOCKED),
                 undocked: () => publish(SIDEBAR_UNDOCKED),
-                changed: () => {}, //_app.pub("sidebar/changed", splitter)
+                changed: () => { /*...*/ },
             },
             storage: {
                 get position() {
@@ -168,7 +190,7 @@ new (class implements IMain {
         this.toolbar = new Toolbar(this.container.children[0], storage.toolbarPosition, this);
         this.sidePanel = new SidePanel(this.container.children[1]);
         this.mainPanel = new MainPanel(this.container.children[3]);
-        this.footer = new Footer(this.container.children[4], this);
+        this.footer = new Footer(this.container.children[4]);
     }
 
     private subscribeEvents() {
@@ -182,6 +204,7 @@ new (class implements IMain {
                 this.splitter.dock();
             }
         });
+        subscribe(SET_APP_STATUS, (status: AppStatus, ...args: any[]) => this.setStatus(status, args));
         document.body.on("contextmenu", e => e.preventDefault());
     }
 })();

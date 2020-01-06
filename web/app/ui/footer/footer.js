@@ -1,6 +1,7 @@
-define(["require", "exports", "app/controls/context-menu", "app/types"], function (require, exports, context_menu_1, types_1) {
+define(["require", "exports", "app/controls/context-menu", "app/_sys/storage", "app/_sys/api"], function (require, exports, context_menu_1, storage_1, api_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    const storage = new storage_1.default({ connection: null });
     class FooterContextMenu extends context_menu_1.ContextMenu {
         adjust() {
             this.element.css("top", "0").css("left", "0").visible(false).showElement();
@@ -23,13 +24,11 @@ define(["require", "exports", "app/controls/context-menu", "app/types"], functio
         }
     }
     class default_1 {
-        constructor(element, index) {
-            this.index = index;
-            index.setStatus(types_1.AppStatus.busy);
+        constructor(element) {
             element.addClass("footer").html(String.html `
             <div class="connections">
                 <span class="icon-database"></span>
-                <span class="connections-text">Connection not selected</span>
+                <span class="connections-text"></span>
             </div>
             <div class="feed clickable" title="Send feedback">&#128526;</div>
         `);
@@ -37,8 +36,32 @@ define(["require", "exports", "app/controls/context-menu", "app/types"], functio
             this.initFeedbackMenu(element.children[1]);
         }
         async initConnectionsMenu(btn) {
-            var result = await (await fetch("connections")).json();
-            this.index.setStatus(types_1.AppStatus.ready);
+            const txt = btn.find(".connections-text");
+            const result = await api_1.fetchConnections();
+            if (!result.ok) {
+                txt.html("¯\\_(ツ)_/¯");
+            }
+            else {
+                if (!storage.connection) {
+                    txt.html("Connection not selected");
+                    txt.attr("title", "Click here to select from available connections...");
+                }
+                else {
+                }
+                const menuItems = new Array();
+                for (let connection of result.data.connections) {
+                    menuItems.push({ text: connection.name, data: connection.value, action: () => {
+                            txt.html(connection.name);
+                            txt.attr("title", connection.value);
+                        } });
+                }
+                new FooterContextMenu({
+                    id: "conn-footer-menu",
+                    event: "click",
+                    target: btn,
+                    items: menuItems
+                });
+            }
             console.log(result);
         }
         initFeedbackMenu(btn) {

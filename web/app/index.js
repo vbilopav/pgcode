@@ -33,6 +33,7 @@ define(["require", "exports", "app/_sys/storage", "app/ui/toolbar/toolbar", "app
             this.defaultTitle = "pgcode";
             this.initTheme();
             this.initElements();
+            this.setStatus(types_1.AppStatus.busy);
             this.initSplitter(this.initGrid());
             this.initComponents();
             this.subscribeEvents();
@@ -47,13 +48,21 @@ define(["require", "exports", "app/_sys/storage", "app/ui/toolbar/toolbar", "app
             this.splitter.updateIndexesAndAdjust(resizeIndex);
             return true;
         }
-        setStatus(status) {
+        setStatus(status, ...args) {
             if (status == types_1.AppStatus.ready) {
+                if (this.status == types_1.AppStatus.ready) {
+                    return;
+                }
+                this.status = status;
                 this.overlay.hideElement();
                 clearInterval(this.loadingTimeout);
                 document.title = this.previousTitle || this.defaultTitle;
             }
             else if (status == types_1.AppStatus.busy) {
+                if (this.status == types_1.AppStatus.busy) {
+                    return;
+                }
+                this.status = status;
                 this.overlay.showElement();
                 this.previousTitle = document.title;
                 clearInterval(this.loadingTimeout);
@@ -64,6 +73,16 @@ define(["require", "exports", "app/_sys/storage", "app/ui/toolbar/toolbar", "app
                         loadingTitle.counter = 0;
                     }
                 }, loadingTitle.interval);
+            }
+            else if (status == types_1.AppStatus.error) {
+                if (this.status == types_1.AppStatus.error) {
+                    return;
+                }
+                this.status = status;
+                this.overlay.showElement();
+                this.previousTitle = document.title;
+                clearInterval(this.loadingTimeout);
+                document.title = args[0] ? `NETWORK ERROR (${args[0]})` : "NETWORK ERROR";
             }
         }
         initTheme() {
@@ -123,7 +142,7 @@ define(["require", "exports", "app/_sys/storage", "app/ui/toolbar/toolbar", "app
             this.toolbar = new toolbar_1.default(this.container.children[0], storage.toolbarPosition, this);
             this.sidePanel = new side_panel_1.default(this.container.children[1]);
             this.mainPanel = new main_panel_1.default(this.container.children[3]);
-            this.footer = new footer_1.default(this.container.children[4], this);
+            this.footer = new footer_1.default(this.container.children[4]);
         }
         subscribeEvents() {
             pubsub_1.subscribe(pubsub_1.STATE_CHANGED_ON, () => {
@@ -136,6 +155,7 @@ define(["require", "exports", "app/_sys/storage", "app/ui/toolbar/toolbar", "app
                     this.splitter.dock();
                 }
             });
+            pubsub_1.subscribe(pubsub_1.SET_APP_STATUS, (status, ...args) => this.setStatus(status, args));
             document.body.on("contextmenu", e => e.preventDefault());
         }
     })();

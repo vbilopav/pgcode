@@ -12,7 +12,7 @@ interface ContextMenuItem extends ContextMenuBase {
     checked?: boolean, 
     keyBindingsInfo?: string, 
     args?: any, 
-    action: (args?: any) => any
+    action?: (args?: any) => any
 }
 
 type MenuItemType = ContextMenuItem | ContextMenuSplitter;

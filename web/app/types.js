@@ -19,6 +19,7 @@ define(["require", "exports"], function (require, exports) {
     (function (AppStatus) {
         AppStatus[AppStatus["ready"] = 0] = "ready";
         AppStatus[AppStatus["busy"] = 1] = "busy";
+        AppStatus[AppStatus["error"] = 2] = "error";
     })(AppStatus || (AppStatus = {}));
     exports.AppStatus = AppStatus;
     ;

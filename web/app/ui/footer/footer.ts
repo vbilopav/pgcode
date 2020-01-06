@@ -1,5 +1,11 @@
-import { ContextMenu, ContextMenuCtorArgs, ContextMenuItem } from "app/controls/context-menu";
-import { AppStatus, IMain } from "app/types";
+import { ContextMenu, ContextMenuCtorArgs, ContextMenuItem, MenuItemType } from "app/controls/context-menu";
+import Storage from "app/_sys/storage";
+import { fetchConnections } from "app/_sys/api";
+
+interface IStorage {connection: string}
+
+const 
+    storage = new Storage({connection: null}) as any as IStorage;
 
 class FooterContextMenu extends ContextMenu {
     protected adjust() {
@@ -25,28 +31,21 @@ class FooterContextMenu extends ContextMenu {
 }
 
 export default class  {
-    private index: IMain;
-
-    constructor(element: Element, index: IMain) {
-        this.index = index;
-        index.setStatus(AppStatus.busy);
-
+    constructor(element: Element) {
         element.addClass("footer").html(String.html`
             <div class="connections">
                 <span class="icon-database"></span>
-                <span class="connections-text">Connection not selected</span>
+                <span class="connections-text"></span>
             </div>
             <div class="feed clickable" title="Send feedback">&#128526;</div>
         `);
 
         //let btnConnections = element.children[0];
-        
-
         /*
         new FooterContextMenu({
             id: "conn-footer-menu",
             event: "click",
-            target: btnConnections,
+            target: element.children[0],
             items: [{text: "item1", action: ()=>{}}, {text: "item2", action: ()=>{}}, {text: "item3", action: ()=>{}}, {text: "item4", action: ()=>{}}]
         } as ContextMenuCtorArgs);
         */
@@ -55,8 +54,33 @@ export default class  {
     }
 
     private async initConnectionsMenu(btn: Element) {
-        var result = await(await fetch("connections")).json();
-        this.index.setStatus(AppStatus.ready);
+        const txt = btn.find(".connections-text");
+        const result = await fetchConnections();
+        if (!result.ok) {
+            txt.html("¯\\_(ツ)_/¯");
+        } else {
+            if (!storage.connection) {
+                txt.html("Connection not selected");
+                txt.attr("title", "Click here to select from available connections...");
+            } else {
+                // ...
+            }
+            const menuItems = new Array<MenuItemType>();
+            for(let connection of result.data.connections) {
+                menuItems.push({text: connection.name, data: connection.value, action: () => {
+                    txt.html(connection.name);
+                    txt.attr("title", connection.value);
+                }});
+            }
+            new FooterContextMenu({
+                id: "conn-footer-menu",
+                event: "click",
+                target: btn,
+                items: menuItems
+            } as ContextMenuCtorArgs);
+        }
+        //Connection not selected
+        //connectionsMenu
         console.log(result);
     }
 

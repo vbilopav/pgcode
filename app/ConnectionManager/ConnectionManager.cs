@@ -12,10 +12,13 @@ namespace Pgcode
         }
 
         public IEnumerable<NameValue> GetConnectionsDataNameValue() =>
-            _connections.Values.Select(c => new NameValue
-            {
-                Name = c.Name,
-                Value = $"PostgreSQL version {c.ServerVersion}, Host name/address={c.Connection.Host}, Port={c.Connection.Port}, Database={c.Connection.Database}, User={c.Connection.UserName}"});
+            _connections.Values.OrderBy(c => c.Name).Select(c => 
+                new NameValue 
+                {
+                    Name = c.Name,
+                    Value = 
+                        $"PostgreSQL version {c.ServerVersion}, Host name/address={c.Connection.Host}, Port={c.Connection.Port}, Database={c.Connection.Database}, User={c.Connection.UserName}"
+                });
 
         public void Dispose()
         {
