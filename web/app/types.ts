@@ -1,9 +1,13 @@
-enum Position { left = "left", right = "right" };
-enum Themes { dark = "dark", light = "light" };
-enum AppStatus { ready = 0, busy = 1, error = 2 };
+enum Position { LEFT = "left", RIGHT = "right" };
+enum Themes { DARK = "dark", LIGHT = "light" };
+enum AppStatus { READY = 0, BUSY = 1, ERROR = 2, NO_CONNECTION };
 
 interface IMain {
     moveToolbar(position: Position, ...args: any[]) : boolean
 }
 
-export { Position, Themes, AppStatus, IMain }
+interface INameValue {
+    name: string, value: string
+}
+
+export { Position, Themes, AppStatus, IMain, INameValue }

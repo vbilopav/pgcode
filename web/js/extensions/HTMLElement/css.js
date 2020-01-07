@@ -7,12 +7,10 @@ define(["js/extensions/test-proto", "js/extensions/String/toCamelCase"], test =>
             this._styles = {};
             const styles = window.getComputedStyle(this);
             for(let style in styles) {
-                if (styles.hasOwnProperty(style)) {
-                    if (!isNaN(style)) {
-                        continue;
-                    }
-                    this._styles[style] = styles[style];
+                if (!isNaN(style)) {
+                    continue;
                 }
+                this._styles[style] = styles[style];
             }
         }
         if (value !== undefined) {

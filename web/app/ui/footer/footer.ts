@@ -1,5 +1,6 @@
 import { ContextMenu, ContextMenuCtorArgs, ContextMenuItem, MenuItemType } from "app/controls/context-menu";
 import Storage from "app/_sys/storage";
+import { INameValue } from "app/types";
 import { fetchConnections } from "app/_sys/api";
 
 interface IStorage {connection: string}
@@ -26,62 +27,81 @@ class FooterContextMenu extends ContextMenu {
     }
 
     protected menuItemElement(menuItem: ContextMenuItem): Element {
-        return String.html`<div class="footer-menu-item" title="${menuItem.data}">${menuItem.text}</div>`.toElement();
+        return String.html`<div class="footer-menu-item">${menuItem.text}</div>`.toElement().attr("title", menuItem.data);
     }
 }
 
 export default class  {
+    private footer: Element;
+    private connections: Element;
+    private connectionsText: Element;
+    private info: Element;
+
     constructor(element: Element) {
-        element.addClass("footer").html(String.html`
+        this.footer = element.addClass("footer").html(String.html`
             <div class="connections">
                 <span class="icon-database"></span>
                 <span class="connections-text"></span>
             </div>
+            <div class="info">PostgreSQL=12.0, Host=localhost, Port=5434, Database=pgcode_test, User=postgres</div>
             <div class="feed clickable" title="Send feedback">&#128526;</div>
         `);
+        this.connections = element.find(".connections");
+        this.connectionsText = this.connections.find(".connections-text");
+        this.info = element.find(".info");
 
-        //let btnConnections = element.children[0];
-        /*
-        new FooterContextMenu({
-            id: "conn-footer-menu",
-            event: "click",
-            target: element.children[0],
-            items: [{text: "item1", action: ()=>{}}, {text: "item2", action: ()=>{}}, {text: "item3", action: ()=>{}}, {text: "item4", action: ()=>{}}]
-        } as ContextMenuCtorArgs);
-        */
-        this.initConnectionsMenu(element.children[0]);
-        this.initFeedbackMenu(element.children[1]);
+        this.initConnectionsMenu();
+        this.initFeedbackMenu(element.find(".feed"));
     }
 
-    private async initConnectionsMenu(btn: Element) {
-        const txt = btn.find(".connections-text");
+    private async initConnectionsMenu() {
         const result = await fetchConnections();
+
         if (!result.ok) {
-            txt.html("¯\\_(ツ)_/¯");
+            this.connectionsText.html("¯\\_(ツ)_/¯");
         } else {
             if (!storage.connection) {
-                txt.html("Connection not selected");
-                txt.attr("title", "Click here to select from available connections...");
+                this.selectConnection();
             } else {
-                // ...
+                const name = storage.connection;
+                const selected = result.data.connections.filter(c => c.name === name);
+                if (!selected.length) {
+                    storage.connection = name
+                    this.selectConnection();
+                } else {
+                    this.selectConnection(selected[0]);
+                }
             }
             const menuItems = new Array<MenuItemType>();
             for(let connection of result.data.connections) {
-                menuItems.push({text: connection.name, data: connection.value, action: () => {
-                    txt.html(connection.name);
-                    txt.attr("title", connection.value);
-                }});
+                menuItems.push({text: connection.name, data: connection.value, action: () => this.selectConnection(connection)}); 
             }
-            new FooterContextMenu({
-                id: "conn-footer-menu",
-                event: "click",
-                target: btn,
-                items: menuItems
-            } as ContextMenuCtorArgs);
+            new FooterContextMenu({id: "conn-footer-menu", event: "click", target: this.connections, items: menuItems} as ContextMenuCtorArgs);
         }
-        //Connection not selected
-        //connectionsMenu
+
         console.log(result);
+    }
+
+    private selectConnection(connection?: INameValue) {
+        if (!connection) {
+            this.connectionsText.html("Connection not selected");
+            this.connectionsText.attr("title", "Click here to select from available connections...");
+            this.info.html("");
+            this.info.attr("title", "no connection...");
+            storage.connection = null;
+        } else {
+            this.connectionsText.html(connection.name);
+            this.connectionsText.attr("title", connection.value);
+            const parts = connection.value.split(","), part = (idx: number) => parts[idx].split("=")[1];
+            this.info.html(` ${part(0)} | ${part(1)} | ${part(2)} | ${part(3)} | ${part(4)} `);
+            this.info.attr("title", connection.value);
+            storage.connection = connection.name;
+        }
+        const rect = this.connections.getBoundingClientRect();
+        let columns = this.footer.css("grid-template-columns").split(" ")
+        columns[0] = rect.width + "px";
+        columns[2] = "auto";
+        this.footer.css("grid-template-columns", columns.join(" "));
     }
 
     private initFeedbackMenu(btn: Element) {

@@ -1,12 +1,12 @@
 .footer {
     grid-area: footer;
-    font-size: 0.9em;
+    /*font-size: 0.9em;*/
     color: $footer-color;
     background-color: $footer-background-color;
     user-select: none;
     display: grid;
-    grid-template-columns: auto auto 27px;
-    grid-template-areas: 'connections gap feed';
+    grid-template-columns: 155px       300px auto 27px;
+    grid-template-areas:  'connections info  gap  feed';
 
     & > div.clickable {
         cursor: pointer;
@@ -40,6 +40,12 @@
         margin-right: 3px;
     }
 
+    & > div.info {
+        grid-area: info;
+        padding-left: 5px;
+    }
+    
+
     & > div.feed {
         grid-area: feed;
         text-align: center;
@@ -69,7 +75,7 @@
     height: 2em;
     align-items: center;
     margin: 1px;
-    padding-right: 10  px;
+    padding-right: 10px;
     padding-left: 10px;
     text-overflow: ellipsis;
     white-space: nowrap;

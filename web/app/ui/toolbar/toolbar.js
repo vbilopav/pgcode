@@ -7,7 +7,7 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/contro
         ButtonRoles["toggle"] = "toggle";
     })(ButtonRoles || (ButtonRoles = {}));
     ;
-    const isInRole = (e, role) => e.dataAttr("role") === role, isSwitch = e => isInRole(e, ButtonRoles.switch), moveText = (position) => position === types_1.Position.left ? "Move Toolbar to Right" : "Move Toolbar to Left";
+    const isInRole = (e, role) => e.dataAttr("role") === role, isSwitch = e => isInRole(e, ButtonRoles.switch), moveText = (position) => position === types_1.Position.LEFT ? "Move Toolbar to Right" : "Move Toolbar to Left";
     const storage = new storage_1.default({
         docs: false,
         tables: false,
@@ -49,17 +49,17 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/contro
                 }
             }
             this.toolbar = element.addClass("toolbar").html(html);
-            if (position === types_1.Position.right) {
+            if (position === types_1.Position.RIGHT) {
                 this.toolbar.addClass("right");
             }
             menuItems.push({ splitter: true }, {
                 id: "move",
                 text: moveText(position),
                 action: () => {
-                    let newPosition = position == types_1.Position.left ? types_1.Position.right : types_1.Position.left;
+                    let newPosition = position == types_1.Position.LEFT ? types_1.Position.RIGHT : types_1.Position.LEFT;
                     if (index.moveToolbar(newPosition)) {
                         position = newPosition;
-                        if (position === types_1.Position.right) {
+                        if (position === types_1.Position.RIGHT) {
                             this.toolbar.addClass("right");
                         }
                         else {

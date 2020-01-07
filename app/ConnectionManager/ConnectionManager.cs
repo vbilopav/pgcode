@@ -17,7 +17,7 @@ namespace Pgcode
                 {
                     Name = c.Name,
                     Value = 
-                        $"PostgreSQL version {c.ServerVersion}, Host name/address={c.Connection.Host}, Port={c.Connection.Port}, Database={c.Connection.Database}, User={c.Connection.UserName}"
+                        $"Version={c.ServerVersion}, Host={c.Connection.Host}, Port={c.Connection.Port}, Database={c.Connection.Database}, User={c.Connection.UserName}"
                 });
 
         public void Dispose()

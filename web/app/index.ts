@@ -20,11 +20,11 @@ interface IStorage {
 
 const 
     storage = new Storage({
-        toolbarPosition: Position.left, 
-        sidePanelPosition: Position.left, 
+        toolbarPosition: Position.LEFT, 
+        sidePanelPosition: Position.LEFT, 
         sidePanelWidth: 250, 
         sidePanelDocked: true,
-        theme: Themes.dark
+        theme: Themes.DARK
     }, 
     "main",
     (name, value) => name == "sidePanelDocked" ? JSON.parse(value) as boolean : value) as any as IStorage;
@@ -32,8 +32,8 @@ const
 const 
     getGridTemplateData: () => [string, string, number] = () => {
         let 
-            tpl = storage.toolbarPosition === Position.left, 
-            spl = storage.sidePanelPosition === Position.left,
+            tpl = storage.toolbarPosition === Position.LEFT, 
+            spl = storage.sidePanelPosition === Position.LEFT,
             spw = storage.sidePanelWidth;
         if (tpl && spl) {
             return ["toolbar side-panel main-splitter main-panel", `50px ${spw}px 5px auto`, 1];
@@ -73,7 +73,7 @@ new (class implements IMain {
     constructor() {
         this.initTheme();
         this.initElements();
-        this.setStatus(AppStatus.busy);
+        this.setStatus(AppStatus.BUSY);
         this.initSplitter(this.initGrid());
         this.initComponents();
         this.subscribeEvents();
@@ -91,8 +91,8 @@ new (class implements IMain {
     }
 
     public setStatus(status: AppStatus, ...args: any[]) : void {
-        if (status == AppStatus.ready) {
-            if (this.status == AppStatus.ready) {
+        if (status == AppStatus.READY) {
+            if (this.status == AppStatus.READY) {
                 return;
             }
             this.status = status;
@@ -100,8 +100,8 @@ new (class implements IMain {
             clearInterval(this.loadingTimeout);
             document.title = this.previousTitle || this.defaultTitle;
 
-        } else if (status == AppStatus.busy) {
-            if (this.status == AppStatus.busy) {
+        } else if (status == AppStatus.BUSY) {
+            if (this.status == AppStatus.BUSY) {
                 return;
             }
             this.status = status;
@@ -116,8 +116,8 @@ new (class implements IMain {
                 }
             }, loadingTitle.interval);
 
-        }  else if (status == AppStatus.error) {
-            if (this.status == AppStatus.error) {
+        }  else if (status == AppStatus.ERROR) {
+            if (this.status == AppStatus.ERROR) {
                 return;
             }
             this.status = status;

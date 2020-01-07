@@ -10,7 +10,7 @@ enum ButtonRoles { switch="switch", toggle="toggle" };
 const 
     isInRole: (e: Element, role: ButtonRoles) => boolean = (e, role) => e.dataAttr("role") === role,
     isSwitch: (e: Element) => boolean = e => isInRole(e, ButtonRoles.switch),
-    moveText = (position: Position) => position === Position.left ? "Move Toolbar to Right" : "Move Toolbar to Left";
+    moveText = (position: Position) => position === Position.LEFT ? "Move Toolbar to Right" : "Move Toolbar to Left";
 
 interface IStorage {
     docs: boolean;
@@ -76,7 +76,7 @@ export default class  {
             }
         }
         this.toolbar = element.addClass("toolbar").html(html);
-        if (position === Position.right) {
+        if (position === Position.RIGHT) {
             this.toolbar.addClass("right");
         }
 
@@ -84,10 +84,10 @@ export default class  {
             id: "move", 
             text: moveText(position), 
             action: () => {
-                let newPosition = position == Position.left ? Position.right : Position.left;
+                let newPosition = position == Position.LEFT ? Position.RIGHT : Position.LEFT;
                 if (index.moveToolbar(newPosition)) {
                     position = newPosition;
-                    if (position === Position.right) {
+                    if (position === Position.RIGHT) {
                         this.toolbar.addClass("right");
                     } else {
                         this.toolbar.removeClass("right");

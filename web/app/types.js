@@ -3,23 +3,24 @@ define(["require", "exports"], function (require, exports) {
     Object.defineProperty(exports, "__esModule", { value: true });
     var Position;
     (function (Position) {
-        Position["left"] = "left";
-        Position["right"] = "right";
+        Position["LEFT"] = "left";
+        Position["RIGHT"] = "right";
     })(Position || (Position = {}));
     exports.Position = Position;
     ;
     var Themes;
     (function (Themes) {
-        Themes["dark"] = "dark";
-        Themes["light"] = "light";
+        Themes["DARK"] = "dark";
+        Themes["LIGHT"] = "light";
     })(Themes || (Themes = {}));
     exports.Themes = Themes;
     ;
     var AppStatus;
     (function (AppStatus) {
-        AppStatus[AppStatus["ready"] = 0] = "ready";
-        AppStatus[AppStatus["busy"] = 1] = "busy";
-        AppStatus[AppStatus["error"] = 2] = "error";
+        AppStatus[AppStatus["READY"] = 0] = "READY";
+        AppStatus[AppStatus["BUSY"] = 1] = "BUSY";
+        AppStatus[AppStatus["ERROR"] = 2] = "ERROR";
+        AppStatus[AppStatus["NO_CONNECTION"] = 3] = "NO_CONNECTION";
     })(AppStatus || (AppStatus = {}));
     exports.AppStatus = AppStatus;
     ;

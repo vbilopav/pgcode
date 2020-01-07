@@ -2,14 +2,14 @@ define(["require", "exports", "app/_sys/storage", "app/ui/toolbar/toolbar", "app
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     const storage = new storage_1.default({
-        toolbarPosition: types_1.Position.left,
-        sidePanelPosition: types_1.Position.left,
+        toolbarPosition: types_1.Position.LEFT,
+        sidePanelPosition: types_1.Position.LEFT,
         sidePanelWidth: 250,
         sidePanelDocked: true,
-        theme: types_1.Themes.dark
+        theme: types_1.Themes.DARK
     }, "main", (name, value) => name == "sidePanelDocked" ? JSON.parse(value) : value);
     const getGridTemplateData = () => {
-        let tpl = storage.toolbarPosition === types_1.Position.left, spl = storage.sidePanelPosition === types_1.Position.left, spw = storage.sidePanelWidth;
+        let tpl = storage.toolbarPosition === types_1.Position.LEFT, spl = storage.sidePanelPosition === types_1.Position.LEFT, spw = storage.sidePanelWidth;
         if (tpl && spl) {
             return ["toolbar side-panel main-splitter main-panel", `50px ${spw}px 5px auto`, 1];
         }
@@ -33,7 +33,7 @@ define(["require", "exports", "app/_sys/storage", "app/ui/toolbar/toolbar", "app
             this.defaultTitle = "pgcode";
             this.initTheme();
             this.initElements();
-            this.setStatus(types_1.AppStatus.busy);
+            this.setStatus(types_1.AppStatus.BUSY);
             this.initSplitter(this.initGrid());
             this.initComponents();
             this.subscribeEvents();
@@ -49,8 +49,8 @@ define(["require", "exports", "app/_sys/storage", "app/ui/toolbar/toolbar", "app
             return true;
         }
         setStatus(status, ...args) {
-            if (status == types_1.AppStatus.ready) {
-                if (this.status == types_1.AppStatus.ready) {
+            if (status == types_1.AppStatus.READY) {
+                if (this.status == types_1.AppStatus.READY) {
                     return;
                 }
                 this.status = status;
@@ -58,8 +58,8 @@ define(["require", "exports", "app/_sys/storage", "app/ui/toolbar/toolbar", "app
                 clearInterval(this.loadingTimeout);
                 document.title = this.previousTitle || this.defaultTitle;
             }
-            else if (status == types_1.AppStatus.busy) {
-                if (this.status == types_1.AppStatus.busy) {
+            else if (status == types_1.AppStatus.BUSY) {
+                if (this.status == types_1.AppStatus.BUSY) {
                     return;
                 }
                 this.status = status;
@@ -74,8 +74,8 @@ define(["require", "exports", "app/_sys/storage", "app/ui/toolbar/toolbar", "app
                     }
                 }, loadingTitle.interval);
             }
-            else if (status == types_1.AppStatus.error) {
-                if (this.status == types_1.AppStatus.error) {
+            else if (status == types_1.AppStatus.ERROR) {
+                if (this.status == types_1.AppStatus.ERROR) {
                     return;
                 }
                 this.status = status;

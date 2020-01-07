@@ -87,7 +87,7 @@ abstract class Splitter {
         if (resizeIndex !== undefined) {
             this.resizeIndex = resizeIndex;
         }
-        this.autoIndex = (this.container.css(this.gridTemplateName) as string).split(" ").indexOf("auto");
+        this.autoIndex = this.container.css(this.gridTemplateName).split(" ").indexOf("auto");
         this.adjust();
     }
 
@@ -247,7 +247,7 @@ abstract class Splitter {
     }
 
     private getValues(): string[] {
-        return (this.container.css(this.gridTemplateName) as string).split(" ");
+        return this.container.css(this.gridTemplateName).split(" ");
     }
 }
 

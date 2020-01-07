@@ -1,5 +1,5 @@
 import { publish, SET_APP_STATUS } from "app/_sys/pubsub";
-import { AppStatus, IMain } from "app/types";
+import { AppStatus, INameValue } from "app/types";
 
 interface IResponse<T> {
     ok: boolean,
@@ -7,30 +7,25 @@ interface IResponse<T> {
     data?: T
 }
 
-interface INameValue {
-    name: string, value: string
-}
-
 interface IConnections {
-    connections: Array<INameValue>,
-    selected: string
+    connections: Array<INameValue>
 }
 
 const _createResponse:<T> (response: Response, data?: T) => IResponse<T> = (response, data) => Object({ok: response.ok, status: response.status, data: data});
 
 const fetchConnections: () => Promise<IResponse<IConnections>> = async () => {
-    publish(SET_APP_STATUS, AppStatus.busy);
+    publish(SET_APP_STATUS, AppStatus.BUSY);
 
     try {
         const response = await fetch("connections");
         if (!response.ok) {
-            publish(SET_APP_STATUS, AppStatus.error, response.status);
+            publish(SET_APP_STATUS, AppStatus.ERROR, response.status);
             return _createResponse(response);
         }
-        publish(SET_APP_STATUS, AppStatus.ready);
+        publish(SET_APP_STATUS, AppStatus.READY);
         return _createResponse(response, await response.json() as IConnections);
     } catch (error) {
-        publish(SET_APP_STATUS, AppStatus.error);
+        publish(SET_APP_STATUS, AppStatus.ERROR);
         throw error;
     }
 }
