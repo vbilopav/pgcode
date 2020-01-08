@@ -16,9 +16,6 @@ namespace Pgcode
         public static bool Initialize(IConfiguration configuration)
         {
             var connections = new Dictionary<string, ConnectionData>();
-            var visible = Console.CursorVisible;
-            Console.CursorVisible = false;
-
             var passwords = GetPasswordDict(configuration);
             Console.WriteLine();
 
@@ -95,11 +92,8 @@ namespace Pgcode
                     SchemaVersion = schemaVersion,
                     ServerVersion = serverVersion
                 });
-                
             }
-
             Console.WriteLine();
-            Console.CursorVisible = visible;
             if (connections.Keys.Count == 0)
             {
                 Console.ForegroundColor = ConsoleColor.Red;
@@ -221,12 +215,11 @@ namespace Pgcode
             var passwords = configuration.GetSection("Passwords").GetChildren().ToDictionary(s => s.Key, s => s.Value);
             foreach (var key in passwords.Keys.ToArray())
             {
-                if (string.IsNullOrEmpty(passwords[key]))
-                {
-                    Console.WriteLine();
-                    Console.Write("Password for: {0}: ", key);
-                    passwords[key] = GetPasswordFromConsole();
-                }
+                if (!string.IsNullOrEmpty(passwords[key])) continue;
+
+                Console.WriteLine();
+                Console.Write("Password for: {0}: ", key);
+                passwords[key] = GetPasswordFromConsole();
             }
 
             return passwords;
@@ -234,8 +227,6 @@ namespace Pgcode
 
         private static string GetPasswordFromConsole()
         {
-            var visible = Console.CursorVisible;
-            Console.CursorVisible = true;
             Console.ForegroundColor = ConsoleColor.Yellow;
             var pass = "";
             
@@ -262,7 +253,6 @@ namespace Pgcode
                 }
             } while (true);
 
-            Console.CursorVisible = visible;
             Console.ResetColor();
             return pass;
         }
