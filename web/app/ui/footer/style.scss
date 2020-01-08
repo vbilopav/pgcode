@@ -31,6 +31,7 @@
         color:  $connections-selector-color;
         cursor: pointer;
         width: fit-content;
+        width: -moz-fit-content;
         max-width: 155px;
     }
     & > div.connections:hover {
@@ -65,6 +66,7 @@
     display: grid;
     max-width: 155px;
     width: fit-content;
+    width: -moz-fit-content;
     box-shadow: 0 2px 8px #000;
     clip-path: inset(-5px -5px 0 -5px);
 }

@@ -180,6 +180,7 @@ body > div.container {
     color: #c1c1c1;
     cursor: pointer;
     width: fit-content;
+    width: -moz-fit-content;
     max-width: 155px; }
   .footer > div.connections:hover {
     background-color: #329171; }
@@ -204,6 +205,7 @@ body > div.container {
   display: grid;
   max-width: 155px;
   width: fit-content;
+  width: -moz-fit-content;
   box-shadow: 0 2px 8px #000;
   clip-path: inset(-5px -5px 0 -5px); }
 
