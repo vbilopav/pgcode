@@ -1,6 +1,5 @@
 .footer {
     grid-area: footer;
-    /*font-size: 0.9em;*/
     color: $footer-color;
     background-color: $footer-background-color;
     user-select: none;
@@ -43,6 +42,7 @@
 
     & > div.info {
         grid-area: info;
+        color:  $connections-selector-color;
         padding-left: 5px;
     }
     

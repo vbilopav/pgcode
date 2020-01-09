@@ -155,7 +155,6 @@ body > div.container {
 
 .footer {
   grid-area: footer;
-  /*font-size: 0.9em;*/
   color: #ffffff;
   background-color: #007ACC;
   user-select: none;
@@ -188,6 +187,7 @@ body > div.container {
     margin-right: 3px; }
   .footer > div.info {
     grid-area: info;
+    color: #c1c1c1;
     padding-left: 5px; }
   .footer > div.feed {
     grid-area: feed;

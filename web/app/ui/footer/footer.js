@@ -25,12 +25,13 @@ define(["require", "exports", "app/controls/context-menu", "app/_sys/storage", "
     }
     class default_1 {
         constructor(element) {
+            this.selectedConnection = null;
             this.footer = element.addClass("footer").html(String.html `
             <div class="connections">
                 <span class="icon-database"></span>
                 <span class="connections-text"></span>
             </div>
-            <div class="info">PostgreSQL=12.0, Host=localhost, Port=5434, Database=pgcode_test, User=postgres</div>
+            <div class="info"></div>
             <div class="feed clickable" title="Send feedback">&#128526;</div>
         `);
             this.connections = element.find(".connections");
@@ -61,13 +62,27 @@ define(["require", "exports", "app/controls/context-menu", "app/_sys/storage", "
                 }
                 const menuItems = new Array();
                 for (let connection of result.data.connections) {
-                    menuItems.push({ text: connection.name, data: connection.value, action: () => this.selectConnection(connection) });
+                    menuItems.push({
+                        id: connection.name,
+                        text: connection.name,
+                        data: this.formatTitleFromConn(connection),
+                        action: () => this.selectConnection(connection)
+                    });
                 }
-                new FooterContextMenu({ id: "conn-footer-menu", event: "click", target: this.connections, items: menuItems });
+                this.connectionMenu = new FooterContextMenu({
+                    id: "conn-footer-menu",
+                    event: "click",
+                    target: this.connections,
+                    items: menuItems
+                });
             }
-            console.log(result);
         }
         selectConnection(connection) {
+            if (this.selectedConnection === connection) {
+                return;
+            }
+            this.selectedConnection = connection;
+            const name = (connection ? connection.name : null);
             if (!connection) {
                 this.connectionsText.html("Connection not selected");
                 this.connectionsText.attr("title", "Click here to select from available connections...");
@@ -76,18 +91,21 @@ define(["require", "exports", "app/controls/context-menu", "app/_sys/storage", "
                 storage.connection = null;
             }
             else {
-                this.connectionsText.html(connection.name);
-                this.connectionsText.attr("title", connection.value);
-                const parts = connection.value.split(","), part = (idx) => parts[idx].split("=")[1];
-                this.info.html(` ${part(0)} | ${part(1)} | ${part(2)} | ${part(3)} | ${part(4)} `);
-                this.info.attr("title", connection.value);
-                storage.connection = connection.name;
+                this.connectionsText.html(name);
+                const title = this.formatTitleFromConn(connection);
+                this.connectionsText.attr("title", title);
+                this.info.html(`${connection.version}://${connection.user}@${connection.host}:${connection.port}/${connection.database}`);
+                this.info.attr("title", title);
+                storage.connection = name;
             }
             const rect = this.connections.getBoundingClientRect();
             let columns = this.footer.css("grid-template-columns").split(" ");
             columns[0] = rect.width + "px";
             columns[2] = "auto";
             this.footer.css("grid-template-columns", columns.join(" "));
+        }
+        formatTitleFromConn(connection) {
+            return `PostgreSQL ${connection.version}\nHost=${connection.host}\nPort=${connection.port}\nDatabase=${connection.database}\nUser=${connection.user}`;
         }
         initFeedbackMenu(btn) {
             new FooterContextMenu({

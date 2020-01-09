@@ -1,5 +1,5 @@
 import { publish, SET_APP_STATUS } from "app/_sys/pubsub";
-import { AppStatus, INameValue } from "app/types";
+import { AppStatus, IConnectionInfo } from "app/types";
 
 interface IResponse<T> {
     ok: boolean,
@@ -8,7 +8,7 @@ interface IResponse<T> {
 }
 
 interface IConnections {
-    connections: Array<INameValue>
+    connections: Array<IConnectionInfo>
 }
 
 const _createResponse:<T> (response: Response, data?: T) => IResponse<T> = (response, data) => Object({ok: response.ok, status: response.status, data: data});

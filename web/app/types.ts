@@ -6,8 +6,13 @@ interface IMain {
     moveToolbar(position: Position, ...args: any[]) : boolean
 }
 
-interface INameValue {
-    name: string, value: string
+interface IConnectionInfo {
+    name: string, 
+    version: string,
+    host: string, 
+    port: number, 
+    database: string,
+    user: string 
 }
 
-export { Position, Themes, AppStatus, IMain, INameValue }
+export { Position, Themes, AppStatus, IMain, IConnectionInfo }

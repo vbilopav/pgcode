@@ -1,6 +1,6 @@
 import { ContextMenu, ContextMenuCtorArgs, ContextMenuItem, MenuItemType } from "app/controls/context-menu";
 import Storage from "app/_sys/storage";
-import { INameValue } from "app/types";
+import { IConnectionInfo } from "app/types";
 import { fetchConnections } from "app/_sys/api";
 
 interface IStorage {connection: string}
@@ -36,6 +36,8 @@ export default class  {
     private connections: Element;
     private connectionsText: Element;
     private info: Element;
+    private selectedConnection?: IConnectionInfo = null;
+    private connectionMenu: ContextMenu;
 
     constructor(element: Element) {
         this.footer = element.addClass("footer").html(String.html`
@@ -43,7 +45,7 @@ export default class  {
                 <span class="icon-database"></span>
                 <span class="connections-text"></span>
             </div>
-            <div class="info">PostgreSQL=12.0, Host=localhost, Port=5434, Database=pgcode_test, User=postgres</div>
+            <div class="info"></div>
             <div class="feed clickable" title="Send feedback">&#128526;</div>
         `);
         this.connections = element.find(".connections");
@@ -74,15 +76,28 @@ export default class  {
             }
             const menuItems = new Array<MenuItemType>();
             for(let connection of result.data.connections) {
-                menuItems.push({text: connection.name, data: connection.value, action: () => this.selectConnection(connection)}); 
+                menuItems.push({
+                    id: connection.name, 
+                    text: connection.name, 
+                    data: this.formatTitleFromConn(connection), 
+                    action: () => this.selectConnection(connection)
+                }); 
             }
-            new FooterContextMenu({id: "conn-footer-menu", event: "click", target: this.connections, items: menuItems} as ContextMenuCtorArgs);
+            this.connectionMenu = new FooterContextMenu({
+                id: "conn-footer-menu", 
+                event: "click", 
+                target: this.connections, 
+                items: menuItems
+            } as ContextMenuCtorArgs);
         }
-
-        console.log(result);
     }
 
-    private selectConnection(connection?: INameValue) {
+    private selectConnection(connection?: IConnectionInfo) {
+        if (this.selectedConnection === connection) {
+            return;
+        }
+        this.selectedConnection = connection;
+        const name = (connection ? connection.name : null);
         if (!connection) {
             this.connectionsText.html("Connection not selected");
             this.connectionsText.attr("title", "Click here to select from available connections...");
@@ -90,18 +105,22 @@ export default class  {
             this.info.attr("title", "no connection...");
             storage.connection = null;
         } else {
-            this.connectionsText.html(connection.name);
-            this.connectionsText.attr("title", connection.value);
-            const parts = connection.value.split(","), part = (idx: number) => parts[idx].split("=")[1];
-            this.info.html(` ${part(0)} | ${part(1)} | ${part(2)} | ${part(3)} | ${part(4)} `);
-            this.info.attr("title", connection.value);
-            storage.connection = connection.name;
+            this.connectionsText.html(name);
+            const title = this.formatTitleFromConn(connection);
+            this.connectionsText.attr("title", title);
+            this.info.html(`${connection.version}://${connection.user}@${connection.host}:${connection.port}/${connection.database}`);
+            this.info.attr("title", title);
+            storage.connection = name;
         }
         const rect = this.connections.getBoundingClientRect();
         let columns = this.footer.css("grid-template-columns").split(" ")
         columns[0] = rect.width + "px";
         columns[2] = "auto";
         this.footer.css("grid-template-columns", columns.join(" "));
+    }
+
+    private formatTitleFromConn(connection: IConnectionInfo) {
+        return `PostgreSQL ${connection.version}\nHost=${connection.host}\nPort=${connection.port}\nDatabase=${connection.database}\nUser=${connection.user}`;
     }
 
     private initFeedbackMenu(btn: Element) {

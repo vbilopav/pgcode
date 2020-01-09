@@ -11,13 +11,16 @@ namespace Pgcode
         {
         }
 
-        public IEnumerable<NameValue> GetConnectionsDataNameValue() =>
+        public IEnumerable<ConnectionInfo> GetConnectionsDataNameValue() =>
             _connections.Values.OrderBy(c => c.Name).Select(c => 
-                new NameValue 
+                new ConnectionInfo
                 {
                     Name = c.Name,
-                    Value = 
-                        $"Version={c.ServerVersion}, Host={c.Connection.Host}, Port={c.Connection.Port}, Database={c.Connection.Database}, User={c.Connection.UserName}"
+                    Version = c.ServerVersion,
+                    Host = c.Connection.Host,
+                    Port = c.Connection.Port,
+                    Database = c.Connection.Database,
+                    User = c.Connection.UserName
                 });
 
         public void Dispose()
