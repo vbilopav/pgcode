@@ -27,7 +27,6 @@
         padding-left: 10px;
         padding-right: 10px;
         background-color: $connections-selector-background-color;
-        color:  $connections-selector-color;
         cursor: pointer;
         width: fit-content;
         width: -moz-fit-content;
@@ -42,7 +41,6 @@
 
     & > div.info {
         grid-area: info;
-        color:  $connections-selector-color;
         padding-left: 5px;
     }
     
@@ -62,7 +60,6 @@
     display: none; 
     position: fixed;
     background-color: $connections-selector-background-color;
-    color:  $connections-selector-color;
     display: grid;
     max-width: 155px;
     width: fit-content;
@@ -91,4 +88,11 @@
 
 #feed-footer-menu.footer-menu {
     background-color: $footer-background-color;
+}
+
+#conn-footer-menu > .footer-menu-item > span:nth-child(1) {
+    position: absolute;
+}
+#conn-footer-menu > .footer-menu-item > span:nth-child(2) {
+    margin-left: 18px;
 }

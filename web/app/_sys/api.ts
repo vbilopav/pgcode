@@ -7,9 +7,7 @@ interface IResponse<T> {
     data?: T
 }
 
-interface IConnections {
-    connections: Array<IConnectionInfo>
-}
+interface IConnections extends Array<IConnectionInfo> { }
 
 const _createResponse:<T> (response: Response, data?: T) => IResponse<T> = (response, data) => Object({ok: response.ok, status: response.status, data: data});
 
@@ -22,7 +20,7 @@ const fetchConnections: () => Promise<IResponse<IConnections>> = async () => {
             publish(SET_APP_STATUS, AppStatus.ERROR, response.status);
             return _createResponse(response);
         }
-        publish(SET_APP_STATUS, AppStatus.READY);
+        
         return _createResponse(response, await response.json() as IConnections);
     } catch (error) {
         publish(SET_APP_STATUS, AppStatus.ERROR);

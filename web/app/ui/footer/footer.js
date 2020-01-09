@@ -1,4 +1,4 @@
-define(["require", "exports", "app/controls/context-menu", "app/_sys/storage", "app/_sys/api"], function (require, exports, context_menu_1, storage_1, api_1) {
+define(["require", "exports", "app/controls/context-menu", "app/_sys/storage", "app/types", "app/_sys/api", "app/_sys/pubsub"], function (require, exports, context_menu_1, storage_1, types_1, api_1, pubsub_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     const storage = new storage_1.default({ connection: null });
@@ -20,7 +20,11 @@ define(["require", "exports", "app/controls/context-menu", "app/_sys/storage", "
             return String.html `<div id="${id}" class="footer-menu"></div>`.toElement();
         }
         menuItemElement(menuItem) {
-            return String.html `<div class="footer-menu-item">${menuItem.text}</div>`.toElement().attr("title", menuItem.data);
+            return String.html `
+        <div class="footer-menu-item">
+            <span>${menuItem.checked ? '&check;' : ""}</span>
+            <span>${menuItem.text}</span>
+        </div>`.toElement().attr("title", menuItem.data);
         }
     }
     class default_1 {
@@ -46,22 +50,8 @@ define(["require", "exports", "app/controls/context-menu", "app/_sys/storage", "
                 this.connectionsText.html("¯\\_(ツ)_/¯");
             }
             else {
-                if (!storage.connection) {
-                    this.selectConnection();
-                }
-                else {
-                    const name = storage.connection;
-                    const selected = result.data.connections.filter(c => c.name === name);
-                    if (!selected.length) {
-                        storage.connection = name;
-                        this.selectConnection();
-                    }
-                    else {
-                        this.selectConnection(selected[0]);
-                    }
-                }
                 const menuItems = new Array();
-                for (let connection of result.data.connections) {
+                for (let connection of result.data) {
                     menuItems.push({
                         id: connection.name,
                         text: connection.name,
@@ -75,6 +65,20 @@ define(["require", "exports", "app/controls/context-menu", "app/_sys/storage", "
                     target: this.connections,
                     items: menuItems
                 });
+                if (!storage.connection) {
+                    this.selectConnection();
+                }
+                else {
+                    const name = storage.connection;
+                    const selected = result.data.filter(c => c.name === name);
+                    if (!selected.length) {
+                        storage.connection = name;
+                        this.selectConnection();
+                    }
+                    else {
+                        this.selectConnection(selected[0]);
+                    }
+                }
             }
         }
         selectConnection(connection) {
@@ -89,6 +93,7 @@ define(["require", "exports", "app/controls/context-menu", "app/_sys/storage", "
                 this.info.html("");
                 this.info.attr("title", "no connection...");
                 storage.connection = null;
+                pubsub_1.publish(pubsub_1.SET_APP_STATUS, types_1.AppStatus.NO_CONNECTION);
             }
             else {
                 this.connectionsText.html(name);
@@ -96,7 +101,13 @@ define(["require", "exports", "app/controls/context-menu", "app/_sys/storage", "
                 this.connectionsText.attr("title", title);
                 this.info.html(`${connection.version}://${connection.user}@${connection.host}:${connection.port}/${connection.database}`);
                 this.info.attr("title", title);
+                let old = storage.connection;
+                if (old) {
+                    this.connectionMenu.updateMenuItem(old, { checked: false });
+                }
+                this.connectionMenu.updateMenuItem(name, { checked: true });
                 storage.connection = name;
+                pubsub_1.publish(pubsub_1.SET_APP_STATUS, types_1.AppStatus.READY);
             }
             const rect = this.connections.getBoundingClientRect();
             let columns = this.footer.css("grid-template-columns").split(" ");

@@ -14,13 +14,6 @@ namespace Pgcode.Api
         }
 
         [HttpGet]
-        public object Get()
-        {
-            return new
-            {
-                connections = _connectionManager.GetConnectionsDataNameValue(),
-                selected = null as string
-            };
-        }
+        public IEnumerable<ConnectionInfo> Get() => _connectionManager.GetConnectionsDataNameValue();
     }
 }

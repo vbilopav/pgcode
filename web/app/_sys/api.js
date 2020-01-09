@@ -10,7 +10,6 @@ define(["require", "exports", "app/_sys/pubsub", "app/types"], function (require
                 pubsub_1.publish(pubsub_1.SET_APP_STATUS, types_1.AppStatus.ERROR, response.status);
                 return _createResponse(response);
             }
-            pubsub_1.publish(pubsub_1.SET_APP_STATUS, types_1.AppStatus.READY);
             return _createResponse(response, await response.json());
         }
         catch (error) {

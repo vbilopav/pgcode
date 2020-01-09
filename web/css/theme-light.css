@@ -155,7 +155,7 @@ body > div.container {
 
 .footer {
   grid-area: footer;
-  color: #ffffff;
+  color: #c1c1c1;
   background-color: #007ACC;
   user-select: none;
   display: grid;
@@ -176,7 +176,6 @@ body > div.container {
     padding-left: 10px;
     padding-right: 10px;
     background-color: #16825d;
-    color: #c1c1c1;
     cursor: pointer;
     width: fit-content;
     width: -moz-fit-content;
@@ -187,7 +186,6 @@ body > div.container {
     margin-right: 3px; }
   .footer > div.info {
     grid-area: info;
-    color: #c1c1c1;
     padding-left: 5px; }
   .footer > div.feed {
     grid-area: feed;
@@ -201,7 +199,6 @@ body > div.container {
   display: none;
   position: fixed;
   background-color: #16825d;
-  color: #c1c1c1;
   display: grid;
   max-width: 155px;
   width: fit-content;
@@ -227,6 +224,12 @@ body > div.container {
 
 #feed-footer-menu.footer-menu {
   background-color: #007ACC; }
+
+#conn-footer-menu > .footer-menu-item > span:nth-child(1) {
+  position: absolute; }
+
+#conn-footer-menu > .footer-menu-item > span:nth-child(2) {
+  margin-left: 18px; }
 
 .main-panel {
   grid-area: main-panel; }

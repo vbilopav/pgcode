@@ -1,7 +1,8 @@
 import { ContextMenu, ContextMenuCtorArgs, ContextMenuItem, MenuItemType } from "app/controls/context-menu";
 import Storage from "app/_sys/storage";
-import { IConnectionInfo } from "app/types";
+import { AppStatus, IConnectionInfo } from "app/types";
 import { fetchConnections } from "app/_sys/api";
+import { publish, SET_APP_STATUS } from "app/_sys/pubsub";
 
 interface IStorage {connection: string}
 
@@ -27,7 +28,11 @@ class FooterContextMenu extends ContextMenu {
     }
 
     protected menuItemElement(menuItem: ContextMenuItem): Element {
-        return String.html`<div class="footer-menu-item">${menuItem.text}</div>`.toElement().attr("title", menuItem.data);
+        return String.html`
+        <div class="footer-menu-item">
+            <span>${menuItem.checked ? '&check;' : ""}</span>
+            <span>${menuItem.text}</span>
+        </div>`.toElement().attr("title", menuItem.data);
     }
 }
 
@@ -62,20 +67,9 @@ export default class  {
         if (!result.ok) {
             this.connectionsText.html("¯\\_(ツ)_/¯");
         } else {
-            if (!storage.connection) {
-                this.selectConnection();
-            } else {
-                const name = storage.connection;
-                const selected = result.data.connections.filter(c => c.name === name);
-                if (!selected.length) {
-                    storage.connection = name
-                    this.selectConnection();
-                } else {
-                    this.selectConnection(selected[0]);
-                }
-            }
+            
             const menuItems = new Array<MenuItemType>();
-            for(let connection of result.data.connections) {
+            for(let connection of result.data) {
                 menuItems.push({
                     id: connection.name, 
                     text: connection.name, 
@@ -89,6 +83,19 @@ export default class  {
                 target: this.connections, 
                 items: menuItems
             } as ContextMenuCtorArgs);
+
+            if (!storage.connection) {
+                this.selectConnection();
+            } else {
+                const name = storage.connection;
+                const selected = result.data.filter(c => c.name === name);
+                if (!selected.length) {
+                    storage.connection = name
+                    this.selectConnection();
+                } else {
+                    this.selectConnection(selected[0]);
+                }
+            }
         }
     }
 
@@ -104,13 +111,20 @@ export default class  {
             this.info.html("");
             this.info.attr("title", "no connection...");
             storage.connection = null;
+            publish(SET_APP_STATUS, AppStatus.NO_CONNECTION);
         } else {
             this.connectionsText.html(name);
             const title = this.formatTitleFromConn(connection);
             this.connectionsText.attr("title", title);
             this.info.html(`${connection.version}://${connection.user}@${connection.host}:${connection.port}/${connection.database}`);
             this.info.attr("title", title);
+            let old = storage.connection;
+            if (old) {
+                this.connectionMenu.updateMenuItem(old, {checked: false});
+            }
+            this.connectionMenu.updateMenuItem(name, {checked: true});
             storage.connection = name;
+            publish(SET_APP_STATUS, AppStatus.READY);
         }
         const rect = this.connections.getBoundingClientRect();
         let columns = this.footer.css("grid-template-columns").split(" ")
