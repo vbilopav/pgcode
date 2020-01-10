@@ -15,6 +15,7 @@
         text-align: center;
         cursor: pointer;
         position: relative;
+        transition-duration: 0.4s;
     }
     & > div.active, & > div.active > div {
         color: $active-color;

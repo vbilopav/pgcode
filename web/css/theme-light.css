@@ -95,7 +95,8 @@ body > div.container {
     align-self: center;
     text-align: center;
     cursor: pointer;
-    position: relative; }
+    position: relative;
+    transition-duration: 0.4s; }
   .toolbar > div.active, .toolbar > div.active > div {
     color: #252526; }
   .toolbar > div.active > div.marker {
@@ -179,7 +180,8 @@ body > div.container {
     cursor: pointer;
     width: fit-content;
     width: -moz-fit-content;
-    max-width: 155px; }
+    max-width: 155px;
+    transition-duration: 0.4s; }
   .footer > div.connections:hover {
     background-color: #329171; }
   .footer > div.connections > span.icon-database {
@@ -191,7 +193,8 @@ body > div.container {
     grid-area: feed;
     text-align: center;
     opacity: 0.5;
-    width: 27px; }
+    width: 27px;
+    transition-duration: 0.4s; }
   .footer > div.feed:hover {
     opacity: 1; }
 

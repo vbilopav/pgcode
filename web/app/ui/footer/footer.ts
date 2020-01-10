@@ -116,7 +116,7 @@ export default class  {
             this.connectionsText.html(name);
             const title = this.formatTitleFromConn(connection);
             this.connectionsText.attr("title", title);
-            this.info.html(`${connection.version}://${connection.user}@${connection.host}:${connection.port}/${connection.database}`);
+            this.info.html(`v${connection.version} //${connection.user}@${connection.host}:${connection.port}/${connection.database}`);
             this.info.attr("title", title);
             let old = storage.connection;
             if (old) {
@@ -124,6 +124,9 @@ export default class  {
             }
             this.connectionMenu.updateMenuItem(name, {checked: true});
             storage.connection = name;
+            //
+            // fetch metadata from public
+            //
             publish(SET_APP_STATUS, AppStatus.READY);
         }
         const rect = this.connections.getBoundingClientRect();
@@ -134,7 +137,7 @@ export default class  {
     }
 
     private formatTitleFromConn(connection: IConnectionInfo) {
-        return `PostgreSQL ${connection.version}\nHost=${connection.host}\nPort=${connection.port}\nDatabase=${connection.database}\nUser=${connection.user}`;
+        return `PostgreSQL ${connection.version}\nHost: ${connection.host}\nPort: ${connection.port}\nDatabase: ${connection.database}\nUser: ${connection.user}`;
     }
 
     private initFeedbackMenu(btn: Element) {

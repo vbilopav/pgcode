@@ -2,7 +2,6 @@ import {
     subscribe, STATE_CHANGED_DOCS, STATE_CHANGED_TABLES, STATE_CHANGED_VIEWS, STATE_CHANGED_FUNCS, STATE_CHANGED_SEARCH,
 } from "app/_sys/pubsub";
 
-
 export default class  {
     constructor(element: Element){
         element.addClass("side-panel").html(String.html`

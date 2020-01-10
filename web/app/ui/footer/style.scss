@@ -31,6 +31,7 @@
         width: fit-content;
         width: -moz-fit-content;
         max-width: 155px;
+        transition-duration: 0.4s;
     }
     & > div.connections:hover {
         background-color: $connections-selector-hover-background-color;
@@ -50,6 +51,7 @@
         text-align: center;
         opacity: 0.5;
         width: 27px;
+        transition-duration: 0.4s;
     }
     & > div.feed:hover {
         opacity: 1;

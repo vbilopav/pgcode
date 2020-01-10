@@ -99,7 +99,7 @@ define(["require", "exports", "app/controls/context-menu", "app/_sys/storage", "
                 this.connectionsText.html(name);
                 const title = this.formatTitleFromConn(connection);
                 this.connectionsText.attr("title", title);
-                this.info.html(`${connection.version}://${connection.user}@${connection.host}:${connection.port}/${connection.database}`);
+                this.info.html(`v${connection.version} //${connection.user}@${connection.host}:${connection.port}/${connection.database}`);
                 this.info.attr("title", title);
                 let old = storage.connection;
                 if (old) {
@@ -116,7 +116,7 @@ define(["require", "exports", "app/controls/context-menu", "app/_sys/storage", "
             this.footer.css("grid-template-columns", columns.join(" "));
         }
         formatTitleFromConn(connection) {
-            return `PostgreSQL ${connection.version}\nHost=${connection.host}\nPort=${connection.port}\nDatabase=${connection.database}\nUser=${connection.user}`;
+            return `PostgreSQL ${connection.version}\nHost: ${connection.host}\nPort: ${connection.port}\nDatabase: ${connection.database}\nUser: ${connection.user}`;
         }
         initFeedbackMenu(btn) {
             new FooterContextMenu({
