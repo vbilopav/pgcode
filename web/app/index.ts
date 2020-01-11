@@ -98,7 +98,7 @@ new (class implements IMain {
             this.status = status;
             this.overlay.hideElement();
             clearInterval(this.loadingTimeout);
-            document.title = this.previousTitle || this.defaultTitle;
+            document.title = args[0] ? `${args[0]} - ${this.defaultTitle}` : this.defaultTitle;
 
         } else if (status == AppStatus.BUSY) {
             if (this.status == AppStatus.BUSY) {
@@ -126,6 +126,15 @@ new (class implements IMain {
             clearInterval(this.loadingTimeout);
             document.title = args[0] ? `NETWORK ERROR (${args[0]})` : "NETWORK ERROR";
 
+        }  else if (status == AppStatus.NO_CONNECTION) {
+            if (this.status == AppStatus.NO_CONNECTION) {
+                return;
+            }
+            this.status = status;
+            this.overlay.hideElement();
+            clearInterval(this.loadingTimeout);
+            this.previousTitle = document.title;
+            document.title = `NO CONNECTION - ${this.defaultTitle}`;
         }
     }
 

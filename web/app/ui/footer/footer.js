@@ -50,33 +50,38 @@ define(["require", "exports", "app/controls/context-menu", "app/_sys/storage", "
                 this.connectionsText.html("¯\\_(ツ)_/¯");
             }
             else {
-                const menuItems = new Array();
-                for (let connection of result.data) {
-                    menuItems.push({
-                        id: connection.name,
-                        text: connection.name,
-                        data: this.formatTitleFromConn(connection),
-                        action: () => this.selectConnection(connection)
-                    });
-                }
-                this.connectionMenu = new FooterContextMenu({
-                    id: "conn-footer-menu",
-                    event: "click",
-                    target: this.connections,
-                    items: menuItems
-                });
-                if (!storage.connection) {
-                    this.selectConnection();
+                if (result.data.length === 1) {
+                    this.selectConnection(result.data[0]);
                 }
                 else {
-                    const name = storage.connection;
-                    const selected = result.data.filter(c => c.name === name);
-                    if (!selected.length) {
-                        storage.connection = name;
+                    const menuItems = new Array();
+                    for (let connection of result.data) {
+                        menuItems.push({
+                            id: connection.name,
+                            text: connection.name,
+                            data: this.formatTitleFromConn(connection),
+                            action: () => this.selectConnection(connection)
+                        });
+                    }
+                    this.connectionMenu = new FooterContextMenu({
+                        id: "conn-footer-menu",
+                        event: "click",
+                        target: this.connections,
+                        items: menuItems
+                    });
+                    if (!storage.connection) {
                         this.selectConnection();
                     }
                     else {
-                        this.selectConnection(selected[0]);
+                        const name = storage.connection;
+                        const selected = result.data.filter(c => c.name === name);
+                        if (!selected.length) {
+                            storage.connection = name;
+                            this.selectConnection();
+                        }
+                        else {
+                            this.selectConnection(selected[0]);
+                        }
                     }
                 }
             }
@@ -101,13 +106,15 @@ define(["require", "exports", "app/controls/context-menu", "app/_sys/storage", "
                 this.connectionsText.attr("title", title);
                 this.info.html(`v${connection.version} //${connection.user}@${connection.host}:${connection.port}/${connection.database}`);
                 this.info.attr("title", title);
-                let old = storage.connection;
-                if (old) {
-                    this.connectionMenu.updateMenuItem(old, { checked: false });
+                if (this.connectionMenu) {
+                    let old = storage.connection;
+                    if (old) {
+                        this.connectionMenu.updateMenuItem(old, { checked: false });
+                    }
+                    this.connectionMenu.updateMenuItem(name, { checked: true });
                 }
-                this.connectionMenu.updateMenuItem(name, { checked: true });
                 storage.connection = name;
-                pubsub_1.publish(pubsub_1.SET_APP_STATUS, types_1.AppStatus.READY);
+                pubsub_1.publish(pubsub_1.SET_APP_STATUS, types_1.AppStatus.READY, name);
             }
             const rect = this.connections.getBoundingClientRect();
             let columns = this.footer.css("grid-template-columns").split(" ");

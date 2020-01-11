@@ -56,7 +56,7 @@ define(["require", "exports", "app/_sys/storage", "app/ui/toolbar/toolbar", "app
                 this.status = status;
                 this.overlay.hideElement();
                 clearInterval(this.loadingTimeout);
-                document.title = this.previousTitle || this.defaultTitle;
+                document.title = args[0] ? `${args[0]} - ${this.defaultTitle}` : this.defaultTitle;
             }
             else if (status == types_1.AppStatus.BUSY) {
                 if (this.status == types_1.AppStatus.BUSY) {
@@ -83,6 +83,16 @@ define(["require", "exports", "app/_sys/storage", "app/ui/toolbar/toolbar", "app
                 this.previousTitle = document.title;
                 clearInterval(this.loadingTimeout);
                 document.title = args[0] ? `NETWORK ERROR (${args[0]})` : "NETWORK ERROR";
+            }
+            else if (status == types_1.AppStatus.NO_CONNECTION) {
+                if (this.status == types_1.AppStatus.NO_CONNECTION) {
+                    return;
+                }
+                this.status = status;
+                this.overlay.hideElement();
+                clearInterval(this.loadingTimeout);
+                this.previousTitle = document.title;
+                document.title = `NO CONNECTION - ${this.defaultTitle}`;
             }
         }
         initTheme() {
