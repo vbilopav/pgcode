@@ -68,7 +68,10 @@ export default class  {
             this.connectionsText.html("¯\\_(ツ)_/¯");
         } else {
             if (result.data.length === 1) {
+                
                 this.selectConnection(result.data[0]);
+                this.connections.css("cursor", "initial");
+
             } else {
 
                 const menuItems = new Array<MenuItemType>();

@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.Extensions.Configuration;
@@ -23,6 +22,7 @@ namespace Pgcode
         public static bool IsDebug { get; set; } = false;
 #endif
         public static IWebHostEnvironment Environment { get; set; }
+        
         public static Settings Settings { get; set; }
 
         public static async Task Main(string[] args)
@@ -89,8 +89,11 @@ namespace Pgcode
                     }
                 })
                 .ConfigureLogging((ctx, logging) => logging.AddConsole()
-                    .AddFilter("Microsoft", LogLevel.Information).AddFilter("System", LogLevel.Information)
-                    .AddFilter("Microsoft", LogLevel.Warning).AddFilter("System", LogLevel.Warning))
+                    .AddFilter("Microsoft", LogLevel.Information)
+                    .AddFilter("System", LogLevel.Information)
+                    .AddFilter("Microsoft", LogLevel.Warning)
+                    .AddFilter("System", LogLevel.Warning)
+                )
                 .UseKestrel(ko => ko.AddServerHeader = false)
                 .ConfigureServices((ctx, services) => services.AddRouting())
                 .SuppressStatusMessages(true)
@@ -256,31 +259,6 @@ namespace Pgcode
             }
 
             return false;
-        }
-    }
-
-    public class Startup
-    {
-        public void ConfigureServices(IServiceCollection services)
-        {
-            services.AddControllers();
-            Services.Configure(services);
-        }
-
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
-        {
-            app.UseRouting();
-            app.UseEndpoints(endpoints => endpoints.MapControllers());
-            app.UseCookieMiddleware();
-            if (env.IsDevelopment())
-            {
-                app.UseDevelopmentMiddleware();
-                app.UseDeveloperExceptionPage();
-            }
-            else
-            {
-                app.UseResourceMiddleware();
-            }
         }
     }
 }

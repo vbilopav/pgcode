@@ -66,7 +66,7 @@ namespace Pgcode
             }
         }
 
-        public static void UseResourceMiddleware(this IApplicationBuilder app)
+        public static void UseResourceMiddleware(this IApplicationBuilder app, params IMiddleware[] mws)
         {
             app.UseEndpoints(endpoints =>
             {
@@ -74,10 +74,23 @@ namespace Pgcode
                 {
                     endpoints.MapGet(key, async context =>
                     {
+                        foreach (var middleware in mws)
+                        {
+                            middleware.ProcessHttpContext(context);
+                        }
+
                         var (resourceId, mimeType, size, isBinary) = value;
 
                         context.Response.Headers.Add("content-type", new StringValues(mimeType));
-                        context.Response.Headers.Add("cache-control", new StringValues("max-age=3600"));
+                        if (key == "/")
+                        {
+                            context.Response.Headers.Add("cache-control", new StringValues(new []{"no-cache", "no-store", "must-revalidate" }));
+                            context.Response.Headers.Add("Expires", new StringValues("0"));
+                        }
+                        else
+                        {
+                            context.Response.Headers.Add("cache-control", new StringValues("max-age=3600"));
+                        }
                         context.Response.Headers.Add("Connection", new StringValues("keep-alive"));
                         context.Response.Headers.Add("content-length", new StringValues(size));
                         context.Response.Headers.Add("etag", new StringValues(Etag));

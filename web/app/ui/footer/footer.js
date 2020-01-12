@@ -52,6 +52,7 @@ define(["require", "exports", "app/controls/context-menu", "app/_sys/storage", "
             else {
                 if (result.data.length === 1) {
                     this.selectConnection(result.data[0]);
+                    this.connections.css("cursor", "initial");
                 }
                 else {
                     const menuItems = new Array();

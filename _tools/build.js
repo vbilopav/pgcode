@@ -89,7 +89,10 @@ function copyRootFiles() {
     var to = cleanPath(config.targetDir + "/" + "index.html");
     
     log(`>>> copying ${from} to ${to}`);
-    let content = fs.readFileSync(from).toString().replace("js/index.js", "js/index.js" + "?" + config.version);
+    let content = fs.readFileSync(from).toString()
+        .replace(".js", ".js" + "?" + config.version)
+        .replace(".css", ".css" + "?" + config.version)
+        .replace(".ico", ".ico" + "?" + config.version);
     fs.writeFileSync(to, content, "utf8");
 
     var from = cleanPath(config.sourceDir + "/" + "favicon.ico");
