@@ -6,6 +6,16 @@ interface IMain {
     moveToolbar(position: Position, ...args: any[]) : boolean
 }
 
+interface IResponse<T> {
+    ok: boolean,
+    status: number,
+    data?: T
+}
+
+interface IInitial { 
+    connections: Array<IConnectionInfo>
+}
+
 interface IConnectionInfo {
     name: string, 
     version: string,
@@ -15,4 +25,4 @@ interface IConnectionInfo {
     user: string 
 }
 
-export { Position, Themes, AppStatus, IMain, IConnectionInfo }
+export { Position, Themes, AppStatus, IMain, IResponse, IInitial, IConnectionInfo }

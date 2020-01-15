@@ -3,7 +3,8 @@ import {
     publish, subscribe, 
     STATE_CHANGED_ON, STATE_CHANGED_OFF, STATE_CHANGED, SIDEBAR_DOCKED, SIDEBAR_UNDOCKED
 } from "app/_sys/pubsub";
-import { MonacoContextMenu, ContextMenuCtorArgs, MenuItemType } from "app/controls/context-menu";
+import { ContextMenuCtorArgs, MenuItemType } from "app/controls/context-menu";
+import MonacoContextMenu from "../../controls/monaco-context-menu";
 import { Position, IMain } from "app/types";
 
 enum ButtonRoles { switch="switch", toggle="toggle" };

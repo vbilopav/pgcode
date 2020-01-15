@@ -1,5 +1,23 @@
-﻿namespace Pgcode.Api
+﻿using System.Collections.Generic;
+
+namespace Pgcode.Api
 {
+    public class InitialResponse
+    {
+        public IEnumerable<ConnectionInfo> Connections { get; set; }
+    }
+
+    public class ConnectionResponse
+    {
+        public Schemas Schemas { get; set; }
+    }
+
+    public class Schemas
+    {
+        public IEnumerable<string> Names { get; set; }
+        public string Selected { get; set; }
+    }
+
     public class ConnectionInfo
     {
         public string Name { get; set; }

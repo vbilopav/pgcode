@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Pgcode.Api;
 
 namespace Pgcode
 {
@@ -10,8 +11,11 @@ namespace Pgcode
     {
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers();
+            services.AddControllers(options => options.Filters.Add<ApiControllerFilter>());
+
             services.AddSingleton<ConnectionManager, ConnectionManager>();
+            services.AddSingleton(Program.Settings);
+            services.AddScoped<DataAccess, DataAccess>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)

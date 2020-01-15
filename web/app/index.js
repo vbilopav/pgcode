@@ -1,4 +1,4 @@
-define(["require", "exports", "app/_sys/storage", "app/ui/toolbar/toolbar", "app/ui/side-panel/side-panel", "app/ui/main-panel/main-panel", "app/ui/footer/footer", "app/controls/splitter", "app/types", "app/_sys/pubsub"], function (require, exports, storage_1, toolbar_1, side_panel_1, main_panel_1, footer_1, splitter_1, types_1, pubsub_1) {
+define(["require", "exports", "app/_sys/storage", "app/ui/toolbar/toolbar", "app/ui/side-panel/side-panel", "app/ui/main-panel/main-panel", "app/ui/footer/footer", "app/controls/splitter", "app/types", "app/_sys/api", "app/_sys/pubsub"], function (require, exports, storage_1, toolbar_1, side_panel_1, main_panel_1, footer_1, splitter_1, types_1, api_1, pubsub_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     const storage = new storage_1.default({
@@ -34,9 +34,10 @@ define(["require", "exports", "app/_sys/storage", "app/ui/toolbar/toolbar", "app
             this.initTheme();
             this.initElements();
             this.setStatus(types_1.AppStatus.BUSY);
-            this.initSplitter(this.initGrid());
             this.initComponents();
+            this.initSplitter(this.initGrid());
             this.subscribeEvents();
+            this.initializeApi();
             document.title = this.defaultTitle;
         }
         moveToolbar(position) {
@@ -167,6 +168,10 @@ define(["require", "exports", "app/_sys/storage", "app/ui/toolbar/toolbar", "app
             });
             pubsub_1.subscribe(pubsub_1.SET_APP_STATUS, (status, ...args) => this.setStatus(status, args));
             document.body.on("contextmenu", e => e.preventDefault());
+        }
+        async initializeApi() {
+            const initial = await api_1.fetchInitial();
+            pubsub_1.publish(pubsub_1.API_INITIAL, initial);
         }
     })();
 });

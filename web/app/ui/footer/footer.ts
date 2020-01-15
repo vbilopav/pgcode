@@ -1,40 +1,13 @@
-import { ContextMenu, ContextMenuCtorArgs, ContextMenuItem, MenuItemType } from "app/controls/context-menu";
+import { ContextMenuCtorArgs, MenuItemType } from "app/controls/context-menu";
+import FooterContextMenu from "app/controls/footer-context-menu";
 import Storage from "app/_sys/storage";
-import { AppStatus, IConnectionInfo } from "app/types";
-import { fetchConnections } from "app/_sys/api";
-import { publish, SET_APP_STATUS } from "app/_sys/pubsub";
+import { AppStatus, IConnectionInfo, IResponse, IInitial } from "app/types";
+import { publish, subscribe, SET_APP_STATUS, API_INITIAL } from "app/_sys/pubsub";
 
 interface IStorage {connection: string}
 
 const 
     storage = new Storage({connection: null}) as any as IStorage;
-
-class FooterContextMenu extends ContextMenu {
-    protected adjust() {
-        this.element.css("top", "0").css("left", "0").visible(false).showElement();
-        const target = this.target.getBoundingClientRect();
-        const element = this.element.getBoundingClientRect();
-        let left: number;
-        if (target.left + element.width >= window.innerWidth) {
-            left = window.innerWidth - element.width;
-        } else {
-            left = target.left;
-        }
-        this.element.css("top", (target.top - element.height) + "px").css("left", left + "px").css("min-width", target.width + "px").visible(true);
-    }
-
-    protected menuElement(id: string): Element {
-        return String.html`<div id="${id}" class="footer-menu"></div>`.toElement();
-    }
-
-    protected menuItemElement(menuItem: ContextMenuItem): Element {
-        return String.html`
-        <div class="footer-menu-item">
-            <span>${menuItem.checked ? '&check;' : ""}</span>
-            <span>${menuItem.text}</span>
-        </div>`.toElement().attr("title", menuItem.data);
-    }
-}
 
 export default class  {
     private footer: Element;
@@ -42,7 +15,7 @@ export default class  {
     private connectionsText: Element;
     private info: Element;
     private selectedConnection?: IConnectionInfo = null;
-    private connectionMenu: ContextMenu;
+    private connectionMenu: FooterContextMenu;
 
     constructor(element: Element) {
         this.footer = element.addClass("footer").html(String.html`
@@ -57,25 +30,23 @@ export default class  {
         this.connectionsText = this.connections.find(".connections-text");
         this.info = element.find(".info");
 
-        this.initConnectionsMenu();
         this.initFeedbackMenu(element.find(".feed"));
+        subscribe(API_INITIAL, response => this.initConnectionsMenu(response));
     }
 
-    private async initConnectionsMenu() {
-        const result = await fetchConnections();
-
-        if (!result.ok) {
+    private initConnectionsMenu(response: IResponse<IInitial>) {
+        if (!response.ok) {
             this.connectionsText.html("¯\\_(ツ)_/¯");
         } else {
-            if (result.data.length === 1) {
+            if (response.data.connections.length === 1) {
                 
-                this.selectConnection(result.data[0]);
+                this.selectConnection(response.data.connections[0]);
                 this.connections.css("cursor", "initial");
 
             } else {
 
                 const menuItems = new Array<MenuItemType>();
-                for(let connection of result.data) {
+                for(let connection of response.data.connections) {
                     menuItems.push({
                         id: connection.name, 
                         text: connection.name, 
@@ -94,7 +65,7 @@ export default class  {
                     this.selectConnection();
                 } else {
                     const name = storage.connection;
-                    const selected = result.data.filter(c => c.name === name);
+                    const selected = response.data.connections.filter(c => c.name === name);
                     if (!selected.length) {
                         storage.connection = name
                         this.selectConnection();

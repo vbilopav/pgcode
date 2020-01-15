@@ -50,6 +50,9 @@
         vertical-align: middle;
         margin-right: 5px;
     }
+    & > div.info:hover {
+        background-color: $clickable-footer-background-color;
+    }
 
     & > div.feed {
         grid-area: feed;
@@ -61,36 +64,6 @@
     & > div.feed:hover {
         opacity: 1;
     }
-}
-
-.footer-menu {
-    display: none; 
-    position: fixed;
-    background-color: $connections-selector-background-color;
-    display: grid;
-    max-width: 155px;
-    width: fit-content;
-    width: -moz-fit-content;
-    box-shadow: 0 2px 8px #000;
-    clip-path: inset(-5px -5px 0 -5px);
-}
-
-.footer-menu-item {
-    line-height: 1.9em;
-    background: none;
-    height: 2em;
-    align-items: center;
-    margin: 1px;
-    padding-right: 10px;
-    padding-left: 10px;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    overflow: hidden;
-    cursor: pointer;
-}
-
-.footer-menu-item:hover:not(.disabled) {
-    background-color: $ctx-menu-hover-color;
 }
 
 #feed-footer-menu.footer-menu {

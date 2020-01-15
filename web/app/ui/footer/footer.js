@@ -1,32 +1,7 @@
-define(["require", "exports", "app/controls/context-menu", "app/_sys/storage", "app/types", "app/_sys/api", "app/_sys/pubsub"], function (require, exports, context_menu_1, storage_1, types_1, api_1, pubsub_1) {
+define(["require", "exports", "app/controls/footer-context-menu", "app/_sys/storage", "app/types", "app/_sys/pubsub"], function (require, exports, footer_context_menu_1, storage_1, types_1, pubsub_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     const storage = new storage_1.default({ connection: null });
-    class FooterContextMenu extends context_menu_1.ContextMenu {
-        adjust() {
-            this.element.css("top", "0").css("left", "0").visible(false).showElement();
-            const target = this.target.getBoundingClientRect();
-            const element = this.element.getBoundingClientRect();
-            let left;
-            if (target.left + element.width >= window.innerWidth) {
-                left = window.innerWidth - element.width;
-            }
-            else {
-                left = target.left;
-            }
-            this.element.css("top", (target.top - element.height) + "px").css("left", left + "px").css("min-width", target.width + "px").visible(true);
-        }
-        menuElement(id) {
-            return String.html `<div id="${id}" class="footer-menu"></div>`.toElement();
-        }
-        menuItemElement(menuItem) {
-            return String.html `
-        <div class="footer-menu-item">
-            <span>${menuItem.checked ? '&check;' : ""}</span>
-            <span>${menuItem.text}</span>
-        </div>`.toElement().attr("title", menuItem.data);
-        }
-    }
     class default_1 {
         constructor(element) {
             this.selectedConnection = null;
@@ -41,22 +16,21 @@ define(["require", "exports", "app/controls/context-menu", "app/_sys/storage", "
             this.connections = element.find(".connections");
             this.connectionsText = this.connections.find(".connections-text");
             this.info = element.find(".info");
-            this.initConnectionsMenu();
             this.initFeedbackMenu(element.find(".feed"));
+            pubsub_1.subscribe(pubsub_1.API_INITIAL, response => this.initConnectionsMenu(response));
         }
-        async initConnectionsMenu() {
-            const result = await api_1.fetchConnections();
-            if (!result.ok) {
+        initConnectionsMenu(response) {
+            if (!response.ok) {
                 this.connectionsText.html("¯\\_(ツ)_/¯");
             }
             else {
-                if (result.data.length === 1) {
-                    this.selectConnection(result.data[0]);
+                if (response.data.connections.length === 1) {
+                    this.selectConnection(response.data.connections[0]);
                     this.connections.css("cursor", "initial");
                 }
                 else {
                     const menuItems = new Array();
-                    for (let connection of result.data) {
+                    for (let connection of response.data.connections) {
                         menuItems.push({
                             id: connection.name,
                             text: connection.name,
@@ -64,7 +38,7 @@ define(["require", "exports", "app/controls/context-menu", "app/_sys/storage", "
                             action: () => this.selectConnection(connection)
                         });
                     }
-                    this.connectionMenu = new FooterContextMenu({
+                    this.connectionMenu = new footer_context_menu_1.default({
                         id: "conn-footer-menu",
                         event: "click",
                         target: this.connections,
@@ -75,7 +49,7 @@ define(["require", "exports", "app/controls/context-menu", "app/_sys/storage", "
                     }
                     else {
                         const name = storage.connection;
-                        const selected = result.data.filter(c => c.name === name);
+                        const selected = response.data.connections.filter(c => c.name === name);
                         if (!selected.length) {
                             storage.connection = name;
                             this.selectConnection();
@@ -127,7 +101,7 @@ define(["require", "exports", "app/controls/context-menu", "app/_sys/storage", "
             return `PostgreSQL ${connection.version}\nHost: ${connection.host}\nPort: ${connection.port}\nDatabase: ${connection.database}\nUser: ${connection.user}`;
         }
         initFeedbackMenu(btn) {
-            new FooterContextMenu({
+            new footer_context_menu_1.default({
                 id: "feed-footer-menu",
                 event: "click",
                 target: btn,

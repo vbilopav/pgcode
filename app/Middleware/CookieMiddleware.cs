@@ -15,7 +15,6 @@ namespace Pgcode
     public class CookieMiddleware : IMiddleware
     {
         private const string CookieName = "pgcode";
-        private static readonly string InstanceId = Guid.NewGuid().ToString().Substring(0, 8);
 
         private static readonly JsonSerializerOptions JsonOptions = new JsonSerializerOptions
         {
@@ -31,13 +30,8 @@ namespace Pgcode
             Expires = DateTime.UtcNow.AddDays(30)
         };
 
-        public void ProcessHttpContext(HttpContext context)
+        public void ProcessCookieAndAddIdentity(HttpContext context)
         {
-            if (context.Request.Path != "/")
-            {
-                return;
-            }
-
             var cookieModel = context.Request.Cookies.TryGetValue(CookieName, out var value)
                 ? JsonSerializer.Deserialize<CookieUserProfileModel>(value, JsonOptions)
                 : new CookieUserProfileModel();
@@ -55,6 +49,16 @@ namespace Pgcode
             context.User = new ClaimsPrincipal();
             context.User.AddIdentity(new GenericIdentity(cookieModel.User));
             context.Response.Cookies.Append(CookieName, JsonSerializer.Serialize(cookieModel, JsonOptions), CookieOptions);
+        }
+
+        public void ProcessHttpContext(HttpContext context)
+        {
+            if (context.Request.Path != "/")
+            {
+                return;
+            }
+
+            ProcessCookieAndAddIdentity(context);
         }
     }
 }

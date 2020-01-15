@@ -58,8 +58,9 @@ const STATE_CHANGED_SEARCH: string = "state/changed/search"; // id: string, stat
 const SIDEBAR_DOCKED: string = "sidebar/docked/"; //void
 const SIDEBAR_UNDOCKED: string = "sidebar/undocked/"; //void
 const CLOSE_CONTEXT_MENU: string = "context-menu/close/"; //id
-
 const SET_APP_STATUS: string = "app/status/"; //status: AppStatus, text?: string
+
+const API_INITIAL: string = "api/initial/"; //initial: IInitial
 
 export { 
     subscribe, publish, unsubscribe,
@@ -75,5 +76,6 @@ export {
     SIDEBAR_DOCKED,
     SIDEBAR_UNDOCKED,
     CLOSE_CONTEXT_MENU,
-    SET_APP_STATUS
+    SET_APP_STATUS,
+    API_INITIAL
 };

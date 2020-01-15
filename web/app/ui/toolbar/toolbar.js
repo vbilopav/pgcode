@@ -1,4 +1,4 @@
-define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/controls/context-menu", "app/types"], function (require, exports, storage_1, pubsub_1, context_menu_1, types_1) {
+define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "../../controls/monaco-context-menu", "app/types"], function (require, exports, storage_1, pubsub_1, monaco_context_menu_1, types_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var ButtonRoles;
@@ -69,7 +69,7 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/contro
                     }
                 }
             });
-            this.menu = new context_menu_1.MonacoContextMenu({ id: "ctx-menu-toolbar", items: menuItems, target: element });
+            this.menu = new monaco_context_menu_1.default({ id: "ctx-menu-toolbar", items: menuItems, target: element });
             this.buttons = this.toolbar.children.on("click", (e) => this.buttonClicked(e.currentTarget));
             for (let e of this.buttons) {
                 const key = e.dataAttr("key");

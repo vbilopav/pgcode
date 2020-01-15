@@ -74,5 +74,7 @@ define(["require", "exports"], function (require, exports) {
     exports.CLOSE_CONTEXT_MENU = CLOSE_CONTEXT_MENU;
     const SET_APP_STATUS = "app/status/";
     exports.SET_APP_STATUS = SET_APP_STATUS;
+    const API_INITIAL = "api/initial/";
+    exports.API_INITIAL = API_INITIAL;
 });
 //# sourceMappingURL=pubsub.js.map

@@ -5,8 +5,11 @@ import MainPanel from "app/ui/main-panel/main-panel";
 import Footer from "app/ui/footer/footer";
 import {Splitter, VerticalSplitter, SplitterCtorArgs} from "app/controls/splitter";
 import { Position, Themes, AppStatus, IMain } from "app/types";
+import { fetchInitial } from "app/_sys/api";
+
 import { 
-    subscribe, publish, SIDEBAR_DOCKED, SIDEBAR_UNDOCKED, STATE_CHANGED_ON, STATE_CHANGED_OFF, SET_APP_STATUS
+    subscribe, publish, 
+    SIDEBAR_DOCKED, SIDEBAR_UNDOCKED, STATE_CHANGED_ON, STATE_CHANGED_OFF, SET_APP_STATUS, API_INITIAL
 } from "app/_sys/pubsub";
 
 
@@ -74,9 +77,12 @@ new (class implements IMain {
         this.initTheme();
         this.initElements();
         this.setStatus(AppStatus.BUSY);
-        this.initSplitter(this.initGrid());
+        
         this.initComponents();
+        this.initSplitter(this.initGrid());
+
         this.subscribeEvents();
+        this.initializeApi();
         document.title = this.defaultTitle;
     }
 
@@ -216,5 +222,11 @@ new (class implements IMain {
         subscribe(SET_APP_STATUS, (status: AppStatus, ...args: any[]) => this.setStatus(status, args));
         document.body.on("contextmenu", e => e.preventDefault());
     }
+
+    private async initializeApi() {
+        const initial = await fetchInitial();
+        publish(API_INITIAL, initial);
+    }
+
 })();
 
