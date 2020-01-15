@@ -124,7 +124,7 @@ export default class  {
             this.connectionsText.html(name);
             const title = this.formatTitleFromConn(connection);
             this.connectionsText.attr("title", title);
-            this.info.html(`v${connection.version} //${connection.user}@${connection.host}:${connection.port}/${connection.database}`);
+            this.info.html(`<img src="favicon.ico" />v${connection.version}&nbsp;&nbsp;//${connection.user}@${connection.host}:${connection.port}/${connection.database}`);
             this.info.attr("title", title);
             if (this.connectionMenu) {
                 let old = storage.connection;

@@ -39,7 +39,7 @@ namespace Pgcode.Migrations
             (
                 id int not null generated always as identity primary key,
                 title varchar(128) not null default '',
-                schema varchar(128) not null default 'public',
+                schema varchar(128) null default 'public',
                 content text not null default '',
                 view_state json null
             );

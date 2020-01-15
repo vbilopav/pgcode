@@ -44,7 +44,12 @@
         grid-area: info;
         padding-left: 5px;
     }
-    
+    & > div.info > img {
+        width: 16px;
+        height: 16px;
+        vertical-align: middle;
+        margin-right: 5px;
+    }
 
     & > div.feed {
         grid-area: feed;

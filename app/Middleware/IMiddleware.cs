@@ -5,14 +5,11 @@ namespace Pgcode
 {
     public interface IMiddleware
     {
-        void Use(IApplicationBuilder app)
+        void Use(IApplicationBuilder app) => app.Use(async (context, next) => 
         {
-            app.Use(async (context, next) =>
-            {
-                ProcessHttpContext(context);
-                await next.Invoke();
-            });
-        }
+            ProcessHttpContext(context);
+            await next.Invoke();
+        });
 
         void ProcessHttpContext(HttpContext context);
     }

@@ -58,16 +58,36 @@ namespace Pgcode
                         if (schemaVersion == null)
                         {
                             Console.WriteLine(
-                                "No migration applied for connection {0}, latest available is {1}. Some features may not be available.",
+                                "No migration applied for connection {0}, latest available is {1}. Upgrading migrations now.",
                                 section.Key, availableVersion);
+
+                            RunMigrations(configuration, runner => runner.Up(), section.Key);
                         }
                         else
                         {
-                            Console.WriteLine("Some migrations appear to be missing for connection {0}.", section.Key);
-                            Console.WriteLine("Current schema version is {0}, latest available is {1}. Some features may not be available.",
-                                schemaVersion, availableVersion);
+                            if (schemaVersion > availableVersion)
+                            {
+                                Console.WriteLine("Connection {0}. appears to have to many migrations.",
+                                    section.Key);
+                                Console.WriteLine(
+                                    "Current schema version is {0}, latest available is {1}. Downgrading migrations now.",
+                                    schemaVersion, availableVersion);
+
+                                RunMigrations(configuration, runner => runner.Down(), section.Key);
+                            }
+                            else
+                            {
+                                Console.WriteLine("Some migrations appear to be missing for connection {0}.",
+                                    section.Key);
+                                Console.WriteLine(
+                                    "Current schema version is {0}, latest available is {1}. Downgrading migrations now.",
+                                    schemaVersion, availableVersion);
+
+                                RunMigrations(configuration, runner => runner.Up(), section.Key);
+                            }
+
+                            schemaVersion = availableVersion;
                         }
-                        Console.WriteLine("Run --schema-upgrade parameter to apply latest schema version.");
                     }
                     Console.ResetColor();
                 }
@@ -262,6 +282,7 @@ namespace Pgcode
             foreach (var (_, data) in _connections)
             {
                 data.Connection.EnsureIsClose();
+                data.Connection.Dispose();
             }
         }
     }
