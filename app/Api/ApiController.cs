@@ -1,7 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
 using System.Linq;
-using Microsoft.AspNetCore.Authorization;
+using System.Net;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace Pgcode.Api
 {
@@ -10,11 +11,13 @@ namespace Pgcode.Api
     {
         private readonly ConnectionManager _connectionManager;
         private readonly DataAccess _dataAccess;
+        private readonly ILogger<ApiController> _logger;
 
-        public ApiController(ConnectionManager connectionManager, DataAccess dataAccess)
+        public ApiController(ConnectionManager connectionManager, DataAccess dataAccess, ILogger<ApiController> logger)
         {
             _connectionManager = connectionManager;
             _dataAccess = dataAccess;
+            _logger = logger;
         }
 
         [HttpGet("initial")]
@@ -35,18 +38,38 @@ namespace Pgcode.Api
                     })
             };
 
-        [HttpGet("connection")]
-        public ConnectionResponse GetConnection()
+        [HttpGet("connection/{name}")]
+        public ConnectionResponse GetConnection(string name)
         {
-            _dataAccess.ForUser(User.Identity.Name);
+            if (SetConnection(name) == null)
+            {
+                return null;
+            }
+
             return new ConnectionResponse
             {
                 Schemas = new Schemas
                 {
                     Names = _dataAccess.GetSchemas(),
-                    Selected = _dataAccess.GetSelectedSchema()
+                    Selected = _dataAccess.GetSelectedSchema(User.Identity.Name)
                 }
             };
+        }
+
+        private DataAccess SetConnection(string name)
+        {
+            try
+            {
+                _dataAccess.For(name);
+            }
+            catch (DataAccessException e)
+            {
+                _logger.LogError(e.Message);
+                Response.StatusCode = 404;
+                return null;
+            }
+
+            return _dataAccess;
         }
     }
 }

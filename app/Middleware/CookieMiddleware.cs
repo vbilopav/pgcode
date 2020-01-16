@@ -2,7 +2,6 @@
 using System.Security.Claims;
 using System.Security.Principal;
 using System.Text.Json;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 
 namespace Pgcode
@@ -36,7 +35,7 @@ namespace Pgcode
                 ? JsonSerializer.Deserialize<CookieUserProfileModel>(value, JsonOptions)
                 : new CookieUserProfileModel();
 
-            if (!string.IsNullOrEmpty(Program.Settings.RunAsUser))
+            if (Program.Settings.RunAsUser != null)
             {
                 cookieModel.User = Program.Settings.RunAsUser;
             }

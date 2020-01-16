@@ -15,8 +15,8 @@ namespace Pgcode
 
         public void ProcessHttpContext(HttpContext context)
         {
-            var userInfo = context.User.Identity.Name == null ? "" : $"\t{context.User.Identity.Name}";
-            _logger.LogInformation($"{context.Request.Method} {context.Request.Path}{context.Request.QueryString.ToString()}{userInfo}");
+            var userInfo = context.User.Identity.Name == null ? "" : $"\t\t{context.User.Identity.Name}";
+            _logger.LogInformation($"{context.Request.Method} {context.Request.Path}{context.Request.QueryString.ToString()} {context.Response.StatusCode}{userInfo}");
         }
     }
 }

@@ -225,20 +225,34 @@ namespace Pgcode
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine("Launching default browser...");
             Console.ResetColor();
+
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+                OpenDefaultBrowserProcess(url, Settings.WindowsOpenCommand);
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                //
-                // TODO: Unhandled exception. System.ComponentModel.Win32Exception (2): No such file or directory
-                //
-                Process.Start("xdg-open", url);
+                OpenDefaultBrowserProcess(url, Settings.LinuxOpenCommand);
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
-                Process.Start("open", url);
+                OpenDefaultBrowserProcess(url, Settings.OsxOpenCommand);
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.FreeBSD))
+            {
+                OpenDefaultBrowserProcess(url, Settings.FreeBsdOpenCommand);
+            }
+        }
+
+        private static void OpenDefaultBrowserProcess(string url, string setting)
+        {
+            if (setting == null)
+            {
+                Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+            }
+            else
+            {
+                Process.Start(setting, url);
             }
         }
 
