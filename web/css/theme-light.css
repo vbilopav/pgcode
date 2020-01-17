@@ -20,6 +20,11 @@ body {
   font-size: 10em;
   text-align: center; }
 
+.out-of-viewport {
+  position: absolute;
+  top: -1000px;
+  left: -1000px; }
+
 @font-face {
   font-family: 'icons';
   src: url("../fonts/icons.woff2?57247429") format("woff2");
@@ -160,8 +165,8 @@ body > div.container {
   background-color: #007ACC;
   user-select: none;
   display: grid;
-  grid-template-columns: 155px       300px auto 27px;
-  grid-template-areas: 'connections info  gap  feed'; }
+  grid-template-columns: 155px       320px 150px  auto 27px;
+  grid-template-areas: 'connections info  schema gap  feed'; }
   .footer > div.clickable {
     cursor: pointer; }
   .footer > div.clickable:hover {
@@ -184,18 +189,27 @@ body > div.container {
     transition-duration: 0.4s; }
   .footer > div.connections:hover {
     background-color: #329171; }
-  .footer > div.connections > span.icon-database {
-    margin-right: 3px; }
   .footer > div.info {
     grid-area: info;
-    padding-left: 5px; }
+    padding-left: 5px;
+    padding-right: 5px;
+    width: fit-content;
+    max-width: 340px;
+    cursor: initial;
+    user-select: text; }
+  .footer > div.info > span::selection {
+    background: #ff8533; }
   .footer > div.info > img {
     width: 16px;
     height: 16px;
     vertical-align: middle;
     margin-right: 5px; }
-  .footer > div.info:hover {
-    background-color: #1f8ad2; }
+  .footer > div.schema {
+    grid-area: schema;
+    padding-left: 5px;
+    padding-right: 5px;
+    width: fit-content;
+    transition-duration: 0.4s; }
   .footer > div.feed {
     grid-area: feed;
     text-align: center;
@@ -204,6 +218,8 @@ body > div.container {
     transition-duration: 0.4s; }
   .footer > div.feed:hover {
     opacity: 1; }
+  .footer > .footer > span.icon-database {
+    margin-right: 3px; }
 
 #feed-footer-menu.footer-menu {
   background-color: #007ACC; }

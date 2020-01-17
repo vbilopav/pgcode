@@ -1,4 +1,4 @@
-define(["require", "exports", "app/_sys/storage", "app/ui/toolbar/toolbar", "app/ui/side-panel/side-panel", "app/ui/main-panel/main-panel", "app/ui/footer/footer", "app/controls/splitter", "app/types", "app/_sys/api", "app/_sys/pubsub"], function (require, exports, storage_1, toolbar_1, side_panel_1, main_panel_1, footer_1, splitter_1, types_1, api_1, pubsub_1) {
+define(["require", "exports", "app/_sys/storage", "app/ui/toolbar/toolbar", "app/ui/side-panel/side-panel", "app/ui/main-panel/main-panel", "app/ui/footer/footer", "app/controls/splitter", "app/types", "app/api", "app/_sys/pubsub"], function (require, exports, storage_1, toolbar_1, side_panel_1, main_panel_1, footer_1, splitter_1, types_1, api_1, pubsub_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     const storage = new storage_1.default({

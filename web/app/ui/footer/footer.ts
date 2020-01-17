@@ -1,5 +1,6 @@
 import { ContextMenuCtorArgs, MenuItemType } from "app/controls/context-menu";
 import FooterContextMenu from "app/controls/footer-context-menu";
+import MonacoContextMenu from "app/controls/monaco-context-menu";
 import Storage from "app/_sys/storage";
 import { AppStatus, IConnectionInfo, IResponse, IInitial } from "app/types";
 import { publish, subscribe, SET_APP_STATUS, API_INITIAL } from "app/_sys/pubsub";
@@ -12,31 +13,63 @@ const
 export default class  {
     private footer: Element;
     private connections: Element;
-    private connectionsText: Element;
     private info: Element;
     private selectedConnection?: IConnectionInfo = null;
-    private connectionMenu: FooterContextMenu;
+    private connectionMenu: FooterContextMenu = null;
 
     constructor(element: Element) {
         this.footer = element.addClass("footer").html(String.html`
             <div class="connections">
-                <span class="icon-database"></span>
-                <span class="connections-text"></span>
+                <i class="icon-database"></i>
+                <span></span>
             </div>
-            <div class="info"></div>
+            <div class="info clickable">
+                <img src="favicon.ico" />
+                <span></span>
+            </div>
+            <div class="schema clickable">
+                <i class="icon-search"></i>
+                <span>public</span>
+            </div>
             <div class="feed clickable" title="Send feedback">&#128526;</div>
         `);
+
         this.connections = element.find(".connections");
-        this.connectionsText = this.connections.find(".connections-text");
         this.info = element.find(".info");
 
         this.initFeedbackMenu(element.find(".feed"));
         subscribe(API_INITIAL, response => this.initConnectionsMenu(response));
+        
+        const hidden = (String.html`<input id="hidden" type="text" class="out-of-viewport" />` as String).
+                        toElement().
+                        appendElementTo(document.body) as HTMLInputElement;
+        new MonacoContextMenu({
+            id: "info-ctx-menu", 
+            target: this.info,
+            beforeOpen: menu => {
+                const selection = window.getSelection();
+                const txt = selection.toString();
+                if (!txt) {
+                    return false;
+                }
+                if (selection.anchorNode.parentElement.parentElement != this.info && selection.anchorNode != this.info) {
+                    return false;
+                }
+                menu.updateMenuItem("copy", {
+                    text: `copy "${txt}"`, action: () => {
+                        hidden.value = txt;
+                        hidden.select();
+                        document.execCommand("copy");
+                    }
+                });
+                return true;
+            }
+        } as ContextMenuCtorArgs);
     }
 
     private initConnectionsMenu(response: IResponse<IInitial>) {
         if (!response.ok) {
-            this.connectionsText.html("¯\\_(ツ)_/¯");
+            this.connections.find("span").html("¯\\_(ツ)_/¯");
         } else {
             if (response.data.connections.length === 1) {
                 
@@ -60,7 +93,9 @@ export default class  {
                     target: this.connections, 
                     items: menuItems
                 } as ContextMenuCtorArgs);
-    
+                
+                //this.info.on("click", () => this.connections.trigger("click"));
+                
                 if (!storage.connection) {
                     this.selectConnection();
                 } else {
@@ -85,17 +120,15 @@ export default class  {
         this.selectedConnection = connection;
         const name = (connection ? connection.name : null);
         if (!connection) {
-            this.connectionsText.html("Connection not selected");
-            this.connectionsText.attr("title", "Click here to select from available connections...");
-            this.info.html("");
+            this.connections.find("span").html("Connection not selected").attr("title", "Click here to select from available connections...");
+            this.info.find("span").html("");
             this.info.attr("title", "no connection...");
             storage.connection = null;
             publish(SET_APP_STATUS, AppStatus.NO_CONNECTION);
         } else {
-            this.connectionsText.html(name);
             const title = this.formatTitleFromConn(connection);
-            this.connectionsText.attr("title", title);
-            this.info.html(`<img src="favicon.ico" />v${connection.version}&nbsp;&nbsp;//${connection.user}@${connection.host}:${connection.port}/${connection.database}`);
+            this.connections.find("span").html(name).attr("title", title);
+            this.info.find("span").html(`v${connection.version}&nbsp;&nbsp;//${connection.user}@${connection.host}:${connection.port}/${connection.database}`);
             this.info.attr("title", title);
             if (this.connectionMenu) {
                 let old = storage.connection;
@@ -110,10 +143,11 @@ export default class  {
             //
             publish(SET_APP_STATUS, AppStatus.READY, name);
         }
-        const rect = this.connections.getBoundingClientRect();
-        let columns = this.footer.css("grid-template-columns").split(" ")
-        columns[0] = rect.width + "px";
-        columns[2] = "auto";
+        const columns = this.footer.css("grid-template-columns").split(" ")
+        columns[0] = this.connections.getBoundingClientRect().width + "px";
+        columns[1] = this.info.getBoundingClientRect().width + "px";
+
+        columns[3] = "auto";
         this.footer.css("grid-template-columns", columns.join(" "));
     }
 

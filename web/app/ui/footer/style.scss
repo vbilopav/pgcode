@@ -4,8 +4,8 @@
     background-color: $footer-background-color;
     user-select: none;
     display: grid;
-    grid-template-columns: 155px       300px auto 27px;
-    grid-template-areas:  'connections info  gap  feed';
+    grid-template-columns: 155px       320px 150px  auto 27px;
+    grid-template-areas:  'connections info  schema gap  feed';
 
     & > div.clickable {
         cursor: pointer;
@@ -36,13 +36,18 @@
     & > div.connections:hover {
         background-color: $connections-selector-hover-background-color;
     }
-    & > div.connections > span.icon-database {
-        margin-right: 3px;
-    }
-
     & > div.info {
         grid-area: info;
         padding-left: 5px;
+        padding-right: 5px;
+        width: fit-content;
+        max-width: 340px;
+        cursor: initial;
+        user-select: text;
+
+    }
+    & > div.info > span::selection {
+        background: invert($footer-background-color);
     }
     & > div.info > img {
         width: 16px;
@@ -50,8 +55,15 @@
         vertical-align: middle;
         margin-right: 5px;
     }
-    & > div.info:hover {
-        background-color: $clickable-footer-background-color;
+
+    & > div.schema {
+        grid-area: schema;
+        padding-left: 5px;
+        padding-right: 5px;
+        
+        width: fit-content;
+
+        transition-duration: 0.4s;
     }
 
     & > div.feed {
@@ -63,6 +75,10 @@
     }
     & > div.feed:hover {
         opacity: 1;
+    }
+
+    & > & > span.icon-database {
+        margin-right: 3px;
     }
 }
 

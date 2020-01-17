@@ -23,6 +23,11 @@ body {
     font-size: 10em;
     text-align: center;
 }
+.out-of-viewport {
+    position: absolute;
+    top: -1000px;
+    left: -1000px;
+}
 
 @import 'icons.scss';
 @import '../app/index.scss';

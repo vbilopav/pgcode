@@ -27,6 +27,7 @@ interface ContextMenuCtorArgs {
     target: Element,
     event: "contextmenu" | "click",
     menuItemsCallback: (items: Array<MenuItemType>) => Array<MenuItemType>,
+    beforeOpen: (menu: ContextMenu) => boolean,
     onOpen: () => any,
     onClose: () => any;
 }
@@ -41,13 +42,15 @@ abstract class ContextMenu {
     protected menuSplitterElement(): Element { return new Element() };
     protected abstract menuItemElement(menuItem: ContextMenuItem): Element;
     protected onClose: () => any;
+    protected event: string;
 
     constructor({
         id,
-        items,
+        items = [],
         target,
         event = "contextmenu",
         menuItemsCallback = items => items,
+        beforeOpen = () => true,
         onOpen = () => {},
         onClose = () => {}
     }: ContextMenuCtorArgs) {
@@ -59,6 +62,7 @@ abstract class ContextMenu {
         }
         this.actions = this.getActionsContainerElement(this.element);
         this.onClose = onClose;
+        this.event = event;
         this.items = {};
         let count = 0;
         for(let item of items) {
@@ -82,6 +86,9 @@ abstract class ContextMenu {
         });
 
         this.target = target.on(event, (e: MouseEvent) => {
+            if (!beforeOpen(this)) {
+                return
+            }
             if (this.isVisible) {
                 this.close();
                 return;
@@ -96,6 +103,10 @@ abstract class ContextMenu {
         });
 
         subscribe(CLOSE_CONTEXT_MENU, () => this.close());
+    }
+
+    public open() {
+        this.target.trigger(this.event);
     }
 
     public close() : void {

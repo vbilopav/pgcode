@@ -5,7 +5,7 @@ import MainPanel from "app/ui/main-panel/main-panel";
 import Footer from "app/ui/footer/footer";
 import {Splitter, VerticalSplitter, SplitterCtorArgs} from "app/controls/splitter";
 import { Position, Themes, AppStatus, IMain } from "app/types";
-import { fetchInitial } from "app/_sys/api";
+import { fetchInitial } from "app/api";
 
 import { 
     subscribe, publish, 

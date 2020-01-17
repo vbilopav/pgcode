@@ -331,6 +331,7 @@ interface Window {
 /**
  * 
  */
+
 interface StringConstructor {
     /**
      * Support for Visual Studio Code [`lit-html` extension](https://github.com/Polymer/lit-html)
@@ -345,6 +346,7 @@ interface StringConstructor {
      */
     html: any
 }
+
 /**
  * 
  */
@@ -364,6 +366,5 @@ interface String {
     /**
      * Builds Element from HTML markup in a string
      */
-    toElement(): Element
+    toElement(): Element,
 }
-

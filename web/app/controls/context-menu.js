@@ -2,7 +2,7 @@ define(["require", "exports", "app/_sys/pubsub"], function (require, exports, pu
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class ContextMenu {
-        constructor({ id, items, target, event = "contextmenu", menuItemsCallback = items => items, onOpen = () => { }, onClose = () => { } }) {
+        constructor({ id, items = [], target, event = "contextmenu", menuItemsCallback = items => items, beforeOpen = () => true, onOpen = () => { }, onClose = () => { } }) {
             this.element = document.body.find("#" + id);
             if (!this.element.length) {
                 this.element = this.menuElement(id);
@@ -10,6 +10,7 @@ define(["require", "exports", "app/_sys/pubsub"], function (require, exports, pu
             }
             this.actions = this.getActionsContainerElement(this.element);
             this.onClose = onClose;
+            this.event = event;
             this.items = {};
             let count = 0;
             for (let item of items) {
@@ -31,6 +32,9 @@ define(["require", "exports", "app/_sys/pubsub"], function (require, exports, pu
                 }
             });
             this.target = target.on(event, (e) => {
+                if (!beforeOpen(this)) {
+                    return;
+                }
                 if (this.isVisible) {
                     this.close();
                     return;
@@ -47,6 +51,9 @@ define(["require", "exports", "app/_sys/pubsub"], function (require, exports, pu
         }
         menuSplitterElement() { return new Element(); }
         ;
+        open() {
+            this.target.trigger(this.event);
+        }
         close() {
             if (!this.isVisible) {
                 return;
