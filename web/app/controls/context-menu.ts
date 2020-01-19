@@ -63,15 +63,7 @@ abstract class ContextMenu {
         this.actions = this.getActionsContainerElement(this.element);
         this.onClose = onClose;
         this.event = event;
-        this.items = {};
-        let count = 0;
-        for(let item of items) {
-            item.order = count++;
-            this.updateItemElement(item);
-            let menuItem: ContextMenuItem = item as ContextMenuItem;
-            this.items[!menuItem.id ? count.toString() : menuItem.id] = item;
-        }
-
+        this.setMenuItems(items);
         this.element.on("click", () => this.close());
         window.on("resize", () => this.close());
         window.on("mousedown", (e: MouseEvent) => {
@@ -87,7 +79,10 @@ abstract class ContextMenu {
 
         this.target = target.on(event, (e: MouseEvent) => {
             if (!beforeOpen(this)) {
-                return
+                return;
+            }
+            if (Object.keys(this.items).length === 0) {
+                return;
             }
             if (this.isVisible) {
                 this.close();
@@ -118,6 +113,15 @@ abstract class ContextMenu {
         this.onClose();
     }
 
+    public getCheckedItem() : ContextMenuItem {
+        for(let value of Object.values(this.items)) {
+            if ((value as ContextMenuItem).checked) {
+                return value as ContextMenuItem;
+            }
+        }
+        return null;
+    }
+
     public triggerById(id: string, args?: any) {
         const item = this.items[id] as ContextMenuItem;
         if (item) {
@@ -129,8 +133,22 @@ abstract class ContextMenu {
         const item = this.items[id];
         const newItem = {...(item ? item : {}), ...data} as ContextMenuItem;
         this.updateItemElement(newItem);
+        if (newItem.id === undefined) {
+            newItem.id = id;
+        }
         this.items[id] = newItem;
         return this;
+    }
+
+    public setMenuItems(items: Array<MenuItemType>) {
+        this.items = {};
+        let count = 0;
+        for(let item of items) {
+            item.order = count++;
+            this.updateItemElement(item);
+            let menuItem: ContextMenuItem = item as ContextMenuItem;
+            this.items[!menuItem.id ? count.toString() : menuItem.id] = item;
+        }
     }
 
     protected adjust(e: MouseEvent) {

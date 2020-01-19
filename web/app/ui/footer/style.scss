@@ -5,7 +5,7 @@
     user-select: none;
     display: grid;
     grid-template-columns: 155px       320px 150px  auto 27px;
-    grid-template-areas:  'connections info  schema gap  feed';
+    grid-template-areas:  'connections info  schemas gap  feed';
 
     & > div.clickable {
         cursor: pointer;
@@ -15,7 +15,7 @@
     }
 
     & > div {
-        line-height: 19px;
+        line-height: 20px;
         height: 100%;
         text-overflow: ellipsis;
         white-space: nowrap;
@@ -56,14 +56,17 @@
         margin-right: 5px;
     }
 
-    & > div.schema {
-        grid-area: schema;
+    & > div.schemas {
+        grid-area: schemas;
         padding-left: 5px;
         padding-right: 5px;
-        
         width: fit-content;
-
+        max-width: 150px;
         transition-duration: 0.4s;
+    }
+    & > div.schemas > i {
+        position: relative;
+        top: 1px;
     }
 
     & > div.feed {
@@ -72,6 +75,7 @@
         opacity: 0.5;
         width: 27px;
         transition-duration: 0.4s;
+        user-select: none;
     }
     & > div.feed:hover {
         opacity: 1;
@@ -82,13 +86,15 @@
     }
 }
 
-#feed-footer-menu.footer-menu {
+#feed-footer-menu.footer-menu, #schema-footer-menu {
     background-color: $footer-background-color;
 }
 
-#conn-footer-menu > .footer-menu-item > span:nth-child(1) {
+#conn-footer-menu > .footer-menu-item > span:nth-child(1),
+#schema-footer-menu > .footer-menu-item > span:nth-child(1) {
     position: absolute;
 }
-#conn-footer-menu > .footer-menu-item > span:nth-child(2) {
+#conn-footer-menu > .footer-menu-item > span:nth-child(2),
+#schema-footer-menu > .footer-menu-item > span:nth-child(2) {
     margin-left: 18px;
 }

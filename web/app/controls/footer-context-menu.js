@@ -23,7 +23,7 @@ define(["require", "exports", "./context-menu"], function (require, exports, con
         <div class="footer-menu-item">
             <span>${menuItem.checked ? '&check;' : ""}</span>
             <span>${menuItem.text}</span>
-        </div>`.toElement().attr("title", menuItem.data);
+        </div>`.toElement().attr("title", !menuItem.data ? "" : menuItem.data);
         }
     }
     exports.default = default_1;

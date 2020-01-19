@@ -12,8 +12,15 @@ interface IResponse<T> {
     data?: T
 }
 
-interface IInitial { 
+interface IInitialResponse { 
     connections: Array<IConnectionInfo>
+}
+
+interface IConnectionResponse { 
+    schemas: {
+        names: Array<string>,
+        selected: string
+    }
 }
 
 interface IConnectionInfo {
@@ -25,4 +32,17 @@ interface IConnectionInfo {
     user: string 
 }
 
-export { Position, Themes, AppStatus, IMain, IResponse, IInitial, IConnectionInfo }
+interface IInitialResponse { 
+    connections: Array<IConnectionInfo>
+}
+
+export { 
+    Position, 
+    Themes, 
+    AppStatus, 
+    IMain, 
+    IResponse, 
+    IInitialResponse, 
+    IConnectionResponse,
+    IConnectionInfo 
+}

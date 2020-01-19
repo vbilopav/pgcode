@@ -102,7 +102,7 @@ new (class implements IMain {
                 return;
             }
             this.status = status;
-            this.overlay.hideElement();
+            this.overlay.hideElement().css("opacity", "0");
             clearInterval(this.loadingTimeout);
             document.title = args[0] ? `${args[0]} - ${this.defaultTitle}` : this.defaultTitle;
 
@@ -112,6 +112,7 @@ new (class implements IMain {
             }
             this.status = status;
             this.overlay.showElement();
+            setTimeout(() => this.overlay.css("opacity", "0.4"));
             this.previousTitle = document.title;
             clearInterval(this.loadingTimeout);
             this.loadingTimeout = setInterval(() => {
@@ -128,6 +129,7 @@ new (class implements IMain {
             }
             this.status = status;
             this.overlay.showElement();
+            setTimeout(() => this.overlay.css("opacity", "0.4"));
             this.previousTitle = document.title;
             clearInterval(this.loadingTimeout);
             document.title = args[0] ? `NETWORK ERROR (${args[0]})` : "NETWORK ERROR";
@@ -137,7 +139,7 @@ new (class implements IMain {
                 return;
             }
             this.status = status;
-            this.overlay.hideElement();
+            this.overlay.hideElement().css("opacity", "0");
             clearInterval(this.loadingTimeout);
             this.previousTitle = document.title;
             document.title = `NO CONNECTION - ${this.defaultTitle}`;

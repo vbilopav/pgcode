@@ -11,14 +11,7 @@ define(["require", "exports", "app/_sys/pubsub"], function (require, exports, pu
             this.actions = this.getActionsContainerElement(this.element);
             this.onClose = onClose;
             this.event = event;
-            this.items = {};
-            let count = 0;
-            for (let item of items) {
-                item.order = count++;
-                this.updateItemElement(item);
-                let menuItem = item;
-                this.items[!menuItem.id ? count.toString() : menuItem.id] = item;
-            }
+            this.setMenuItems(items);
             this.element.on("click", () => this.close());
             window.on("resize", () => this.close());
             window.on("mousedown", (e) => {
@@ -33,6 +26,9 @@ define(["require", "exports", "app/_sys/pubsub"], function (require, exports, pu
             });
             this.target = target.on(event, (e) => {
                 if (!beforeOpen(this)) {
+                    return;
+                }
+                if (Object.keys(this.items).length === 0) {
                     return;
                 }
                 if (this.isVisible) {
@@ -62,6 +58,14 @@ define(["require", "exports", "app/_sys/pubsub"], function (require, exports, pu
             this.actions.html("");
             this.onClose();
         }
+        getCheckedItem() {
+            for (let value of Object.values(this.items)) {
+                if (value.checked) {
+                    return value;
+                }
+            }
+            return null;
+        }
         triggerById(id, args) {
             const item = this.items[id];
             if (item) {
@@ -72,8 +76,21 @@ define(["require", "exports", "app/_sys/pubsub"], function (require, exports, pu
             const item = this.items[id];
             const newItem = { ...(item ? item : {}), ...data };
             this.updateItemElement(newItem);
+            if (newItem.id === undefined) {
+                newItem.id = id;
+            }
             this.items[id] = newItem;
             return this;
+        }
+        setMenuItems(items) {
+            this.items = {};
+            let count = 0;
+            for (let item of items) {
+                item.order = count++;
+                this.updateItemElement(item);
+                let menuItem = item;
+                this.items[!menuItem.id ? count.toString() : menuItem.id] = item;
+            }
         }
         adjust(e) {
             this.element.css("top", e.y + "px").css("left", e.x + "px").visible(false).showElement();
