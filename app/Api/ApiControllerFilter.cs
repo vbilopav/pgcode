@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc.Filters;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Logging;
+using Pgcode.Middleware;
 
 namespace Pgcode.Api
 {
@@ -22,9 +24,18 @@ namespace Pgcode.Api
 
         public void OnActionExecuted(ActionExecutedContext context)
         {
-            if (_settings.LogRequests)
+            if (context.Exception is DataAccessException exception)
             {
-                _loggingMiddleware.ProcessHttpContext(context.HttpContext);
+                context.Result = new ObjectResult(null) {StatusCode = exception.StatusCode};
+                context.ExceptionHandled = true;
+                if (_settings.LogRequests)
+                {
+                    _loggingMiddleware.LogMessage(context.HttpContext, exception);
+                }
+
+            } else if (_settings.LogRequests)
+            {
+                _loggingMiddleware.LogMessage(context.HttpContext);
             }
         }
     }

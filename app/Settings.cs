@@ -5,6 +5,7 @@ namespace Pgcode
         public int Port { get; set; } = 5000;
         public string Host { get; set; } = "localhost";
         public string RunAsUser { get; set; } = null;
+        public string MinimalPgVersion { get; set; } = "9.5";
         public string PgCodeSchema { get; set; } = "pgcode";
         public string DefaultSchema { get; set; } = "public";
         public string[] SkipSchemaStartingWith { get; set; } = { "pg_toast", "pg_temp" };

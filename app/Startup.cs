@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Pgcode.Api;
+using Pgcode.Middleware;
 
 namespace Pgcode
 {
@@ -15,7 +16,8 @@ namespace Pgcode
 
             services.AddSingleton<ConnectionManager, ConnectionManager>();
             services.AddSingleton(Program.Settings);
-            services.AddScoped<DataAccess, DataAccess>();
+            services.AddScoped<InformationSchema, InformationSchema>();
+            services.AddScoped<UserProfile, UserProfile>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)

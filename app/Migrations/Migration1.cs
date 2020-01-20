@@ -7,15 +7,17 @@ namespace Pgcode.Migrations
     {
         public const int Version = 1;
 
-        public string Up(Settings settings) => Sql.Script(new[] { ("_version", PgTypes.Int, Version.ToString()) }, @$"
-
-            {Sql.SearchPathSchema(settings.PgCodeSchema)};
-
-            if ({Sql.CurrentSchema}) is null then
-
-                {Sql.Info($"creating schema {settings.PgCodeSchema}")};
-                {Sql.CreateSchema(settings.PgCodeSchema)};
-                {Sql.SearchPathSchema(settings.PgCodeSchema)};
+        public string Up(Settings settings) => $@"
+        do $$
+        declare _version int = {Version};
+        begin
+            set search_path to {settings.PgCodeSchema};
+            
+            if current_schema() is null then
+                raise info 'creating schema {settings.PgCodeSchema}';
+                
+                create schema {settings.PgCodeSchema};
+                set search_path to {settings.PgCodeSchema};
                 
                 create table if not exists schema_version
                 (
@@ -25,14 +27,13 @@ namespace Pgcode.Migrations
             end if;
             
             if exists(select version from schema_version where version = _version) then
-                {Sql.Info($"schema version {Version} is up to date")};
                 return;
             end if;
             
             create table users
             (
                 id varchar(64) not null primary key,
-                data json not null default '{{}}'
+                data jsonb not null default '{{}}'
             );
 
             create table scripts
@@ -44,17 +45,23 @@ namespace Pgcode.Migrations
                 view_state json null
             );
 
+            raise info 'applying migration version %', _version;
+            
             insert into schema_version (version) values (_version) on conflict do nothing;
+        end
+        $$;
+        ";
 
-            {Sql.Info("migration % up", "_version")};
+        public string Down(Settings settings) => $@"
+        do $$
+        declare _version int = {Version};
+        begin
         
-        ");
+            drop schema {settings.PgCodeSchema} cascade;
+            raise info 'migration % down', _version;
 
-        public string Down(Settings settings) => Sql.Script(new[] {("_version", PgTypes.Int, Version.ToString())}, @$"
-        
-            {Sql.DropSchemaCascade(settings.PgCodeSchema)};
-            {Sql.Info("migration % down", "_version")};
-
-        ");
+        end
+        $$;
+        ";
     }
 }

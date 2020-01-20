@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.FileProviders;
 
-namespace Pgcode
+namespace Pgcode.Middleware
 {
     public static class DevelopmentMiddleware
     {

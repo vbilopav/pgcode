@@ -34,8 +34,6 @@ namespace Pgcode
 
                 var connection = CreateConnection(section, passwords);
                 var migrations = new MigrationRunner(connection, Program.Settings);
-                int? schemaVersion;
-                string serverVersion;
                 try
                 {
                     connection.Open();
@@ -43,8 +41,15 @@ namespace Pgcode
                     Console.Write(" ... ");
                     Console.ForegroundColor = ConsoleColor.Green;
                     int availableVersion;
+                    int? schemaVersion;
                     (schemaVersion, availableVersion) = migrations.GetSchemaVersions();
-                    serverVersion = connection.ServerVersion;
+                    var serverVersion = connection.ServerVersion;
+
+                    if (Convert.ToDecimal(serverVersion) < Convert.ToDecimal(Program.Settings.MinimalPgVersion))
+                    {
+                        throw new Exception($"PostgreSQL connection name '{section.Key}' is version {serverVersion} that is not supported. Lowest supported version is {Program.Settings.MinimalPgVersion}");
+                    }
+
                     Console.Write("success, server version {0}", serverVersion);
                     if (schemaVersion == availableVersion)
                     {
@@ -90,6 +95,14 @@ namespace Pgcode
                         }
                     }
                     Console.ResetColor();
+
+                    connections.Add(section.Key, new ConnectionData
+                    {
+                        Connection = connection,
+                        Name = section.Key,
+                        SchemaVersion = schemaVersion,
+                        ServerVersion = serverVersion
+                    });
                 }
                 catch (Exception e)
                 {
@@ -98,21 +111,13 @@ namespace Pgcode
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine("failed: {0}", e.Message);
                     Console.ResetColor();
-                    continue;
                 }
                 finally
                 {
                     connection.Close();
                 }
-
-                connections.Add(section.Key, new ConnectionData
-                {
-                    Connection = connection,
-                    Name = section.Key,
-                    SchemaVersion = schemaVersion,
-                    ServerVersion = serverVersion
-                });
             }
+
             Console.WriteLine();
             if (connections.Keys.Count == 0)
             {

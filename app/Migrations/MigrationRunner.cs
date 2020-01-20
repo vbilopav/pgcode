@@ -39,7 +39,9 @@ namespace Pgcode.Migrations
 
         public int? CurrentSchemaVersion()
         {
-            var schema = _connection.TrySearchPathSchema(_settings.PgCodeSchema);
+            var schema = _connection
+                .Execute($"set search_path to {_settings.PgCodeSchema}")
+                .Single<string>("select current_schema()");
 
             if (schema == null)
             {

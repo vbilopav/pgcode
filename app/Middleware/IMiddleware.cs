@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 
-namespace Pgcode
+namespace Pgcode.Middleware
 {
     public interface IMiddleware
     {

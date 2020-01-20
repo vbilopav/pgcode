@@ -4,7 +4,7 @@ using System.Security.Principal;
 using System.Text.Json;
 using Microsoft.AspNetCore.Http;
 
-namespace Pgcode
+namespace Pgcode.Middleware
 {
     public class CookieUserProfileModel
     {

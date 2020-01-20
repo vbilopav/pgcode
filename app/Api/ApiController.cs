@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Linq;
-using System.Net;
-using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 
 namespace Pgcode.Api
 {
@@ -11,14 +9,17 @@ namespace Pgcode.Api
     public class ApiController : Controller
     {
         private readonly ConnectionManager _connectionManager;
-        private readonly DataAccess _dataAccess;
-        private readonly ILogger<ApiController> _logger;
+        private readonly UserProfile _userProfile;
+        private readonly InformationSchema _informationSchema;
 
-        public ApiController(ConnectionManager connectionManager, DataAccess dataAccess, ILogger<ApiController> logger)
+        public ApiController(
+            ConnectionManager connectionManager,
+            UserProfile userProfile,
+            InformationSchema informationSchema)
         {
             _connectionManager = connectionManager;
-            _dataAccess = dataAccess;
-            _logger = logger;
+            _userProfile = userProfile;
+            _informationSchema = informationSchema;
         }
 
         [HttpGet("initial")]
@@ -39,38 +40,19 @@ namespace Pgcode.Api
                     })
             };
 
-        [HttpGet("connection/{name}")]
-        public ConnectionResponse GetConnection(string name)
-        {
-            if (SetConnection(name) == null)
-            {
-                return null;
-            }
-
-            return new ConnectionResponse
+        [HttpGet("connection/{connection}")]
+        public async ValueTask<ConnectionResponse> GetConnection(string connection) =>
+            new ConnectionResponse
             {
                 Schemas = new Schemas
                 {
-                    Names = _dataAccess.GetSchemas(),
-                    Selected = _dataAccess.GetSelectedSchema(User.Identity.Name)
+                    Names = await _informationSchema.For(connection).GetSchemasAsync().ToListAsync(),
+                    Selected = await _userProfile.For(connection).GetSelectedSchemaAsync(User.Identity.Name)
                 }
             };
-        }
 
-        private DataAccess SetConnection(string name)
-        {
-            try
-            {
-                _dataAccess.For(name);
-            }
-            catch (DataAccessException e)
-            {
-                _logger.LogError(e.Message);
-                Response.StatusCode = 404;
-                return null;
-            }
-
-            return _dataAccess;
-        }
+        [HttpGet("set-schema/{connection}/{schema}")]
+        public async ValueTask SetSchema(string connection, string schema) => 
+            await _userProfile.For(connection).SetSelectedSchemaAsync(User.Identity.Name, schema);
     }
 }
