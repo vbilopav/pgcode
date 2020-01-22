@@ -11,7 +11,21 @@ namespace Pgcode
 
         public IEnumerable<ConnectionData> GetConnectionsData() => _connections.Values;
 
-        public NpgsqlConnection GetConnection(string name) => _connections.Keys.Contains(name) ? _connections[name].Connection : null;
+        public NpgsqlConnection GetConnectionByName(string connectionName) => 
+            _connections.Keys.Contains(connectionName) ? _connections[connectionName].Connection : null;
+
+        public bool SetConnectionNameByUserId(string userId, string connectionName)
+        {
+            if (!_connections.Keys.Contains(connectionName))
+            {
+                return false;
+            }
+            ConnectionNamesByUserId.AddOrUpdate(userId, connectionName, (key, value) => connectionName);
+            return true;
+        }
+
+        public NpgsqlConnection GetConnectionByUserId(string userId) => 
+            GetConnectionByName(ConnectionNamesByUserId[userId]);
 
         public void Dispose()
         {

@@ -2,10 +2,10 @@ define(["require", "exports", "app/_sys/pubsub", "app/types"], function (require
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     const _createResponse = (response, data) => Object({ ok: response.ok, status: response.status, data: data });
-    const fetchInitial = async () => {
+    const _fetchAndPublishStatus = async (url) => {
         pubsub_1.publish(pubsub_1.SET_APP_STATUS, types_1.AppStatus.BUSY);
         try {
-            const response = await fetch("api/initial");
+            const response = await fetch(url);
             if (!response.ok) {
                 pubsub_1.publish(pubsub_1.SET_APP_STATUS, types_1.AppStatus.ERROR, response.status);
                 return _createResponse(response);
@@ -13,26 +13,12 @@ define(["require", "exports", "app/_sys/pubsub", "app/types"], function (require
             return _createResponse(response, await response.json());
         }
         catch (error) {
-            pubsub_1.publish(pubsub_1.SET_APP_STATUS, types_1.AppStatus.ERROR);
+            pubsub_1.publish(pubsub_1.SET_APP_STATUS, types_1.AppStatus.ERROR, error.message);
             throw error;
         }
     };
-    exports.fetchInitial = fetchInitial;
-    const fetchConnection = async (name) => {
-        pubsub_1.publish(pubsub_1.SET_APP_STATUS, types_1.AppStatus.BUSY);
-        try {
-            const response = await fetch(`api/connection/${name}`);
-            if (!response.ok) {
-                pubsub_1.publish(pubsub_1.SET_APP_STATUS, types_1.AppStatus.ERROR, response.status);
-                return _createResponse(response);
-            }
-            return _createResponse(response, await response.json());
-        }
-        catch (error) {
-            pubsub_1.publish(pubsub_1.SET_APP_STATUS, types_1.AppStatus.ERROR);
-            throw error;
-        }
-    };
-    exports.fetchConnection = fetchConnection;
+    exports.fetchInitial = async () => _fetchAndPublishStatus("api/initial");
+    exports.fetchConnection = async (name) => _fetchAndPublishStatus(`api/connection/${name}`);
+    exports.setSchema = async (schema) => _fetchAndPublishStatus(`api/schema/${schema}`);
 });
 //# sourceMappingURL=api.js.map

@@ -2,8 +2,8 @@ import { ContextMenuCtorArgs, MenuItemType } from "app/controls/context-menu";
 import FooterContextMenu from "app/controls/footer-context-menu";
 import MonacoContextMenu from "app/controls/monaco-context-menu";
 import Storage from "app/_sys/storage";
-import { AppStatus, IConnectionInfo, IResponse, IInitialResponse } from "app/types";
-import { fetchConnection } from "app/api";
+import { AppStatus, IConnectionInfo } from "app/types";
+import { fetchConnection, setSchema } from "app/api";
 import { publish, subscribe, SET_APP_STATUS, API_INITIAL } from "app/_sys/pubsub";
 
 interface IStorage {connection: string}
@@ -157,20 +157,24 @@ export default class  {
         const name = (connection ? connection.name : null);
         if (!connection) {
             this.connections.find("span").html("Connection not selected").attr("title", "Click here to select from available connections...");
+            this.adjustWidths();
             this.info.find("span").html("");
             this.info.attr("title", "no connection...");
             this.schemas.showElement(false);
+            this.adjustWidths();
             storage.connection = null;
             publish(SET_APP_STATUS, AppStatus.NO_CONNECTION);
         } else {
             const title = this.formatTitleFromConn(connection);
             this.connections.find("span").html(name).attr("title", title);
+            this.adjustWidths();
             this.info.find("span").html(`v${connection.version}&nbsp;&nbsp;//${connection.user}@${connection.host}:${connection.port}/${connection.database}`);
             this.info.attr("title", title);
+            this.adjustWidths();
             if (this.connectionMenu) {
-                let old = storage.connection;
-                if (old) {
-                    this.connectionMenu.updateMenuItem(old, {checked: false});
+                const checked = this.connectionMenu.getCheckedItem();
+                if (checked) {
+                    this.connectionMenu.updateMenuItem(checked.id, {checked: false});
                 }
                 this.connectionMenu.updateMenuItem(name, {checked: true});
             }
@@ -189,13 +193,14 @@ export default class  {
                 }
                 this.schemasMenu.setMenuItems(menuItems);
                 this.schemas.showElement().find("span").html(response.data.schemas.selected);
+                await setSchema(response.data.schemas.selected);
                 publish(SET_APP_STATUS, AppStatus.READY, name);
             }
         }
         this.adjustWidths();
     }
 
-    private selectSchema(name: string) {
+    private async selectSchema(name: string) {
         const checked = this.schemasMenu.getCheckedItem();
         if (checked) {
             this.schemasMenu.updateMenuItem(checked.id, {checked: false})
@@ -204,8 +209,10 @@ export default class  {
                 return;
             }
         }
-        this.schemasMenu.updateMenuItem(name, {checked: true})
+        this.schemasMenu.updateMenuItem(name, {checked: true});
         this.schemas.showElement().find("span").html(name);
+        await setSchema(name);
+        publish(SET_APP_STATUS, AppStatus.READY);
     }
 
     private adjustWidths() {

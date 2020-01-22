@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 
 namespace Pgcode.Api
 {
@@ -11,6 +12,10 @@ namespace Pgcode.Api
         private readonly ConnectionManager _connectionManager;
         private readonly UserProfile _userProfile;
         private readonly InformationSchema _informationSchema;
+
+        protected string UserId => User.Identity.Name;
+        protected UserProfile UserProfile => _userProfile.ForUserId(UserId);
+        protected InformationSchema InformationSchema => _informationSchema.ForUserId(UserId);
 
         public ApiController(
             ConnectionManager connectionManager,
@@ -41,18 +46,32 @@ namespace Pgcode.Api
             };
 
         [HttpGet("connection/{connection}")]
-        public async ValueTask<ConnectionResponse> GetConnection(string connection) =>
-            new ConnectionResponse
+        public async ValueTask<ConnectionResponse> GetConnection(string connection)
+        {
+            if (!_connectionManager.SetConnectionNameByUserId(UserId, connection))
+            {
+                throw new ApiException($"Unknown connection name {connection}", 404);
+            }
+
+            return new ConnectionResponse
             {
                 Schemas = new Schemas
                 {
-                    Names = await _informationSchema.For(connection).GetSchemasAsync().ToListAsync(),
-                    Selected = await _userProfile.For(connection).GetSelectedSchemaAsync(User.Identity.Name)
+                    Names = await InformationSchema.GetSchemaNamesAsync().ToListAsync(),
+                    Selected = await UserProfile.GetSchemaNameAsync()
                 }
             };
+        }
 
-        [HttpGet("set-schema/{connection}/{schema}")]
-        public async ValueTask SetSchema(string connection, string schema) => 
-            await _userProfile.For(connection).SetSelectedSchemaAsync(User.Identity.Name, schema);
+        [HttpGet("schema/{schema}")]
+        public async ValueTask<object> Schema(string schema)
+        {
+            await UserProfile.SetSchemaNameAsync(schema);
+            
+            return new
+            {
+                schema
+            };
+        }
     }
 }

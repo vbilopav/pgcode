@@ -4,19 +4,42 @@ using Norm.Extensions;
 
 namespace Pgcode.Api
 {
+    public class TableTypes
+    {
+        public string Table => "BASE TABLE";
+        public string View => "VIEW";
+        public string External => "FOREIGN TABLE";
+        public string Temp => "LOCAL TEMPORARY";
+    }
+
+
     public class InformationSchema : DataAccess<InformationSchema>
     {
-        public InformationSchema(Settings settings, ConnectionManager connectionManager) : base(settings, connectionManager)
+        private readonly Settings _settings;
+
+        public InformationSchema(Settings settings, ConnectionManager connectionManager, UserProfile profile) : base(connectionManager)
         {
+            _settings = settings;
         }
 
-        public IAsyncEnumerable<string> GetSchemasAsync() => Connection.ReadAsync<string>(@"
+        public IAsyncEnumerable<string> GetSchemaNamesAsync() => Connection.ReadAsync<string>(@"
 
             select
                 schema_name 
             from
                 information_schema.schemata
 
-        ").Where(s => Settings.SkipSchemaStartingWith.All(skip => !s.StartsWith(skip)));
+        ").Where(s => _settings.SkipSchemaStartingWith.All(skip => !s.StartsWith(skip)));
+
+        private IAsyncEnumerable<string> GetTableNamesByTypeAsync(string type) => Connection.ReadAsync<string>(@"
+            select
+                table_name
+            from
+                information_schema.tables
+            where
+                table_schema = 'public' and table_type = 'BASE TABLE'
+            order by
+                table_name
+        ");
     }
 }

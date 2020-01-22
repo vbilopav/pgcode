@@ -3,41 +3,26 @@ import { AppStatus, IResponse, IInitialResponse, IConnectionResponse } from "app
 
 const _createResponse:<T> (response: Response, data?: T) => IResponse<T> = (response, data) => Object({ok: response.ok, status: response.status, data: data});
 
-const fetchInitial: () => Promise<IResponse<IInitialResponse>> = async () => {
+const _fetchAndPublishStatus:<T> (url: string) => Promise<IResponse<T>> = async url => {
     publish(SET_APP_STATUS, AppStatus.BUSY);
-
     try {
-        const response = await fetch("api/initial");
+        const response = await fetch(url);
         if (!response.ok) {
             publish(SET_APP_STATUS, AppStatus.ERROR, response.status);
             return _createResponse(response);
         }
-        
-        return _createResponse(response, await response.json() as IInitialResponse);
+        return _createResponse(response, await response.json());
     } catch (error) {
-        publish(SET_APP_STATUS, AppStatus.ERROR);
+        publish(SET_APP_STATUS, AppStatus.ERROR, error.message);
         throw error;
     }
 }
 
-const fetchConnection: (name: string) => Promise<IResponse<IConnectionResponse>> = async name => {
-    publish(SET_APP_STATUS, AppStatus.BUSY);
+export const fetchInitial: () => Promise<IResponse<IInitialResponse>> = async () => 
+    _fetchAndPublishStatus<IInitialResponse>("api/initial");
 
-    try {
-        const response = await fetch(`api/connection/${name}`);
-        if (!response.ok) {
-            publish(SET_APP_STATUS, AppStatus.ERROR, response.status);
-            return _createResponse(response);
-        }
-        
-        return _createResponse(response, await response.json() as IConnectionResponse);
-    } catch (error) {
-        publish(SET_APP_STATUS, AppStatus.ERROR);
-        throw error;
-    }
-}
+export const fetchConnection: (name: string) => Promise<IResponse<IConnectionResponse>> = async name => 
+    _fetchAndPublishStatus<IConnectionResponse>(`api/connection/${name}`);
 
-
-export {
-    fetchInitial, fetchConnection
-}
+export const setSchema: (schema: string) => Promise<IResponse<string>> = async schema => 
+    _fetchAndPublishStatus<string>(`api/schema/${schema}`);

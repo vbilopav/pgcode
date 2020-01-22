@@ -133,21 +133,25 @@ define(["require", "exports", "app/controls/footer-context-menu", "app/controls/
             const name = (connection ? connection.name : null);
             if (!connection) {
                 this.connections.find("span").html("Connection not selected").attr("title", "Click here to select from available connections...");
+                this.adjustWidths();
                 this.info.find("span").html("");
                 this.info.attr("title", "no connection...");
                 this.schemas.showElement(false);
+                this.adjustWidths();
                 storage.connection = null;
                 pubsub_1.publish(pubsub_1.SET_APP_STATUS, types_1.AppStatus.NO_CONNECTION);
             }
             else {
                 const title = this.formatTitleFromConn(connection);
                 this.connections.find("span").html(name).attr("title", title);
+                this.adjustWidths();
                 this.info.find("span").html(`v${connection.version}&nbsp;&nbsp;//${connection.user}@${connection.host}:${connection.port}/${connection.database}`);
                 this.info.attr("title", title);
+                this.adjustWidths();
                 if (this.connectionMenu) {
-                    let old = storage.connection;
-                    if (old) {
-                        this.connectionMenu.updateMenuItem(old, { checked: false });
+                    const checked = this.connectionMenu.getCheckedItem();
+                    if (checked) {
+                        this.connectionMenu.updateMenuItem(checked.id, { checked: false });
                     }
                     this.connectionMenu.updateMenuItem(name, { checked: true });
                 }
@@ -165,12 +169,13 @@ define(["require", "exports", "app/controls/footer-context-menu", "app/controls/
                     }
                     this.schemasMenu.setMenuItems(menuItems);
                     this.schemas.showElement().find("span").html(response.data.schemas.selected);
+                    await api_1.setSchema(response.data.schemas.selected);
                     pubsub_1.publish(pubsub_1.SET_APP_STATUS, types_1.AppStatus.READY, name);
                 }
             }
             this.adjustWidths();
         }
-        selectSchema(name) {
+        async selectSchema(name) {
             const checked = this.schemasMenu.getCheckedItem();
             if (checked) {
                 this.schemasMenu.updateMenuItem(checked.id, { checked: false });
@@ -182,6 +187,8 @@ define(["require", "exports", "app/controls/footer-context-menu", "app/controls/
             }
             this.schemasMenu.updateMenuItem(name, { checked: true });
             this.schemas.showElement().find("span").html(name);
+            await api_1.setSchema(name);
+            pubsub_1.publish(pubsub_1.SET_APP_STATUS, types_1.AppStatus.READY);
         }
         adjustWidths() {
             const columns = this.footer.css("grid-template-columns").split(" ");

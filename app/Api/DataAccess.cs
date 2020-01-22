@@ -1,30 +1,48 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using Norm.Extensions;
-using Npgsql;
+﻿using Npgsql;
 
 namespace Pgcode.Api
 {
     public abstract class DataAccess<T> where T : DataAccess<T>
     {
+        private string _userId;
         private readonly ConnectionManager _connectionManager;
-        protected readonly Settings Settings;
-        protected NpgsqlConnection Connection;
+        private NpgsqlConnection _connection;
 
-        protected DataAccess(Settings settings, ConnectionManager connectionManager)
+        protected string UserId => _userId ?? throw new ApiException("UserId is not supplied");
+
+        protected DataAccess(ConnectionManager connectionManager)
         {
-            Settings = settings;
             _connectionManager = connectionManager;
+            _connection = null;
+            _userId = null;
         }
 
-        public T For(string name)
+        public T ForUserId(string userId)
         {
-            Connection = _connectionManager.GetConnection(name);
-            if (Connection == null)
+            if (_userId != null)
             {
-                throw new DataAccessException($"Connection {name} doesn't exist.", 404);
+                return this as T;
             }
+            _userId = userId;
             return this as T;
+        }
+
+        protected NpgsqlConnection Connection
+        {
+            get
+            {
+                if (_connection != null)
+                {
+                    return _connection;
+                }
+                _connection = _connectionManager.GetConnectionByUserId(UserId);
+                if (_connection == null)
+                {
+                    throw new ApiException($"Connection could not be found. ", 404);
+                }
+
+                return _connection;
+            }
         }
     }
 }

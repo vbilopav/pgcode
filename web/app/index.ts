@@ -76,7 +76,7 @@ new (class implements IMain {
     constructor() {
         this.initTheme();
         this.initElements();
-        this.setStatus(AppStatus.BUSY);
+        this.setStatus(AppStatus.BUSY, []);
         
         this.initComponents();
         this.initSplitter(this.initGrid());
@@ -96,7 +96,7 @@ new (class implements IMain {
         return true;
     }
 
-    public setStatus(status: AppStatus, ...args: any[]) : void {
+    public setStatus(status: AppStatus, args: any[]) : void {
         if (status == AppStatus.READY) {
             if (this.status == AppStatus.READY) {
                 return;
@@ -104,7 +104,7 @@ new (class implements IMain {
             this.status = status;
             this.overlay.hideElement().css("opacity", "0");
             clearInterval(this.loadingTimeout);
-            document.title = args[0] ? `${args[0]} - ${this.defaultTitle}` : this.defaultTitle;
+            document.title = args.length ? `${args[0]} - ${this.defaultTitle}` : this.previousTitle;
 
         } else if (status == AppStatus.BUSY) {
             if (this.status == AppStatus.BUSY) {
@@ -132,7 +132,7 @@ new (class implements IMain {
             setTimeout(() => this.overlay.css("opacity", "0.4"));
             this.previousTitle = document.title;
             clearInterval(this.loadingTimeout);
-            document.title = args[0] ? `NETWORK ERROR (${args[0]})` : "NETWORK ERROR";
+            document.title = args.length ? `NETWORK ERROR (${args[0]})` : "NETWORK ERROR";
 
         }  else if (status == AppStatus.NO_CONNECTION) {
             if (this.status == AppStatus.NO_CONNECTION) {

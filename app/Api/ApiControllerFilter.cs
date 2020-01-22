@@ -24,7 +24,7 @@ namespace Pgcode.Api
 
         public void OnActionExecuted(ActionExecutedContext context)
         {
-            if (context.Exception is DataAccessException exception)
+            if (context.Exception is ApiException exception)
             {
                 context.Result = new ObjectResult(null) {StatusCode = exception.StatusCode};
                 context.ExceptionHandled = true;

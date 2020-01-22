@@ -33,7 +33,7 @@ define(["require", "exports", "app/_sys/storage", "app/ui/toolbar/toolbar", "app
             this.defaultTitle = "pgcode";
             this.initTheme();
             this.initElements();
-            this.setStatus(types_1.AppStatus.BUSY);
+            this.setStatus(types_1.AppStatus.BUSY, []);
             this.initComponents();
             this.initSplitter(this.initGrid());
             this.subscribeEvents();
@@ -49,7 +49,7 @@ define(["require", "exports", "app/_sys/storage", "app/ui/toolbar/toolbar", "app
             this.splitter.updateIndexesAndAdjust(resizeIndex);
             return true;
         }
-        setStatus(status, ...args) {
+        setStatus(status, args) {
             if (status == types_1.AppStatus.READY) {
                 if (this.status == types_1.AppStatus.READY) {
                     return;
@@ -57,7 +57,7 @@ define(["require", "exports", "app/_sys/storage", "app/ui/toolbar/toolbar", "app
                 this.status = status;
                 this.overlay.hideElement().css("opacity", "0");
                 clearInterval(this.loadingTimeout);
-                document.title = args[0] ? `${args[0]} - ${this.defaultTitle}` : this.defaultTitle;
+                document.title = args.length ? `${args[0]} - ${this.defaultTitle}` : this.previousTitle;
             }
             else if (status == types_1.AppStatus.BUSY) {
                 if (this.status == types_1.AppStatus.BUSY) {
@@ -85,7 +85,7 @@ define(["require", "exports", "app/_sys/storage", "app/ui/toolbar/toolbar", "app
                 setTimeout(() => this.overlay.css("opacity", "0.4"));
                 this.previousTitle = document.title;
                 clearInterval(this.loadingTimeout);
-                document.title = args[0] ? `NETWORK ERROR (${args[0]})` : "NETWORK ERROR";
+                document.title = args.length ? `NETWORK ERROR (${args[0]})` : "NETWORK ERROR";
             }
             else if (status == types_1.AppStatus.NO_CONNECTION) {
                 if (this.status == types_1.AppStatus.NO_CONNECTION) {

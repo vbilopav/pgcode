@@ -19,7 +19,7 @@ namespace Pgcode.Middleware
             _deleteLogger = loggerFactory.CreateLogger("DELETE");
         }
 
-        public void LogMessage(HttpContext context, DataAccessException exception = null)
+        public void LogMessage(HttpContext context, ApiException exception = null)
         {
             var userInfo = context.User.Identity.Name == null ? "" : $"\t{context.User.Identity.Name}";
             var statusCode = exception?.StatusCode ?? context.Response.StatusCode;

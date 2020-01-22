@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -12,6 +13,7 @@ namespace Pgcode
     public sealed partial class ConnectionManager
     {
         private static ImmutableDictionary<string, ConnectionData> _connections;
+        private static readonly ConcurrentDictionary<string, string> ConnectionNamesByUserId = new ConcurrentDictionary<string, string>();
 
         public static bool Initialize(IConfiguration configuration)
         {
