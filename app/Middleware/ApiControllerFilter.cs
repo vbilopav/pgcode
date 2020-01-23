@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Logging;
-using Pgcode.Middleware;
+using Pgcode.Api;
 
-namespace Pgcode.Api
+namespace Pgcode.Middleware
 {
     public class ApiControllerFilter : IActionFilter
     {

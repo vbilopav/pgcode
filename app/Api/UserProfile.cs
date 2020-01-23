@@ -16,7 +16,9 @@ namespace Pgcode.Api
 
         public ValueTask<string> GetSchemaNameAsync() => GetProfileValueAsync("schema", _settings.DefaultSchema);
 
-        public ValueTask SetSchemaNameAsync(string schema) => SetProfileValueAsync("schema", schema, _settings.DefaultSchema);
+        //public string GetSchemaName() => GetProfileValue("schema", _settings.DefaultSchema);
+
+        public ValueTask SetSchemaNameAsync(string schema) => SetProfileValueAsync("schema", schema);
 
         protected async ValueTask<T> GetProfileValueAsync<T>(string key, T defaultValue = default)
         {
@@ -30,13 +32,13 @@ namespace Pgcode.Api
             return result;
         }
 
-        protected async ValueTask SetProfileValueAsync<T>(string key, T value, T defaultValue = default)
+        protected async ValueTask SetProfileValueAsync<T>(string key, T value)
         {
             SetCache(GetCacheKey(key), value);
             await Connection.ExecuteAsync(SetDbProfileValueQuery(key), ("userId", UserId), ("value", value));
         }
 
-        private string GetCacheKey(string key) => $"{UserId}_{key}";
+        private string GetCacheKey(string key) => $"{UserId}-{ConnectionManager.GetConnectionIdByUserId(UserId)}-{key}";
 
         private void SetCache(string key, object value) => MemoryCache.AddOrUpdate(key, value, (_, __) => value);
 
@@ -47,7 +49,7 @@ namespace Pgcode.Api
                 {_settings.PgCodeSchema}.users 
             where 
                 id = @userId";
-          
+
         private string SetDbProfileValueQuery(string key) => $@"
             insert into {_settings.PgCodeSchema}.users 
             (   id,         data    )

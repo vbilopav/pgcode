@@ -24,5 +24,5 @@ export const fetchInitial: () => Promise<IResponse<IInitialResponse>> = async ()
 export const fetchConnection: (name: string) => Promise<IResponse<IConnectionResponse>> = async name => 
     _fetchAndPublishStatus<IConnectionResponse>(`api/connection/${name}`);
 
-export const setSchema: (schema: string) => Promise<IResponse<string>> = async schema => 
+export const fetchSchema: (schema: string) => Promise<IResponse<string>> = async schema => 
     _fetchAndPublishStatus<string>(`api/schema/${schema}`);

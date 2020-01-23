@@ -48,16 +48,12 @@ namespace Pgcode.Api
         [HttpGet("connection/{connection}")]
         public async ValueTask<ConnectionResponse> GetConnection(string connection)
         {
-            if (!_connectionManager.SetConnectionNameByUserId(UserId, connection))
-            {
-                throw new ApiException($"Unknown connection name {connection}", 404);
-            }
-
+            _connectionManager.SetConnectionNameByUserId(UserId, connection);
             return new ConnectionResponse
             {
                 Schemas = new Schemas
                 {
-                    Names = await InformationSchema.GetSchemaNamesAsync().ToListAsync(),
+                    Names = InformationSchema.GetSchemaNamesAsync().ToEnumerable(),
                     Selected = await UserProfile.GetSchemaNameAsync()
                 }
             };

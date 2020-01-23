@@ -164,18 +164,21 @@ define(["require", "exports", "app/controls/footer-context-menu", "app/controls/
                             id: schema,
                             text: schema,
                             checked: response.data.schemas.selected === schema,
-                            action: () => this.selectSchema(schema)
+                            action: () => {
+                                this.selectSchema(schema);
+                                this.fetchSchema(schema);
+                            }
                         });
                     }
                     this.schemasMenu.setMenuItems(menuItems);
                     this.schemas.showElement().find("span").html(response.data.schemas.selected);
-                    await api_1.setSchema(response.data.schemas.selected);
+                    this.selectSchema(response.data.schemas.selected);
                     pubsub_1.publish(pubsub_1.SET_APP_STATUS, types_1.AppStatus.READY, name);
                 }
             }
             this.adjustWidths();
         }
-        async selectSchema(name) {
+        selectSchema(name) {
             const checked = this.schemasMenu.getCheckedItem();
             if (checked) {
                 this.schemasMenu.updateMenuItem(checked.id, { checked: false });
@@ -187,7 +190,9 @@ define(["require", "exports", "app/controls/footer-context-menu", "app/controls/
             }
             this.schemasMenu.updateMenuItem(name, { checked: true });
             this.schemas.showElement().find("span").html(name);
-            await api_1.setSchema(name);
+        }
+        async fetchSchema(name) {
+            await api_1.fetchSchema(name);
             pubsub_1.publish(pubsub_1.SET_APP_STATUS, types_1.AppStatus.READY);
         }
         adjustWidths() {

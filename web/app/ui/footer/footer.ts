@@ -3,7 +3,7 @@ import FooterContextMenu from "app/controls/footer-context-menu";
 import MonacoContextMenu from "app/controls/monaco-context-menu";
 import Storage from "app/_sys/storage";
 import { AppStatus, IConnectionInfo } from "app/types";
-import { fetchConnection, setSchema } from "app/api";
+import { fetchConnection, fetchSchema } from "app/api";
 import { publish, subscribe, SET_APP_STATUS, API_INITIAL } from "app/_sys/pubsub";
 
 interface IStorage {connection: string}
@@ -188,19 +188,23 @@ export default class  {
                         id: schema, 
                         text: schema, 
                         checked: response.data.schemas.selected === schema,
-                        action: () => this.selectSchema(schema) 
+                        action: () => {
+                            this.selectSchema(schema);
+                            this.fetchSchema(schema)
+                        }
                     }); 
                 }
                 this.schemasMenu.setMenuItems(menuItems);
                 this.schemas.showElement().find("span").html(response.data.schemas.selected);
-                await setSchema(response.data.schemas.selected);
+                this.selectSchema(response.data.schemas.selected);
+                // publish schema
                 publish(SET_APP_STATUS, AppStatus.READY, name);
             }
         }
         this.adjustWidths();
     }
 
-    private async selectSchema(name: string) {
+    private selectSchema(name: string) {
         const checked = this.schemasMenu.getCheckedItem();
         if (checked) {
             this.schemasMenu.updateMenuItem(checked.id, {checked: false})
@@ -211,7 +215,11 @@ export default class  {
         }
         this.schemasMenu.updateMenuItem(name, {checked: true});
         this.schemas.showElement().find("span").html(name);
-        await setSchema(name);
+    }
+
+    private async fetchSchema(name: string) {
+        await fetchSchema(name);
+        // publish schema
         publish(SET_APP_STATUS, AppStatus.READY);
     }
 

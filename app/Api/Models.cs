@@ -1,7 +1,16 @@
 ﻿using System.Collections.Generic;
+using Npgsql;
 
 namespace Pgcode.Api
 {
+    public class ConnectionData
+    {
+        public int? SchemaVersion { get; set; }
+        public string ServerVersion { get; set; }
+        public string Name { get; set; }
+        public NpgsqlConnection Connection { get; set; }
+    }
+
     public class InitialResponse
     {
         public IEnumerable<ConnectionInfo> Connections { get; set; }

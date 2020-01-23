@@ -8,7 +8,7 @@ using Norm.Extensions;
 using Npgsql;
 using Pgcode.Migrations;
 
-namespace Pgcode
+namespace Pgcode.Api
 {
     public sealed partial class ConnectionManager
     {
