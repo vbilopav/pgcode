@@ -16,7 +16,7 @@ namespace Pgcode
 
             services.AddSingleton<ConnectionManager, ConnectionManager>();
             services.AddSingleton(Program.Settings);
-            services.AddScoped<InformationSchema, InformationSchema>();
+            services.AddScoped<ApiAccess, ApiAccess>();
             services.AddScoped<UserProfile, UserProfile>();
         }
 

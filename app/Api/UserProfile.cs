@@ -1,4 +1,6 @@
 ﻿using System.Collections.Concurrent;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Norm.Extensions;
 
@@ -6,7 +8,7 @@ namespace Pgcode.Api
 {
     public class UserProfile : DataAccess<UserProfile>
     {
-        private static readonly ConcurrentDictionary<string, object> MemoryCache = new ConcurrentDictionary<string, object>();
+        private static readonly ConcurrentDictionary<string, string> MemoryCache = new ConcurrentDictionary<string, string>();
         private readonly Settings _settings;
 
         public UserProfile(Settings settings, ConnectionManager connectionManager) : base(connectionManager)
@@ -16,48 +18,36 @@ namespace Pgcode.Api
 
         public ValueTask<string> GetSchemaNameAsync() => GetProfileValueAsync("schema", _settings.DefaultSchema);
 
-        //public string GetSchemaName() => GetProfileValue("schema", _settings.DefaultSchema);
-
         public ValueTask SetSchemaNameAsync(string schema) => SetProfileValueAsync("schema", schema);
 
-        protected async ValueTask<T> GetProfileValueAsync<T>(string key, T defaultValue = default)
+        protected async ValueTask<string> GetProfileValueAsync(string key, string defaultValue = default)
         {
             var cacheKey = GetCacheKey(key);
             if (MemoryCache.TryGetValue(cacheKey, out var cacheResult))
             {
-                return (T)cacheResult;
+                return cacheResult;
             }
-            var result = await Connection.SingleAsync<T>(GetDbProfileValueQuery(key), UserId) ?? defaultValue;
+            var result = await GetDbProfileValueAsync(key) ?? defaultValue;
             SetCache(cacheKey, result);
             return result;
         }
 
-        protected async ValueTask SetProfileValueAsync<T>(string key, T value)
+        protected async ValueTask SetProfileValueAsync(string key, string value)
         {
             SetCache(GetCacheKey(key), value);
-            await Connection.ExecuteAsync(SetDbProfileValueQuery(key), ("userId", UserId), ("value", value));
+            await SetDbProfileValueAsync(key, value);
         }
 
         private string GetCacheKey(string key) => $"{UserId}-{ConnectionManager.GetConnectionIdByUserId(UserId)}-{key}";
 
-        private void SetCache(string key, object value) => MemoryCache.AddOrUpdate(key, value, (_, __) => value);
+        private void SetCache(string key, string value) => MemoryCache.AddOrUpdate(key, value, (_, __) => value);
 
-        private string GetDbProfileValueQuery(string key)  =>  $@"
-            select 
-                data->>'{key}'
-            from 
-                {_settings.PgCodeSchema}.users 
-            where 
-                id = @userId";
+        private async ValueTask<string> GetDbProfileValueAsync(string key) =>
+            await UserConnection.GetStringAsync("get_user_data", new {key, userId = UserId});
 
-        private string SetDbProfileValueQuery(string key) => $@"
-            insert into {_settings.PgCodeSchema}.users 
-            (   id,         data    )
-            values 
-            (   @userId,    jsonb_build_object('{key}', @value) )
-            on conflict (id) do 
-            update 
-                set 
-                    data = users.data || excluded.data";
+        private async ValueTask SetDbProfileValueAsync(string key, string value)
+        {
+            await UserConnection.VoidAsync("set_user_data", new { key, userId = UserId, value });
+        }
     }
 }

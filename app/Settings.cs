@@ -8,7 +8,7 @@ namespace Pgcode
         public string MinimalPgVersion { get; set; } = "9.5";
         public string PgCodeSchema { get; set; } = "pgcode";
         public string DefaultSchema { get; set; } = "public";
-        public string[] SkipSchemaStartingWith { get; set; } = { "pg_toast", "pg_temp" };
+        public string SkipSchemaPattern { get; set; } = "(pg_temp|pg_toast)%";
         public bool LogRequests { get; set; } = true;
         public string WindowsOpenCommand { get; set; } = null;
         public string OsxOpenCommand { get; set; } = "open";

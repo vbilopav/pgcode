@@ -39,4 +39,9 @@ namespace Pgcode.Middleware
             }
         }
     }
+
+    public static class ControllerExtensions
+    {
+
+    }
 }

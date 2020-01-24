@@ -1,8 +1,19 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Npgsql;
 
 namespace Pgcode.Api
 {
+    public class ApiException : Exception
+    {
+        public readonly int StatusCode;
+
+        public ApiException(string message, int status = 500) : base(message)
+        {
+            StatusCode = status;
+        }
+    }
+
     public class ConnectionData
     {
         public int? SchemaVersion { get; set; }
@@ -19,6 +30,7 @@ namespace Pgcode.Api
     public class ConnectionResponse
     {
         public Schemas Schemas { get; set; }
+        public string Name { get; set; }
     }
 
     public class Schemas

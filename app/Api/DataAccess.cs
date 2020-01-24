@@ -27,7 +27,7 @@ namespace Pgcode.Api
             return this as T;
         }
 
-        protected NpgsqlConnection Connection
+        protected NpgsqlConnection UserConnection
         {
             get
             {

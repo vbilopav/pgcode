@@ -73,7 +73,7 @@ namespace Pgcode.Migrations
                 var migration = _migrations[key];
                 try
                 {
-                    _connection.Execute(migration.Up(_settings));
+                    _connection.Execute(migration.Up(_settings, _connection));
                 }
                 catch (PostgresException e)
                 {
@@ -93,7 +93,7 @@ namespace Pgcode.Migrations
                 var migration = _migrations[key];
                 try
                 {
-                    _connection.Execute(migration.Down(_settings));
+                    _connection.Execute(migration.Down(_settings, _connection));
                 }
                 catch (PostgresException e)
                 {

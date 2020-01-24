@@ -11,20 +11,20 @@ namespace Pgcode.Api
     {
         private readonly ConnectionManager _connectionManager;
         private readonly UserProfile _userProfile;
-        private readonly InformationSchema _informationSchema;
+        private readonly ApiAccess _api;
 
         protected string UserId => User.Identity.Name;
         protected UserProfile UserProfile => _userProfile.ForUserId(UserId);
-        protected InformationSchema InformationSchema => _informationSchema.ForUserId(UserId);
+        protected ApiAccess Api => _api.ForUserId(UserId);
 
         public ApiController(
             ConnectionManager connectionManager,
             UserProfile userProfile,
-            InformationSchema informationSchema)
+            ApiAccess api)
         {
             _connectionManager = connectionManager;
             _userProfile = userProfile;
-            _informationSchema = informationSchema;
+            _api = api;
         }
 
         [HttpGet("initial")]
@@ -46,28 +46,17 @@ namespace Pgcode.Api
             };
 
         [HttpGet("connection/{connection}")]
-        public async ValueTask<ConnectionResponse> GetConnection(string connection)
+        public async ValueTask<ContentResult> GetConnection(string connection)
         {
             _connectionManager.SetConnectionNameByUserId(UserId, connection);
-            return new ConnectionResponse
-            {
-                Schemas = new Schemas
-                {
-                    Names = InformationSchema.GetSchemaNamesAsync().ToEnumerable(),
-                    Selected = await UserProfile.GetSchemaNameAsync()
-                }
-            };
+            return await Api.GetConnectionContentResult(connection, await UserProfile.GetSchemaNameAsync());
         }
 
         [HttpGet("schema/{schema}")]
         public async ValueTask<object> Schema(string schema)
         {
             await UserProfile.SetSchemaNameAsync(schema);
-            
-            return new
-            {
-                schema
-            };
+            return await Api.GetSchemaContentResult(schema);
         }
     }
 }

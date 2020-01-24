@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using System;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Pgcode.Api;
 
@@ -21,9 +22,9 @@ namespace Pgcode.Middleware
 
         public void LogMessage(HttpContext context, ApiException exception = null)
         {
-            var userInfo = context.User.Identity.Name == null ? "" : $"\t{context.User.Identity.Name}";
+            var userInfo = context.User.Identity.Name == null ? "" : $"{Environment.NewLine}User: {context.User.Identity.Name}";
             var statusCode = exception?.StatusCode ?? context.Response.StatusCode;
-            var error = exception == null ? "" : $"\nerror: {exception.Message}";
+            var error = exception == null ? "" : $"{Environment.NewLine}message: {exception.Message}";
             var msg = $"{context.Request.Path}{context.Request.QueryString.ToString()} {statusCode}{userInfo}{error}";
             var logLevel = exception == null ? LogLevel.Information : LogLevel.Error;
 

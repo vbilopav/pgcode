@@ -157,7 +157,6 @@ export default class  {
         const name = (connection ? connection.name : null);
         if (!connection) {
             this.connections.find("span").html("Connection not selected").attr("title", "Click here to select from available connections...");
-            this.adjustWidths();
             this.info.find("span").html("");
             this.info.attr("title", "no connection...");
             this.schemas.showElement(false);
@@ -166,11 +165,15 @@ export default class  {
             publish(SET_APP_STATUS, AppStatus.NO_CONNECTION);
         } else {
             const title = this.formatTitleFromConn(connection);
+            this.info.visible(false);
+            this.schemas.visible(false);
             this.connections.find("span").html(name).attr("title", title);
-            this.adjustWidths();
             this.info.find("span").html(`v${connection.version}&nbsp;&nbsp;//${connection.user}@${connection.host}:${connection.port}/${connection.database}`);
             this.info.attr("title", title);
             this.adjustWidths();
+            this.info.visible(true);
+            this.schemas.visible(true);
+            
             if (this.connectionMenu) {
                 const checked = this.connectionMenu.getCheckedItem();
                 if (checked) {
