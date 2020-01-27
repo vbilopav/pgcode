@@ -10,6 +10,7 @@ namespace Pgcode
         public string DefaultSchema { get; set; } = "public";
         public string SkipSchemaPattern { get; set; } = "(pg_temp|pg_toast)%";
         public bool LogRequests { get; set; } = true;
+        public bool LogInternalConnectionNotice { get; set; } = true;
         public string WindowsOpenCommand { get; set; } = null;
         public string OsxOpenCommand { get; set; } = "open";
         public string LinuxOpenCommand { get; set; } = "xdg-open";

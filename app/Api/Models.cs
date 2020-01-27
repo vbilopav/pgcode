@@ -12,6 +12,11 @@ namespace Pgcode.Api
         {
             StatusCode = status;
         }
+
+        public ApiException(string message, Exception innerException, int status = 500) : base(message, innerException)
+        {
+            StatusCode = status;
+        }
     }
 
     public class ConnectionData

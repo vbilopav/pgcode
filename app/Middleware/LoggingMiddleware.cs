@@ -1,12 +1,18 @@
 ﻿using System;
+using System.Collections;
+using System.Linq;
+using System.Text;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using Npgsql;
 using Pgcode.Api;
 
 namespace Pgcode.Middleware
 {
     public class LoggingMiddleware : IMiddleware
     {
+        private static readonly string NL = Environment.NewLine;
+
         private readonly ILogger _getLogger;
         private readonly ILogger _postLogger;
         private readonly ILogger _putLogger;
@@ -22,11 +28,9 @@ namespace Pgcode.Middleware
 
         public void LogMessage(HttpContext context, ApiException exception = null)
         {
-            var userInfo = context.User.Identity.Name == null ? "" : $"{Environment.NewLine}User: {context.User.Identity.Name}";
-            var statusCode = exception?.StatusCode ?? context.Response.StatusCode;
-            var error = exception == null ? "" : $"{Environment.NewLine}message: {exception.Message}";
+            var userInfo = context.User.Identity.Name == null ? "" : $"{NL}User: {context.User.Identity.Name}";
+            var (statusCode, error, logLevel) = GetStatusCodeErrorAndLogLevel(context, exception);
             var msg = $"{context.Request.Path}{context.Request.QueryString.ToString()} {statusCode}{userInfo}{error}";
-            var logLevel = exception == null ? LogLevel.Information : LogLevel.Error;
 
             switch (context.Request.Method)
             {
@@ -46,5 +50,42 @@ namespace Pgcode.Middleware
         }
 
         public void ProcessHttpContext(HttpContext context) => LogMessage(context);
+
+        private static (int, string, LogLevel) GetStatusCodeErrorAndLogLevel(HttpContext context, ApiException exception)
+        {
+            return (
+                 exception?.StatusCode ?? context.Response.StatusCode,
+                 FormatError(exception),
+                 exception == null ? LogLevel.Information : LogLevel.Error
+                 );
+        }
+
+        private static string FormatError(ApiException exception)
+        {
+            if (exception == null)
+            {
+                return "";
+            }
+                
+            if (exception.InnerException != null &&
+                exception.InnerException is PostgresException postgresException)
+            {
+                return FormatPostgresExceptionMessage(postgresException);
+            }
+            
+            return $"{NL}{exception.Message}";
+        }
+
+        private static string FormatPostgresExceptionMessage(PostgresException e)
+        {
+            var sb = new StringBuilder();
+            sb.Append($"{NL}PostgreSQL error:{NL}");
+            foreach (var entry in e.Data.Cast<DictionaryEntry>().Where(entry => entry.Value != null))
+            {
+                sb.Append($"{NL}{entry.Key}: {entry.Value}");
+            }
+            sb.Append($"{NL}{NL}");
+            return sb.ToString();
+        }
     }
 }

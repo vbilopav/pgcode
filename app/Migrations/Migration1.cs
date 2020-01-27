@@ -1,6 +1,4 @@
-﻿using System;
-using Norm.Extensions.PostgreSQL;
-using Npgsql;
+﻿using Npgsql;
 
 namespace Pgcode.Migrations
 {
@@ -96,6 +94,9 @@ namespace Pgcode.Migrations
             set
                 data = users.data || excluded.data,
                 timestamp = _now;
+
+            raise info 'pgcode.users set data key % with value % for user id = %', 
+                _data->>'key', _data->>'value', _data->>'userId';
         end
         $$
         language plpgsql security definer volatile;
@@ -248,7 +249,8 @@ namespace Pgcode.Migrations
             'scripts', (select {settings.PgCodeSchema}.select_scripts(_data->'scripts')),
             'tables', (select {settings.PgCodeSchema}.select_information_schema_tables(_data->'tables')),
             'views', (select {settings.PgCodeSchema}.select_information_schema_tables(_data->'views')),
-            'routines', (select {settings.PgCodeSchema}.select_information_schema_routines(_data->'routines'))
+            'routines', (select {settings.PgCodeSchema}.select_information_schema_routines(_data->'routines')),
+            'name', _data->>'name'
         );
         $$
         language sql security definer stable;
@@ -268,7 +270,8 @@ namespace Pgcode.Migrations
             'scripts', (select {settings.PgCodeSchema}.select_scripts(_data->'scripts')),
             'tables', (select {settings.PgCodeSchema}.select_information_schema_tables(_data->'tables')),
             'views', (select {settings.PgCodeSchema}.select_information_schema_tables(_data->'views')),
-            'routines', (select {settings.PgCodeSchema}.select_information_schema_routines(_data->'routines'))
+            'routines', (select {settings.PgCodeSchema}.select_information_schema_routines(_data->'routines')),
+            'name', _data->>'name'
         );
         $$
         language sql security definer stable;

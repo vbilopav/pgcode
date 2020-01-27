@@ -49,6 +49,11 @@ namespace Pgcode
                     app.UseResourceMiddleware(cookieMiddleware);
                 }
             }
+
+            if (Program.Settings.LogInternalConnectionNotice)
+            {
+                ConnectionManager.AddNoticeHandlersToConnections(loggerFactory);
+            }
         }
     }
 }

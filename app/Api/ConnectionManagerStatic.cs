@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Norm.Extensions;
 using Npgsql;
 using Pgcode.Migrations;
@@ -159,6 +160,41 @@ namespace Pgcode.Api
 
         public static void MigrationsDown(IConfiguration configuration, int? downToVersion = null, string forConnection = null) =>
             RunMigrations(configuration, runner => runner.Down(downToVersion), forConnection);
+
+        public static void AddNoticeHandlersToConnections(ILoggerFactory loggerFactory)
+        {
+            foreach (var (key, value) in _connections)
+            {
+                var logger = loggerFactory.CreateLogger(key);
+                value.Connection.Notice += (sender, args) =>
+                {
+                    var severity = args.Notice.Severity;
+                    if (InfoLevels.Contains(severity))
+                    {
+                        logger.LogInformation(args.Notice.MessageText);
+                    }
+                    else if (severity == "WARNING")
+                    {
+                        logger.LogWarning(args.Notice.MessageText);
+                    }
+                    else if (severity.StartsWith("DEBUG"))
+                    {
+                        logger.LogDebug(args.Notice.MessageText);
+                    }
+                    else if (ErrorLevels.Contains(severity))
+                    {
+                        logger.LogError(args.Notice.MessageText);
+                    }
+                    else
+                    {
+                        logger.LogTrace(args.Notice.MessageText);
+                    }
+                };
+            }
+        }
+
+        private static readonly IEnumerable<string> InfoLevels = new[] { "INFO", "NOTICE", "LOG" };
+        private static readonly IEnumerable<string> ErrorLevels = new[] { "ERROR", "PANIC" };
 
         private static void RunMigrations(IConfiguration configuration, Action<MigrationRunner> action, string forConnection = null)
         {

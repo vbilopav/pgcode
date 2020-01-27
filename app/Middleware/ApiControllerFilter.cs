@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Logging;
 using Pgcode.Api;
@@ -24,24 +25,23 @@ namespace Pgcode.Middleware
 
         public void OnActionExecuted(ActionExecutedContext context)
         {
-            if (context.Exception is ApiException exception)
+            var exception = context.Exception as ApiException;
+            if (exception is null && context.Exception is Npgsql.PostgresException postgresException)
+            {
+                exception = new ApiException("PostgresException", postgresException);
+            }
+
+            if (exception != null)
             {
                 context.Result = new ObjectResult(null) {StatusCode = exception.StatusCode};
-                context.ExceptionHandled = true;
-                if (_settings.LogRequests)
-                {
-                    _loggingMiddleware.LogMessage(context.HttpContext, exception);
-                }
+                context.ExceptionHandled = true; 
+                _loggingMiddleware.LogMessage(context.HttpContext, exception);
+            }
 
-            } else if (_settings.LogRequests)
+            else if (_settings.LogRequests)
             {
                 _loggingMiddleware.LogMessage(context.HttpContext);
             }
         }
-    }
-
-    public static class ControllerExtensions
-    {
-
     }
 }
