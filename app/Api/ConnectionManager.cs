@@ -7,8 +7,6 @@ namespace Pgcode.Api
 {
     public sealed partial class ConnectionManager : IDisposable
     {
-        public ConnectionManager() { }
-
         public IEnumerable<ConnectionData> GetConnectionsData() => _connections.Values;
 
         public NpgsqlConnection GetConnectionByName(string connectionName)

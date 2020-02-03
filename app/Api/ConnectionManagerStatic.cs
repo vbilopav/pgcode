@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Data;
 using System.Linq;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -324,7 +325,10 @@ namespace Pgcode.Api
         {
             foreach (var (_, data) in _connections)
             {
-                data.Connection.EnsureIsClose();
+                if (data.Connection.State != ConnectionState.Closed)
+                {
+                    data.Connection.Close();
+                }
                 data.Connection.Dispose();
             }
         }
