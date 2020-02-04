@@ -93,7 +93,7 @@ body > div.container {
   height: 100%;
   display: grid;
   grid-template-rows: 4px 42px 42px 42px 42px 42px auto 42px 4px;
-  grid-template-areas: 'gap1' 'docs' 'tables' 'views' 'funcs' 'search' 'gap2' 'pgcode' 'gap3';
+  grid-template-areas: 'gap1' 'scripts' 'tables' 'views' 'funcs' 'search' 'gap2' 'pgcode' 'gap3';
   row-gap: 12px;
   user-select: none;
   overflow-y: overlay; }
@@ -120,8 +120,8 @@ body > div.container {
     position: absolute; }
   .toolbar > div:hover {
     color: #252526; }
-  .toolbar > div.btn-docs {
-    grid-area: docs;
+  .toolbar > div.btn-scripts {
+    grid-area: scripts;
     font-size: 28px; }
   .toolbar > div.btn-tables {
     grid-area: tables;

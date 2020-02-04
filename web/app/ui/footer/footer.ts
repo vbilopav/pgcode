@@ -4,7 +4,7 @@ import MonacoContextMenu from "app/controls/monaco-context-menu";
 import Storage from "app/_sys/storage";
 import { AppStatus, IConnectionInfo } from "app/types";
 import { fetchConnection, fetchSchema } from "app/api";
-import { publish, subscribe, SET_APP_STATUS, API_INITIAL } from "app/_sys/pubsub";
+import { publish, subscribe, SET_APP_STATUS, API_INITIAL, WS_CHANGED } from "app/_sys/pubsub";
 
 interface IStorage {connection: string}
 
@@ -200,7 +200,7 @@ export default class  {
                 this.schemasMenu.setMenuItems(menuItems);
                 this.schemas.showElement().find("span").html(response.data.schemas.selected);
                 this.selectSchema(response.data.schemas.selected);
-                // publish schema
+                publish(WS_CHANGED, response.data);
                 publish(SET_APP_STATUS, AppStatus.READY, name);
             }
         }
@@ -221,8 +221,8 @@ export default class  {
     }
 
     private async fetchSchema(name: string) {
-        await fetchSchema(name);
-        // publish schema
+        const response = await fetchSchema(name);
+        publish(WS_CHANGED, response.data);
         publish(SET_APP_STATUS, AppStatus.READY);
     }
 

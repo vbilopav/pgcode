@@ -14,7 +14,7 @@ const
     moveText = (position: Position) => position === Position.LEFT ? "Move Toolbar to Right" : "Move Toolbar to Left";
 
 interface IStorage {
-    docs: boolean;
+    scripts: boolean;
     tables: boolean;
     views: boolean;
     funcs: boolean;
@@ -25,12 +25,12 @@ interface IStorage {
 
 const 
     storage = new Storage({
-        docs: false, 
+        scripts: false, 
         tables: false, 
         views: false,
         funcs: false, 
         search: false, 
-        previousKey: "docs", 
+        previousKey: "scripts", 
         pgcode: false
     }, 
     "state", 
@@ -45,7 +45,7 @@ const
     active = "active", 
     docked = "docked",
     items = [
-        {id: "btn-docs", icon: "icon-doc-text", key: "docs", label: "scripts", text: "Scripts", keyBinding: "Ctrl+S", role: ButtonRoles.switch},
+        {id: "btn-scripts", icon: "icon-doc-text", key: "scripts", label: "scripts", text: "Scripts", keyBinding: "Ctrl+S", role: ButtonRoles.switch},
         {id: "btn-tables", icon: "icon-database", key: "tables", label: "tables", text: "Tables", keyBinding: "Ctrl+T", role: ButtonRoles.switch},
         {id: "btn-views", icon: "icon-database", key: "views", label: "views", text: "Views", keyBinding: "Ctrl+V", role: ButtonRoles.switch},
         {id: "btn-funcs", icon: "icon-database", key: "funcs", label: "routines", text: "Routines", keyBinding: "Ctrl+R", role: ButtonRoles.switch},

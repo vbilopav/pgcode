@@ -9,12 +9,12 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "../../cont
     ;
     const isInRole = (e, role) => e.dataAttr("role") === role, isSwitch = e => isInRole(e, ButtonRoles.switch), moveText = (position) => position === types_1.Position.LEFT ? "Move Toolbar to Right" : "Move Toolbar to Left";
     const storage = new storage_1.default({
-        docs: false,
+        scripts: false,
         tables: false,
         views: false,
         funcs: false,
         search: false,
-        previousKey: "docs",
+        previousKey: "scripts",
         pgcode: false
     }, "state", (name, value) => {
         if (name !== "previousKey") {
@@ -23,7 +23,7 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "../../cont
         return value;
     });
     const active = "active", docked = "docked", items = [
-        { id: "btn-docs", icon: "icon-doc-text", key: "docs", label: "scripts", text: "Scripts", keyBinding: "Ctrl+S", role: ButtonRoles.switch },
+        { id: "btn-scripts", icon: "icon-doc-text", key: "scripts", label: "scripts", text: "Scripts", keyBinding: "Ctrl+S", role: ButtonRoles.switch },
         { id: "btn-tables", icon: "icon-database", key: "tables", label: "tables", text: "Tables", keyBinding: "Ctrl+T", role: ButtonRoles.switch },
         { id: "btn-views", icon: "icon-database", key: "views", label: "views", text: "Views", keyBinding: "Ctrl+V", role: ButtonRoles.switch },
         { id: "btn-funcs", icon: "icon-database", key: "funcs", label: "routines", text: "Routines", keyBinding: "Ctrl+R", role: ButtonRoles.switch },

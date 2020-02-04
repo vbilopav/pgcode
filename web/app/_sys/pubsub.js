@@ -56,8 +56,8 @@ define(["require", "exports"], function (require, exports) {
     exports.STATE_CHANGED_OFF = STATE_CHANGED_OFF;
     const STATE_CHANGED = "state/changed/";
     exports.STATE_CHANGED = STATE_CHANGED;
-    const STATE_CHANGED_DOCS = "state/changed/docs";
-    exports.STATE_CHANGED_DOCS = STATE_CHANGED_DOCS;
+    const STATE_CHANGED_SCRIPTS = "state/changed/scripts";
+    exports.STATE_CHANGED_SCRIPTS = STATE_CHANGED_SCRIPTS;
     const STATE_CHANGED_TABLES = "state/changed/tables";
     exports.STATE_CHANGED_TABLES = STATE_CHANGED_TABLES;
     const STATE_CHANGED_VIEWS = "state/changed/views";
@@ -76,5 +76,7 @@ define(["require", "exports"], function (require, exports) {
     exports.SET_APP_STATUS = SET_APP_STATUS;
     const API_INITIAL = "api/initial/";
     exports.API_INITIAL = API_INITIAL;
+    const WS_CHANGED = "app/schema/";
+    exports.WS_CHANGED = WS_CHANGED;
 });
 //# sourceMappingURL=pubsub.js.map

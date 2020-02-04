@@ -1,4 +1,4 @@
-define(["require", "exports", "app/_sys/storage", "app/ui/toolbar/toolbar", "app/ui/side-panel/side-panel", "app/ui/main-panel/main-panel", "app/ui/footer/footer", "app/controls/splitter", "app/types", "app/api", "app/_sys/pubsub"], function (require, exports, storage_1, toolbar_1, side_panel_1, main_panel_1, footer_1, splitter_1, types_1, api_1, pubsub_1) {
+define(["require", "exports", "app/_sys/storage", "app/ui/toolbar/toolbar", "app/ui/side-panel/_side-panel", "app/ui/main-panel/main-panel", "app/ui/footer/footer", "app/controls/splitter", "app/types", "app/api", "app/_sys/pubsub"], function (require, exports, storage_1, toolbar_1, _side_panel_1, main_panel_1, footer_1, splitter_1, types_1, api_1, pubsub_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     const storage = new storage_1.default({
@@ -153,7 +153,7 @@ define(["require", "exports", "app/_sys/storage", "app/ui/toolbar/toolbar", "app
         }
         initComponents() {
             this.toolbar = new toolbar_1.default(this.container.children[0], storage.toolbarPosition, this);
-            this.sidePanel = new side_panel_1.default(this.container.children[1]);
+            this.sidePanel = new _side_panel_1.default(this.container.children[1]);
             this.mainPanel = new main_panel_1.default(this.container.children[3]);
             this.footer = new footer_1.default(this.container.children[4]);
         }

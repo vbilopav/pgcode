@@ -16,11 +16,28 @@ interface IInitialResponse {
     connections: Array<IConnectionInfo>
 }
 
-interface IConnectionResponse { 
+interface IConnectionResponse extends IWorkspace { 
+    name: string,
     schemas: {
         names: Array<string>,
         selected: string
-    }
+    },
+}
+
+interface ISchemaResponse extends IWorkspace { 
+    name: string
+}
+
+interface IWorkspace { 
+    routines: Array<{
+        id: string,
+        language: string,
+        name: string,
+        type: string
+    }>,
+    scripts: Array<string>,
+    tables: Array<string>,
+    views: Array<string>
 }
 
 interface IConnectionInfo {
@@ -36,6 +53,10 @@ interface IInitialResponse {
     connections: Array<IConnectionInfo>
 }
 
+interface IPanel { 
+    show: (state: boolean) => void
+}
+
 export { 
     Position, 
     Themes, 
@@ -44,5 +65,8 @@ export {
     IResponse, 
     IInitialResponse, 
     IConnectionResponse,
-    IConnectionInfo 
+    ISchemaResponse,
+    IWorkspace,
+    IConnectionInfo,
+    IPanel
 }

@@ -49,7 +49,7 @@ const STATE_CHANGED_ON: string = "state/changed/on/"; // id: string
 const STATE_CHANGED_OFF: string = "state/changed/off/"; // id: string
 const STATE_CHANGED: string = "state/changed/"; // helper, id: string, state: bool
 
-const STATE_CHANGED_DOCS: string = "state/changed/docs"; // id: string, state: bool
+const STATE_CHANGED_SCRIPTS: string = "state/changed/scripts"; // id: string, state: bool
 const STATE_CHANGED_TABLES: string = "state/changed/tables"; // id: string, state: bool
 const STATE_CHANGED_VIEWS: string = "state/changed/views"; // id: string, state: bool
 const STATE_CHANGED_FUNCS: string = "state/changed/funcs"; // id: string, state: bool
@@ -61,6 +61,7 @@ const CLOSE_CONTEXT_MENU: string = "context-menu/close/"; //id
 const SET_APP_STATUS: string = "app/status/"; //status: AppStatus, text?: string
 
 const API_INITIAL: string = "api/initial/"; //initial: IInitial
+const WS_CHANGED: string = "app/schema/"; //schema: IWorkspace
 
 export { 
     subscribe, publish, unsubscribe,
@@ -68,7 +69,7 @@ export {
     STATE_CHANGED_ON,
     STATE_CHANGED_OFF,
     STATE_CHANGED,
-    STATE_CHANGED_DOCS,
+    STATE_CHANGED_SCRIPTS,
     STATE_CHANGED_TABLES,
     STATE_CHANGED_VIEWS,
     STATE_CHANGED_FUNCS,
@@ -77,5 +78,6 @@ export {
     SIDEBAR_UNDOCKED,
     CLOSE_CONTEXT_MENU,
     SET_APP_STATUS,
-    API_INITIAL
+    API_INITIAL,
+    WS_CHANGED
 };
