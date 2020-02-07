@@ -1,4 +1,4 @@
-define(["require", "exports"], function (require, exports) {
+define(["require", "exports", "app/types"], function (require, exports, types_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     const _entries = {};
@@ -56,15 +56,15 @@ define(["require", "exports"], function (require, exports) {
     exports.STATE_CHANGED_OFF = STATE_CHANGED_OFF;
     const STATE_CHANGED = "state/changed/";
     exports.STATE_CHANGED = STATE_CHANGED;
-    const STATE_CHANGED_SCRIPTS = "state/changed/scripts";
+    const STATE_CHANGED_SCRIPTS = `state/changed/${types_1.keys.scripts}`;
     exports.STATE_CHANGED_SCRIPTS = STATE_CHANGED_SCRIPTS;
-    const STATE_CHANGED_TABLES = "state/changed/tables";
+    const STATE_CHANGED_TABLES = `state/changed/${types_1.keys.tables}`;
     exports.STATE_CHANGED_TABLES = STATE_CHANGED_TABLES;
-    const STATE_CHANGED_VIEWS = "state/changed/views";
+    const STATE_CHANGED_VIEWS = `state/changed/${types_1.keys.views}`;
     exports.STATE_CHANGED_VIEWS = STATE_CHANGED_VIEWS;
-    const STATE_CHANGED_FUNCS = "state/changed/funcs";
-    exports.STATE_CHANGED_FUNCS = STATE_CHANGED_FUNCS;
-    const STATE_CHANGED_SEARCH = "state/changed/search";
+    const STATE_CHANGED_ROUTINES = `state/changed/${types_1.keys.routines}`;
+    exports.STATE_CHANGED_ROUTINES = STATE_CHANGED_ROUTINES;
+    const STATE_CHANGED_SEARCH = `state/changed/${types_1.keys.search}`;
     exports.STATE_CHANGED_SEARCH = STATE_CHANGED_SEARCH;
     const SIDEBAR_DOCKED = "sidebar/docked/";
     exports.SIDEBAR_DOCKED = SIDEBAR_DOCKED;
@@ -78,5 +78,7 @@ define(["require", "exports"], function (require, exports) {
     exports.API_INITIAL = API_INITIAL;
     const WS_CHANGED = "app/schema/";
     exports.WS_CHANGED = WS_CHANGED;
+    const ITEM_COUNT_CHANGED = "item/count/";
+    exports.ITEM_COUNT_CHANGED = ITEM_COUNT_CHANGED;
 });
 //# sourceMappingURL=pubsub.js.map

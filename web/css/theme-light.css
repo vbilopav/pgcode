@@ -93,7 +93,7 @@ body > div.container {
   height: 100%;
   display: grid;
   grid-template-rows: 4px 42px 42px 42px 42px 42px auto 42px 4px;
-  grid-template-areas: 'gap1' 'scripts' 'tables' 'views' 'funcs' 'search' 'gap2' 'pgcode' 'gap3';
+  grid-template-areas: 'gap1' 'scripts' 'tables' 'views' 'routines' 'search' 'gap2' 'pgcode' 'gap3';
   row-gap: 12px;
   user-select: none;
   overflow-y: overlay; }
@@ -118,6 +118,22 @@ body > div.container {
     display: none;
     /*block;*/
     position: absolute; }
+  .toolbar > div > div.count {
+    display: block;
+    position: absolute;
+    top: 15px;
+    font-size: 10px;
+    background-color: #ADADAD;
+    color: #333333;
+    right: 6px;
+    border-radius: 50%;
+    padding: 2px;
+    text-align: center;
+    width: 10px;
+    height: 10px;
+    border: 1px #333333 solid; }
+  .toolbar > div.active > div.count {
+    background-color: #252526; }
   .toolbar > div:hover {
     color: #252526; }
   .toolbar > div.btn-scripts {
@@ -129,8 +145,8 @@ body > div.container {
   .toolbar > div.btn-views {
     grid-area: views;
     font-size: 28px; }
-  .toolbar > div.btn-funcs {
-    grid-area: funcs;
+  .toolbar > div.btn-routines {
+    grid-area: routines;
     font-size: 28px; }
   .toolbar > div.btn-search {
     grid-area: search;

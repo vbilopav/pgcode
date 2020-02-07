@@ -12,9 +12,9 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "../../cont
         scripts: false,
         tables: false,
         views: false,
-        funcs: false,
+        routines: false,
         search: false,
-        previousKey: "scripts",
+        previousKey: types_1.keys.scripts,
         pgcode: false
     }, "state", (name, value) => {
         if (name !== "previousKey") {
@@ -23,11 +23,11 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "../../cont
         return value;
     });
     const active = "active", docked = "docked", items = [
-        { id: "btn-scripts", icon: "icon-doc-text", key: "scripts", label: "scripts", text: "Scripts", keyBinding: "Ctrl+S", role: ButtonRoles.switch },
-        { id: "btn-tables", icon: "icon-database", key: "tables", label: "tables", text: "Tables", keyBinding: "Ctrl+T", role: ButtonRoles.switch },
-        { id: "btn-views", icon: "icon-database", key: "views", label: "views", text: "Views", keyBinding: "Ctrl+V", role: ButtonRoles.switch },
-        { id: "btn-funcs", icon: "icon-database", key: "funcs", label: "routines", text: "Routines", keyBinding: "Ctrl+R", role: ButtonRoles.switch },
-        { id: "btn-search", icon: "icon-search", key: "search", label: "search", text: "Search", keyBinding: "Ctrl+F", role: ButtonRoles.switch },
+        { id: `btn-${types_1.keys.scripts}`, icon: "icon-doc-text", key: types_1.keys.scripts, label: types_1.keys.scripts, text: "Scripts", keyBinding: "Ctrl+S", role: ButtonRoles.switch },
+        { id: `btn-${types_1.keys.tables}`, icon: "icon-database", key: types_1.keys.tables, label: types_1.keys.tables, text: "Tables", keyBinding: "Ctrl+T", role: ButtonRoles.switch },
+        { id: `btn-${types_1.keys.views}`, icon: "icon-database", key: types_1.keys.views, label: types_1.keys.views, text: "Views", keyBinding: "Ctrl+V", role: ButtonRoles.switch },
+        { id: `btn-${types_1.keys.routines}`, icon: "icon-database", key: types_1.keys.routines, label: types_1.keys.routines, text: "Routines", keyBinding: "Ctrl+R", role: ButtonRoles.switch },
+        { id: `btn-${types_1.keys.search}`, icon: "icon-search", key: types_1.keys.search, label: types_1.keys.search, text: "Search", keyBinding: "Ctrl+F", role: ButtonRoles.switch },
     ];
     class default_1 {
         constructor(element, position, index) {
@@ -38,6 +38,7 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "../../cont
             <div class="${item.icon} ${item.id}" id="${item.id}" data-key="${item.key}" data-role="${item.role}" title="${item.label} (${item.keyBinding})">
                 <div class="marker"></div>
                 <div class="lbl">${item.label}</div>
+                <div class="count" style="display: none"></div>
             </div>`;
                 if (item.text) {
                     menuItems.push({

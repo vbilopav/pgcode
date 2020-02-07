@@ -1,5 +1,5 @@
-import { subscribe, WS_CHANGED } from "app/_sys/pubsub";
-import { IWorkspace, IPanel } from "app/types";
+import { subscribe, publish, WS_CHANGED, ITEM_COUNT_CHANGED } from "app/_sys/pubsub";
+import { IWorkspace, IPanel, keys } from "app/types";
 
 export default class implements IPanel {
     private element: Element;
@@ -7,7 +7,8 @@ export default class implements IPanel {
     constructor(element: Element){
         this.element = element;
         subscribe(WS_CHANGED, (data: IWorkspace) => {
-            console.log(data.scripts);
+            //console.log(data.scripts);
+            publish(ITEM_COUNT_CHANGED, keys.scripts, data.scripts.length);
         });
     }
 

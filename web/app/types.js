@@ -24,5 +24,13 @@ define(["require", "exports"], function (require, exports) {
     })(AppStatus || (AppStatus = {}));
     exports.AppStatus = AppStatus;
     ;
+    const keys = {
+        scripts: "scripts",
+        tables: "tables",
+        views: "views",
+        routines: "routines",
+        search: "search"
+    };
+    exports.keys = keys;
 });
 //# sourceMappingURL=types.js.map

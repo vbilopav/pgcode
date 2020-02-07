@@ -1,3 +1,5 @@
+import { keys } from "app/types";
+
 const _entries = {};
 
 const subscribe: (name: string | Array<string>, handler: (...args: any[]) => void) => number | void = (name, handler) => {
@@ -49,11 +51,11 @@ const STATE_CHANGED_ON: string = "state/changed/on/"; // id: string
 const STATE_CHANGED_OFF: string = "state/changed/off/"; // id: string
 const STATE_CHANGED: string = "state/changed/"; // helper, id: string, state: bool
 
-const STATE_CHANGED_SCRIPTS: string = "state/changed/scripts"; // id: string, state: bool
-const STATE_CHANGED_TABLES: string = "state/changed/tables"; // id: string, state: bool
-const STATE_CHANGED_VIEWS: string = "state/changed/views"; // id: string, state: bool
-const STATE_CHANGED_FUNCS: string = "state/changed/funcs"; // id: string, state: bool
-const STATE_CHANGED_SEARCH: string = "state/changed/search"; // id: string, state: bool
+const STATE_CHANGED_SCRIPTS: string = `state/changed/${keys.scripts}`; // id: string, state: bool
+const STATE_CHANGED_TABLES: string = `state/changed/${keys.tables}`; // id: string, state: bool
+const STATE_CHANGED_VIEWS: string = `state/changed/${keys.views}`; // id: string, state: bool
+const STATE_CHANGED_ROUTINES: string = `state/changed/${keys.routines}`; // id: string, state: bool
+const STATE_CHANGED_SEARCH: string = `state/changed/${keys.search}`; // id: string, state: bool
 
 const SIDEBAR_DOCKED: string = "sidebar/docked/"; //void
 const SIDEBAR_UNDOCKED: string = "sidebar/undocked/"; //void
@@ -62,6 +64,7 @@ const SET_APP_STATUS: string = "app/status/"; //status: AppStatus, text?: string
 
 const API_INITIAL: string = "api/initial/"; //initial: IInitial
 const WS_CHANGED: string = "app/schema/"; //schema: IWorkspace
+const ITEM_COUNT_CHANGED: string = "item/count/"; //id: string, count: number
 
 export { 
     subscribe, publish, unsubscribe,
@@ -72,12 +75,13 @@ export {
     STATE_CHANGED_SCRIPTS,
     STATE_CHANGED_TABLES,
     STATE_CHANGED_VIEWS,
-    STATE_CHANGED_FUNCS,
+    STATE_CHANGED_ROUTINES,
     STATE_CHANGED_SEARCH,
     SIDEBAR_DOCKED,
     SIDEBAR_UNDOCKED,
     CLOSE_CONTEXT_MENU,
     SET_APP_STATUS,
     API_INITIAL,
-    WS_CHANGED
+    WS_CHANGED,
+    ITEM_COUNT_CHANGED
 };

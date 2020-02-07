@@ -1,3 +1,5 @@
+import scripts from "./ui/side-panel/scripts"
+
 enum Position { LEFT = "left", RIGHT = "right" };
 enum Themes { DARK = "dark", LIGHT = "light" };
 enum AppStatus { READY = 0, BUSY = 1, ERROR = 2, NO_CONNECTION };
@@ -57,6 +59,14 @@ interface IPanel {
     show: (state: boolean) => void
 }
 
+const keys = {
+    scripts: "scripts", 
+    tables: "tables", 
+    views: "views", 
+    routines: "routines", 
+    search: "search"
+};
+
 export { 
     Position, 
     Themes, 
@@ -68,5 +78,6 @@ export {
     ISchemaResponse,
     IWorkspace,
     IConnectionInfo,
-    IPanel
+    IPanel,
+    keys
 }

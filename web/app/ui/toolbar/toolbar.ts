@@ -1,11 +1,11 @@
 import Storage from "app/_sys/storage";
 import { 
     publish, subscribe, 
-    STATE_CHANGED_ON, STATE_CHANGED_OFF, STATE_CHANGED, SIDEBAR_DOCKED, SIDEBAR_UNDOCKED
+    STATE_CHANGED_ON, STATE_CHANGED_OFF, STATE_CHANGED, SIDEBAR_DOCKED, SIDEBAR_UNDOCKED, ITEM_COUNT_CHANGED
 } from "app/_sys/pubsub";
 import { ContextMenuCtorArgs, MenuItemType } from "app/controls/context-menu";
 import MonacoContextMenu from "../../controls/monaco-context-menu";
-import { Position, IMain } from "app/types";
+import { Position, IMain, keys } from "app/types";
 
 enum ButtonRoles { switch="switch", toggle="toggle" };
 const 
@@ -17,7 +17,7 @@ interface IStorage {
     scripts: boolean;
     tables: boolean;
     views: boolean;
-    funcs: boolean;
+    routines: boolean;
     search: boolean;
     previousKey: string;
     pgcode: boolean;
@@ -28,9 +28,9 @@ const
         scripts: false, 
         tables: false, 
         views: false,
-        funcs: false, 
+        routines: false, 
         search: false, 
-        previousKey: "scripts", 
+        previousKey: keys.scripts, 
         pgcode: false
     }, 
     "state", 
@@ -45,11 +45,11 @@ const
     active = "active", 
     docked = "docked",
     items = [
-        {id: "btn-scripts", icon: "icon-doc-text", key: "scripts", label: "scripts", text: "Scripts", keyBinding: "Ctrl+S", role: ButtonRoles.switch},
-        {id: "btn-tables", icon: "icon-database", key: "tables", label: "tables", text: "Tables", keyBinding: "Ctrl+T", role: ButtonRoles.switch},
-        {id: "btn-views", icon: "icon-database", key: "views", label: "views", text: "Views", keyBinding: "Ctrl+V", role: ButtonRoles.switch},
-        {id: "btn-funcs", icon: "icon-database", key: "funcs", label: "routines", text: "Routines", keyBinding: "Ctrl+R", role: ButtonRoles.switch},
-        {id: "btn-search", icon: "icon-search", key: "search", label: "search", text: "Search", keyBinding: "Ctrl+F", role: ButtonRoles.switch},
+        {id: `btn-${keys.scripts}`, icon: "icon-doc-text", key: keys.scripts, label: keys.scripts, text: "Scripts", keyBinding: "Ctrl+S", role: ButtonRoles.switch},
+        {id: `btn-${keys.tables}`, icon: "icon-database", key: keys.tables, label: keys.tables, text: "Tables", keyBinding: "Ctrl+T", role: ButtonRoles.switch},
+        {id: `btn-${keys.views}`, icon: "icon-database", key: keys.views, label: keys.views, text: "Views", keyBinding: "Ctrl+V", role: ButtonRoles.switch},
+        {id: `btn-${keys.routines}`, icon: "icon-database", key: keys.routines, label: keys.routines, text: "Routines", keyBinding: "Ctrl+R", role: ButtonRoles.switch},
+        {id: `btn-${keys.search}`, icon: "icon-search", key: keys.search, label: keys.search, text: "Search", keyBinding: "Ctrl+F", role: ButtonRoles.switch},
         //{id: "btn-pgcode", icon: "icon-terminal", key: "pgcode", label: "pgcode", text: null, keyBinding: null, role: ButtonRoles.toggle}
     ];
 
@@ -66,6 +66,7 @@ export default class  {
             <div class="${item.icon} ${item.id}" id="${item.id}" data-key="${item.key}" data-role="${item.role}" title="${item.label} (${item.keyBinding})">
                 <div class="marker"></div>
                 <div class="lbl">${item.label}</div>
+                <div class="count" style="display: none"></div>
             </div>`;
             if (item.text) {
                 menuItems.push({
