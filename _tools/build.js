@@ -85,21 +85,46 @@ function copyFonts() {
 }
 
 function copyRootFiles() {
+    //index.html
     var from = cleanPath(config.sourceDir + "/" + "index.html");
     var to = cleanPath(config.targetDir + "/" + "index.html");
     
     log(`>>> copying ${from} to ${to}`);
     let content = fs.readFileSync(from).toString()
-        .replace(".js", ".js" + "?" + config.version)
-        .replace(".css", ".css" + "?" + config.version)
-        .replace(".ico", ".ico" + "?" + config.version);
+        .replace(".js\"", ".js" + "?" + config.version + "\"")
+        .replace(".json\"", ".json" + "?" + config.version + "\"")
+        .replace(".css\"", ".css" + "?" + config.version + "\"")
+        .replace(".ico\"", ".ico" + "?" + config.version + "\"");
     fs.writeFileSync(to, content, "utf8");
 
+    //favicon.ico
     var from = cleanPath(config.sourceDir + "/" + "favicon.ico");
     var to = (config.targetDir + "/" + "favicon.ico");
     
     log(`>>> copying ${from} to ${to}`);
     fs.copyFileSync(from, to);
+/*
+    //manifest.json
+    var from = cleanPath(config.sourceDir + "/" + "manifest.json");
+    var to = (config.targetDir + "/" + "manifest.json");
+    
+    log(`>>> copying ${from} to ${to}`);
+    fs.copyFileSync(from, to);
+
+    //service-worker.js
+    var from = cleanPath(config.sourceDir + "/" + "service-worker.js");
+    var to = (config.targetDir + "/" + "service-worker.js");
+    
+    log(`>>> copying ${from} to ${to}`);
+    fs.copyFileSync(from, to);
+
+    //postgresql-512.png
+    var from = cleanPath(config.sourceDir + "/" + "postgresql-512.png");
+    var to = (config.targetDir + "/" + "postgresql-512.png");
+    
+    log(`>>> copying ${from} to ${to}`);
+    fs.copyFileSync(from, to);
+*/
 }
 
 function recreateOutputDir() {

@@ -35,14 +35,10 @@ namespace Pgcode
                 return;
             }
 
-            //
-            // see source code for default config
-            // https://github.com/aspnet/AspNetCore/tree/master/src/DefaultBuilder/src
-            //
-
             var builder = new WebHostBuilder();
             var configBuilder = new ConfigurationBuilder()
                 .AddJsonFile(Path.Join(Directory.GetCurrentDirectory(), "appsettings.json"), optional: false, reloadOnChange: false)
+                .AddJsonFile(Path.Join(Directory.GetCurrentDirectory(), "settings.json"), optional: true, reloadOnChange: false)
                 .AddCommandLine(args)
                 .AddEnvironmentVariables("PGCODE_");
 
@@ -68,6 +64,12 @@ namespace Pgcode
                 ConnectionManager.MigrationsInfo(config, forConnection);
                 return;
             }
+            if (args.Length > 0 && args[0].StartsWith("--update-routines"))
+            {
+                var forConnection = args.Length > 1 ? args[1] : null;
+                ConnectionManager.MigrationsUp(config, ExtractNullableIntFromArgs(args, 0), forConnection, routinesOnly: true);
+                return;
+            }
 
             PrintStartMessages();
 
@@ -76,7 +78,7 @@ namespace Pgcode
                 return;
             }
 
-            var url = $"http://{Settings.Host}:{Settings.Port}";
+            var url = $"https://{Settings.Host}:{Settings.Port}";
 
             builder
                 .UseSetting("URLS", url)
@@ -224,8 +226,12 @@ namespace Pgcode
 
         private static void OpenDefaultBrowser(string url)
         {
+            if (Settings.OpenCommandUrl != null)
+            {
+                url = Settings.OpenCommandUrl;
+            }
             Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine("Launching default browser...");
+            Console.WriteLine("Launching default browser: {0}", url);
             Console.ResetColor();
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))

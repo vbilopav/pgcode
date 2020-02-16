@@ -61,7 +61,36 @@ namespace Pgcode.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to html{font-family:&apos;Consolas&apos;, &apos;Courier New&apos;, &apos;monospace&apos;;font-size:12px;line-height:1.15}body{margin:0;color:#C5C5C5;background-color:#1E1E1E}#loading{position:absolute;left:0px;top:0px;width:100%;height:100%;justify-content:center;align-content:center;display:grid;font-size:10em;text-align:center}@font-face{font-family:&apos;icons&apos;;src:url(&quot;../fonts/icons.woff2?57247429&quot;) format(&quot;woff2&quot;);font-weight:normal;font-style:normal}[class^=&quot;icon-&quot;]:before,[class*=&quot; icon-&quot;]:before{font-family:&quot;icons&quot;;font-style:normal;fo [rest of string was truncated]&quot;;.
+        ///   Looks up a localized string similar to html {
+        ///  font-family: &quot;Segoe UI&quot;, sans-serif;
+        ///  font-size: 12px;
+        ///  line-height: 1.15; }
+        ///
+        ///body {
+        ///  margin: 0;
+        ///  color: #C5C5C5;
+        ///  background-color: #1E1E1E; }
+        ///
+        ///#loading {
+        ///  position: absolute;
+        ///  left: 0px;
+        ///  top: 0px;
+        ///  width: 100%;
+        ///  height: 100%;
+        ///  justify-content: center;
+        ///  align-content: center;
+        ///  display: grid;
+        ///  font-size: 10em;
+        ///  text-align: center; }
+        ///
+        ///.out-of-viewport {
+        ///  position: absolute;
+        ///  top: -1000px;
+        ///  left: -1000px; }
+        ///
+        ///@font-face {
+        ///  font-family: &apos;icons&apos;;
+        ///  src: url(&quot;../fonts/icons.woff2?5724 [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string _css_theme_dark_css {
             get {
@@ -70,7 +99,36 @@ namespace Pgcode.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to html{font-family:&apos;Consolas&apos;, &apos;Courier New&apos;, &apos;monospace&apos;;font-size:12px;line-height:1.15}body{margin:0;color:#1E1E1E;background-color:#C5C5C5}#loading{position:absolute;left:0px;top:0px;width:100%;height:100%;justify-content:center;align-content:center;display:grid;font-size:10em;text-align:center}@font-face{font-family:&apos;icons&apos;;src:url(&quot;../fonts/icons.woff2?57247429&quot;) format(&quot;woff2&quot;);font-weight:normal;font-style:normal}[class^=&quot;icon-&quot;]:before,[class*=&quot; icon-&quot;]:before{font-family:&quot;icons&quot;;font-style:normal;fo [rest of string was truncated]&quot;;.
+        ///   Looks up a localized string similar to html {
+        ///  font-family: &quot;Segoe UI&quot;, sans-serif;
+        ///  font-size: 12px;
+        ///  line-height: 1.15; }
+        ///
+        ///body {
+        ///  margin: 0;
+        ///  color: #1E1E1E;
+        ///  background-color: #C5C5C5; }
+        ///
+        ///#loading {
+        ///  position: absolute;
+        ///  left: 0px;
+        ///  top: 0px;
+        ///  width: 100%;
+        ///  height: 100%;
+        ///  justify-content: center;
+        ///  align-content: center;
+        ///  display: grid;
+        ///  font-size: 10em;
+        ///  text-align: center; }
+        ///
+        ///.out-of-viewport {
+        ///  position: absolute;
+        ///  top: -1000px;
+        ///  left: -1000px; }
+        ///
+        ///@font-face {
+        ///  font-family: &apos;icons&apos;;
+        ///  src: url(&quot;../fonts/icons.woff2?5724 [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string _css_theme_light_css {
             get {
@@ -100,21 +158,20 @@ namespace Pgcode.Properties {
         
         /// <summary>
         ///   Looks up a localized string similar to &lt;!DOCTYPE html&gt;
-        ///&lt;html lang=&quot;en&quot;&gt;
         ///&lt;head&gt;
         ///    &lt;meta charset=&quot;utf-8&quot;&gt;
         ///    &lt;title&gt;&lt;/title&gt;
-        ///    &lt;link rel=&quot;icon&quot; type=&quot;image/x-icon&quot; href=&quot;favicon.ico?v=1&quot; /&gt;
-        ///    &lt;link rel=&quot;stylesheet&quot; id=&quot;theme&quot; type=&quot;text/css&quot; href=&quot;css/theme-dark.css&quot; /&gt;
+        ///    &lt;base href=&quot;/&quot; /&gt;
+        ///    &lt;link rel=&quot;icon&quot; type=&quot;image/x-icon&quot; href=&quot;favicon.ico?3978&quot; /&gt;
+        ///    &lt;link rel=&quot;stylesheet&quot; id=&quot;theme&quot; type=&quot;text/css&quot; href=&quot;css/theme-dark.css?3978&quot; /&gt;
+        ///    &lt;link rel=&quot;manifest&quot; href=&quot;/manifest.json?3978&quot;&gt;
         ///&lt;/head&gt;
         ///&lt;body&gt;
         ///    &lt;div id=&quot;loading&quot;&gt;
         ///        &amp;#8987;
         ///        &lt;script&gt;
-        ///            setTimeout(function() { var e = document.getElementById(&quot;loading&quot;); if (e) e.innerHTML = &quot;Please update to modern browser!&quot;; }, 3000);
-        ///        &lt;/script&gt;
-        ///    &lt;/div&gt;
-        ///    &lt;script t [rest of string was truncated]&quot;;.
+        ///            //navigator.serviceWorker.register(&quot;service-worker.js?3978&quot;);
+        ///            setTimeout(function() { var e = document [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string _index_html {
             get {
@@ -123,8 +180,8 @@ namespace Pgcode.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to /*build: 2019-12-01 15:56:09:829, version: 0.1, copyright VB-Consulting*/
-        ///(function(){&quot;use strict&quot;;const e=this;&quot;object&quot;==typeof global&amp;&amp;global;var t;!function(t){t.global=e;class i{constructor(){this._detected=!1,this._isWindows=!1,this._isWebWorker=!1}get isWindows(){return this._detect(),this._isWindows}get isWebWorker(){return this._detect(),this._isWebWorker}_detect(){this._detected||(this._detected=!0,this._isWindows=i._isWindows(),this._isWebWorker=&quot;function&quot;==typeof t.global.importScripts)}static _i [rest of string was truncated]&quot;;.
+        ///   Looks up a localized string similar to /*build: 2020-02-16 11:45:16:783, version: 3978, copyright VB-Consulting*/
+        ///(function(){&quot;use strict&quot;;const e=this;&quot;object&quot;==typeof global&amp;&amp;global;var t;!function(t){t.global=e;class i{constructor(){this._detected=!1,this._isWindows=!1,this._isWebWorker=!1}get isWindows(){return this._detect(),this._isWindows}get isWebWorker(){return this._detect(),this._isWebWorker}_detect(){this._detected||(this._detected=!0,this._isWindows=i._isWindows(),this._isWebWorker=&quot;function&quot;==typeof t.global.importScripts)}static _ [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string _js_index_js {
             get {

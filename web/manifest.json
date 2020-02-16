@@ -1,0 +1,14 @@
+{
+    "short_name": "pgcode",
+    "name": "pgcode",
+    "icons": [{
+        "src": "postgresql-512.png",
+        "type": "image/png",
+        "sizes": "512*512"
+    }],
+    "start_url": "/",
+    "background_color": "#0e0e0e",
+    "display": "standalone",
+    "scope": "/",
+    "theme_color": "#2f6792"
+}

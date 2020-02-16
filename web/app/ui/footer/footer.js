@@ -145,7 +145,7 @@ define(["require", "exports", "app/controls/footer-context-menu", "app/controls/
                 this.info.visible(false);
                 this.schemas.visible(false);
                 this.connections.find("span").html(name).attr("title", title);
-                this.info.find("span").html(`v${connection.version}&nbsp;&nbsp;//${connection.user}@${connection.host}:${connection.port}/${connection.database}`);
+                this.info.find("span").html(`v${connection.version}&nbsp;&nbsp;//&nbsp;&nbsp;${connection.user}@${connection.host}:${connection.port}/${connection.database}`);
                 this.info.attr("title", title);
                 this.adjustWidths();
                 this.info.visible(true);

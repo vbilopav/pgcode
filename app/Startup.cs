@@ -54,6 +54,8 @@ namespace Pgcode
             {
                 ConnectionManager.AddNoticeHandlersToConnections(loggerFactory);
             }
+
+            app.UseHttpsRedirection();
         }
     }
 }

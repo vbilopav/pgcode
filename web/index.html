@@ -1,15 +1,17 @@
 <!DOCTYPE html>
-<html lang="en">
 <head>
     <meta charset="utf-8">
     <title></title>
+    <base href="/" />
     <link rel="icon" type="image/x-icon" href="favicon.ico" />
     <link rel="stylesheet" id="theme" type="text/css" href="css/theme-dark.css" />
+    <!-- <link rel="manifest" href="/manifest.json"> -->
 </head>
 <body>
     <div id="loading">
         &#8987;
         <script>
+            //navigator.serviceWorker.register("service-worker.js");
             setTimeout(function() { var e = document.getElementById("loading"); if (e) e.innerHTML = "Please update to modern browser!"; }, 3000);
         </script>
     </div>

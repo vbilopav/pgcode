@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Pgcode.Routines;
 
 namespace Pgcode.Api
 {
@@ -22,7 +23,7 @@ namespace Pgcode.Api
         }
 
         public async ValueTask<ContentResult> GetConnectionContentResult(string connection, string schema) =>
-            await UserConnection.GetContentResultAsync("api_get_connection", new
+            await UserConnection.GetContentResultAsync(ApiGetConnection.Name, new
             {
                 name = connection,
                 schemata = new
@@ -51,7 +52,7 @@ namespace Pgcode.Api
             });
 
         public async ValueTask<ContentResult> GetSchemaContentResult(string schema) =>
-            await UserConnection.GetContentResultAsync("api_get_schema", new
+            await UserConnection.GetContentResultAsync(ApiGetSchema.Name, new
             {
                 name = schema,
                 scripts = new

@@ -8,6 +8,7 @@ namespace Pgcode.Migrations
 {
     public interface IMigration
     {
+        public IEnumerable<IMigration> Routines => Enumerable.Empty<IMigration>();
         string Up(Settings settings, NpgsqlConnection connection);
         string Down(Settings settings, NpgsqlConnection connection);
     }

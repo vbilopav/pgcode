@@ -29,7 +29,9 @@ namespace Pgcode.Middleware
             "/libs/monaco-editor/min/vs/basic-languages/pgsql/pgsql.js",
             "/libs/monaco-editor/min/vs/base/worker/workerMain.js",
             "/favicon.ico",
-            "/fonts/icons.woff2"
+            "/fonts/icons.woff2",
+            //"/manifest.json",
+            //"/postgresql-512.png"
         };
 
         private static readonly Dictionary<string, (string resourceId, string mimeType, string size, bool isBinary)> Maps = 
@@ -47,6 +49,8 @@ namespace Pgcode.Middleware
                     "js" => ("application/javascript; charset=UTF-8", false),
                     "ico" => ("image/x-icon; charset=UTF-8", true),
                     "woff2" => ("font/woff2; charset=UTF-8", true),
+                    "json" => (key == "/manifest.json" ? "application/manifest+json; charset=UTF-8" : "application/json; charset=UTF-8", false),
+                    "png" => ("image/png; charset=UTF-8", true),
                     _ => throw new NotSupportedException()
                 };
                 if (isBinary)

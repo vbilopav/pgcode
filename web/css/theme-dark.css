@@ -213,7 +213,8 @@ body > div.container {
     width: fit-content;
     max-width: 340px;
     cursor: initial;
-    user-select: text; }
+    user-select: text;
+    color: #ADADAD; }
   .footer > div.info > span::selection {
     background: #ff8533; }
   .footer > div.info > img {

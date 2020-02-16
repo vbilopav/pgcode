@@ -16,6 +16,8 @@ namespace Pgcode.Api
     {
         private static ImmutableDictionary<string, ConnectionData> _connections;
         private static readonly ConcurrentDictionary<string, string> ConnectionNamesByUserId = new ConcurrentDictionary<string, string>();
+        private static readonly IEnumerable<string> InfoLevels = new[] { "INFO", "NOTICE", "LOG" };
+        private static readonly IEnumerable<string> ErrorLevels = new[] { "ERROR", "PANIC" };
 
         public static bool Initialize(IConfiguration configuration)
         {
@@ -69,8 +71,8 @@ namespace Pgcode.Api
                             Console.WriteLine(
                                 "No migration applied for connection {0}, latest available is {1}. Upgrading migrations now.",
                                 section.Key, availableVersion);
-
-                            RunMigrations(configuration, runner => runner.Up(), section.Key);
+                            Console.WriteLine();
+                            RunMigrations(configuration, runner => runner.Up(null), section.Key);
                         }
                         else
                         {
@@ -81,8 +83,8 @@ namespace Pgcode.Api
                                 Console.WriteLine(
                                     "Current schema version is {0}, latest available is {1}. Downgrading migrations now.",
                                     schemaVersion, availableVersion);
-
-                                RunMigrations(configuration, runner => runner.Down(), section.Key);
+                                Console.WriteLine();
+                                RunMigrations(configuration, runner => runner.Down(null), section.Key);
                             }
                             else
                             {
@@ -91,8 +93,8 @@ namespace Pgcode.Api
                                 Console.WriteLine(
                                     "Current schema version is {0}, latest available is {1}. Downgrading migrations now.",
                                     schemaVersion, availableVersion);
-
-                                RunMigrations(configuration, runner => runner.Up(), section.Key);
+                                Console.WriteLine();
+                                RunMigrations(configuration, runner => runner.Up(null), section.Key);
                             }
 
                             schemaVersion = availableVersion;
@@ -140,7 +142,7 @@ namespace Pgcode.Api
             return true;
         }
 
-        public static void MigrationsInfo(IConfiguration configuration, string forConnection = null)
+        public static void MigrationsInfo(IConfiguration configuration, string forConnection)
         {
             RunMigrations(configuration, runner =>
             {
@@ -156,11 +158,11 @@ namespace Pgcode.Api
             }, forConnection);
         }
 
-        public static void MigrationsUp(IConfiguration configuration, int? upToVersion = null, string forConnection = null) =>
-            RunMigrations(configuration, runner => runner.Up(upToVersion), forConnection);
+        public static void MigrationsUp(IConfiguration configuration, int? upToVersion, string forConnection, bool routinesOnly = false) =>
+            RunMigrations(configuration, runner => runner.Up(upToVersion, routinesOnly), forConnection, routinesOnly);
 
-        public static void MigrationsDown(IConfiguration configuration, int? downToVersion = null, string forConnection = null) =>
-            RunMigrations(configuration, runner => runner.Down(downToVersion), forConnection);
+        public static void MigrationsDown(IConfiguration configuration, int? downToVersion, string forConnection, bool routinesOnly = false) =>
+            RunMigrations(configuration, runner => runner.Down(downToVersion, routinesOnly), forConnection, routinesOnly);
 
         public static void AddNoticeHandlersToConnections(ILoggerFactory loggerFactory)
         {
@@ -194,10 +196,7 @@ namespace Pgcode.Api
             }
         }
 
-        private static readonly IEnumerable<string> InfoLevels = new[] { "INFO", "NOTICE", "LOG" };
-        private static readonly IEnumerable<string> ErrorLevels = new[] { "ERROR", "PANIC" };
-
-        private static void RunMigrations(IConfiguration configuration, Action<MigrationRunner> action, string forConnection = null)
+        private static void RunMigrations(IConfiguration configuration, Action<MigrationRunner> action, string forConnection, bool routinesOnly = false)
         {
             var children = configuration.GetSection("ConnectionStrings").GetChildren().ToList();
             var passwords = GetPasswordDict(configuration);
@@ -210,7 +209,7 @@ namespace Pgcode.Api
                 var connection = CreateConnection(section, passwords);
                 var migrations = new MigrationRunner(connection, Program.Settings);
                 Console.ResetColor();
-                Console.Write("Connection: ");
+                Console.Write(!routinesOnly ? "Migrating Connection: " : "Updating routines for connection: ");
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine(section.Key);
                 

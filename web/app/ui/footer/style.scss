@@ -44,7 +44,7 @@
         max-width: 340px;
         cursor: initial;
         user-select: text;
-
+        color: $control-color;
     }
     & > div.info > span::selection {
         background: invert($footer-background-color);

@@ -5,7 +5,6 @@ using System.Linq;
 using Norm.Extensions;
 using Norm.Extensions.PostgreSQL;
 using Npgsql;
-using Npgsql.TypeHandlers.NetworkHandlers;
 
 namespace Pgcode.Migrations
 {
@@ -62,7 +61,7 @@ namespace Pgcode.Migrations
 
         public (int?, int) GetSchemaVersions() => (CurrentSchemaVersion(), AvailableSchemaVersion());
 
-        public void Up(int? upToVersion = null)
+        public void Up(int? upToVersion, bool routinesOnly = false)
         {
             foreach (var key in _migrations.Keys.OrderBy(v => v))
             {
@@ -73,7 +72,10 @@ namespace Pgcode.Migrations
                 var migration = _migrations[key];
                 try
                 {
-                    _connection.Execute(migration.Up(_settings, _connection));
+                    _connection.Execute(!routinesOnly
+                        ? migration.Up(_settings, _connection)
+                        : string.Join(Environment.NewLine,
+                            migration.Routines.Select(m => m.Up(_settings, _connection))));
                 }
                 catch (PostgresException e)
                 {
@@ -82,7 +84,7 @@ namespace Pgcode.Migrations
             }
         }
 
-        public void Down(int? downToVersion = null)
+        public void Down(int? downToVersion, bool routinesOnly = false)
         {
             foreach (var key in _migrations.Keys.OrderByDescending(v => v))
             {
@@ -93,7 +95,10 @@ namespace Pgcode.Migrations
                 var migration = _migrations[key];
                 try
                 {
-                    _connection.Execute(migration.Down(_settings, _connection));
+                    _connection.Execute(!routinesOnly
+                        ? migration.Down(_settings, _connection)
+                        : string.Join(Environment.NewLine,
+                            migration.Routines.Select(m => m.Down(_settings, _connection))));
                 }
                 catch (PostgresException e)
                 {
