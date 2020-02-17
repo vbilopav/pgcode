@@ -109,6 +109,18 @@ export default class  {
 
         subscribe(SIDEBAR_DOCKED, () => this.sidebarDocked());
         subscribe(SIDEBAR_UNDOCKED, () => this.sidebarUndocked());
+
+        subscribe(ITEM_COUNT_CHANGED, (key, count) => {
+            let btn = this.buttons.namedItem("btn-" + key);
+            let e = btn.find(".count").html(count).showElement();
+            if (count.toString().length > 2) {
+                e.css("width", "16px");
+            } else {
+                e.css("width", "10px");
+            }
+            let hint = (btn.attr("title") as string).split("\n");
+            btn.attr("title", hint[0] + "\n" + count + " items");
+        });
     }
 
     private sidebarDocked() {

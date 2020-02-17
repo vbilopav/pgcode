@@ -176,9 +176,15 @@ namespace Pgcode
             Console.WriteLine("                              Optionally provide a specific version or connection name to downgrade.");
 
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.Write("  --schema-info [connection]");
+            Console.Write("  --schema-info[=version]");
             Console.ResetColor();
             Console.WriteLine("  See schema migration info - current and available version.");
+
+            //--update-routines
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.Write("  --update-routines[=version]");
+            Console.ResetColor();
+            Console.WriteLine("  Update server routines.");
 
             Console.ForegroundColor = ConsoleColor.Green;
             Console.Write("  -h --help");

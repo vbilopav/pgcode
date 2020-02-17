@@ -3,7 +3,7 @@ import FooterContextMenu from "app/controls/footer-context-menu";
 import MonacoContextMenu from "app/controls/monaco-context-menu";
 import Storage from "app/_sys/storage";
 import { AppStatus, IConnectionInfo } from "app/types";
-import { fetchConnection, fetchSchema } from "app/api";
+import { fetchWsConnection, fetchWorkspace } from "app/api";
 import { publish, subscribe, SET_APP_STATUS, API_INITIAL, WS_CHANGED } from "app/_sys/pubsub";
 
 interface IStorage {connection: string}
@@ -183,7 +183,7 @@ export default class  {
             }
             storage.connection = name;
 
-            const response = await fetchConnection(name);
+            const response = await fetchWsConnection(name);
             if (response.ok) {
                 const menuItems = new Array<MenuItemType>();
                 for(let schema of response.data.schemas.names) {
@@ -193,7 +193,7 @@ export default class  {
                         checked: response.data.schemas.selected === schema,
                         action: () => {
                             this.selectSchema(schema);
-                            this.fetchSchema(schema)
+                            this.fetchWorkspace(schema)
                         }
                     }); 
                 }
@@ -220,8 +220,8 @@ export default class  {
         this.schemas.showElement().find("span").html(name);
     }
 
-    private async fetchSchema(name: string) {
-        const response = await fetchSchema(name);
+    private async fetchWorkspace(name: string) {
+        const response = await fetchWorkspace(name);
         publish(WS_CHANGED, response.data);
         publish(SET_APP_STATUS, AppStatus.READY);
     }

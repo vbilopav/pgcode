@@ -46,10 +46,10 @@ $footer-background-color: default;
 }
 $footer-color: default;
 @if $theme == "dark" {
-    $footer-color: #c1c1c1;
+    $footer-color: #ffffff;
 } 
 @if $theme == "light" {
-    $footer-color: #c1c1c1;
+    $footer-color: #ffffff;
 }
 $clickable-footer-background-color: default;
 @if $theme == "dark" {

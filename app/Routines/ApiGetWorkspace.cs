@@ -3,11 +3,11 @@ using Pgcode.Migrations;
 
 namespace Pgcode.Routines
 {
-    public class ApiGetSchema : IMigration
+    public class ApiGetWorkspace : IMigration
     {
         private readonly int _forVersion;
         public const int Version = 1;
-        public const string Name = "api_get_schema";
+        public const string Name = "api_get_workspace";
 
         public static readonly string CommentMarkup = $@"
 
@@ -25,7 +25,7 @@ namespace Pgcode.Routines
 
         ";
 
-        public ApiGetSchema(int forVersion)
+        public ApiGetWorkspace(int forVersion)
         {
             _forVersion = forVersion;
         }

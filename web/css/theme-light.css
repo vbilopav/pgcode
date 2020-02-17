@@ -131,8 +131,9 @@ body > div.container {
     text-align: center;
     width: 10px;
     height: 10px;
-    border: 1px #333333 solid; }
-  .toolbar > div.active > div.count {
+    border: 1px #333333 solid;
+    transition-duration: 0.4s; }
+  .toolbar > div.active > div.count, .toolbar > div:hover > div.count {
     background-color: #252526; }
   .toolbar > div:hover {
     color: #252526; }
@@ -162,6 +163,10 @@ body > div.container {
 .toolbar.docked > div.active:not(.btn-pgcode), .toolbar.docked > div.active > div {
   color: #ADADAD; }
 
+.toolbar.docked > div.active > div.count {
+  background-color: #ADADAD;
+  color: #333333; }
+
 .toolbar.docked > div.active:not(.btn-pgcode) > div.marker {
   display: none; }
 
@@ -178,7 +183,7 @@ body > div.container {
 
 .footer {
   grid-area: footer;
-  color: #c1c1c1;
+  color: #ffffff;
   background-color: #007ACC;
   user-select: none;
   display: grid;
@@ -214,7 +219,7 @@ body > div.container {
     max-width: 340px;
     cursor: initial;
     user-select: text;
-    color: #ADADAD; }
+    color: #C5C5C5; }
   .footer > div.info > span::selection {
     background: #ff8533; }
   .footer > div.info > img {

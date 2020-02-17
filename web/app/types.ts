@@ -18,7 +18,7 @@ interface IInitialResponse {
     connections: Array<IConnectionInfo>
 }
 
-interface IConnectionResponse extends IWorkspace { 
+interface IWsConnectionResponse extends IWorkspace { 
     name: string,
     schemas: {
         names: Array<string>,
@@ -26,7 +26,7 @@ interface IConnectionResponse extends IWorkspace {
     },
 }
 
-interface ISchemaResponse extends IWorkspace { 
+interface IWorkspaceResponse extends IWorkspace { 
     name: string
 }
 
@@ -74,8 +74,8 @@ export {
     IMain, 
     IResponse, 
     IInitialResponse, 
-    IConnectionResponse,
-    ISchemaResponse,
+    IWsConnectionResponse,
+    IWorkspaceResponse,
     IWorkspace,
     IConnectionInfo,
     IPanel,

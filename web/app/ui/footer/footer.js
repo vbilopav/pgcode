@@ -158,7 +158,7 @@ define(["require", "exports", "app/controls/footer-context-menu", "app/controls/
                     this.connectionMenu.updateMenuItem(name, { checked: true });
                 }
                 storage.connection = name;
-                const response = await api_1.fetchConnection(name);
+                const response = await api_1.fetchWsConnection(name);
                 if (response.ok) {
                     const menuItems = new Array();
                     for (let schema of response.data.schemas.names) {
@@ -168,7 +168,7 @@ define(["require", "exports", "app/controls/footer-context-menu", "app/controls/
                             checked: response.data.schemas.selected === schema,
                             action: () => {
                                 this.selectSchema(schema);
-                                this.fetchSchema(schema);
+                                this.fetchWorkspace(schema);
                             }
                         });
                     }
@@ -194,8 +194,8 @@ define(["require", "exports", "app/controls/footer-context-menu", "app/controls/
             this.schemasMenu.updateMenuItem(name, { checked: true });
             this.schemas.showElement().find("span").html(name);
         }
-        async fetchSchema(name) {
-            const response = await api_1.fetchSchema(name);
+        async fetchWorkspace(name) {
+            const response = await api_1.fetchWorkspace(name);
             pubsub_1.publish(pubsub_1.WS_CHANGED, response.data);
             pubsub_1.publish(pubsub_1.SET_APP_STATUS, types_1.AppStatus.READY);
         }

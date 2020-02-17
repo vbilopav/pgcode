@@ -13,9 +13,9 @@ define(["require", "exports", "app/_sys/pubsub", "app/ui/side-panel/scripts", "a
             const panels = {};
             panels[types_1.keys.scripts] = new scripts_1.default(element.children[0]);
             panels[types_1.keys.tables] = new tables_1.default(element.children[1]);
-            panels[types_1.keys.views] = new views_1.default(element.children[3]);
-            panels[types_1.keys.routines] = new routines_1.default(element.children[4]);
-            panels[types_1.keys.search] = new search_1.default(element.children[5]);
+            panels[types_1.keys.views] = new views_1.default(element.children[2]);
+            panels[types_1.keys.routines] = new routines_1.default(element.children[3]);
+            panels[types_1.keys.search] = new search_1.default(element.children[4]);
             pubsub_1.subscribe([
                 pubsub_1.STATE_CHANGED_SCRIPTS,
                 pubsub_1.STATE_CHANGED_TABLES,

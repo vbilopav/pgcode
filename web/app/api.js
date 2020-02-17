@@ -18,7 +18,7 @@ define(["require", "exports", "app/_sys/pubsub", "app/types"], function (require
         }
     };
     exports.fetchInitial = async () => _fetchAndPublishStatus("api/initial");
-    exports.fetchConnection = async (name) => _fetchAndPublishStatus(`api/connection/${name}`);
-    exports.fetchSchema = async (schema) => _fetchAndPublishStatus(`api/schema/${schema}`);
+    exports.fetchWsConnection = async (name) => _fetchAndPublishStatus(`api/ws-connection/${name}`);
+    exports.fetchWorkspace = async (schema) => _fetchAndPublishStatus(`api/ws/${schema}`);
 });
 //# sourceMappingURL=api.js.map

@@ -22,8 +22,8 @@ namespace Pgcode.Api
             _settings = settings;
         }
 
-        public async ValueTask<ContentResult> GetConnectionContentResult(string connection, string schema) =>
-            await UserConnection.GetContentResultAsync(ApiGetConnection.Name, new
+        public async ValueTask<ContentResult> GetWorkspaceForConnectionContentResult(string connection, string schema) =>
+            await UserConnection.GetContentResultAsync(ApiGetWorkspaceForConnection.Name, new
             {
                 name = connection,
                 schemata = new
@@ -51,8 +51,8 @@ namespace Pgcode.Api
                 }
             });
 
-        public async ValueTask<ContentResult> GetSchemaContentResult(string schema) =>
-            await UserConnection.GetContentResultAsync(ApiGetSchema.Name, new
+        public async ValueTask<ContentResult> GetWorkspaceContentResult(string schema) =>
+            await UserConnection.GetContentResultAsync(ApiGetWorkspace.Name, new
             {
                 name = schema,
                 scripts = new

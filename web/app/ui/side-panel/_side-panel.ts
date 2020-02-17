@@ -22,9 +22,9 @@ export default class  {
         const panels: Record<string, IPanel> = {};
         panels[keys.scripts] = new Scripts(element.children[0]);
         panels[keys.tables] = new Tables(element.children[1]);
-        panels[keys.views] = new Views(element.children[3]);
-        panels[keys.routines] = new Routines(element.children[4]);
-        panels[keys.search] = new Search(element.children[5]);
+        panels[keys.views] = new Views(element.children[2]);
+        panels[keys.routines] = new Routines(element.children[3]);
+        panels[keys.search] = new Search(element.children[4]);
         
         subscribe([
             STATE_CHANGED_SCRIPTS, 

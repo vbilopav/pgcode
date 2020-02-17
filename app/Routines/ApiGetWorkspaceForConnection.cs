@@ -4,11 +4,11 @@ using Pgcode.Migrations;
 
 namespace Pgcode.Routines
 {
-    public class ApiGetConnection : IMigration
+    public class ApiGetWorkspaceForConnection : IMigration
     {
         private readonly int _forVersion;
         public const int Version = 1;
-        public const string Name = "api_get_connection";
+        public const string Name = "api_get_worskapce_for_connection";
 
         public static readonly string CommentMarkup = $@"
 
@@ -28,7 +28,7 @@ namespace Pgcode.Routines
 
         ";
 
-        public ApiGetConnection(int forVersion)
+        public ApiGetWorkspaceForConnection(int forVersion)
         {
             _forVersion = forVersion;
         }

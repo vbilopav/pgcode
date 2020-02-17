@@ -78,6 +78,18 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "../../cont
             }
             pubsub_1.subscribe(pubsub_1.SIDEBAR_DOCKED, () => this.sidebarDocked());
             pubsub_1.subscribe(pubsub_1.SIDEBAR_UNDOCKED, () => this.sidebarUndocked());
+            pubsub_1.subscribe(pubsub_1.ITEM_COUNT_CHANGED, (key, count) => {
+                let btn = this.buttons.namedItem("btn-" + key);
+                let e = btn.find(".count").html(count).showElement();
+                if (count.toString().length > 2) {
+                    e.css("width", "16px");
+                }
+                else {
+                    e.css("width", "10px");
+                }
+                let hint = btn.attr("title").split("\n");
+                btn.attr("title", hint[0] + "\n" + count + " items");
+            });
         }
         sidebarDocked() {
             this.toolbar.addClass(docked);

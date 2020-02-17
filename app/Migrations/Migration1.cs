@@ -18,8 +18,8 @@ namespace Pgcode.Migrations
             new SelectInformationSchemaTables(Version),
             new SelectScripts(Version),
             new SetUserData(Version),
-            new ApiGetConnection(Version),
-            new ApiGetSchema(Version),
+            new ApiGetWorkspaceForConnection(Version),
+            new ApiGetWorkspace(Version),
         };
 
         public string Up(Settings settings, NpgsqlConnection connection) => $@"

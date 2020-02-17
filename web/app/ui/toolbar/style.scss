@@ -49,8 +49,9 @@
         width: 10px;
         height: 10px;
         border: 1px $control-background-color solid;
+        transition-duration: 0.4s;
     }
-    & > div.active > div.count {
+    & > div.active > div.count, & > div:hover > div.count {
         background-color: $active-color;
     }
     & > div:hover {
@@ -93,6 +94,10 @@
     & > div.active:not(.btn-pgcode), & > div.active > div {
         color: $control-color;
     }
+    & > div.active > div.count {
+        background-color: $control-color;
+        color: $control-background-color;
+    }
     & > div.active:not(.btn-pgcode) > div.marker {
         display: none;
     }
@@ -106,6 +111,6 @@
     background: transparent;
 }
 .toolbar::-webkit-scrollbar-thumb {
-    box-shadow: inset 0 0 5px $scroll-color;   
+    box-shadow: inset 0 0 5px $scroll-color;
     border-radius: 2px;
 } 
