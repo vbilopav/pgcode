@@ -91,10 +91,10 @@ function copyRootFiles() {
     
     log(`>>> copying ${from} to ${to}`);
     let content = fs.readFileSync(from).toString()
-        .replace(".js\"", ".js" + "?" + config.version + "\"")
-        .replace(".json\"", ".json" + "?" + config.version + "\"")
-        .replace(".css\"", ".css" + "?" + config.version + "\"")
-        .replace(".ico\"", ".ico" + "?" + config.version + "\"");
+        .replace(/\.js"/g, ".js" + "?" + config.version + "\"")
+        .replace(/\.json"/g, ".json" + "?" + config.version + "\"")
+        .replace(/\.css"/g, ".css" + "?" + config.version + "\"")
+        .replace(/\.ico"/g, ".ico" + "?" + config.version + "\"");
     fs.writeFileSync(to, content, "utf8");
 
     //favicon.ico
