@@ -10,11 +10,7 @@ namespace Pgcode.Routines
         public const string Name = "set_user_data";
         public const string CommentMarkup = @"
 
-        Returns json object with elements:
-        - scripts (value from `select_scripts`)
-        - tables (value from `select_information_schema_tables`)
-        - views (value from `select_information_schema_tables`)
-        - routines (value from `select_information_schema_routines`)
+        Sets user profile value by `key` and `userId`.
 
         Params:
         - _data->>'key' - profile key

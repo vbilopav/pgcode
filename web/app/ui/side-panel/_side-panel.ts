@@ -1,7 +1,7 @@
 import { 
     subscribe, STATE_CHANGED_SCRIPTS, STATE_CHANGED_TABLES, STATE_CHANGED_VIEWS, STATE_CHANGED_ROUTINES, STATE_CHANGED_SEARCH
 } from "app/_sys/pubsub";
-import { IPanel } from "app/types";
+import Panel from "app/ui/side-panel/panel"
 import Scripts from "app/ui/side-panel/scripts";
 import Tables from "app/ui/side-panel/tables";
 import Views from "app/ui/side-panel/views";
@@ -13,13 +13,28 @@ import { keys } from "app/types";
 export default class  {
     constructor(element: Element){
         element.addClass("side-panel").html(String.html`
-            <div style="display: none;"></div>
-            <div style="display: none;"></div>
-            <div style="display: none;"></div>
-            <div style="display: none;"></div>
-            <div style="display: none;"></div>
+            <div style="display: none;">
+                <div></div>
+                <div></div>
+            </div>
+            <div style="display: none;">
+                <div></div>
+                <div></div>
+            </div>
+            <div style="display: none;">
+                <div></div>
+                <div></div>
+            </div>
+            <div style="display: none;">
+                <div></div>
+                <div></div>
+            </div>
+            <div style="display: none;">
+                <div></div>
+                <div></div>
+            </div>
         `);
-        const panels: Record<string, IPanel> = {};
+        const panels: Record<string, Panel> = {};
         panels[keys.scripts] = new Scripts(element.children[0]);
         panels[keys.tables] = new Tables(element.children[1]);
         panels[keys.views] = new Views(element.children[2]);

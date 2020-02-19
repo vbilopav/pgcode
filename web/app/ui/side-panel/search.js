@@ -1,12 +1,9 @@
-define(["require", "exports"], function (require, exports) {
+define(["require", "exports", "app/types", "app/ui/side-panel/panel"], function (require, exports, types_1, panel_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    class default_1 {
+    class default_1 extends panel_1.default {
         constructor(element) {
-            this.element = element;
-        }
-        show(state) {
-            this.element.showElement(state);
+            super(element, types_1.keys.search.toUpperCase());
         }
     }
     exports.default = default_1;

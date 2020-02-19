@@ -10,11 +10,8 @@ namespace Pgcode.Routines
         public const string Name = "select_scripts";
         public const string CommentMarkup = @"
 
-        Returns json object with elements:
-        - scripts (value from `select_scripts`)
-        - tables (value from `select_information_schema_tables`)
-        - views (value from `select_information_schema_tables`)
-        - routines (value from `select_information_schema_routines`)
+        Returns json array with script `id` and `name`
+        
 
         Params:
         - _data->>'userId' - user id or null for all users

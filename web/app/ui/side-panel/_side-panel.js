@@ -4,11 +4,26 @@ define(["require", "exports", "app/_sys/pubsub", "app/ui/side-panel/scripts", "a
     class default_1 {
         constructor(element) {
             element.addClass("side-panel").html(String.html `
-            <div style="display: none;"></div>
-            <div style="display: none;"></div>
-            <div style="display: none;"></div>
-            <div style="display: none;"></div>
-            <div style="display: none;"></div>
+            <div style="display: none;">
+                <div></div>
+                <div></div>
+            </div>
+            <div style="display: none;">
+                <div></div>
+                <div></div>
+            </div>
+            <div style="display: none;">
+                <div></div>
+                <div></div>
+            </div>
+            <div style="display: none;">
+                <div></div>
+                <div></div>
+            </div>
+            <div style="display: none;">
+                <div></div>
+                <div></div>
+            </div>
         `);
             const panels = {};
             panels[types_1.keys.scripts] = new scripts_1.default(element.children[0]);

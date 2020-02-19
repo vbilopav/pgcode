@@ -55,10 +55,6 @@ interface IInitialResponse {
     connections: Array<IConnectionInfo>
 }
 
-interface IPanel { 
-    show: (state: boolean) => void
-}
-
 const keys = {
     scripts: "scripts", 
     tables: "tables", 
@@ -78,6 +74,5 @@ export {
     IWorkspaceResponse,
     IWorkspace,
     IConnectionInfo,
-    IPanel,
     keys
 }

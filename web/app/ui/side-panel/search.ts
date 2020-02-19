@@ -1,13 +1,9 @@
-import { IWorkspace, IPanel } from "app/types";
+import { keys } from "app/types";
+import Panel from "app/ui/side-panel/panel"
 
-export default class implements IPanel {
-    private element: Element;
-
-    constructor(element: Element){
-        this.element = element;
-    }
-
-    show(state: boolean) {
-        this.element.showElement(state);
+export default class extends Panel {
+    constructor(element: Element) {
+        super(element, keys.search.toUpperCase());
+        
     }
 }
