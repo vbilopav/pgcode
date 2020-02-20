@@ -22,7 +22,7 @@ namespace Pgcode.Api
             _settings = settings;
         }
 
-        public async ValueTask<ContentResult> GetWorkspaceForConnectionContentResult(string connection, string schema) =>
+        public async ValueTask<ContentResult> GetWorkspaceForConnection(string connection, string schema) =>
             await UserConnection.GetContentResultAsync(ApiGetWorkspaceForConnection.Name, new
             {
                 name = connection,
@@ -51,7 +51,7 @@ namespace Pgcode.Api
                 }
             });
 
-        public async ValueTask<ContentResult> GetWorkspaceContentResult(string schema) =>
+        public async ValueTask<ContentResult> GetWorkspace(string schema) =>
             await UserConnection.GetContentResultAsync(ApiGetWorkspace.Name, new
             {
                 name = schema,
@@ -75,5 +75,8 @@ namespace Pgcode.Api
                     schema
                 }
             });
+
+        public async ValueTask<ContentResult> CreateNewScript(string userId, string schema) =>
+            await UserConnection.GetContentResultAsync(ApiCreateNewScript.Name, new { userId, schema });
     }
 }

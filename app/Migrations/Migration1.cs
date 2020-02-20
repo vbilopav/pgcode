@@ -20,6 +20,7 @@ namespace Pgcode.Migrations
             new SetUserData(Version),
             new ApiGetWorkspaceForConnection(Version),
             new ApiGetWorkspace(Version),
+            new ApiCreateNewScript(Version),
         };
 
         public string Up(Settings settings, NpgsqlConnection connection) => $@"
@@ -47,7 +48,7 @@ namespace Pgcode.Migrations
 
             create table users
             (
-                id varchar(64) not null primary key,
+                id varchar not null primary key,
                 data jsonb not null default '{{}}',
                 timestamp timestamp with time zone not null default (transaction_timestamp() at time zone 'utc')
             );
@@ -55,15 +56,17 @@ namespace Pgcode.Migrations
             create table scripts
             (
                 id int not null generated always as identity primary key,
-                user_id varchar(64) null,
-                title varchar(128) not null,
-                schema varchar(128) null,
+                user_id varchar not null,
+                title varchar not null,
+                schema varchar null,
+                comment varchar null,
                 content text not null default '',
                 view_state json null,
                 timestamp timestamp with time zone not null default (transaction_timestamp() at time zone 'utc')
             );
             
-            create index idx_scripts_user_id on scripts using btree (user_id);
+            create index IDX_scripts_user_id on scripts using btree (user_id);
+            create unique index IDX_scripts_user_id_title_schema on scripts (user_id, title, schema) where schema is null;
 
             {string.Join(Environment.NewLine, Routines.Select(m => m.Up(settings, connection)))}
 

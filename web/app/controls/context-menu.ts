@@ -24,24 +24,25 @@ interface ContextMenuSplitter extends ContextMenuBase {
 interface ContextMenuCtorArgs {
     id: string,
     items: Array<MenuItemType>,
-    target: Element,
+    target: Element | ElementResult,
     event: "contextmenu" | "click",
     menuItemsCallback: (items: Array<MenuItemType>) => Array<MenuItemType>,
     beforeOpen: (menu: ContextMenu) => boolean,
-    onOpen: () => any,
-    onClose: () => any;
+    onOpen: (menu?: ContextMenu) => any,
+    onClose: (menu?: ContextMenu) => any;
 }
 
 abstract class ContextMenu {
 
+    public readonly element: Element;
+    public readonly target: Element;
+
     protected items: {[id: string] : MenuItemType};
-    protected element: Element;
     protected actions: Element;
-    protected target: Element;
     protected abstract menuElement(id: string): Element;
     protected menuSplitterElement(): Element { return new Element() };
     protected abstract menuItemElement(menuItem: ContextMenuItem): Element;
-    protected onClose: () => any;
+    protected onClose: (menu?: ContextMenu) => any;
     protected event: string;
 
     constructor({
@@ -94,7 +95,7 @@ abstract class ContextMenu {
             }
             this.adjust(e);
             e.preventDefault();
-            onOpen();
+            onOpen(this);
         });
 
         subscribe(CLOSE_CONTEXT_MENU, () => this.close());
@@ -110,7 +111,7 @@ abstract class ContextMenu {
         }
         this.element.hideElement();
         this.actions.html("");
-        this.onClose();
+        this.onClose(this);
     }
 
     public getCheckedItem() : ContextMenuItem {

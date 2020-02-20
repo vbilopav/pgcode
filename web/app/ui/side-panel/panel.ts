@@ -1,15 +1,33 @@
+import MonacoContextMenu from "app/controls/monaco-context-menu";
+import { ContextMenuCtorArgs, MenuItemType } from "app/controls/context-menu";
+
+class PanelMenu extends MonacoContextMenu {
+    protected adjust() {
+        this.element.css("top", "0").css("left", "0").visible(false).showElement();
+        const target = this.target.getBoundingClientRect();
+        const element = this.element.getBoundingClientRect();
+        let left: number;
+        if (target.left + element.width >= window.innerWidth) {
+            left = window.innerWidth - element.width;
+        } else {
+            left = target.left;
+        }
+        this.element.css("top", (target.top + target.height) + "px").css("left", left + "px").css("min-width", target.width + "px").visible(true);
+    }
+}
+
 export default abstract class Panel {
     protected readonly element: Element;
     protected readonly header: Element;
     protected readonly items: Element;
-    protected itemScrollTimeout: number;
+    private itemScrollTimeout: number;
 
-    constructor(element: Element, title: string){
+    constructor(element: Element, title: string, menuItems: Array<MenuItemType> = []){
         this.element = element;
         this.header = element.children[0].html(String.html`
             <div>${title}</div>
             <div>
-                <span class="btn">&nbsp;&#8942;&nbsp;</span>
+                <span class="btn"><i class="icon-menu"></i></span>
             </div>
         `);
         this.items = element.children[1];
@@ -24,6 +42,20 @@ export default abstract class Panel {
             }
         }).on("scroll", () => this.toggleHeaderShadow());
         this.toggleHeaderShadow();
+
+        if (menuItems.length) {
+            new PanelMenu({
+                id: "scripts-panel-menu",
+                target: this.header.find(".btn"),
+                event: "click",
+                items: menuItems,
+                onOpen: menu => menu.target.addClass("active"),
+                onClose: menu => menu.target.removeClass("active")
+            } as ContextMenuCtorArgs);
+
+        } else {
+            this.header.find(".btn").remove();
+        }
     }
 
     show(state: boolean) {
@@ -41,6 +73,6 @@ export default abstract class Panel {
                 this.header.removeClass("shadow");
             }
             this.itemScrollTimeout = undefined;
-        }, 5);
+        }, 10);
     }
 }

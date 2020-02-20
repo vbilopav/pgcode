@@ -134,7 +134,7 @@ export default class  {
         new FooterContextMenu({
             id: "feed-footer-menu",
             event: "click",
-            target: btn as Element,
+            target: btn,
             items: [{
                 text: "Open New Issue", 
                 data: "Opens a new window to create a new issue on GitHub repository",

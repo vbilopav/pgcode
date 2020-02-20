@@ -287,12 +287,15 @@ body > div.container {
       margin-top: auto;
       margin-bottom: auto; }
     .side-panel > div > div:nth-child(1) > div > .btn {
+      font-size: 14px;
+      border-radius: 25%;
       border: 1px #3c3c3c;
       padding: 3px;
       cursor: pointer;
       display: none; }
-    .side-panel > div > div:nth-child(1) > div > .btn:active {
-      border-style: inset; }
+    .side-panel > div > div:nth-child(1) > div > .btn.active {
+      border-style: inset;
+      display: initial; }
   .side-panel > div > div:nth-child(1):hover > div > .btn {
     display: initial; }
   .side-panel > div > div:nth-child(2) {

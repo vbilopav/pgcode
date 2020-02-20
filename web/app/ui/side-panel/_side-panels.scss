@@ -25,17 +25,20 @@
         display: grid;
 
         & > div {
-            margin-top: auto;
+            margin-top: auto;  
             margin-bottom: auto;
         }
         & > div > .btn {
+            font-size: 14px;
+            border-radius: 25%;
             border: 1px $ctx-menu-bck-color;
             padding: 3px;
             cursor: pointer;
             display: none;
         }
-        & > div > .btn:active {
+        & > div > .btn.active {
             border-style: inset;
+            display: initial; 
         }
     }
 

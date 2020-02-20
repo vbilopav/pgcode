@@ -44,4 +44,4 @@ define(["require", "exports", "app/_sys/pubsub", "app/ui/side-panel/scripts", "a
     }
     exports.default = default_1;
 });
-//# sourceMappingURL=_side-panel.js.map
+//# sourceMappingURL=_side-panels.js.map

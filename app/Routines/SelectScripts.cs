@@ -32,7 +32,8 @@ namespace Pgcode.Routines
             from (
                 select 
                     id,
-                    title
+                    title,
+                    comment
                 from 
                     {settings.PgCodeSchema}.scripts
                 where

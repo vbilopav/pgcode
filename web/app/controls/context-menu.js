@@ -41,7 +41,7 @@ define(["require", "exports", "app/_sys/pubsub"], function (require, exports, pu
                 }
                 this.adjust(e);
                 e.preventDefault();
-                onOpen();
+                onOpen(this);
             });
             pubsub_1.subscribe(pubsub_1.CLOSE_CONTEXT_MENU, () => this.close());
         }
@@ -56,7 +56,7 @@ define(["require", "exports", "app/_sys/pubsub"], function (require, exports, pu
             }
             this.element.hideElement();
             this.actions.html("");
-            this.onClose();
+            this.onClose(this);
         }
         getCheckedItem() {
             for (let value of Object.values(this.items)) {

@@ -37,7 +37,11 @@ interface IWorkspace {
         name: string,
         type: string
     }>,
-    scripts: Array<string>,
+    scripts: Array<{
+        id: string,
+        title: string,
+        comment: string,
+    }>,
     tables: Array<string>,
     views: Array<string>
 }

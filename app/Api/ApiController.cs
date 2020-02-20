@@ -49,14 +49,20 @@ namespace Pgcode.Api
         public async ValueTask<ContentResult> GetConnection(string connection)
         {
             _connectionManager.SetConnectionNameByUserId(UserId, connection);
-            return await Api.GetWorkspaceForConnectionContentResult(connection, await UserProfile.GetSchemaNameAsync());
+            return await Api.GetWorkspaceForConnection(connection, await UserProfile.GetSchemaNameAsync());
         }
 
         [HttpGet("ws/{schema}")]
         public async ValueTask<object> Schema(string schema)
         {
             await UserProfile.SetSchemaNameAsync(schema);
-            return await Api.GetWorkspaceContentResult(schema);
+            return await Api.GetWorkspace(schema);
+        }
+
+        [HttpGet("new-script/{schema}")]
+        public async ValueTask<object> NewScript(string schema)
+        {
+            return await Api.CreateNewScript(UserId, schema);
         }
     }
 }
