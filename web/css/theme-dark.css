@@ -288,14 +288,15 @@ body > div.container {
       margin-bottom: auto; }
     .side-panel > div > div:nth-child(1) > div > .btn {
       font-size: 14px;
-      border-radius: 25%;
       border: 1px #3c3c3c;
       padding: 3px;
       cursor: pointer;
       display: none; }
     .side-panel > div > div:nth-child(1) > div > .btn.active {
-      border-style: inset;
-      display: initial; }
+      display: initial;
+      box-shadow: 0 2px 8px #000;
+      color: #f0f0f0;
+      background-color: #3c3c3c; }
   .side-panel > div > div:nth-child(1):hover > div > .btn {
     display: initial; }
   .side-panel > div > div:nth-child(2) {
@@ -318,6 +319,9 @@ body > div.container {
   .side-panel > div > div:nth-child(2)::-webkit-scrollbar-thumb {
     box-shadow: inset 0 0 5px #7a7a7a;
     border-radius: 2px; }
+
+#scripts-panel-menu .pgmenu-container {
+  clip-path: inset(0px -5px -5px -5px); }
 
 .main-split {
   background-color: #252526;

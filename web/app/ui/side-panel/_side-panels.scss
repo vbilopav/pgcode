@@ -30,15 +30,16 @@
         }
         & > div > .btn {
             font-size: 14px;
-            border-radius: 25%;
             border: 1px $ctx-menu-bck-color;
             padding: 3px;
             cursor: pointer;
             display: none;
         }
         & > div > .btn.active {
-            border-style: inset;
             display: initial; 
+            box-shadow: 0 2px 8px #000;
+            color: $ctx-menu-color;
+            background-color: $ctx-menu-bck-color;
         }
     }
 
@@ -75,4 +76,8 @@
         box-shadow: inset 0 0 5px #7a7a7a; 
         border-radius: 2px;
     }
+}
+
+#scripts-panel-menu .pgmenu-container {
+    clip-path: inset(0px -5px -5px -5px);
 }

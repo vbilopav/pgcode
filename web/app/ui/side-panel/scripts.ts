@@ -5,7 +5,7 @@ import Panel from "app/ui/side-panel/panel"
 export default class extends Panel {
     constructor(element: Element) {
         super(element, keys.scripts.toUpperCase(), [
-            {text: "New scripts"},
+            {text: "New script", keyBindingsInfo: "Ctrl+N"},
             {splitter: true},
             {text: "Order ascending"},
             {text: "Order descending"},

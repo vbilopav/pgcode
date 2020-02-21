@@ -45,7 +45,6 @@ namespace Pgcode.Routines
                 data = users.data || excluded.data,
                 timestamp = _now;
 
-            raise info 'pgcode.users set data key % with value % for user id = %', _data->>'key', _data->>'value', _data->>'userId';
         end
         ${Name}$
         language plpgsql security definer volatile;

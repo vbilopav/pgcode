@@ -66,7 +66,6 @@ namespace Pgcode.Migrations
             );
             
             create index IDX_scripts_user_id on scripts using btree (user_id);
-            create unique index IDX_scripts_user_id_title_schema on scripts (user_id, title, schema) where schema is null;
 
             {string.Join(Environment.NewLine, Routines.Select(m => m.Up(settings, connection)))}
 

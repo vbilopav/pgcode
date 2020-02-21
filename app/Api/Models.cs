@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
 using Npgsql;
 
 namespace Pgcode.Api
@@ -25,6 +26,7 @@ namespace Pgcode.Api
         public string ServerVersion { get; set; }
         public string Name { get; set; }
         public NpgsqlConnection Connection { get; set; }
+        public ILogger Logger { get; set; }
     }
 
     public class InitialResponse

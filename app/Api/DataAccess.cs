@@ -5,7 +5,7 @@ namespace Pgcode.Api
     public abstract class DataAccess<T> where T : DataAccess<T>
     {
         private string _userId;
-        private NpgsqlConnection _connection;
+        private ConnectionData _connectionData;
 
         protected readonly ConnectionManager ConnectionManager;
         protected string UserId => _userId ?? throw new ApiException("UserId is not supplied");
@@ -13,7 +13,7 @@ namespace Pgcode.Api
         protected DataAccess(ConnectionManager connectionManager)
         {
             ConnectionManager = connectionManager;
-            _connection = null;
+            _connectionData = null;
             _userId = null;
         }
 
@@ -27,15 +27,15 @@ namespace Pgcode.Api
             return this as T;
         }
 
-        protected NpgsqlConnection UserConnection
+        protected ConnectionData UserConnection
         {
             get
             {
-                if (_connection != null)
+                if (_connectionData != null)
                 {
-                    return _connection;
+                    return _connectionData;
                 }
-                return _connection = ConnectionManager.GetConnectionByUserId(UserId);
+                return _connectionData = ConnectionManager.GetConnectionDataByUserId(UserId);
             }
         }
     }

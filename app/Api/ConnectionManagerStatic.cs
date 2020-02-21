@@ -142,6 +142,14 @@ namespace Pgcode.Api
             return true;
         }
 
+        public static void AddLoggers(ILoggerFactory loggerFactory)
+        {
+            foreach (var (key, value) in _connections)
+            {
+                value.Logger = loggerFactory.CreateLogger(key);
+            }
+        }
+
         public static void MigrationsInfo(IConfiguration configuration, string forConnection)
         {
             RunMigrations(configuration, runner =>
@@ -168,29 +176,28 @@ namespace Pgcode.Api
         {
             foreach (var (key, value) in _connections)
             {
-                var logger = loggerFactory.CreateLogger(key);
                 value.Connection.Notice += (sender, args) =>
                 {
                     var severity = args.Notice.Severity;
                     if (InfoLevels.Contains(severity))
                     {
-                        logger.LogInformation(args.Notice.MessageText);
+                        value.Logger.LogInformation(args.Notice.MessageText);
                     }
                     else if (severity == "WARNING")
                     {
-                        logger.LogWarning(args.Notice.MessageText);
+                        value.Logger.LogWarning(args.Notice.MessageText);
                     }
                     else if (severity.StartsWith("DEBUG"))
                     {
-                        logger.LogDebug(args.Notice.MessageText);
+                        value.Logger.LogDebug(args.Notice.MessageText);
                     }
                     else if (ErrorLevels.Contains(severity))
                     {
-                        logger.LogError(args.Notice.MessageText);
+                        value.Logger.LogError(args.Notice.MessageText);
                     }
                     else
                     {
-                        logger.LogTrace(args.Notice.MessageText);
+                        value.Logger.LogTrace(args.Notice.MessageText);
                     }
                 };
             }

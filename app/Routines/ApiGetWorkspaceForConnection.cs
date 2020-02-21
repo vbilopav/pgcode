@@ -8,7 +8,7 @@ namespace Pgcode.Routines
     {
         private readonly int _forVersion;
         public const int Version = 1;
-        public const string Name = "api_get_worskapce_for_connection";
+        public const string Name = "api_get_workspace_for_connection";
 
         public static readonly string CommentMarkup = $@"
 

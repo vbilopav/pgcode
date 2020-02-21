@@ -4,7 +4,7 @@ define(["require", "exports", "app/_sys/pubsub", "app/types", "app/ui/side-panel
     class default_1 extends panel_1.default {
         constructor(element) {
             super(element, types_1.keys.scripts.toUpperCase(), [
-                { text: "New scripts" },
+                { text: "New script", keyBindingsInfo: "Ctrl+N" },
                 { splitter: true },
                 { text: "Order ascending" },
                 { text: "Order descending" },

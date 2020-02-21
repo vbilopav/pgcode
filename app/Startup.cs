@@ -50,7 +50,12 @@ namespace Pgcode
                 }
             }
 
-            if (Program.Settings.LogInternalConnectionNotice)
+            if (Program.Settings.LogPgCodeCommandNotice || Program.Settings.LogPgCodeDbCommands)
+            {
+                ConnectionManager.AddLoggers(loggerFactory);
+            }
+
+            if (Program.Settings.LogPgCodeCommandNotice)
             {
                 ConnectionManager.AddNoticeHandlersToConnections(loggerFactory);
             }

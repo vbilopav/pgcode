@@ -9,11 +9,11 @@ namespace Pgcode.Api
     {
         public IEnumerable<ConnectionData> GetConnectionsData() => _connections.Values;
 
-        public NpgsqlConnection GetConnectionByName(string connectionName)
+        public ConnectionData GetConnectionDataByName(string connectionName)
         {
             if (_connections.TryGetValue(connectionName, out var data))
             {
-                return data.Connection;
+                return data;
             }
             throw new ApiException($"Unknown connection name {connectionName}", 404);
         }
@@ -43,11 +43,11 @@ namespace Pgcode.Api
             throw new ApiException($"Unknown userId {userId}", 404);
         }
 
-        public NpgsqlConnection GetConnectionByUserId(string userId)
+        public ConnectionData GetConnectionDataByUserId(string userId)
         {
             if (ConnectionNamesByUserId.TryGetValue(userId, out var name))
             {
-                return GetConnectionByName(name);
+                return GetConnectionDataByName(name);
             }
 
             throw new ApiException($"Unknown userId {userId}", 404);

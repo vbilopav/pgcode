@@ -3,7 +3,6 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <RootNamespace>Pgcode</RootNamespace>
-    <ApplicationIcon>Properties\favicon.ico</ApplicationIcon>
     <Win32Resource />
   </PropertyGroup>
 
