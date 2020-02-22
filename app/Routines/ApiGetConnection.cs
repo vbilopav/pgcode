@@ -4,31 +4,31 @@ using Pgcode.Migrations;
 
 namespace Pgcode.Routines
 {
-    public class ApiGetWorkspaceForConnection : IMigration
+    public class ApiGetConnection : IMigration
     {
         private readonly int _forVersion;
         public const int Version = 1;
-        public const string Name = "api_get_workspace_for_connection";
+        public const string Name = "api_get_connection";
 
         public static readonly string CommentMarkup = $@"
 
         Returns json object with elements:
-        - schemas (selected schema name and names from `{SelectInformationSchemaSchemata.Name}`)
+        - schemas (selected schema name and names from `{SelectSchemata.Name}`)
         - scripts (value from `{SelectScripts.Name}`)
-        - tables (value from `{SelectInformationSchemaTables.Name}`)
-        - views (value from `{SelectInformationSchemaTables.Name}`)
-        - routines (value from `{SelectInformationSchemaRoutines.Name}`)
+        - tables (value from `{SelectTables.Name}`)
+        - views (value from `{SelectTables.Name}`)
+        - routines (value from `{GetRoutines.Name}`)
 
         Params:
-        -  `_data->'schemata'` - `{SelectInformationSchemaSchemata.Name}` params
+        -  `_data->'schemata'` - `{SelectSchemata.Name}` params
         -  `_data->'scripts'` - `{SelectScripts.Name}` params
-        -  `_data->'tables'` - `{SelectInformationSchemaTables.Name}` params
-        -  `_data->'views'` - `{SelectInformationSchemaTables.Name}` params
-        -  `_data->'routines'` - `{SelectInformationSchemaRoutines.Name}` params
+        -  `_data->'tables'` - `{SelectTables.Name}` params
+        -  `_data->'views'` - `{SelectTables.Name}` params
+        -  `_data->'routines'` - `{GetRoutines.Name}` params
 
         ";
 
-        public ApiGetWorkspaceForConnection(int forVersion)
+        public ApiGetConnection(int forVersion)
         {
             _forVersion = forVersion;
         }
@@ -41,7 +41,7 @@ namespace Pgcode.Routines
             select json_build_object(
                 'schemas', json_build_object(
                     'names', (
-                        select {settings.PgCodeSchema}.{SelectInformationSchemaSchemata.Name}(_data->'schemata')
+                        select {settings.PgCodeSchema}.{SelectSchemata.Name}(_data->'schemata')
                     ),
                     'selected', _data->'schemata'->>'schema'
                 ),
@@ -49,13 +49,13 @@ namespace Pgcode.Routines
                     select {settings.PgCodeSchema}.{SelectScripts.Name}(_data->'scripts')
                 ),
                 'tables', (
-                    select {settings.PgCodeSchema}.{SelectInformationSchemaTables.Name}(_data->'tables')
+                    select {settings.PgCodeSchema}.{SelectTables.Name}(_data->'tables')
                 ),
                 'views', (
-                    select {settings.PgCodeSchema}.{SelectInformationSchemaTables.Name}(_data->'views')
+                    select {settings.PgCodeSchema}.{SelectTables.Name}(_data->'views')
                 ),
                 'routines', (
-                    select {settings.PgCodeSchema}.{SelectInformationSchemaRoutines.Name}(_data->'routines')
+                    select {settings.PgCodeSchema}.{GetRoutines.Name}(_data->'routines')
                 ),
                 'name', _data->>'name'
             );

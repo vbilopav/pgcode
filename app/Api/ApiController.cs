@@ -45,24 +45,24 @@ namespace Pgcode.Api
                     })
             };
 
-        [HttpGet("ws-connection/{connection}")]
+        [HttpGet("connection/{connection}")]
         public async ValueTask<ContentResult> GetConnection(string connection)
         {
             _connectionManager.SetConnectionNameByUserId(UserId, connection);
-            return await Api.GetWorkspaceForConnection(connection, await UserProfile.GetSchemaNameAsync());
+            return await Api.GetConnection(connection, await UserProfile.GetSchemaNameAsync());
         }
 
-        [HttpGet("ws/{schema}")]
+        [HttpGet("schema/{schema}")]
         public async ValueTask<object> Schema(string schema)
         {
             await UserProfile.SetSchemaNameAsync(schema);
-            return await Api.GetWorkspace(schema);
+            return await Api.GetSchema(schema);
         }
 
-        [HttpGet("new-script/{schema}")]
-        public async ValueTask<object> NewScript(string schema)
+        [HttpGet("create-script/{schema}")]
+        public async ValueTask<object> CreateScript(string schema)
         {
-            return await Api.CreateNewScript(UserId, schema);
+            return await Api.CreateScript(UserId, schema);
         }
     }
 }

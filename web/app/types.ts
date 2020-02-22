@@ -1,24 +1,18 @@
-import scripts from "./ui/side-panel/scripts"
+export enum Position { LEFT = "left", RIGHT = "right" };
+export enum Themes { DARK = "dark", LIGHT = "light" };
+export enum AppStatus { READY = 0, BUSY = 1, ERROR = 2, NO_CONNECTION };
 
-enum Position { LEFT = "left", RIGHT = "right" };
-enum Themes { DARK = "dark", LIGHT = "light" };
-enum AppStatus { READY = 0, BUSY = 1, ERROR = 2, NO_CONNECTION };
-
-interface IMain {
+export interface IMain {
     moveToolbar(position: Position, ...args: any[]) : boolean
 }
 
-interface IResponse<T> {
+export interface IResponse<T> {
     ok: boolean,
     status: number,
     data?: T
 }
 
-interface IInitialResponse { 
-    connections: Array<IConnectionInfo>
-}
-
-interface IWsConnectionResponse extends IWorkspace { 
+export interface IConnectionResponse extends ISchema { 
     name: string,
     schemas: {
         names: Array<string>,
@@ -26,27 +20,23 @@ interface IWsConnectionResponse extends IWorkspace {
     },
 }
 
-interface IWorkspaceResponse extends IWorkspace { 
+export interface ISchemaResponse extends ISchema { 
     name: string
 }
 
-interface IWorkspace { 
+export interface ISchema { 
     routines: Array<{
         id: string,
         language: string,
         name: string,
         type: string
     }>,
-    scripts: Array<{
-        id: string,
-        title: string,
-        comment: string,
-    }>,
+    scripts: Array<IScriptInfo>,
     tables: Array<string>,
     views: Array<string>
 }
 
-interface IConnectionInfo {
+export interface IConnectionInfo {
     name: string, 
     version: string,
     host: string, 
@@ -55,28 +45,27 @@ interface IConnectionInfo {
     user: string 
 }
 
-interface IInitialResponse { 
+export interface IScriptInfo {
+    id: string,
+    title: string,
+    comment: string,
+    timestamp: string
+}
+
+export interface IScript extends IScriptInfo {
+    schema: string,
+    content: string,
+    viewState: string
+}
+
+export interface IInitialResponse { 
     connections: Array<IConnectionInfo>
 }
 
-const keys = {
+export const keys = {
     scripts: "scripts", 
     tables: "tables", 
     views: "views", 
     routines: "routines", 
     search: "search"
 };
-
-export { 
-    Position, 
-    Themes, 
-    AppStatus, 
-    IMain, 
-    IResponse, 
-    IInitialResponse, 
-    IWsConnectionResponse,
-    IWorkspaceResponse,
-    IWorkspace,
-    IConnectionInfo,
-    keys
-}

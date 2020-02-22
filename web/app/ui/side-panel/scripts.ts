@@ -1,5 +1,5 @@
 import { subscribe, publish, WS_CHANGED, ITEM_COUNT_CHANGED } from "app/_sys/pubsub";
-import { IWorkspace, keys } from "app/types";
+import { ISchema, keys } from "app/types";
 import Panel from "app/ui/side-panel/panel"
 
 export default class extends Panel {
@@ -11,7 +11,7 @@ export default class extends Panel {
             {text: "Order descending"},
         ]);
         
-        subscribe(WS_CHANGED, (data: IWorkspace) => {
+        subscribe(WS_CHANGED, (data: ISchema) => {
             publish(ITEM_COUNT_CHANGED, keys.scripts, data.scripts.length);
             this.items.html("");
             for(let item of data.scripts) {

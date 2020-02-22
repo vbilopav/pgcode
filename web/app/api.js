@@ -17,8 +17,17 @@ define(["require", "exports", "app/_sys/pubsub", "app/types"], function (require
             throw error;
         }
     };
+    let _currentSchema;
     exports.fetchInitial = async () => _fetchAndPublishStatus("api/initial");
-    exports.fetchWsConnection = async (name) => _fetchAndPublishStatus(`api/ws-connection/${name}`);
-    exports.fetchWorkspace = async (schema) => _fetchAndPublishStatus(`api/ws/${schema}`);
+    exports.fetchConnection = async (name) => {
+        const result = _fetchAndPublishStatus(`api/connection/${name}`);
+        _currentSchema = (await result).data.schemas.selected;
+        return result;
+    };
+    exports.fetchSchema = async (schema) => {
+        const result = _fetchAndPublishStatus(`api/schema/${schema}`);
+        _currentSchema = (await result).data.name;
+        return result;
+    };
 });
 //# sourceMappingURL=api.js.map

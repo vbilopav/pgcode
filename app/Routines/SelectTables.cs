@@ -3,39 +3,46 @@ using Pgcode.Migrations;
 
 namespace Pgcode.Routines
 {
-    public class SelectInformationSchemaSchemata : IMigration
+    public class SelectTables : IMigration
     {
         private readonly int _forVersion;
         public const int Version = 1;
-        public const string Name = "select_information_schema_schemata";
+        public const string Name = "select_tables";
         public const string CommentMarkup = @"
-        
-        Returns schema names json array filtered by `skipPattern`
+
+        Returns json array with table names.
+
+        Type of the table: 
+        - `BASE TABLE` for a persistent base table (the normal table type)
+        - `VIEW` for a view
+        - `FOREIGN` for a foreign table
+        - `LOCAL TEMPORARY` for a temporary table
 
         Params:
-        - _data->>'skipPattern' - skip pattern not similiar to
+        - _data->>'type' - type of the table
+        - _data->>'schema' - schema name
 
         ";
 
-        public SelectInformationSchemaSchemata(int forVersion)
+        public SelectTables(int forVersion)
         {
             _forVersion = forVersion;
         }
 
         public string Up(Settings settings, NpgsqlConnection connection) => (_forVersion != Version ? "" : $@"
-
-        create or replace function {settings.PgCodeSchema}.{Name}(_data json default '{{}}') returns json as
+       
+        create or replace function {settings.PgCodeSchema}.{Name}(_data json) returns json as
         ${Name}$
-            select coalesce(json_agg(result.schema_name), '[]')
+            select coalesce(json_agg(result.table_name), '[]')
             from (
                 select
-                    schema_name
+                    table_name
                 from
-                    information_schema.schemata
-                where 
-                    _data->>'skipPattern' is null or schema_name not similar to _data->>'skipPattern'
+                    information_schema.tables
+                where
+                    table_schema = _data->>'schema' and table_type = _data->>'type'
                 order by
-                    schema_name
+                    table_name
             ) as result;
         ${Name}$
         language sql security definer stable;

@@ -33,7 +33,8 @@ namespace Pgcode.Routines
                 select 
                     id,
                     title,
-                    comment
+                    comment,
+                    timestamp
                 from 
                     {settings.PgCodeSchema}.scripts
                 where

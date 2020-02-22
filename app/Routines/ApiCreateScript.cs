@@ -3,11 +3,11 @@ using Pgcode.Migrations;
 
 namespace Pgcode.Routines
 {
-    public class ApiCreateNewScript : IMigration
+    public class ApiCreateScript : IMigration
     {
         private readonly int _forVersion;
         public const int Version = 1;
-        public const string Name = "api_create_new_script";
+        public const string Name = "api_create_script";
         public const string CommentMarkup = @"
 
         Creates a new script. Returns script record.
@@ -19,7 +19,7 @@ namespace Pgcode.Routines
 
         ";
 
-        public ApiCreateNewScript(int forVersion)
+        public ApiCreateScript(int forVersion)
         {
             _forVersion = forVersion;
         }
@@ -47,7 +47,7 @@ namespace Pgcode.Routines
             with cte as (
                 insert into {settings.PgCodeSchema}.scripts (user_id, title, ""schema"")
                 values(_user_name, _title, _data->>'schema')
-                returning *
+                returning id, title, comment, schema, comment, timestamp, content, view_state as viewState, timestamp
             )
             select to_json(cte) into _result from cte;
 

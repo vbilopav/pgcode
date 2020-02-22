@@ -63,7 +63,7 @@ const CLOSE_CONTEXT_MENU: string = "context-menu/close/"; //id
 const SET_APP_STATUS: string = "app/status/"; //status: AppStatus, text?: string
 
 const API_INITIAL: string = "api/initial/"; //initial: IInitial
-const WS_CHANGED: string = "app/schema/"; //schema: IWorkspace
+const WS_CHANGED: string = "app/schema/"; //schema: ISchema
 const ITEM_COUNT_CHANGED: string = "item/count/"; //id: string, count: number
 
 export { 

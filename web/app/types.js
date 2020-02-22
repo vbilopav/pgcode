@@ -5,15 +5,13 @@ define(["require", "exports"], function (require, exports) {
     (function (Position) {
         Position["LEFT"] = "left";
         Position["RIGHT"] = "right";
-    })(Position || (Position = {}));
-    exports.Position = Position;
+    })(Position = exports.Position || (exports.Position = {}));
     ;
     var Themes;
     (function (Themes) {
         Themes["DARK"] = "dark";
         Themes["LIGHT"] = "light";
-    })(Themes || (Themes = {}));
-    exports.Themes = Themes;
+    })(Themes = exports.Themes || (exports.Themes = {}));
     ;
     var AppStatus;
     (function (AppStatus) {
@@ -21,16 +19,14 @@ define(["require", "exports"], function (require, exports) {
         AppStatus[AppStatus["BUSY"] = 1] = "BUSY";
         AppStatus[AppStatus["ERROR"] = 2] = "ERROR";
         AppStatus[AppStatus["NO_CONNECTION"] = 3] = "NO_CONNECTION";
-    })(AppStatus || (AppStatus = {}));
-    exports.AppStatus = AppStatus;
+    })(AppStatus = exports.AppStatus || (exports.AppStatus = {}));
     ;
-    const keys = {
+    exports.keys = {
         scripts: "scripts",
         tables: "tables",
         views: "views",
         routines: "routines",
         search: "search"
     };
-    exports.keys = keys;
 });
 //# sourceMappingURL=types.js.map

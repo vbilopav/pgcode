@@ -13,14 +13,14 @@ namespace Pgcode.Migrations
         public IEnumerable<IMigration> Routines => new List<IMigration>
         {
             new GetUserData(Version),
-            new SelectInformationSchemaRoutines(Version),
-            new SelectInformationSchemaSchemata(Version),
-            new SelectInformationSchemaTables(Version),
+            new GetRoutines(Version),
+            new SelectSchemata(Version),
+            new SelectTables(Version),
             new SelectScripts(Version),
             new SetUserData(Version),
-            new ApiGetWorkspaceForConnection(Version),
-            new ApiGetWorkspace(Version),
-            new ApiCreateNewScript(Version),
+            new ApiGetConnection(Version),
+            new ApiGetSchema(Version),
+            new ApiCreateScript(Version),
         };
 
         public string Up(Settings settings, NpgsqlConnection connection) => $@"

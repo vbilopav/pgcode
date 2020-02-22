@@ -144,9 +144,9 @@ namespace Pgcode.Api
 
         public static void AddLoggers(ILoggerFactory loggerFactory)
         {
-            foreach (var (key, value) in _connections)
+            foreach (var (_, value) in _connections)
             {
-                value.Logger = loggerFactory.CreateLogger(key);
+                value.Logger = loggerFactory.CreateLogger(value.Connection.ConnectionString);
             }
         }
 

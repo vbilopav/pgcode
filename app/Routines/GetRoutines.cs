@@ -3,11 +3,11 @@ using Pgcode.Migrations;
 
 namespace Pgcode.Routines
 {
-    public class SelectInformationSchemaRoutines : IMigration
+    public class GetRoutines : IMigration
     {
         private readonly int _forVersion;
         public const int Version = 1;
-        public const string Name = "select_information_schema_routines";
+        public const string Name = "get_routines";
         public const string CommentMarkup = @"
 
         Returns json array with routine info with elements:
@@ -21,7 +21,7 @@ namespace Pgcode.Routines
 
         ";
 
-        public SelectInformationSchemaRoutines(int forVersion)
+        public GetRoutines(int forVersion)
         {
             _forVersion = forVersion;
         }
