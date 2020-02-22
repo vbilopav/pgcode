@@ -1,5 +1,61 @@
 import { publish, SET_APP_STATUS } from "app/_sys/pubsub";
-import { AppStatus, IResponse, IInitialResponse, IConnectionResponse, ISchemaResponse } from "app/types";
+import { AppStatus } from "app/types";
+
+interface IResponse<T> {
+    ok: boolean,
+    status: number,
+    data?: T
+}
+
+interface IConnectionResponse extends ISchema { 
+    name: string,
+    schemas: {
+        names: Array<string>,
+        selected: string
+    },
+}
+
+interface ISchemaResponse extends ISchema { 
+    name: string
+}
+
+export interface ISchema { 
+    routines: Array<{
+        id: string,
+        language: string,
+        name: string,
+        type: string
+    }>,
+    scripts: Array<IScriptInfo>,
+    tables: Array<string>,
+    views: Array<string>
+}
+
+export interface IConnectionInfo {
+    name: string, 
+    version: string,
+    host: string, 
+    port: number, 
+    database: string,
+    user: string 
+}
+
+interface IScriptInfo {
+    id: string,
+    title: string,
+    comment: string,
+    timestamp: string
+}
+
+interface IScript extends IScriptInfo {
+    schema: string,
+    content: string,
+    viewState: string
+}
+
+interface IInitialResponse { 
+    connections: Array<IConnectionInfo>
+}
 
 const _createResponse:<T> (response: Response, data?: T) => IResponse<T> = (response, data) => Object({ok: response.ok, status: response.status, data: data});
 

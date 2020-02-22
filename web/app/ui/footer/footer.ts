@@ -2,8 +2,8 @@ import { ContextMenuCtorArgs, MenuItemType } from "app/controls/context-menu";
 import FooterContextMenu from "app/controls/footer-context-menu";
 import MonacoContextMenu from "app/controls/monaco-context-menu";
 import Storage from "app/_sys/storage";
-import { AppStatus, IConnectionInfo } from "app/types";
-import { fetchConnection, fetchSchema } from "app/api";
+import { AppStatus } from "app/types";
+import { fetchConnection, fetchSchema, IConnectionInfo } from "app/api";
 import { publish, subscribe, SET_APP_STATUS, API_INITIAL, WS_CHANGED } from "app/_sys/pubsub";
 
 interface IStorage {connection: string}

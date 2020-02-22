@@ -1,5 +1,6 @@
 import { subscribe, publish, WS_CHANGED, ITEM_COUNT_CHANGED } from "app/_sys/pubsub";
-import { ISchema, keys } from "app/types";
+import { keys } from "app/types";
+import { ISchema } from "app/api";
 import Panel from "app/ui/side-panel/panel"
 
 export default class extends Panel {
