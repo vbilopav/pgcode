@@ -3,6 +3,7 @@ define(["require", "exports", "app/_sys/pubsub"], function (require, exports, pu
     Object.defineProperty(exports, "__esModule", { value: true });
     class ContextMenu {
         constructor({ id, items = [], target, event = "contextmenu", menuItemsCallback = items => items, beforeOpen = () => true, onOpen = () => { }, onClose = () => { } }) {
+            this.id = id;
             this.element = document.body.find("#" + id);
             if (!this.element.length) {
                 this.element = this.menuElement(id);

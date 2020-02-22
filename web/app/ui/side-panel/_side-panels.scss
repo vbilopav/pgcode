@@ -51,16 +51,21 @@
 
     & > div > div:nth-child(2) {
         grid-area: items;
-        overflow-y: scroll;
+        overflow-y: hidden;
         overflow-x: hidden;
-        padding-left: 10px;
-        font-size: 13px;
+        font-size: 14px;
 
         & > div {
+            padding-left: 5px;
             padding-top: 5px;
             padding-bottom: 5px;
             white-space: nowrap;
             text-overflow: ellipsis;
+            overflow: hidden;
+            cursor: pointer;
+        }
+        & > div:hover {
+            background-color: $body-background-color;
         }
     }
 
@@ -78,6 +83,10 @@
     }
 }
 
-#scripts-panel-menu .pgmenu-container {
+#scripts-panel-menu > .pgmenu-container, 
+#routines-panel-menu > .pgmenu-container, 
+#search-panel-menu > .pgmenu-container, 
+#tables-panel-menu > .pgmenu-container,
+#views-panel-menu > .pgmenu-container {
     clip-path: inset(0px -5px -5px -5px);
 }

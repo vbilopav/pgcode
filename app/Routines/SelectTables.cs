@@ -41,8 +41,7 @@ namespace Pgcode.Routines
                     information_schema.tables
                 where
                     table_schema = _data->>'schema' and table_type = _data->>'type'
-                order by
-                    table_name
+
             ) as result;
         ${Name}$
         language sql security definer stable;

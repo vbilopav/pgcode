@@ -76,8 +76,8 @@ define(["require", "exports", "app/types"], function (require, exports, types_1)
     exports.SET_APP_STATUS = SET_APP_STATUS;
     const API_INITIAL = "api/initial/";
     exports.API_INITIAL = API_INITIAL;
-    const WS_CHANGED = "app/schema/";
-    exports.WS_CHANGED = WS_CHANGED;
+    const SCHEMA_CHANGED = "app/schema/";
+    exports.SCHEMA_CHANGED = SCHEMA_CHANGED;
     const ITEM_COUNT_CHANGED = "item/count/";
     exports.ITEM_COUNT_CHANGED = ITEM_COUNT_CHANGED;
 });

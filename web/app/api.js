@@ -17,7 +17,15 @@ define(["require", "exports", "app/_sys/pubsub", "app/types"], function (require
             throw error;
         }
     };
+    const _fetch = async (url) => {
+        const response = await fetch(url);
+        if (!response.ok) {
+            return _createResponse(response);
+        }
+        return _createResponse(response, await response.json());
+    };
     let _currentSchema;
+    const getCurrentSchema = () => _currentSchema;
     exports.fetchInitial = async () => _fetchAndPublishStatus("api/initial");
     exports.fetchConnection = async (name) => {
         const result = _fetchAndPublishStatus(`api/connection/${name}`);
@@ -29,5 +37,6 @@ define(["require", "exports", "app/_sys/pubsub", "app/types"], function (require
         _currentSchema = (await result).data.name;
         return result;
     };
+    exports.createScript = async () => _fetch(`api/create-script/${getCurrentSchema()}`);
 });
 //# sourceMappingURL=api.js.map

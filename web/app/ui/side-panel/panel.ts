@@ -1,3 +1,5 @@
+import { subscribe, publish, SCHEMA_CHANGED, ITEM_COUNT_CHANGED } from "app/_sys/pubsub";
+import { ISchema } from "app/api";
 import MonacoContextMenu from "app/controls/monaco-context-menu";
 import { ContextMenuCtorArgs, MenuItemType } from "app/controls/context-menu";
 
@@ -17,15 +19,17 @@ class PanelMenu extends MonacoContextMenu {
 }
 
 export default abstract class Panel {
+    protected readonly key: string;
     protected readonly element: Element;
     protected readonly header: Element;
     protected readonly items: Element;
     private itemScrollTimeout: number;
 
-    constructor(element: Element, title: string, menuItems: Array<MenuItemType> = []){
+    constructor(element: Element, key: string, menuItems: Array<MenuItemType> = []){
         this.element = element;
+        this.key = key;
         this.header = element.children[0].html(String.html`
-            <div>${title}</div>
+            <div>${key.toUpperCase()}</div>
             <div>
                 <span class="btn"><i class="icon-menu"></i></span>
             </div>
@@ -45,7 +49,7 @@ export default abstract class Panel {
 
         if (menuItems.length) {
             new PanelMenu({
-                id: "scripts-panel-menu",
+                id: `${key}-panel-menu`,
                 target: this.header.find(".btn"),
                 event: "click",
                 items: menuItems,
@@ -56,10 +60,18 @@ export default abstract class Panel {
         } else {
             this.header.find(".btn").remove();
         }
+
+        subscribe(SCHEMA_CHANGED, (data: ISchema) => this.schemaChanged(data));
     }
 
-    show(state: boolean) {
+    public show(state: boolean) {
         this.element.showElement(state);
+    }
+
+    protected abstract schemaChanged(data: ISchema) : void;
+
+    protected publishLength() {
+        publish(ITEM_COUNT_CHANGED, this.key, this.items.children.length);
     }
 
     private toggleHeaderShadow() {
@@ -73,6 +85,6 @@ export default abstract class Panel {
                 this.header.removeClass("shadow");
             }
             this.itemScrollTimeout = undefined;
-        }, 10);
+        }, 25);
     }
 }

@@ -179,25 +179,26 @@ namespace Pgcode.Api
                 value.Connection.Notice += (sender, args) =>
                 {
                     var severity = args.Notice.Severity;
+                    var msg = $"{args.Notice.MessageText}{Environment.NewLine}";
                     if (InfoLevels.Contains(severity))
                     {
-                        value.Logger.LogInformation(args.Notice.MessageText);
+                        value.Logger.LogInformation(msg);
                     }
                     else if (severity == "WARNING")
                     {
-                        value.Logger.LogWarning(args.Notice.MessageText);
+                        value.Logger.LogWarning(msg);
                     }
                     else if (severity.StartsWith("DEBUG"))
                     {
-                        value.Logger.LogDebug(args.Notice.MessageText);
+                        value.Logger.LogDebug(msg);
                     }
                     else if (ErrorLevels.Contains(severity))
                     {
-                        value.Logger.LogError(args.Notice.MessageText);
+                        value.Logger.LogError(msg);
                     }
                     else
                     {
-                        value.Logger.LogTrace(args.Notice.MessageText);
+                        value.Logger.LogTrace(msg);
                     }
                 };
             }

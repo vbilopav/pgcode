@@ -40,7 +40,7 @@ export interface IConnectionInfo {
     user: string 
 }
 
-interface IScriptInfo {
+export interface IScriptInfo {
     id: string,
     title: string,
     comment: string,
@@ -74,7 +74,16 @@ const _fetchAndPublishStatus:<T> (url: string) => Promise<IResponse<T>> = async 
     }
 }
 
+const _fetch:<T> (url: string) => Promise<IResponse<T>> = async url => {
+    const response = await fetch(url);
+    if (!response.ok) {
+        return _createResponse(response);
+    }
+    return _createResponse(response, await response.json());
+}
+
 let _currentSchema;
+const getCurrentSchema = () => _currentSchema;
 
 export const fetchInitial: () => Promise<IResponse<IInitialResponse>> = async () => 
     _fetchAndPublishStatus<IInitialResponse>("api/initial");
@@ -91,6 +100,4 @@ export const fetchSchema: (schema: string) => Promise<IResponse<ISchemaResponse>
     return result;
 }
 
-//export const getCurrentSchema = () => _currentSchema;
-
-//export const createScript: () => Promise<IResponse<ISchemaResponse>> = async schema => {
+export const createScript: () => Promise<IResponse<IScript>> = async () => _fetch(`api/create-script/${getCurrentSchema()}`);

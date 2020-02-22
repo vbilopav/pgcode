@@ -1,23 +1,38 @@
-define(["require", "exports", "app/_sys/pubsub", "app/types", "app/ui/side-panel/panel"], function (require, exports, pubsub_1, types_1, panel_1) {
+define(["require", "exports", "app/types", "app/api", "app/ui/side-panel/panel"], function (require, exports, types_1, api_1, panel_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class default_1 extends panel_1.default {
         constructor(element) {
-            super(element, types_1.keys.scripts.toUpperCase(), [
-                { text: "New script", keyBindingsInfo: "Ctrl+N" },
+            super(element, types_1.keys.scripts, [
+                { text: "New script", keyBindingsInfo: "Ctrl+N", action: () => this.createScript() },
                 { splitter: true },
+                { text: "Filter" },
                 { text: "Order ascending" },
                 { text: "Order descending" },
             ]);
-            pubsub_1.subscribe(pubsub_1.WS_CHANGED, (data) => {
-                pubsub_1.publish(pubsub_1.ITEM_COUNT_CHANGED, types_1.keys.scripts, data.scripts.length);
-                this.items.html("");
-                for (let item of data.scripts) {
-                    String.html `<div data-id="${item.id}">${item.title}</div>`
-                        .toElement()
-                        .appendElementTo(this.items);
-                }
-            });
+        }
+        schemaChanged(data) {
+            this.items.html("");
+            for (let item of data.scripts) {
+                this.addNewItem(item);
+            }
+            this.publishLength();
+        }
+        async createScript() {
+            const response = await api_1.createScript();
+            if (response.ok) {
+                this.addNewItem(response.data);
+                this.publishLength();
+            }
+        }
+        addNewItem(item) {
+            String.html `
+        <div data-id="${item.id}">
+            <i class="icon-doc-text"></i>
+            <span>${item.title}<span>
+        </div>`
+                .toElement()
+                .appendElementTo(this.items);
         }
     }
     exports.default = default_1;

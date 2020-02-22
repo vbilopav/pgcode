@@ -1,4 +1,4 @@
-define(["require", "exports", "app/controls/monaco-context-menu"], function (require, exports, monaco_context_menu_1) {
+define(["require", "exports", "app/_sys/pubsub", "app/controls/monaco-context-menu"], function (require, exports, pubsub_1, monaco_context_menu_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class PanelMenu extends monaco_context_menu_1.default {
@@ -17,10 +17,11 @@ define(["require", "exports", "app/controls/monaco-context-menu"], function (req
         }
     }
     class Panel {
-        constructor(element, title, menuItems = []) {
+        constructor(element, key, menuItems = []) {
             this.element = element;
+            this.key = key;
             this.header = element.children[0].html(String.html `
-            <div>${title}</div>
+            <div>${key.toUpperCase()}</div>
             <div>
                 <span class="btn"><i class="icon-menu"></i></span>
             </div>
@@ -38,7 +39,7 @@ define(["require", "exports", "app/controls/monaco-context-menu"], function (req
             this.toggleHeaderShadow();
             if (menuItems.length) {
                 new PanelMenu({
-                    id: "scripts-panel-menu",
+                    id: `${key}-panel-menu`,
                     target: this.header.find(".btn"),
                     event: "click",
                     items: menuItems,
@@ -49,9 +50,13 @@ define(["require", "exports", "app/controls/monaco-context-menu"], function (req
             else {
                 this.header.find(".btn").remove();
             }
+            pubsub_1.subscribe(pubsub_1.SCHEMA_CHANGED, (data) => this.schemaChanged(data));
         }
         show(state) {
             this.element.showElement(state);
+        }
+        publishLength() {
+            pubsub_1.publish(pubsub_1.ITEM_COUNT_CHANGED, this.key, this.items.children.length);
         }
         toggleHeaderShadow() {
             if (this.itemScrollTimeout) {
@@ -65,7 +70,7 @@ define(["require", "exports", "app/controls/monaco-context-menu"], function (req
                     this.header.removeClass("shadow");
                 }
                 this.itemScrollTimeout = undefined;
-            }, 10);
+            }, 25);
         }
     }
     exports.default = Panel;

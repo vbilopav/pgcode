@@ -40,9 +40,8 @@ namespace Pgcode.Routines
                 where
                     (_data->>'schema' is null or schema = _data->>'schema')
                     and
-                    (_data->>'userId' is null or schema = _data->>'userId')
-                order by
-                    title
+                    (_data->>'userId' is null or user_id = _data->>'userId')
+
             ) as result;
         ${Name}$
         language sql security definer stable;

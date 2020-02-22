@@ -1,0 +1,22 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "vscode-edge-devtools.debug",
+            "request": "launch",
+            "name": "Launch Microsoft Edge and open the Elements tool",
+            //"file": "${workspaceFolder}/index.html",
+            "webRoot": "${workspaceFolder}/web",
+            "url": "https://localhost:80/"
+        }, {
+            "type": "vscode-edge-devtools.debug",
+            "request": "attach",
+            "name": "Attach to Microsoft Edge and open the Elements tool",
+            "url": "https://localhost:80/",
+            "webRoot": "${workspaceFolder}/web"
+        }
+    ]
+}

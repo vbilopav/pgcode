@@ -36,6 +36,7 @@ abstract class ContextMenu {
 
     public readonly element: Element;
     public readonly target: Element;
+    public readonly id: string;
 
     protected items: {[id: string] : MenuItemType};
     protected actions: Element;
@@ -55,7 +56,7 @@ abstract class ContextMenu {
         onOpen = () => {},
         onClose = () => {}
     }: ContextMenuCtorArgs) {
-
+        this.id = id;
         this.element = document.body.find("#" + id);
         if (!(this.element as ElementResult).length) {
             this.element = this.menuElement(id) as ElementResult;

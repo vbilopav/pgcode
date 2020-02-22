@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System;
+using System.Globalization;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -36,9 +37,11 @@ namespace Pgcode.Api
         {
             var command = $"select {Program.Settings.PgCodeSchema}.{name}(@_data::json)";
             var dataParam = JsonSerializer.Serialize(parameters);
+
             if (data.Logger != null && Program.Settings.LogPgCodeDbCommands)
             {
-                data.Logger.LogInformation(command.Replace("@_data", $"'{dataParam}'"));
+                var msg = $"{command.Replace("@_data", $"'{dataParam}'")}{Environment.NewLine}";
+                data.Logger.LogInformation(msg);
             }
             return (command, dataParam);
         }
