@@ -62,13 +62,34 @@ export default abstract class Panel {
         }
 
         subscribe(SCHEMA_CHANGED, (data: ISchema) => this.schemaChanged(data));
+        
+        this.items.on("click", e => {
+            const element = (e.target as Element).closest("div.panel-item");
+            if (!element) {
+                return;
+            }
+            if (!element.hasClass("active")) {
+                element.addClass("active");
+                this.itemSelected(element);
+            }
+        });
     }
 
     public show(state: boolean) {
         this.element.showElement(state);
     }
 
+    protected createItemElement(content: string) {
+        return String.html`
+        <div class="panel-item">
+            ${content}
+        </div>`
+        .toElement() as Element
+    }
+
     protected abstract schemaChanged(data: ISchema) : void;
+
+    protected itemSelected(element: Element) : void {};
 
     protected publishLength() {
         publish(ITEM_COUNT_CHANGED, this.key, this.items.children.length);

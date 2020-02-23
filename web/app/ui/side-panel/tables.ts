@@ -14,13 +14,17 @@ export default class extends Panel {
     protected schemaChanged(data: ISchema) {
         this.items.html("");
         for(let item of data.tables) {
-            String.html`
-            <div>
-                <i class="icon-database"></i>
-                <span>${item}</span>
-            </div>`
-            .toElement().appendElementTo(this.items);
+            this.addNewItem(item);
         }
         this.publishLength();
+    }
+
+    private addNewItem(item: string) {
+        this.createItemElement(String.html`
+            <i class="icon-database"></i>
+            <span>${item}</span>
+        `)
+        .dataAttr("item", item)
+        .appendElementTo(this.items);
     }
 }

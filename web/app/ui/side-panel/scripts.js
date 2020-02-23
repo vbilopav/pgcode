@@ -26,12 +26,17 @@ define(["require", "exports", "app/types", "app/api", "app/ui/side-panel/panel"]
             }
         }
         addNewItem(item) {
-            String.html `
-        <div data-id="${item.id}">
-            <i class="icon-doc-text"></i>
-            <span>${item.title}<span>
-        </div>`
-                .toElement()
+            this.createItemElement(String.html `
+            <div>
+                <i class="icon-doc-text"></i>
+                <span>${item.title}</span>
+            </div>
+            <div>
+                <i class="icon-doc-text" style="visibility: hidden;"></i>
+                <span class="item-subtitle">${item.timestamp.toDateTimeString()}</span>
+            </div>
+        `)
+                .dataAttr("item", item)
                 .appendElementTo(this.items);
         }
     }

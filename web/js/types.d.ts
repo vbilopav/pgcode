@@ -38,7 +38,7 @@ interface Element {
      * - If `value` is present, sets instance css property to that value and returns same instance.
      * - Note: setting value doesn't mutate the DOM, it caches value on element instance.
      */
-    dataAttr(key: string, value?: string): any | Element
+    dataAttr(key: string, value?: any): any | Element
     /**
      * - Returns all element descendants of node that match selectors (executes `instance.querySelector`).
      * - If no matches found for selector - returns dummy parameter with result length property set to 0 (to avoid unnecessary nestings in code)
@@ -367,4 +367,9 @@ interface String {
      * Builds Element from HTML markup in a string
      */
     toElement(): Element,
+
+    /**
+     * Format date time string
+    */
+    toDateTimeString(): string;
 }

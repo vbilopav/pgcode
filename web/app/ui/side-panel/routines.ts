@@ -1,5 +1,5 @@
 import { keys } from "app/types";
-import { ISchema } from "app/api";
+import { ISchema, IRoutineInfo } from "app/api";
 import Panel from "app/ui/side-panel/panel"
 
 export default class extends Panel {
@@ -14,13 +14,17 @@ export default class extends Panel {
     protected schemaChanged(data: ISchema) {
         this.items.html("");
         for(let item of data.routines) {
-            String.html`
-            <div>
-                <i class="icon-database"></i>
-                <span>${item.name}</span>
-            </div>
-            `.toElement().appendElementTo(this.items);
+            this.addNewItem(item);
         }
         this.publishLength();
+    }
+
+    private addNewItem(item: IRoutineInfo) {
+        this.createItemElement(String.html`
+            <i class="icon-database"></i>
+            <span>${item.name}</span>
+        `)
+        .dataAttr("item", item)
+        .appendElementTo(this.items);
     }
 }

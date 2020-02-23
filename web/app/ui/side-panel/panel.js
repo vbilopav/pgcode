@@ -51,10 +51,29 @@ define(["require", "exports", "app/_sys/pubsub", "app/controls/monaco-context-me
                 this.header.find(".btn").remove();
             }
             pubsub_1.subscribe(pubsub_1.SCHEMA_CHANGED, (data) => this.schemaChanged(data));
+            this.items.on("click", e => {
+                const element = e.target.closest("div.panel-item");
+                if (!element) {
+                    return;
+                }
+                if (!element.hasClass("active")) {
+                    element.addClass("active");
+                    this.itemSelected(element);
+                }
+            });
         }
         show(state) {
             this.element.showElement(state);
         }
+        createItemElement(content) {
+            return String.html `
+        <div class="panel-item">
+            ${content}
+        </div>`
+                .toElement();
+        }
+        itemSelected(element) { }
+        ;
         publishLength() {
             pubsub_1.publish(pubsub_1.ITEM_COUNT_CHANGED, this.key, this.items.children.length);
         }

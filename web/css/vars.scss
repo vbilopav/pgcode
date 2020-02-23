@@ -168,3 +168,38 @@ $ctx-menu-hover-color: default;
 @if $theme == "light" {
     $ctx-menu-hover-color: #094771;
 }
+
+
+//
+// PANEL HEADER BACKGROUND COLOR
+// 
+$panel-header-background-color: default;
+@if $theme == "dark" {
+    $panel-header-background-color: #1E1E1E;
+} 
+@if $theme == "light" {
+    $panel-header-background-color: #C5C5C5;
+}
+
+//
+// PANEL ITEM MOUSE HOVER BACKGROUND COLOR
+//
+$panel-item-hover-background-color: default;
+@if $theme == "dark" {
+    $panel-item-hover-background-color: #1e1e1ea1;
+} 
+@if $theme == "light" {
+    $panel-item-hover-background-color: #a0a0a0a0;
+}
+
+
+//
+// PANEL ITEM ACTIVE BACKGROUND COLOR
+//
+$panel-item-active-background-color: default;
+@if $theme == "dark" {
+    $panel-item-active-background-color: #1E1E1E;
+} 
+@if $theme == "light" {
+    $panel-item-active-background-color: #C5C5C5;
+}

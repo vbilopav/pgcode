@@ -20,12 +20,7 @@ interface ISchemaResponse extends ISchema {
 }
 
 export interface ISchema { 
-    routines: Array<{
-        id: string,
-        language: string,
-        name: string,
-        type: string
-    }>,
+    routines: Array<IRoutineInfo>,
     scripts: Array<IScriptInfo>,
     tables: Array<string>,
     views: Array<string>
@@ -38,6 +33,13 @@ export interface IConnectionInfo {
     port: number, 
     database: string,
     user: string 
+}
+
+export interface IRoutineInfo {
+    id: string,
+    language: string,
+    name: string,
+    type: string
 }
 
 export interface IScriptInfo {

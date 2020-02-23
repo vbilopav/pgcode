@@ -38,7 +38,7 @@ namespace Pgcode.Migrations
                 create table if not exists schema_version
                 (
                     version int not null primary key,
-                    timestamp timestamp with time zone not null default (transaction_timestamp() at time zone 'utc')
+                    timestamp timestamp with time zone not null default transaction_timestamp()
                 );
             end if;
 
@@ -50,7 +50,7 @@ namespace Pgcode.Migrations
             (
                 id varchar not null primary key,
                 data jsonb not null default '{{}}',
-                timestamp timestamp with time zone not null default (transaction_timestamp() at time zone 'utc')
+                timestamp timestamp with time zone not null default transaction_timestamp()
             );
 
             create table scripts
@@ -62,7 +62,7 @@ namespace Pgcode.Migrations
                 comment varchar null,
                 content text not null default '',
                 view_state json null,
-                timestamp timestamp with time zone not null default (transaction_timestamp() at time zone 'utc')
+                timestamp timestamp with time zone not null default transaction_timestamp()
             );
             
             create index IDX_scripts_user_id on scripts using btree (user_id);

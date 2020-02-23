@@ -18,14 +18,14 @@
 
     & > div > div:nth-child(1) {
         grid-area: header;
-        background-color: $body-background-color;
+        background-color: $panel-header-background-color;
         padding-left: 10px;
         padding-right: 10px;
         grid-template-columns: auto min-content;
         display: grid;
 
         & > div {
-            margin-top: auto;  
+            margin-top: auto;
             margin-bottom: auto;
         }
         & > div > .btn {
@@ -65,7 +65,14 @@
             cursor: pointer;
         }
         & > div:hover {
-            background-color: $body-background-color;
+            background-color: $panel-item-hover-background-color;
+        }
+        & > div.active {
+            background-color: $panel-item-active-background-color;
+        }
+        & > div .item-subtitle {
+            font-size: 10px;
+            opacity: 0.6;
         }
     }
 

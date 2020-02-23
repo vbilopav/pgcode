@@ -313,7 +313,12 @@ body > div.container {
       overflow: hidden;
       cursor: pointer; }
     .side-panel > div > div:nth-child(2) > div:hover {
+      background-color: #1e1e1ea1; }
+    .side-panel > div > div:nth-child(2) > div.active {
       background-color: #1E1E1E; }
+    .side-panel > div > div:nth-child(2) > div .item-subtitle {
+      font-size: 10px;
+      opacity: 0.6; }
   .side-panel > div > div:nth-child(2)::-webkit-scrollbar {
     width: 8px;
     height: 8px; }

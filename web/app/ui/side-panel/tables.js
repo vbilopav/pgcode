@@ -12,14 +12,17 @@ define(["require", "exports", "app/types", "app/ui/side-panel/panel"], function 
         schemaChanged(data) {
             this.items.html("");
             for (let item of data.tables) {
-                String.html `
-            <div>
-                <i class="icon-database"></i>
-                <span>${item}</span>
-            </div>`
-                    .toElement().appendElementTo(this.items);
+                this.addNewItem(item);
             }
             this.publishLength();
+        }
+        addNewItem(item) {
+            this.createItemElement(String.html `
+            <i class="icon-database"></i>
+            <span>${item}</span>
+        `)
+                .dataAttr("item", item)
+                .appendElementTo(this.items);
         }
     }
     exports.default = default_1;
