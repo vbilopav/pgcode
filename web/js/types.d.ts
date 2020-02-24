@@ -366,10 +366,5 @@ interface String {
     /**
      * Builds Element from HTML markup in a string
      */
-    toElement(): Element,
-
-    /**
-     * Format date time string
-    */
-    toDateTimeString(): string;
+    toElement(): Element
 }

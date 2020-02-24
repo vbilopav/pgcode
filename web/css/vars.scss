@@ -203,3 +203,14 @@ $panel-item-active-background-color: default;
 @if $theme == "light" {
     $panel-item-active-background-color: #C5C5C5;
 }
+
+//
+// PANEL ITEM ACTIVE BORDER COLOR
+//
+$panel-item-active-border-color: default;
+@if $theme == "dark" {
+    $panel-item-active-border-color: #c5c5c557;
+} 
+@if $theme == "light" {
+    $panel-item-active-border-color: #c5c5c557;
+}

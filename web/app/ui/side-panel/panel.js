@@ -57,6 +57,12 @@ define(["require", "exports", "app/_sys/pubsub", "app/controls/monaco-context-me
                     return;
                 }
                 if (!element.hasClass("active")) {
+                    const active = this.items.findAll(".active");
+                    if (active.length > 0) {
+                        for (let unselect of active) {
+                            this.itemUnselected(unselect.removeClass("active"));
+                        }
+                    }
                     element.addClass("active");
                     this.itemSelected(element);
                 }
@@ -73,6 +79,8 @@ define(["require", "exports", "app/_sys/pubsub", "app/controls/monaco-context-me
                 .toElement();
         }
         itemSelected(element) { }
+        ;
+        itemUnselected(element) { }
         ;
         publishLength() {
             pubsub_1.publish(pubsub_1.ITEM_COUNT_CHANGED, this.key, this.items.children.length);

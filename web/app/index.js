@@ -1,6 +1,19 @@
 define(["require", "exports", "app/_sys/storage", "app/ui/toolbar/toolbar", "./ui/side-panel/_side-panels", "app/ui/main-panel/main-panel", "app/ui/footer/footer", "app/controls/splitter", "app/types", "app/api", "app/_sys/pubsub"], function (require, exports, storage_1, toolbar_1, _side_panels_1, main_panel_1, footer_1, splitter_1, types_1, api_1, pubsub_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    String.prototype.formatDateString = function () {
+        const d = new Date(this);
+        const today = new Date();
+        const fullYear = d.getFullYear();
+        const date = d.getDate();
+        const month = d.getMonth();
+        if (date == today.getDate() && month == today.getMonth() && fullYear == today.getFullYear()) {
+            return `${d.getHours().toString().padStart(2, "0")}:${d.getMinutes().toString().padStart(2, "0")}:${d.getSeconds().toString().padStart(2, "0")}.${d.getMilliseconds().toString().padStart(3, "0")}`;
+        }
+        else {
+            return `${fullYear}-${(month + 1).toString().padStart(2, "0")}-${date.toString().padStart(2, "0")} ${d.getHours().toString().padStart(2, "0")}:${d.getMinutes().toString().padStart(2, "0")}:${d.getSeconds().toString().padStart(2, "0")}.${d.getMilliseconds().toString().padStart(3, "0")}`;
+        }
+    };
     const storage = new storage_1.default({
         toolbarPosition: types_1.Position.LEFT,
         sidePanelPosition: types_1.Position.LEFT,

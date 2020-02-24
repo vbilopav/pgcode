@@ -30,14 +30,15 @@ export default class extends Panel {
     }
 
     private addNewItem(item: IScriptInfo) {
+        const comment = item.comment ? String.html`<div class="item-subtext">${item.comment}</div>` : "";
         this.createItemElement(String.html`
             <div>
                 <i class="icon-doc-text"></i>
                 <span>${item.title}</span>
             </div>
             <div>
-                <i class="icon-doc-text" style="visibility: hidden;"></i>
-                <span class="item-subtitle">${item.timestamp.toDateTimeString()}</span>
+                <div class="item-subtext">${item.timestamp.formatDateString()}</div>
+                ${comment}
             </div>
         `)
         .dataAttr("item", item)

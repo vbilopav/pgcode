@@ -12,6 +12,18 @@ import {
     SIDEBAR_DOCKED, SIDEBAR_UNDOCKED, STATE_CHANGED_ON, STATE_CHANGED_OFF, SET_APP_STATUS, API_INITIAL
 } from "app/_sys/pubsub";
 
+String.prototype.formatDateString = function() {
+    const d = new Date(this);
+    const today = new Date();
+    const fullYear = d.getFullYear();
+    const date = d.getDate();
+    const month = d.getMonth();
+    if (date == today.getDate() && month == today.getMonth() && fullYear == today.getFullYear()) {
+        return `${d.getHours().toString().padStart(2, "0")}:${d.getMinutes().toString().padStart(2, "0")}:${d.getSeconds().toString().padStart(2, "0")}.${d.getMilliseconds().toString().padStart(3, "0")}`
+    } else {
+        return `${fullYear}-${(month + 1).toString().padStart(2, "0")}-${date.toString().padStart(2, "0")} ${d.getHours().toString().padStart(2, "0")}:${d.getMinutes().toString().padStart(2, "0")}:${d.getSeconds().toString().padStart(2, "0")}.${d.getMilliseconds().toString().padStart(3, "0")}`
+    }
+}
 
 interface IStorage {
     toolbarPosition: Position, 

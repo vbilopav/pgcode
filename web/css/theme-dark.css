@@ -311,14 +311,21 @@ body > div.container {
       white-space: nowrap;
       text-overflow: ellipsis;
       overflow: hidden;
-      cursor: pointer; }
+      cursor: pointer;
+      border: 1px transparent solid; }
     .side-panel > div > div:nth-child(2) > div:hover {
       background-color: #1e1e1ea1; }
     .side-panel > div > div:nth-child(2) > div.active {
-      background-color: #1E1E1E; }
-    .side-panel > div > div:nth-child(2) > div .item-subtitle {
+      background-color: #1E1E1E;
+      border: 1px #c5c5c557 dotted; }
+    .side-panel > div > div:nth-child(2) > div .item-subtext {
       font-size: 10px;
-      opacity: 0.6; }
+      opacity: 0.6;
+      margin-left: 17px; }
+    .side-panel > div > div:nth-child(2) > div div, .side-panel > div > div:nth-child(2) > div span {
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden; }
   .side-panel > div > div:nth-child(2)::-webkit-scrollbar {
     width: 8px;
     height: 8px; }

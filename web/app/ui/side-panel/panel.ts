@@ -69,6 +69,12 @@ export default abstract class Panel {
                 return;
             }
             if (!element.hasClass("active")) {
+                const active = this.items.findAll(".active");
+                if (active.length > 0) {
+                    for(let unselect of active) {
+                        this.itemUnselected((unselect as Element).removeClass("active"));
+                    } 
+                }
                 element.addClass("active");
                 this.itemSelected(element);
             }
@@ -90,6 +96,8 @@ export default abstract class Panel {
     protected abstract schemaChanged(data: ISchema) : void;
 
     protected itemSelected(element: Element) : void {};
+
+    protected itemUnselected(element: Element) : void {};
 
     protected publishLength() {
         publish(ITEM_COUNT_CHANGED, this.key, this.items.children.length);
