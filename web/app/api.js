@@ -2,10 +2,10 @@ define(["require", "exports", "app/_sys/pubsub", "app/types"], function (require
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     const _createResponse = (response, data) => Object({ ok: response.ok, status: response.status, data: data });
-    const _fetchAndPublishStatus = async (url) => {
+    const _fetchAndPublishStatus = async (url, init) => {
         pubsub_1.publish(pubsub_1.SET_APP_STATUS, types_1.AppStatus.BUSY);
         try {
-            const response = await fetch(url);
+            const response = await fetch(url, init);
             if (!response.ok) {
                 pubsub_1.publish(pubsub_1.SET_APP_STATUS, types_1.AppStatus.ERROR, response.status);
                 return _createResponse(response);
@@ -26,9 +26,12 @@ define(["require", "exports", "app/_sys/pubsub", "app/types"], function (require
     };
     let _currentSchema;
     const getCurrentSchema = () => _currentSchema;
+    const getTimezoneHeader = () => {
+        return { headers: { "timezone": Intl.DateTimeFormat().resolvedOptions().timeZone } };
+    };
     exports.fetchInitial = async () => _fetchAndPublishStatus("api/initial");
     exports.fetchConnection = async (name) => {
-        const result = _fetchAndPublishStatus(`api/connection/${name}`);
+        const result = _fetchAndPublishStatus(`api/connection/${name}`, getTimezoneHeader());
         _currentSchema = (await result).data.schemas.selected;
         return result;
     };

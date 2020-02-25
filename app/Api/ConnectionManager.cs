@@ -27,22 +27,6 @@ namespace Pgcode.Api
             ConnectionNamesByUserId.AddOrUpdate(userId, connectionName, (key, value) => connectionName);
         }
 
-        public int GetConnectionIdByUserId(string userId)
-        {
-            if (ConnectionNamesByUserId.TryGetValue(userId, out var name))
-            {
-                var result = _connections.Keys.ToList().IndexOf(name);
-                if (result == -1)
-                {
-                    throw new ApiException($"Unknown connection name {name}", 404);
-                }
-
-                return result;
-            }
-
-            throw new ApiException($"Unknown userId {userId}", 404);
-        }
-
         public ConnectionData GetConnectionDataByUserId(string userId)
         {
             if (ConnectionNamesByUserId.TryGetValue(userId, out var name))

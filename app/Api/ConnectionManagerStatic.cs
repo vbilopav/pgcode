@@ -243,11 +243,8 @@ namespace Pgcode.Api
                     {
                         Console.ForegroundColor = ConsoleColor.Red;
                         Console.WriteLine("Failed to apply migration for connection {0}, version {1}", section.Key, e.Version);
-                        Console.WriteLine("Error: {0}", e.PostgresException.Message);
-                        if (e.PostgresException.Detail != null)
-                        {
-                            Console.WriteLine("Detail: {0}", e.PostgresException.Detail);
-                        }
+                        Console.WriteLine("Error:");
+                        Console.WriteLine(e.PostgresException);
                         Console.ResetColor();
                     }
                     Console.ResetColor();

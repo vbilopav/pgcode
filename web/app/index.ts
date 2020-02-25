@@ -12,6 +12,7 @@ import {
     SIDEBAR_DOCKED, SIDEBAR_UNDOCKED, STATE_CHANGED_ON, STATE_CHANGED_OFF, SET_APP_STATUS, API_INITIAL
 } from "app/_sys/pubsub";
 
+
 String.prototype.formatDateString = function() {
     const d = new Date(this);
     const today = new Date();

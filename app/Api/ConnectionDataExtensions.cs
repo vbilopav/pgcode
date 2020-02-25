@@ -17,21 +17,25 @@ namespace Pgcode.Api
             return await data.Connection.SingleAsync<string>(command, dataParam);
         }
 
-        public static async ValueTask VoidAsync<T>(this ConnectionData data, string name, T parameters)
+        public static async ValueTask ExecAsync<T>(this ConnectionData data, string name, T parameters)
         {
             var (command, dataParam) = GetCommand(data, name, parameters);
             await data.Connection.ExecuteAsync(command, dataParam);
         }
 
-        public static async ValueTask<ContentResult> GetContentResultAsync<T>(this ConnectionData data, string name, T parameters)
+        public static void Exec<T>(this ConnectionData data, string name, T parameters)
         {
-            return new ContentResult
+            var (command, dataParam) = GetCommand(data, name, parameters);
+            data.Connection.Execute(command, dataParam);
+        }
+
+        public static async ValueTask<ContentResult> GetContentResultAsync<T>(this ConnectionData data, string name, T parameters) =>
+            new ContentResult
             {
                 StatusCode = 200,
                 Content = await data.GetStringAsync(name, parameters),
                 ContentType = "application/javascript; charset=UTF-8"
             };
-        }
 
         private static (string command, string dataParam) GetCommand<T>(ConnectionData data, string name, T parameters)
         {

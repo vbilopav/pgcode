@@ -12,12 +12,10 @@ namespace Pgcode.Migrations
 
         public IEnumerable<IMigration> Routines => new List<IMigration>
         {
-            new GetUserData(Version),
-            new GetRoutines(Version),
+            new SelectRoutines(Version),
             new SelectSchemata(Version),
             new SelectTables(Version),
             new SelectScripts(Version),
-            new SetUserData(Version),
             new ApiGetConnection(Version),
             new ApiGetSchema(Version),
             new ApiCreateScript(Version),
@@ -35,8 +33,7 @@ namespace Pgcode.Migrations
                 create schema {settings.PgCodeSchema};
                 set search_path to {settings.PgCodeSchema};
 
-                create table if not exists schema_version
-                (
+                create table if not exists schema_version (
                     version int not null primary key,
                     timestamp timestamp with time zone not null default transaction_timestamp()
                 );
@@ -46,15 +43,13 @@ namespace Pgcode.Migrations
                 return;
             end if;
 
-            create table users
-            (
+            create table users (
                 id varchar not null primary key,
                 data jsonb not null default '{{}}',
                 timestamp timestamp with time zone not null default transaction_timestamp()
             );
 
-            create table scripts
-            (
+            create table scripts (
                 id int not null generated always as identity primary key,
                 user_id varchar not null,
                 title varchar not null,

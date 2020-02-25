@@ -26,7 +26,7 @@ namespace Pgcode.Middleware
         {
             IsEssential = true,
             Path = "/",
-            Expires = DateTime.UtcNow.AddDays(30)
+            Expires = DateTime.UtcNow.AddYears(1)
         };
 
         public void ProcessCookieAndAddIdentity(HttpContext context)
