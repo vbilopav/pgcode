@@ -314,10 +314,12 @@ body > div.container {
       cursor: pointer;
       border: 1px transparent solid; }
     .side-panel > div > div:nth-child(2) > div:hover {
-      background-color: #a0a0a0a0; }
+      background-color: #a0a0a0a0;
+      color: #252526; }
     .side-panel > div > div:nth-child(2) > div.active {
       background-color: #C5C5C5;
-      border: 1px #c5c5c557 dotted; }
+      border: 1px #c5c5c557 dotted;
+      color: #252526; }
     .side-panel > div > div:nth-child(2) > div .item-subtext {
       font-size: 10px;
       opacity: 0.6;

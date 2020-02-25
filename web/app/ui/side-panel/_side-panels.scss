@@ -67,10 +67,12 @@
         }
         & > div:hover {
             background-color: $panel-item-hover-background-color;
+            color: $active-color;
         }
         & > div.active {
             background-color: $panel-item-active-background-color;
             border: 1px $panel-item-active-border-color dotted;
+            color: $active-color;
         }
         & > div .item-subtext {
             font-size: 10px;

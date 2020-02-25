@@ -29,25 +29,31 @@ namespace Pgcode.Routines
         create or replace function {settings.PgCodeSchema}.{Name}(_data json) returns json as
         ${Name}$
         declare _title varchar;
-        declare _user_name varchar;
+        declare _user_id varchar;
+        declare _timezone varchar;
         declare _result json;
         begin
 
             _title := _data->>'title';
-            _user_name := _data->>'userId';
+            _user_id := _data->>'userId';
 
-            if (_user_name is null) then
+            if (_user_id is null) then
                 raise exception 'userId parameter is missing';
             end if;
+
+            _timezone := coalesce({settings.PgCodeSchema}.{GetProfileValue.Name}(_data->>'userId', 'timezone'), current_setting('timezone'));
             
             if (_title is null) then
-                _title := 'Script ' || (select count(*) + 1 from {settings.PgCodeSchema}.scripts where user_id = _user_name);
+                _title := 'Script ' || (select count(*) + 1 from {settings.PgCodeSchema}.scripts where user_id = _user_id);
             end if;
 
             with cte as (
                 insert into {settings.PgCodeSchema}.scripts (user_id, title, ""schema"")
-                values(_user_name, _title, _data->>'schema')
-                returning id, title, comment, schema, comment, timestamp, content, view_state as viewState, timestamp
+                values(_user_id, _title, _data->>'schema')
+                returning 
+                    id, title, comment, schema, comment, content, 
+                    view_state as viewState, 
+                    timestamp at time zone _timezone as ""timestamp""
             )
             select to_json(cte) into _result from cte;
 

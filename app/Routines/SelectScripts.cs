@@ -28,23 +28,32 @@ namespace Pgcode.Routines
 
         create or replace function {settings.PgCodeSchema}.{Name}(_data json) returns json as
         ${Name}$
-            select coalesce(json_agg(result), '[]')
+        declare _user_id varchar;
+        declare _timezone varchar;
+        begin
+
+            _user_id := _data->>'userId';
+            _timezone := coalesce({settings.PgCodeSchema}.{GetProfileValue.Name}(_data->>'userId', 'timezone'), current_setting('timezone'));
+
+            return coalesce(json_agg(result), '[]')
             from (
                 select 
                     id,
                     title,
                     comment,
-                    timestamp
+                    timestamp at time zone _timezone as ""timestamp""
                 from 
                     {settings.PgCodeSchema}.scripts
                 where
                     (_data->>'schema' is null or schema = _data->>'schema')
                     and
-                    (_data->>'userId' is null or user_id = _data->>'userId')
+                    (_user_id is null or user_id = _user_id)
 
             ) as result;
+
+        end
         ${Name}$
-        language sql security definer stable;
+        language plpgsql security definer stable;
         comment on function {settings.PgCodeSchema}.{Name}(json) is ${Name}_comment${CommentMarkup.Trim()}${Name}_comment$;
         revoke all on function {settings.PgCodeSchema}.{Name}(json) from public;
         grant execute on function {settings.PgCodeSchema}.{Name}(json) to {connection.UserName};

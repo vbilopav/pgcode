@@ -19,6 +19,7 @@ namespace Pgcode.Migrations
             new ApiGetConnection(Version),
             new ApiGetSchema(Version),
             new ApiCreateScript(Version),
+            new GetProfileValue(Version)
         };
 
         public string Up(Settings settings, NpgsqlConnection connection) => $@"
