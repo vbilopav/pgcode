@@ -11,20 +11,16 @@ namespace Pgcode.Api
     public class ApiController : Controller
     {
         private readonly ConnectionManager _connectionManager;
-        //private readonly UserProfile _userProfile;
         private readonly ApiAccess _api;
 
         protected string UserId => User.Identity.Name;
-        //protected UserProfile UserProfile => _userProfile.ForUserId(UserId);
         protected ApiAccess Api => _api.ForUserId(UserId);
 
         public ApiController(
             ConnectionManager connectionManager,
-            //UserProfile userProfile,
             ApiAccess api)
         {
             _connectionManager = connectionManager;
-            //_userProfile = userProfile;
             _api = api;
         }
 
@@ -58,5 +54,8 @@ namespace Pgcode.Api
 
         [HttpGet("create-script/{schema}")]
         public async ValueTask<object> CreateScript(string schema) => await Api.CreateScript(UserId, schema);
+
+        [HttpGet("script-content/{id}")]
+        public async ValueTask<object> ScriptContent(int id) => await Api.GetCreateContent(id);
     }
 }

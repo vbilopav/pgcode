@@ -261,7 +261,18 @@ body > div.container {
   margin-left: 18px; }
 
 .main-panel {
-  grid-area: main-panel; }
+  grid-area: main-panel;
+  height: 100%;
+  display: grid;
+  grid-template-rows: 40px auto;
+  grid-template-areas: 'tabs' 'content'; }
+  .main-panel > div {
+    width: 100%;
+    height: 100%; }
+  .main-panel > div:nth-child(1) {
+    grid-area: tabs; }
+  .main-panel > div:nth-child(1) {
+    grid-area: content; }
 
 .side-panel {
   grid-area: side-panel;

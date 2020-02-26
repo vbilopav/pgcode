@@ -4,13 +4,45 @@ using Pgcode.Routines;
 
 namespace Pgcode.Api
 {
-    public class ApiAccess : DataAccess<ApiAccess>
+    public class ApiAccess
     {
         private readonly Settings _settings;
+        protected readonly ConnectionManager ConnectionManager;
 
-        public ApiAccess(ConnectionManager connectionManager, Settings settings) : base(connectionManager)
+        private string _userId;
+        private ConnectionData _connectionData;
+
+        public string UserId => _userId ?? throw new ApiException("UserId is not supplied");
+
+
+        public ApiAccess(ConnectionManager connectionManager, Settings settings) // : base(connectionManager)
         {
             _settings = settings;
+            ConnectionManager = connectionManager;
+            _connectionData = null;
+            _userId = null;
+        }
+
+        public virtual ApiAccess ForUserId(string userId)
+        {
+            if (_userId != null)
+            {
+                return this;
+            }
+            _userId = userId;
+            return this;
+        }
+
+        public ConnectionData UserConnection
+        {
+            get
+            {
+                if (_connectionData != null)
+                {
+                    return _connectionData;
+                }
+                return _connectionData = ConnectionManager.GetConnectionDataByUserId(UserId);
+            }
         }
 
         public async ValueTask<ContentResult> GetConnection(string userId, string timezone) =>
@@ -27,5 +59,8 @@ namespace Pgcode.Api
 
         public async ValueTask<ContentResult> CreateScript(string userId, string schema) =>
             await UserConnection.GetContentResultAsync(ApiCreateScript.Name, new { userId, schema });
+
+        public async ValueTask<ContentResult> GetCreateContent(int id) =>
+            await UserConnection.GetContentResultAsync(ApiGetScriptContent.Name, new { id });
     }
 }

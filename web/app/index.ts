@@ -6,25 +6,16 @@ import Footer from "app/ui/footer/footer";
 import {Splitter, VerticalSplitter, SplitterCtorArgs} from "app/controls/splitter";
 import { Position, Themes, AppStatus, IMain } from "app/types";
 import { fetchInitial } from "app/api";
-
+import "app/extensions";
 import { 
     subscribe, publish, 
-    SIDEBAR_DOCKED, SIDEBAR_UNDOCKED, STATE_CHANGED_ON, STATE_CHANGED_OFF, SET_APP_STATUS, API_INITIAL
+    SIDEBAR_DOCKED, 
+    SIDEBAR_UNDOCKED, 
+    STATE_CHANGED_ON, 
+    STATE_CHANGED_OFF, 
+    SET_APP_STATUS, 
+    API_INITIAL
 } from "app/_sys/pubsub";
-
-
-String.prototype.formatDateString = function() {
-    const d = new Date(this);
-    const today = new Date();
-    const fullYear = d.getFullYear();
-    const date = d.getDate();
-    const month = d.getMonth();
-    if (date == today.getDate() && month == today.getMonth() && fullYear == today.getFullYear()) {
-        return `${d.getHours().toString().padStart(2, "0")}:${d.getMinutes().toString().padStart(2, "0")}:${d.getSeconds().toString().padStart(2, "0")}.${d.getMilliseconds().toString().padStart(3, "0")}`
-    } else {
-        return `${fullYear}-${(month + 1).toString().padStart(2, "0")}-${date.toString().padStart(2, "0")} ${d.getHours().toString().padStart(2, "0")}:${d.getMinutes().toString().padStart(2, "0")}:${d.getSeconds().toString().padStart(2, "0")}.${d.getMilliseconds().toString().padStart(3, "0")}`
-    }
-}
 
 interface IStorage {
     toolbarPosition: Position, 
@@ -76,11 +67,7 @@ new (class implements IMain {
     private themeLink: Element;
     private container: Element;
     private overlay: Element;
-    private toolbar: Toolbar;
-    private sidePanel: SidePanel
     private splitter: Splitter;
-    private mainPanel: MainPanel;
-    private footer: Footer;
     private defaultTitle: string = "pgcode";
     private previousTitle: string;
     private loadingTimeout: number;
@@ -217,10 +204,10 @@ new (class implements IMain {
     }
 
     private initComponents() {
-        this.toolbar = new Toolbar(this.container.children[0], storage.toolbarPosition, this);
-        this.sidePanel = new SidePanel(this.container.children[1]);
-        this.mainPanel = new MainPanel(this.container.children[3]);
-        this.footer = new Footer(this.container.children[4]);
+        const mainPanel = new MainPanel(this.container.children[3]);
+        new Toolbar(this.container.children[0], storage.toolbarPosition, this);
+        new SidePanel(this.container.children[1], mainPanel);
+        new Footer(this.container.children[4]);
     }
 
     private subscribeEvents() {

@@ -71,6 +71,10 @@ define(["require", "exports", "app/_sys/pubsub", "app/controls/monaco-context-me
         show(state) {
             this.element.showElement(state);
         }
+        setMainPanelRef(mainPanel) {
+            this.mainPanel = mainPanel;
+            return this;
+        }
         createItemElement(content) {
             return String.html `
         <div class="panel-item">

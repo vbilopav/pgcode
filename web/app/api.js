@@ -41,5 +41,6 @@ define(["require", "exports", "app/_sys/pubsub", "app/types"], function (require
         return result;
     };
     exports.createScript = async () => _fetch(`api/create-script/${getCurrentSchema()}`);
+    exports.fetchScriptContent = async (id) => _fetch(`api/script-content/${id}`);
 });
 //# sourceMappingURL=api.js.map

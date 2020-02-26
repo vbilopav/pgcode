@@ -366,5 +366,7 @@ interface String {
     /**
      * Builds Element from HTML markup in a string
      */
-    toElement(): Element
+    toElement(): Element,
+
+    formatDateString(): string;
 }

@@ -1,19 +1,6 @@
-define(["require", "exports", "app/_sys/storage", "app/ui/toolbar/toolbar", "./ui/side-panel/_side-panels", "app/ui/main-panel/main-panel", "app/ui/footer/footer", "app/controls/splitter", "app/types", "app/api", "app/_sys/pubsub"], function (require, exports, storage_1, toolbar_1, _side_panels_1, main_panel_1, footer_1, splitter_1, types_1, api_1, pubsub_1) {
+define(["require", "exports", "app/_sys/storage", "app/ui/toolbar/toolbar", "./ui/side-panel/_side-panels", "app/ui/main-panel/main-panel", "app/ui/footer/footer", "app/controls/splitter", "app/types", "app/api", "app/_sys/pubsub", "app/extensions"], function (require, exports, storage_1, toolbar_1, _side_panels_1, main_panel_1, footer_1, splitter_1, types_1, api_1, pubsub_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    String.prototype.formatDateString = function () {
-        const d = new Date(this);
-        const today = new Date();
-        const fullYear = d.getFullYear();
-        const date = d.getDate();
-        const month = d.getMonth();
-        if (date == today.getDate() && month == today.getMonth() && fullYear == today.getFullYear()) {
-            return `${d.getHours().toString().padStart(2, "0")}:${d.getMinutes().toString().padStart(2, "0")}:${d.getSeconds().toString().padStart(2, "0")}.${d.getMilliseconds().toString().padStart(3, "0")}`;
-        }
-        else {
-            return `${fullYear}-${(month + 1).toString().padStart(2, "0")}-${date.toString().padStart(2, "0")} ${d.getHours().toString().padStart(2, "0")}:${d.getMinutes().toString().padStart(2, "0")}:${d.getSeconds().toString().padStart(2, "0")}.${d.getMilliseconds().toString().padStart(3, "0")}`;
-        }
-    };
     const storage = new storage_1.default({
         toolbarPosition: types_1.Position.LEFT,
         sidePanelPosition: types_1.Position.LEFT,
@@ -165,10 +152,10 @@ define(["require", "exports", "app/_sys/storage", "app/ui/toolbar/toolbar", "./u
             }).start();
         }
         initComponents() {
-            this.toolbar = new toolbar_1.default(this.container.children[0], storage.toolbarPosition, this);
-            this.sidePanel = new _side_panels_1.default(this.container.children[1]);
-            this.mainPanel = new main_panel_1.default(this.container.children[3]);
-            this.footer = new footer_1.default(this.container.children[4]);
+            const mainPanel = new main_panel_1.default(this.container.children[3]);
+            new toolbar_1.default(this.container.children[0], storage.toolbarPosition, this);
+            new _side_panels_1.default(this.container.children[1], mainPanel);
+            new footer_1.default(this.container.children[4]);
         }
         subscribeEvents() {
             pubsub_1.subscribe(pubsub_1.STATE_CHANGED_ON, () => {

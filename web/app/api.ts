@@ -48,11 +48,15 @@ export interface IScriptInfo {
     timestamp: string
 }
 
-interface IScript extends IScriptInfo {
+interface IScript extends IScriptInfo, IScriptContent {
     schema: string,
+}
+
+interface IScriptContent {
     content: string,
     viewState: string
 }
+
 
 interface IInitialResponse { 
     connections: Array<IConnectionInfo>
@@ -105,3 +109,5 @@ export const fetchSchema: (schema: string) => Promise<IResponse<ISchemaResponse>
 }
 
 export const createScript: () => Promise<IResponse<IScript>> = async () => _fetch(`api/create-script/${getCurrentSchema()}`);
+
+export const fetchScriptContent: (id: number) => Promise<IResponse<IScriptContent>> = async id => _fetch(`api/script-content/${id}`);

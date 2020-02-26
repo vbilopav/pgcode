@@ -26,11 +26,16 @@ export default class extends Panel {
         if (response.ok) {
             this.addNewItem(response.data);
             this.publishLength();
+            //this.mainPanel
         }
     }
 
     private addNewItem(item: IScriptInfo) {
         const comment = item.comment ? String.html`<div class="item-subtext">${item.comment}</div>` : "";
+        let title = `id: ${item.id}\ntitle: ${item.title}\nmodified: ${item.timestamp}`;
+        if (item.comment) {
+            title = `title\ncomment: ${item.comment}`;
+        }
         this.createItemElement(String.html`
             <div>
                 <i class="icon-doc-text"></i>
@@ -42,6 +47,7 @@ export default class extends Panel {
             </div>
         `)
         .dataAttr("item", item)
+        .attr("title", title)
         .appendElementTo(this.items);
     }
 }

@@ -27,6 +27,10 @@ define(["require", "exports", "app/types", "app/api", "app/ui/side-panel/panel"]
         }
         addNewItem(item) {
             const comment = item.comment ? String.html `<div class="item-subtext">${item.comment}</div>` : "";
+            let title = `id: ${item.id}\ntitle: ${item.title}\nmodified: ${item.timestamp}`;
+            if (item.comment) {
+                title = `title\ncomment: ${item.comment}`;
+            }
             this.createItemElement(String.html `
             <div>
                 <i class="icon-doc-text"></i>
@@ -38,6 +42,7 @@ define(["require", "exports", "app/types", "app/api", "app/ui/side-panel/panel"]
             </div>
         `)
                 .dataAttr("item", item)
+                .attr("title", title)
                 .appendElementTo(this.items);
         }
     }

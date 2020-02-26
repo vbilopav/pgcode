@@ -70,6 +70,12 @@ namespace Pgcode
                 ConnectionManager.MigrationsUp(config, ExtractNullableIntFromArgs(args, 0), forConnection, routinesOnly: true);
                 return;
             }
+            if (args.Length > 0 && args[0].StartsWith("--downgrade-routines"))
+            {
+                var forConnection = args.Length > 1 ? args[1] : null;
+                ConnectionManager.MigrationsDown(config, ExtractNullableIntFromArgs(args, 0), forConnection, routinesOnly: true);
+                return;
+            }
 
             PrintStartMessages();
 

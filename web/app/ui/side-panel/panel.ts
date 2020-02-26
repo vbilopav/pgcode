@@ -1,4 +1,5 @@
 import { subscribe, publish, SCHEMA_CHANGED, ITEM_COUNT_CHANGED } from "app/_sys/pubsub";
+import MainPanel from "app/ui/main-panel/main-panel";
 import { ISchema } from "app/api";
 import MonacoContextMenu from "app/controls/monaco-context-menu";
 import { ContextMenuCtorArgs, MenuItemType } from "app/controls/context-menu";
@@ -23,6 +24,7 @@ export default abstract class Panel {
     protected readonly element: Element;
     protected readonly header: Element;
     protected readonly items: Element;
+    protected mainPanel: MainPanel;
     private itemScrollTimeout: number;
 
     constructor(element: Element, key: string, menuItems: Array<MenuItemType> = []){
@@ -56,7 +58,6 @@ export default abstract class Panel {
                 onOpen: menu => menu.target.addClass("active"),
                 onClose: menu => menu.target.removeClass("active")
             } as ContextMenuCtorArgs);
-
         } else {
             this.header.find(".btn").remove();
         }
@@ -83,6 +84,11 @@ export default abstract class Panel {
 
     public show(state: boolean) {
         this.element.showElement(state);
+    }
+
+    public setMainPanelRef(mainPanel: MainPanel) {
+        this.mainPanel = mainPanel;
+        return this;
     }
 
     protected createItemElement(content: string) {
