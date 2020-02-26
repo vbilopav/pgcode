@@ -42,7 +42,7 @@ export interface IRoutineInfo {
 }
 
 export interface IScriptInfo {
-    id: string,
+    id: number,
     title: string,
     comment: string,
     timestamp: string

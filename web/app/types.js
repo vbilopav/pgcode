@@ -28,5 +28,10 @@ define(["require", "exports"], function (require, exports) {
         routines: "routines",
         search: "search"
     };
+    var EditorType;
+    (function (EditorType) {
+        EditorType[EditorType["SCRIPT"] = 0] = "SCRIPT";
+    })(EditorType = exports.EditorType || (exports.EditorType = {}));
+    ;
 });
 //# sourceMappingURL=types.js.map

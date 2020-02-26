@@ -13,3 +13,5 @@ export const keys = {
     routines: "routines", 
     search: "search"
 };
+
+export enum EditorType { SCRIPT = 0 };

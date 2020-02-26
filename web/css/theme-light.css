@@ -270,8 +270,41 @@ body > div.container {
     width: 100%;
     height: 100%; }
   .main-panel > div:nth-child(1) {
-    grid-area: tabs; }
-  .main-panel > div:nth-child(1) {
+    grid-area: tabs;
+    background-color: #252526;
+    margin-left: -4px;
+    padding-right: 4px;
+    display: flex;
+    flex-wrap: wrap; }
+    .main-panel > div:nth-child(1) > div {
+      min-width: 100px;
+      max-width: 400px;
+      display: grid;
+      grid-template-columns: 20px auto 20px;
+      padding-left: 10px;
+      padding-right: 10px;
+      cursor: pointer;
+      overflow: hidden;
+      border-right: 1px #C5C5C5 solid;
+      border-bottom: 1px #C5C5C5 solid; }
+      .main-panel > div:nth-child(1) > div > i, .main-panel > div:nth-child(1) > div > span {
+        margin: auto; }
+      .main-panel > div:nth-child(1) > div > span {
+        margin-left: 5px;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+        max-width: 360px; }
+      .main-panel > div:nth-child(1) > div > i.close {
+        align-self: end;
+        font: inherit;
+        visibility: hidden;
+        font-size: 14px; }
+      .main-panel > div:nth-child(1) > div > i.close:hover {
+        visibility: visible; }
+    .main-panel > div:nth-child(1) > div:hover > i.close {
+      visibility: visible; }
+  .main-panel > div:nth-child(2) {
     grid-area: content; }
 
 .side-panel {

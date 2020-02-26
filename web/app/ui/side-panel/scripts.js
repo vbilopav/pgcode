@@ -45,6 +45,11 @@ define(["require", "exports", "app/types", "app/api", "app/ui/side-panel/panel"]
                 .attr("title", title)
                 .appendElementTo(this.items);
         }
+        itemSelected(element) {
+            const item = element.dataAttr("item");
+            this.mainPanel.activateScript(item.id, item.title);
+        }
+        ;
     }
     exports.default = default_1;
 });

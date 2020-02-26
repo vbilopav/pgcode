@@ -24,7 +24,7 @@ export default class extends Panel {
     private async createScript() {
         const response = await createScript();
         if (response.ok) {
-            this.addNewItem(response.data);
+            this.addNewItem(response.data as IScriptInfo);
             this.publishLength();
             //this.mainPanel
         }
@@ -50,4 +50,9 @@ export default class extends Panel {
         .attr("title", title)
         .appendElementTo(this.items);
     }
+
+    protected itemSelected(element: Element) {
+        const item = element.dataAttr("item") as IScriptInfo;
+        this.mainPanel.activateScript(item.id, item.title);
+    };
 }
