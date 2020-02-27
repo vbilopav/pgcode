@@ -27,46 +27,10 @@ define(["require", "exports", "app/_sys/pubsub", "app/controls/monaco-context-me
             </div>
         `);
             this.items = element.children[1];
-            this.items.on("mouseleave", event => {
-                let e = event.target;
-                e.css("overflow-y", "hidden").css("z-index", "");
-            }).on("mouseenter", event => {
-                let e = event.target;
-                if (e.scrollHeight > e.clientHeight) {
-                    e.css("overflow-y", "scroll").css("z-index", "1");
-                }
-            }).on("scroll", () => this.toggleHeaderShadow());
-            this.toggleHeaderShadow();
-            if (menuItems.length) {
-                new PanelMenu({
-                    id: `${key}-panel-menu`,
-                    target: this.header.find(".btn"),
-                    event: "click",
-                    items: menuItems,
-                    onOpen: menu => menu.target.addClass("active"),
-                    onClose: menu => menu.target.removeClass("active")
-                });
-            }
-            else {
-                this.header.find(".btn").remove();
-            }
+            this.initiateToggleShadow();
+            this.initPanelMenu(menuItems);
+            this.items.on("click", e => this.itemsClick(e));
             pubsub_1.subscribe(pubsub_1.SCHEMA_CHANGED, (data) => this.schemaChanged(data));
-            this.items.on("click", e => {
-                const element = e.target.closest("div.panel-item");
-                if (!element) {
-                    return;
-                }
-                if (!element.hasClass("active")) {
-                    const active = this.items.findAll(".active");
-                    if (active.length > 0) {
-                        for (let unselect of active) {
-                            this.itemUnselected(unselect.removeClass("active"));
-                        }
-                    }
-                    element.addClass("active");
-                    this.itemSelected(element);
-                }
-            });
         }
         show(state) {
             this.element.showElement(state);
@@ -89,19 +53,62 @@ define(["require", "exports", "app/_sys/pubsub", "app/controls/monaco-context-me
         publishLength() {
             pubsub_1.publish(pubsub_1.ITEM_COUNT_CHANGED, this.key, this.items.children.length);
         }
-        toggleHeaderShadow() {
-            if (this.itemScrollTimeout) {
-                clearTimeout(this.itemScrollTimeout);
+        itemsClick(e) {
+            const element = e.target.closest("div.panel-item");
+            if (!element) {
+                return;
             }
-            this.itemScrollTimeout = setTimeout(() => {
+            if (!element.hasClass("active")) {
+                const active = this.items.findAll(".active");
+                if (active.length > 0) {
+                    for (let unselect of active) {
+                        this.itemUnselected(unselect.removeClass("active"));
+                    }
+                }
+                element.addClass("active");
+                this.itemSelected(element);
+            }
+        }
+        initPanelMenu(menuItems = []) {
+            if (menuItems.length) {
+                new PanelMenu({
+                    id: `${this.key}-panel-menu`,
+                    target: this.header.find(".btn"),
+                    event: "click",
+                    items: menuItems,
+                    onOpen: menu => menu.target.addClass("active"),
+                    onClose: menu => menu.target.removeClass("active")
+                });
+            }
+            else {
+                this.header.find(".btn").remove();
+            }
+        }
+        initiateToggleShadow() {
+            this.items.on("mouseleave", event => {
+                let e = event.target;
+                e.css("overflow-y", "hidden").css("z-index", "");
+            }).on("mouseenter", event => {
+                let e = event.target;
+                if (e.scrollHeight > e.clientHeight) {
+                    e.css("overflow-y", "scroll").css("z-index", "1");
+                }
+            }).on("scroll", () => this.toggleHeaderShadow());
+            this.toggleHeaderShadow();
+        }
+        toggleHeaderShadow() {
+            if (this.scrollTimeout) {
+                clearTimeout(this.scrollTimeout);
+            }
+            this.scrollTimeout = setTimeout(() => {
                 if (this.items.scrollHeight > this.items.clientHeight && this.items.scrollTop) {
                     this.header.addClass("shadow");
                 }
                 else {
                     this.header.removeClass("shadow");
                 }
-                this.itemScrollTimeout = undefined;
-            }, 25);
+                this.scrollTimeout = undefined;
+            }, 10);
         }
     }
     exports.default = Panel;

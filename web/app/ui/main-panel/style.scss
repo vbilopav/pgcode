@@ -21,7 +21,7 @@
         flex-wrap: wrap;
 
         // tab
-        & > div {
+        & > div.tab {
             min-width: 100px;
             max-width: 400px;
             display: grid;
@@ -54,7 +54,14 @@
                 visibility: visible;
             }
         }
-        & > div:hover {
+        & > div.tab:hover {
+            & > i.close {
+                visibility: visible;
+            }
+        }
+        & > div.tab.active {
+            color: $active-color;
+            background-color: $panel-item-active-background-color;
             & > i.close {
                 visibility: visible;
             }

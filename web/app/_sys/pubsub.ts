@@ -2,7 +2,7 @@ import { keys } from "app/types";
 
 const _entries = {};
 
-const subscribe: (name: string | Array<string>, handler: (...args: any[]) => void) => number | void = (name, handler) => {
+export const subscribe: (name: string | Array<string>, handler: (...args: any[]) => void) => number | void = (name, handler) => {
     const doSub: (topic: string) => number = topic => {
         let entry = _entries[topic];
         if (!entry) {
@@ -19,7 +19,7 @@ const subscribe: (name: string | Array<string>, handler: (...args: any[]) => voi
     }
 }
 
-const publish: (name: string | Array<string>, ...args: any[]) => void = (name, ...args) => {
+export const publish: (name: string | Array<string>, ...args: any[]) => void = (name, ...args) => {
     const doPub: (topic: string) => void = topic => {
         const entry = _entries[topic];
         if (!entry) {
@@ -38,7 +38,7 @@ const publish: (name: string | Array<string>, ...args: any[]) => void = (name, .
     }
 }
 
-const unsubscribe: (name: string, ref: number) => boolean = (name, ref) => {
+export const unsubscribe: (name: string, ref: number) => boolean = (name, ref) => {
     let entry = _entries[name];
     if (!entry) {
         return false;;
@@ -47,41 +47,23 @@ const unsubscribe: (name: string, ref: number) => boolean = (name, ref) => {
     return true;
 }
 
-const STATE_CHANGED_ON: string = "state/changed/on/"; // id: string
-const STATE_CHANGED_OFF: string = "state/changed/off/"; // id: string
-const STATE_CHANGED: string = "state/changed/"; // helper, id: string, state: bool
+export const STATE_CHANGED_ON: string = "state/changed/on/"; // id: string
+export const STATE_CHANGED_OFF: string = "state/changed/off/"; // id: string
+export const STATE_CHANGED: string = "state/changed/"; // helper, id: string, state: bool
 
-const STATE_CHANGED_SCRIPTS: string = `state/changed/${keys.scripts}`; // id: string, state: bool
-const STATE_CHANGED_TABLES: string = `state/changed/${keys.tables}`; // id: string, state: bool
-const STATE_CHANGED_VIEWS: string = `state/changed/${keys.views}`; // id: string, state: bool
-const STATE_CHANGED_ROUTINES: string = `state/changed/${keys.routines}`; // id: string, state: bool
-const STATE_CHANGED_SEARCH: string = `state/changed/${keys.search}`; // id: string, state: bool
+export const STATE_CHANGED_SCRIPTS: string = `state/changed/${keys.scripts}`; // id: string, state: bool
+export const STATE_CHANGED_TABLES: string = `state/changed/${keys.tables}`; // id: string, state: bool
+export const STATE_CHANGED_VIEWS: string = `state/changed/${keys.views}`; // id: string, state: bool
+export const STATE_CHANGED_ROUTINES: string = `state/changed/${keys.routines}`; // id: string, state: bool
+export const STATE_CHANGED_SEARCH: string = `state/changed/${keys.search}`; // id: string, state: bool
 
-const SIDEBAR_DOCKED: string = "sidebar/docked/"; //void
-const SIDEBAR_UNDOCKED: string = "sidebar/undocked/"; //void
-const CLOSE_CONTEXT_MENU: string = "context-menu/close/"; //id
-const SET_APP_STATUS: string = "app/status/"; //status: AppStatus, text?: string
+export const SIDEBAR_DOCKED: string = "sidebar/docked/"; //void
+export const SIDEBAR_UNDOCKED: string = "sidebar/undocked/"; //void
+export const CLOSE_CONTEXT_MENU: string = "context-menu/close/"; //id
+export const SET_APP_STATUS: string = "app/status/"; //status: AppStatus, text?: string
 
-const API_INITIAL: string = "api/initial/"; //initial: IInitial
-const SCHEMA_CHANGED: string = "app/schema/"; //schema: ISchema
-const ITEM_COUNT_CHANGED: string = "item/count/"; //id: string, count: number
+export const API_INITIAL: string = "api/initial/"; //initial: IInitial
+export const SCHEMA_CHANGED: string = "app/schema/"; //schema: ISchema
+export const ITEM_COUNT_CHANGED: string = "item/count/"; //id: string, count: number
 
-export { 
-    subscribe, publish, unsubscribe,
-
-    STATE_CHANGED_ON,
-    STATE_CHANGED_OFF,
-    STATE_CHANGED,
-    STATE_CHANGED_SCRIPTS,
-    STATE_CHANGED_TABLES,
-    STATE_CHANGED_VIEWS,
-    STATE_CHANGED_ROUTINES,
-    STATE_CHANGED_SEARCH,
-    SIDEBAR_DOCKED,
-    SIDEBAR_UNDOCKED,
-    CLOSE_CONTEXT_MENU,
-    SET_APP_STATUS,
-    API_INITIAL,
-    SCHEMA_CHANGED,
-    ITEM_COUNT_CHANGED
-};
+export const SPLITTER_CHANGED: string = "splitter/changed"; //void

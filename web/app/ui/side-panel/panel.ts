@@ -25,7 +25,7 @@ export default abstract class Panel {
     protected readonly header: Element;
     protected readonly items: Element;
     protected mainPanel: MainPanel;
-    private itemScrollTimeout: number;
+    private scrollTimeout: number;
 
     constructor(element: Element, key: string, menuItems: Array<MenuItemType> = []){
         this.element = element;
@@ -37,49 +37,10 @@ export default abstract class Panel {
             </div>
         `);
         this.items = element.children[1];
-
-        this.items.on("mouseleave", event => {
-            let e = (event.target as Element);
-            e.css("overflow-y", "hidden").css("z-index", "");
-        }).on("mouseenter", event => {
-            let e = (event.target as Element);
-            if (e.scrollHeight > e.clientHeight) {
-                e.css("overflow-y", "scroll").css("z-index", "1");
-            }
-        }).on("scroll", () => this.toggleHeaderShadow());
-        this.toggleHeaderShadow();
-
-        if (menuItems.length) {
-            new PanelMenu({
-                id: `${key}-panel-menu`,
-                target: this.header.find(".btn"),
-                event: "click",
-                items: menuItems,
-                onOpen: menu => menu.target.addClass("active"),
-                onClose: menu => menu.target.removeClass("active")
-            } as ContextMenuCtorArgs);
-        } else {
-            this.header.find(".btn").remove();
-        }
-
+        this.initiateToggleShadow();
+        this.initPanelMenu(menuItems);
+        this.items.on("click", e => this.itemsClick(e));
         subscribe(SCHEMA_CHANGED, (data: ISchema) => this.schemaChanged(data));
-        
-        this.items.on("click", e => {
-            const element = (e.target as Element).closest("div.panel-item");
-            if (!element) {
-                return;
-            }
-            if (!element.hasClass("active")) {
-                const active = this.items.findAll(".active");
-                if (active.length > 0) {
-                    for(let unselect of active) {
-                        this.itemUnselected((unselect as Element).removeClass("active"));
-                    } 
-                }
-                element.addClass("active");
-                this.itemSelected(element);
-            }
-        });
     }
 
     public show(state: boolean) {
@@ -109,17 +70,62 @@ export default abstract class Panel {
         publish(ITEM_COUNT_CHANGED, this.key, this.items.children.length);
     }
 
-    private toggleHeaderShadow() {
-        if (this.itemScrollTimeout) {
-            clearTimeout(this.itemScrollTimeout);
+    private itemsClick(e: Event){
+        const element = (e.target as Element).closest("div.panel-item");
+        if (!element) {
+            return;
         }
-        this.itemScrollTimeout = setTimeout(() => {
+        if (!element.hasClass("active")) {
+            const active = this.items.findAll(".active");
+            if (active.length > 0) {
+                for(let unselect of active) {
+                    this.itemUnselected((unselect as Element).removeClass("active"));
+                } 
+            }
+            element.addClass("active");
+            this.itemSelected(element);
+        }
+    }
+
+    private initPanelMenu(menuItems: Array<MenuItemType> = []) {
+        if (menuItems.length) {
+            new PanelMenu({
+                id: `${this.key}-panel-menu`,
+                target: this.header.find(".btn"),
+                event: "click",
+                items: menuItems,
+                onOpen: menu => menu.target.addClass("active"),
+                onClose: menu => menu.target.removeClass("active")
+            } as ContextMenuCtorArgs);
+        } else {
+            this.header.find(".btn").remove();
+        }
+    }
+
+    private initiateToggleShadow() {
+        this.items.on("mouseleave", event => {
+            let e = (event.target as Element);
+            e.css("overflow-y", "hidden").css("z-index", "");
+        }).on("mouseenter", event => {
+            let e = (event.target as Element);
+            if (e.scrollHeight > e.clientHeight) {
+                e.css("overflow-y", "scroll").css("z-index", "1");
+            }
+        }).on("scroll", () => this.toggleHeaderShadow());
+        this.toggleHeaderShadow();
+    }
+
+    private toggleHeaderShadow() {
+        if (this.scrollTimeout) {
+            clearTimeout(this.scrollTimeout);
+        }
+        this.scrollTimeout = setTimeout(() => {
             if (this.items.scrollHeight > this.items.clientHeight && this.items.scrollTop) {
                 this.header.addClass("shadow");
             } else {
                 this.header.removeClass("shadow");
             }
-            this.itemScrollTimeout = undefined;
-        }, 25);
+            this.scrollTimeout = undefined;
+        }, 10);
     }
 }

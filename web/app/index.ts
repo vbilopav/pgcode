@@ -14,7 +14,8 @@ import {
     STATE_CHANGED_ON, 
     STATE_CHANGED_OFF, 
     SET_APP_STATUS, 
-    API_INITIAL
+    API_INITIAL,
+    SPLITTER_CHANGED
 } from "app/_sys/pubsub";
 
 interface IStorage {
@@ -182,9 +183,9 @@ new (class implements IMain {
             resizeIndex: resizeIndex,
             maxResizeDelta: 100,
             events: {
-                docked: () => publish(SIDEBAR_DOCKED),
-                undocked: () => publish(SIDEBAR_UNDOCKED),
-                changed: () => { /*...*/ },
+                docked: () => publish([SIDEBAR_DOCKED, SPLITTER_CHANGED]),
+                undocked: () => publish([SIDEBAR_UNDOCKED, SPLITTER_CHANGED]),
+                changed: () => publish(SPLITTER_CHANGED)
             },
             storage: {
                 get position() {

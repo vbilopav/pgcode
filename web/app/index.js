@@ -131,9 +131,9 @@ define(["require", "exports", "app/_sys/storage", "app/ui/toolbar/toolbar", "./u
                 resizeIndex: resizeIndex,
                 maxResizeDelta: 100,
                 events: {
-                    docked: () => pubsub_1.publish(pubsub_1.SIDEBAR_DOCKED),
-                    undocked: () => pubsub_1.publish(pubsub_1.SIDEBAR_UNDOCKED),
-                    changed: () => { },
+                    docked: () => pubsub_1.publish([pubsub_1.SIDEBAR_DOCKED, pubsub_1.SPLITTER_CHANGED]),
+                    undocked: () => pubsub_1.publish([pubsub_1.SIDEBAR_UNDOCKED, pubsub_1.SPLITTER_CHANGED]),
+                    changed: () => pubsub_1.publish(pubsub_1.SPLITTER_CHANGED)
                 },
                 storage: {
                     get position() {

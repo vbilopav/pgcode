@@ -276,7 +276,7 @@ body > div.container {
     padding-right: 4px;
     display: flex;
     flex-wrap: wrap; }
-    .main-panel > div:nth-child(1) > div {
+    .main-panel > div:nth-child(1) > div.tab {
       min-width: 100px;
       max-width: 400px;
       display: grid;
@@ -287,23 +287,28 @@ body > div.container {
       overflow: hidden;
       border-right: 1px #1E1E1E solid;
       border-bottom: 1px #1E1E1E solid; }
-      .main-panel > div:nth-child(1) > div > i, .main-panel > div:nth-child(1) > div > span {
+      .main-panel > div:nth-child(1) > div.tab > i, .main-panel > div:nth-child(1) > div.tab > span {
         margin: auto; }
-      .main-panel > div:nth-child(1) > div > span {
+      .main-panel > div:nth-child(1) > div.tab > span {
         margin-left: 5px;
         text-overflow: ellipsis;
         overflow: hidden;
         white-space: nowrap;
         max-width: 360px; }
-      .main-panel > div:nth-child(1) > div > i.close {
+      .main-panel > div:nth-child(1) > div.tab > i.close {
         align-self: end;
         font: inherit;
         visibility: hidden;
         font-size: 14px; }
-      .main-panel > div:nth-child(1) > div > i.close:hover {
+      .main-panel > div:nth-child(1) > div.tab > i.close:hover {
         visibility: visible; }
-    .main-panel > div:nth-child(1) > div:hover > i.close {
+    .main-panel > div:nth-child(1) > div.tab:hover > i.close {
       visibility: visible; }
+    .main-panel > div:nth-child(1) > div.tab.active {
+      color: #ffffff;
+      background-color: #1E1E1E; }
+      .main-panel > div:nth-child(1) > div.tab.active > i.close {
+        visibility: visible; }
   .main-panel > div:nth-child(2) {
     grid-area: content; }
 
