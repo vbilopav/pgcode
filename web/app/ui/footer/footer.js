@@ -175,7 +175,7 @@ define(["require", "exports", "app/controls/footer-context-menu", "app/controls/
                     this.schemasMenu.setMenuItems(menuItems);
                     this.schemas.showElement().find("span").html(response.data.schemas.selected);
                     this.selectSchema(response.data.schemas.selected);
-                    pubsub_1.publish(pubsub_1.SCHEMA_CHANGED, response.data);
+                    pubsub_1.publish(pubsub_1.SCHEMA_CHANGED, response.data, response.data.schemas.selected);
                     pubsub_1.publish(pubsub_1.SET_APP_STATUS, types_1.AppStatus.READY, name);
                 }
             }
@@ -196,7 +196,7 @@ define(["require", "exports", "app/controls/footer-context-menu", "app/controls/
         }
         async fetchSchema(name) {
             const response = await api_1.fetchSchema(name);
-            pubsub_1.publish(pubsub_1.SCHEMA_CHANGED, response.data);
+            pubsub_1.publish(pubsub_1.SCHEMA_CHANGED, response.data, response.data.name);
             pubsub_1.publish(pubsub_1.SET_APP_STATUS, types_1.AppStatus.READY);
         }
         adjustWidths() {

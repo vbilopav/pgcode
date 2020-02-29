@@ -3,7 +3,7 @@ define(["require", "exports", "app/types", "app/ui/side-panel/panel"], function 
     Object.defineProperty(exports, "__esModule", { value: true });
     class default_1 extends panel_1.default {
         constructor(element) {
-            super(element, types_1.keys.routines, [
+            super(element, types_1.Keys.ROUTINES, [
                 { text: "Filter" },
                 { text: "Order ascending" },
                 { text: "Order descending" },

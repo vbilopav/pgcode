@@ -30,7 +30,8 @@ define(["require", "exports", "app/_sys/pubsub", "app/controls/monaco-context-me
             this.initiateToggleShadow();
             this.initPanelMenu(menuItems);
             this.items.on("click", e => this.itemsClick(e));
-            pubsub_1.subscribe(pubsub_1.SCHEMA_CHANGED, (data) => this.schemaChanged(data));
+            pubsub_1.subscribe(pubsub_1.SCHEMA_CHANGED, (data, name) => this.schemaChanged(data, name));
+            pubsub_1.subscribe(pubsub_1.TAB_SELECTED, (id) => this.selectItemByElement(this.items.find(`#${id}`), false));
         }
         show(state) {
             this.element.showElement(state);
@@ -58,14 +59,25 @@ define(["require", "exports", "app/_sys/pubsub", "app/controls/monaco-context-me
             if (!element) {
                 return;
             }
-            if (!element.hasClass("active")) {
-                const active = this.items.findAll(".active");
-                if (active.length > 0) {
-                    for (let unselect of active) {
+            this.selectItemByElement(element);
+        }
+        selectItemByElement(element, emitEvents = true) {
+            if (!element || element.hasClass("active")) {
+                return;
+            }
+            const active = this.items.findAll(".active");
+            if (active.length > 0) {
+                for (let unselect of active) {
+                    if (emitEvents) {
                         this.itemUnselected(unselect.removeClass("active"));
                     }
+                    else {
+                        unselect.removeClass("active");
+                    }
                 }
-                element.addClass("active");
+            }
+            element.addClass("active");
+            if (emitEvents) {
                 this.itemSelected(element);
             }
         }

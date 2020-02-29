@@ -1,10 +1,10 @@
-import { keys } from "app/types";
-import { ISchema, IScriptInfo, createScript } from "app/api";
+import { Keys } from "app/types";
+import { ISchema, IScriptInfo, createScript, ScriptId } from "app/api";
 import Panel from "app/ui/side-panel/panel"
 
 export default class extends Panel {
     constructor(element: Element) {
-        super(element, keys.scripts, [
+        super(element, Keys.SCRIPTS, [
             {text: "New script", keyBindingsInfo: "Ctrl+N", action: () => this.createScript()},
             {splitter: true},
             {text: "Filter"},
@@ -26,7 +26,7 @@ export default class extends Panel {
         if (response.ok) {
             this.addNewItem(response.data as IScriptInfo);
             this.publishLength();
-            //this.mainPanel
+            //this.mainPanel activate with content
         }
     }
 
@@ -48,11 +48,11 @@ export default class extends Panel {
         `)
         .dataAttr("item", item)
         .attr("title", title)
+        .attr("id", ScriptId(item.id))
         .appendElementTo(this.items);
     }
 
     protected itemSelected(element: Element) {
-        const item = element.dataAttr("item") as IScriptInfo;
-        this.mainPanel.activateScript(item.id, item.title);
+        this.mainPanel.activateScript(element.dataAttr("item") as IScriptInfo);
     };
 }

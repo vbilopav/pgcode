@@ -3,7 +3,7 @@ define(["require", "exports", "app/types", "app/api", "app/ui/side-panel/panel"]
     Object.defineProperty(exports, "__esModule", { value: true });
     class default_1 extends panel_1.default {
         constructor(element) {
-            super(element, types_1.keys.scripts, [
+            super(element, types_1.Keys.SCRIPTS, [
                 { text: "New script", keyBindingsInfo: "Ctrl+N", action: () => this.createScript() },
                 { splitter: true },
                 { text: "Filter" },
@@ -43,11 +43,11 @@ define(["require", "exports", "app/types", "app/api", "app/ui/side-panel/panel"]
         `)
                 .dataAttr("item", item)
                 .attr("title", title)
+                .attr("id", api_1.ScriptId(item.id))
                 .appendElementTo(this.items);
         }
         itemSelected(element) {
-            const item = element.dataAttr("item");
-            this.mainPanel.activateScript(item.id, item.title);
+            this.mainPanel.activateScript(element.dataAttr("item"));
         }
         ;
     }

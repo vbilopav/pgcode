@@ -200,7 +200,7 @@ export default class  {
                 this.schemasMenu.setMenuItems(menuItems);
                 this.schemas.showElement().find("span").html(response.data.schemas.selected);
                 this.selectSchema(response.data.schemas.selected);
-                publish(SCHEMA_CHANGED, response.data);
+                publish(SCHEMA_CHANGED, response.data, response.data.schemas.selected);
                 publish(SET_APP_STATUS, AppStatus.READY, name);
             }
         }
@@ -222,7 +222,7 @@ export default class  {
 
     private async fetchSchema(name: string) {
         const response = await fetchSchema(name);
-        publish(SCHEMA_CHANGED, response.data);
+        publish(SCHEMA_CHANGED, response.data, response.data.name);
         publish(SET_APP_STATUS, AppStatus.READY);
     }
 

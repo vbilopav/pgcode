@@ -1,5 +1,7 @@
 import { publish, SET_APP_STATUS } from "app/_sys/pubsub";
-import { AppStatus } from "app/types";
+import { AppStatus, Keys } from "app/types";
+
+export const ScriptId: (id: number) => string = id  => `${Keys.SCRIPTS}${id}`;
 
 interface IResponse<T> {
     ok: boolean,
@@ -44,19 +46,17 @@ export interface IRoutineInfo {
 export interface IScriptInfo {
     id: number,
     title: string,
+    schema: string,
     comment: string,
     timestamp: string
 }
 
-interface IScript extends IScriptInfo, IScriptContent {
-    schema: string,
-}
+interface IScript extends IScriptInfo, IScriptContent {}
 
 interface IScriptContent {
     content: string,
     viewState: string
 }
-
 
 interface IInitialResponse { 
     connections: Array<IConnectionInfo>

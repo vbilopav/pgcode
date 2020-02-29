@@ -14,6 +14,7 @@
     // tabs
     & > div:nth-child(1) {
         grid-area: tabs;
+        user-select: none;
         background-color: $panel-background-color;
         margin-left: -4px;
         padding-right: 4px;
@@ -22,6 +23,7 @@
 
         // tab
         & > div.tab {
+            transition-duration: 0.2s;
             min-width: 100px;
             max-width: 400px;
             display: grid;
@@ -32,11 +34,12 @@
             overflow: hidden;
             border-right: 1px $panel-header-background-color solid;
             border-bottom: 1px $panel-header-background-color solid;
+
             & > i, & > span {
                 margin: auto;
             }
             // tab text
-            & > span {
+            & > span.title {
                 margin-left: 5px;
                 text-overflow: ellipsis;
                 overflow: hidden;
@@ -59,12 +62,25 @@
                 visibility: visible;
             }
         }
+        & > div.tab.active:nth-child(1) {
+            clip-path: inset(-5px -5px 0px 0px);
+        }
         & > div.tab.active {
             color: $active-color;
             background-color: $panel-item-active-background-color;
+            box-shadow: 0px 0px 4px 2px #000000;
+            clip-path: inset(-5px -5px 0px -5px);
             & > i.close {
                 visibility: visible;
             }
+        }
+        & > div.tab.sticky {
+            & > span.title {
+                font-style: italic;
+            }
+        }
+        & > div.tab.active.upper-row {
+            clip-path: inset(-5px -5px -5px -5px);
         }
     }
     

@@ -8,7 +8,7 @@ import Tables from "app/ui/side-panel/tables";
 import Views from "app/ui/side-panel/views";
 import Routines from "app/ui/side-panel/routines";
 import Search from "app/ui/side-panel/search";
-import { keys } from "app/types";
+import { Keys } from "app/types";
 
 
 export default class  {
@@ -36,11 +36,11 @@ export default class  {
             </div>
         `);
         const panels: Record<string, Panel> = {};
-        panels[keys.scripts] = new Scripts(element.children[0]).setMainPanelRef(mainPanel);
-        panels[keys.tables] = new Tables(element.children[1]).setMainPanelRef(mainPanel);;
-        panels[keys.views] = new Views(element.children[2]).setMainPanelRef(mainPanel);;
-        panels[keys.routines] = new Routines(element.children[3]).setMainPanelRef(mainPanel);;
-        panels[keys.search] = new Search(element.children[4]).setMainPanelRef(mainPanel);;
+        panels[Keys.SCRIPTS] = new Scripts(element.children[0]).setMainPanelRef(mainPanel);
+        panels[Keys.TABLES] = new Tables(element.children[1]).setMainPanelRef(mainPanel);;
+        panels[Keys.VIEWS] = new Views(element.children[2]).setMainPanelRef(mainPanel);;
+        panels[Keys.ROUTINES] = new Routines(element.children[3]).setMainPanelRef(mainPanel);;
+        panels[Keys.SEARCH] = new Search(element.children[4]).setMainPanelRef(mainPanel);;
         
         subscribe([
             STATE_CHANGED_SCRIPTS, 

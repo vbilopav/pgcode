@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Linq;
-using System.Security.Principal;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR;
 
 namespace Pgcode.Api
 {
@@ -50,12 +48,12 @@ namespace Pgcode.Api
         }
 
         [HttpGet("schema/{schema}")]
-        public async ValueTask<object> Schema(string schema) => await Api.GetSchema(UserId, schema);
+        public async ValueTask<ContentResult> Schema(string schema) => await Api.GetSchema(UserId, schema);
 
         [HttpGet("create-script/{schema}")]
-        public async ValueTask<object> CreateScript(string schema) => await Api.CreateScript(UserId, schema);
+        public async ValueTask<ContentResult> CreateScript(string schema) => await Api.CreateScript(UserId, schema);
 
         [HttpGet("script-content/{id}")]
-        public async ValueTask<object> ScriptContent(int id) => await Api.GetCreateContent(id);
+        public async ValueTask<ContentResult> ScriptContent(int id) => await Api.GetCreateContent(id);
     }
 }

@@ -1,7 +1,17 @@
 import "vs/editor/editor.main";
-import { subscribe, SPLITTER_CHANGED } from "app/_sys/pubsub";
-//import { EditorType } from "app/types";
-//import { fetchScriptContent } from "app/api";
+import { subscribe, publish, SPLITTER_CHANGED, TAB_SELECTED } from "app/_sys/pubsub";
+import { Keys } from "app/types";
+import { fetchScriptContent, IScriptInfo, ScriptId } from "app/api";
+
+interface Item {
+    tab: Element;
+    id: string;
+    key: Keys
+}
+
+const _items: Record<string, Item> = {};
+let _activeTab: Element;
+let _sticky: Element;
 
 export default class  {
     private element: Element;
@@ -31,31 +41,61 @@ export default class  {
         */
     }
 
-    public async activateScript(id: number, title: string) {
-        const tab = (
-            String.html`
-            <div class="tab">
-                <i class="icon-doc-text"></i>
-                <span>${title}</span>
-                <i class="close" title="close">&#10006</i>
-            </div>` as string)
-            .toElement()
-            .on("click", e => this.tabClick(e))
-            .appendElementTo(this.tabs);
-        this.activateByTab(tab);
-        this.adjustHeaderHeight();
+    public async activateScript(script: IScriptInfo) {
+        const id = ScriptId(script.id);
+        const item = _items[id];
+        if (item) {
+            // tab already exists
+            this.activateByTab(item.tab);
+
+        } else {
+            // create a new tab
+            const tab = this.createTabElement("icon-doc-text", script.title, id);
+            if (_sticky) {
+                delete _items[_sticky.id];
+                _sticky.replaceWith(this.sticky(tab));
+            } else {
+                this.sticky(tab).appendElementTo(this.tabs);
+            }
+            _items[id] = {tab, id, key: Keys.SCRIPTS};
+            this.activateByTab(tab);
+        }
     }
 
     private activateByTab(tab: Element) {
-        this.tabs.children.forEachChild
         for(let t of this.tabs.children) {
             t.removeClass("active");
         }
-        tab.addClass("active");
+        _activeTab = tab.addClass("active");
+        this.activated(tab.id);
+        this.initiateHeaderAdjust();
+    }
+
+    private activated(id: string) {
+        let item = _items[id];
+        publish(TAB_SELECTED, item.id, item.key);
     }
 
     private removeByTab(tab: Element) {
         //...
+    }
+
+    private createTabElement(iconClass: string, title: string, key: string) {
+        return (String.html`
+        <div class="tab">
+            <i class=${iconClass}></i>
+            <span class="title">${title}</span>
+            <i class="close" title="close">&#10006</i>
+        </div>` as string)
+        .toElement()
+        .attr("id", key)
+        .on("click", e => this.tabClick(e))
+        .on("dblclick", e => this.tabDblClick(e));
+    }
+
+    private sticky(tab: Element) {
+        _sticky = tab;
+        return tab.addClass("sticky");
     }
 
     private tabClick(e: Event) {
@@ -65,6 +105,14 @@ export default class  {
             return;
         }
         this.activateByTab(e.currentTarget as Element);
+    }
+
+    private tabDblClick(e: Event) {
+        const tab = e.currentTarget as Element;
+        if (tab.hasClass("sticky")) {
+            tab.removeClass("sticky")
+            _sticky = null;
+        }
     }
     
     private initHeaderAdjustment() {
@@ -92,13 +140,19 @@ export default class  {
                 rows++;
             }
             lastTop = top;
+            t.dataAttr("row", rows);
         }
-        if (rows == this.headerRows) {
-            return;
+        if (_activeTab) {
+            if (_activeTab.dataAttr("row") as number != rows) {
+                _activeTab.addClass("upper-row");
+            } else {
+                _activeTab.removeClass("upper-row");
+            }
         }
-        let split = this.element.css("grid-template-rows").split(" ");
-        this.element.css("grid-template-rows", `${rows * this.headerHeight}px ${split[1]}`);
-        this.headerRows = rows;
+        if (rows != this.headerRows) {
+            this.element.css("grid-template-rows", `${rows * this.headerHeight}px auto`);
+            this.headerRows = rows;
+        }
         this.adjustTimeout = undefined;
     }
 }

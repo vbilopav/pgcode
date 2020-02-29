@@ -5,7 +5,7 @@ import {
 } from "app/_sys/pubsub";
 import { ContextMenuCtorArgs, MenuItemType } from "app/controls/context-menu";
 import MonacoContextMenu from "../../controls/monaco-context-menu";
-import { Position, IMain, keys } from "app/types";
+import { Position, IMain, Keys } from "app/types";
 
 enum ButtonRoles { switch="switch", toggle="toggle" };
 const 
@@ -30,7 +30,7 @@ const
         views: false,
         routines: false, 
         search: false, 
-        previousKey: keys.scripts, 
+        previousKey: Keys.SCRIPTS, 
         pgcode: false
     }, 
     "state", 
@@ -45,11 +45,11 @@ const
     active = "active", 
     docked = "docked",
     items = [
-        {id: `btn-${keys.scripts}`, icon: "icon-doc-text", key: keys.scripts, label: keys.scripts, text: "Scripts", keyBinding: "Ctrl+S", role: ButtonRoles.switch},
-        {id: `btn-${keys.tables}`, icon: "icon-database", key: keys.tables, label: keys.tables, text: "Tables", keyBinding: "Ctrl+T", role: ButtonRoles.switch},
-        {id: `btn-${keys.views}`, icon: "icon-database", key: keys.views, label: keys.views, text: "Views", keyBinding: "Ctrl+V", role: ButtonRoles.switch},
-        {id: `btn-${keys.routines}`, icon: "icon-database", key: keys.routines, label: keys.routines, text: "Routines", keyBinding: "Ctrl+R", role: ButtonRoles.switch},
-        {id: `btn-${keys.search}`, icon: "icon-search", key: keys.search, label: keys.search, text: "Search", keyBinding: "Ctrl+F", role: ButtonRoles.switch},
+        {id: `btn-${Keys.SCRIPTS}`, icon: "icon-doc-text", key: Keys.SCRIPTS, label: Keys.SCRIPTS, text: "Scripts", keyBinding: "Ctrl+S", role: ButtonRoles.switch},
+        {id: `btn-${Keys.TABLES}`, icon: "icon-database", key: Keys.TABLES, label: Keys.TABLES, text: "Tables", keyBinding: "Ctrl+T", role: ButtonRoles.switch},
+        {id: `btn-${Keys.VIEWS}`, icon: "icon-database", key: Keys.VIEWS, label: Keys.VIEWS, text: "Views", keyBinding: "Ctrl+V", role: ButtonRoles.switch},
+        {id: `btn-${Keys.ROUTINES}`, icon: "icon-database", key: Keys.ROUTINES, label: Keys.ROUTINES, text: "Routines", keyBinding: "Ctrl+R", role: ButtonRoles.switch},
+        {id: `btn-${Keys.SEARCH}`, icon: "icon-search", key: Keys.SEARCH, label: Keys.SEARCH, text: "Search", keyBinding: "Ctrl+F", role: ButtonRoles.switch},
         //{id: "btn-pgcode", icon: "icon-terminal", key: "pgcode", label: "pgcode", text: null, keyBinding: null, role: ButtonRoles.toggle}
     ];
 
@@ -118,7 +118,7 @@ export default class  {
             } else {
                 e.css("width", "10px");
             }
-            let hint = (btn.attr("title") as string).split("\n");
+            let hint = btn.attr("title").split("\n");
             btn.attr("title", hint[0] + "\n" + count + " items");
         });
     }

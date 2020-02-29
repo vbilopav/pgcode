@@ -24,7 +24,9 @@ interface Element {
      * - If `value` is present, sets value to instance attribute with same key and returns same instance.
      * - If `toggle` is present, toggles presence of attribute with same key and returns same instance.
      */
-    attr(key: string, value?: string , toggle?: boolean): String | Element
+    attr(key: string, value: string , toggle: boolean): String | Element
+    attr(key: string, value: string): Element
+    attr(key: string): String
     /**
      * returns value of instance css property (does not apply to `NodeList` and `HTMLModelArray`).
      */

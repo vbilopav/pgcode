@@ -21,17 +21,14 @@ define(["require", "exports"], function (require, exports) {
         AppStatus[AppStatus["NO_CONNECTION"] = 3] = "NO_CONNECTION";
     })(AppStatus = exports.AppStatus || (exports.AppStatus = {}));
     ;
-    exports.keys = {
-        scripts: "scripts",
-        tables: "tables",
-        views: "views",
-        routines: "routines",
-        search: "search"
-    };
-    var EditorType;
-    (function (EditorType) {
-        EditorType[EditorType["SCRIPT"] = 0] = "SCRIPT";
-    })(EditorType = exports.EditorType || (exports.EditorType = {}));
+    var Keys;
+    (function (Keys) {
+        Keys["SCRIPTS"] = "scripts";
+        Keys["TABLES"] = "tables";
+        Keys["VIEWS"] = "views";
+        Keys["ROUTINES"] = "routines";
+        Keys["SEARCH"] = "search";
+    })(Keys = exports.Keys || (exports.Keys = {}));
     ;
 });
 //# sourceMappingURL=types.js.map

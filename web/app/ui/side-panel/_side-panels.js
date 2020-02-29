@@ -26,14 +26,14 @@ define(["require", "exports", "app/_sys/pubsub", "app/ui/side-panel/scripts", "a
             </div>
         `);
             const panels = {};
-            panels[types_1.keys.scripts] = new scripts_1.default(element.children[0]).setMainPanelRef(mainPanel);
-            panels[types_1.keys.tables] = new tables_1.default(element.children[1]).setMainPanelRef(mainPanel);
+            panels[types_1.Keys.SCRIPTS] = new scripts_1.default(element.children[0]).setMainPanelRef(mainPanel);
+            panels[types_1.Keys.TABLES] = new tables_1.default(element.children[1]).setMainPanelRef(mainPanel);
             ;
-            panels[types_1.keys.views] = new views_1.default(element.children[2]).setMainPanelRef(mainPanel);
+            panels[types_1.Keys.VIEWS] = new views_1.default(element.children[2]).setMainPanelRef(mainPanel);
             ;
-            panels[types_1.keys.routines] = new routines_1.default(element.children[3]).setMainPanelRef(mainPanel);
+            panels[types_1.Keys.ROUTINES] = new routines_1.default(element.children[3]).setMainPanelRef(mainPanel);
             ;
-            panels[types_1.keys.search] = new search_1.default(element.children[4]).setMainPanelRef(mainPanel);
+            panels[types_1.Keys.SEARCH] = new search_1.default(element.children[4]).setMainPanelRef(mainPanel);
             ;
             pubsub_1.subscribe([
                 pubsub_1.STATE_CHANGED_SCRIPTS,
