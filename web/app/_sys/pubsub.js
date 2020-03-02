@@ -64,5 +64,6 @@ define(["require", "exports", "app/types"], function (require, exports, types_1)
     exports.ITEM_COUNT_CHANGED = "item/count/";
     exports.SPLITTER_CHANGED = "splitter/changed";
     exports.TAB_SELECTED = `tab/selected`;
+    exports.TAB_UNSELECTED = `tab/unselected`;
 });
 //# sourceMappingURL=pubsub.js.map

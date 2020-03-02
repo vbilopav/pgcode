@@ -1,4 +1,4 @@
-import { subscribe, publish, SCHEMA_CHANGED, ITEM_COUNT_CHANGED, TAB_SELECTED } from "app/_sys/pubsub";
+import { subscribe, publish, SCHEMA_CHANGED, ITEM_COUNT_CHANGED, TAB_SELECTED, TAB_UNSELECTED } from "app/_sys/pubsub";
 import MainPanel from "app/ui/main-panel/main-panel";
 import { ISchema } from "app/api";
 import MonacoContextMenu from "app/controls/monaco-context-menu";
@@ -40,9 +40,11 @@ export default abstract class Panel {
         this.initiateToggleShadow();
         this.initPanelMenu(menuItems);
         this.items.on("click", e => this.itemsClick(e));
+        this.items.on("dblclick", e => this.itemsDblClick(e));
         
         subscribe(SCHEMA_CHANGED, (data: ISchema, name: string) => this.schemaChanged(data, name));
         subscribe(TAB_SELECTED, (id: string) => this.selectItemByElement(this.items.find(`#${id}`), false));
+        subscribe(TAB_UNSELECTED, (id: string) => this.unselectItemByElement(this.items.find(`#${id}`), false));
     }
 
     public show(state: boolean) {
@@ -77,26 +79,34 @@ export default abstract class Panel {
         if (!element) {
             return;
         }
-        this.selectItemByElement(element);
-    }
-
-    private selectItemByElement(element: Element, emitEvents = true) {
-        if (!element || element.hasClass("active")) {
+        if (element.hasClass("active")) {
             return
         }
         const active = this.items.findAll(".active");
         if (active.length > 0) {
             for(let unselect of active) {
-                if (emitEvents) {
-                    this.itemUnselected((unselect as Element).removeClass("active"));
-                } else {
-                    (unselect as Element).removeClass("active");
-                }
+                this.unselectItemByElement(unselect as Element);
             } 
         }
+        this.selectItemByElement(element, true);
+    }
+
+    private itemsDblClick(e: Event){
+        const element = (e.target as Element).closest("div.panel-item");
+        this.mainPanel.unstickById(element.id);
+    }
+
+    private selectItemByElement(element: Element, emitEvents = true) {
         element.addClass("active");
         if (emitEvents) {
             this.itemSelected(element);
+        }
+    }
+
+    private unselectItemByElement(element: Element, emitEvents = true) {
+        element.removeClass("active");
+        if (emitEvents) {
+            this.itemUnselected(element);
         }
     }
 

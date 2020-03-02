@@ -30,8 +30,10 @@ define(["require", "exports", "app/_sys/pubsub", "app/controls/monaco-context-me
             this.initiateToggleShadow();
             this.initPanelMenu(menuItems);
             this.items.on("click", e => this.itemsClick(e));
+            this.items.on("dblclick", e => this.itemsDblClick(e));
             pubsub_1.subscribe(pubsub_1.SCHEMA_CHANGED, (data, name) => this.schemaChanged(data, name));
             pubsub_1.subscribe(pubsub_1.TAB_SELECTED, (id) => this.selectItemByElement(this.items.find(`#${id}`), false));
+            pubsub_1.subscribe(pubsub_1.TAB_UNSELECTED, (id) => this.unselectItemByElement(this.items.find(`#${id}`), false));
         }
         show(state) {
             this.element.showElement(state);
@@ -59,26 +61,31 @@ define(["require", "exports", "app/_sys/pubsub", "app/controls/monaco-context-me
             if (!element) {
                 return;
             }
-            this.selectItemByElement(element);
-        }
-        selectItemByElement(element, emitEvents = true) {
-            if (!element || element.hasClass("active")) {
+            if (element.hasClass("active")) {
                 return;
             }
             const active = this.items.findAll(".active");
             if (active.length > 0) {
                 for (let unselect of active) {
-                    if (emitEvents) {
-                        this.itemUnselected(unselect.removeClass("active"));
-                    }
-                    else {
-                        unselect.removeClass("active");
-                    }
+                    this.unselectItemByElement(unselect);
                 }
             }
+            this.selectItemByElement(element, true);
+        }
+        itemsDblClick(e) {
+            const element = e.target.closest("div.panel-item");
+            this.mainPanel.unstickById(element.id);
+        }
+        selectItemByElement(element, emitEvents = true) {
             element.addClass("active");
             if (emitEvents) {
                 this.itemSelected(element);
+            }
+        }
+        unselectItemByElement(element, emitEvents = true) {
+            element.removeClass("active");
+            if (emitEvents) {
+                this.itemUnselected(element);
             }
         }
         initPanelMenu(menuItems = []) {

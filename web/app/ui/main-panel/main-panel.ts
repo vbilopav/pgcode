@@ -1,17 +1,16 @@
 import "vs/editor/editor.main";
-import { subscribe, publish, SPLITTER_CHANGED, TAB_SELECTED } from "app/_sys/pubsub";
+import { subscribe, publish, SPLITTER_CHANGED, TAB_SELECTED, TAB_UNSELECTED } from "app/_sys/pubsub";
 import { Keys } from "app/types";
 import { fetchScriptContent, IScriptInfo, ScriptId } from "app/api";
 
 interface Item {
     tab: Element;
     id: string;
-    key: Keys
+    key: Keys;
+    timestamp: number;
 }
-
-const _items: Record<string, Item> = {};
-let _activeTab: Element;
-let _sticky: Element;
+const _sticky = "sticky";
+const _active = "active";
 
 export default class  {
     private element: Element;
@@ -20,6 +19,9 @@ export default class  {
     private headerHeight: number;
     private headerRows: number = 1;
     private adjustTimeout: number;
+    private activeTab: Element;
+    private stickyTab: Element;
+    private items: Map<string, Item> = new Map<string, Item>();
 
     constructor(element: Element){
         this.element = element.addClass("main-panel").html(
@@ -41,9 +43,16 @@ export default class  {
         */
     }
 
+    public unstickById(id: string) {
+        if (this.stickyTab && this.stickyTab.id == id) {
+            this.stickyTab.removeClass(_sticky);
+            this.stickyTab = null;
+        }
+    }
+
     public async activateScript(script: IScriptInfo) {
         const id = ScriptId(script.id);
-        const item = _items[id];
+        const item = this.items.get(id);
         if (item) {
             // tab already exists
             this.activateByTab(item.tab);
@@ -51,33 +60,59 @@ export default class  {
         } else {
             // create a new tab
             const tab = this.createTabElement("icon-doc-text", script.title, id);
-            if (_sticky) {
-                delete _items[_sticky.id];
-                _sticky.replaceWith(this.sticky(tab));
+            if (this.stickyTab) {
+                this.items.delete(this.stickyTab.id);
+                this.stickyTab.replaceWith(this.makeStickyTab(tab));
             } else {
-                this.sticky(tab).appendElementTo(this.tabs);
+                this.makeStickyTab(tab).appendElementTo(this.tabs);
             }
-            _items[id] = {tab, id, key: Keys.SCRIPTS};
-            this.activateByTab(tab);
+            let item = {tab, id, key: Keys.SCRIPTS} as Item;
+            this.items.set(id, item);
+            this.activateByTab(tab, item);
         }
     }
 
-    private activateByTab(tab: Element) {
+    private activateByTab(tab: Element, item?: Item) {
         for(let t of this.tabs.children) {
-            t.removeClass("active");
+            if (t.hasClass(_active)) {
+                t.removeClass(_active);
+                let remove = this.items.get(t.id);
+                publish(TAB_UNSELECTED, remove.id, remove.key);
+            }
         }
-        _activeTab = tab.addClass("active");
-        this.activated(tab.id);
+        this.activeTab = tab.addClass(_active);
+        this.activated(tab.id, item);
         this.initiateHeaderAdjust();
     }
 
-    private activated(id: string) {
-        let item = _items[id];
+    private activated(id: string, item?: Item) {
+        if (!item) {
+            item = this.items.get(id);
+        }
+        item.timestamp = new Date().getTime();
         publish(TAB_SELECTED, item.id, item.key);
     }
 
     private removeByTab(tab: Element) {
-        //...
+        const 
+            id = tab.id, 
+            active = tab.hasClass(_active), 
+            sticky = tab.hasClass(_sticky), 
+            item = this.items.get(id);
+        this.items.delete(id);
+        tab.remove();
+        if (sticky) {
+            this.stickyTab = null;
+        }
+        if (!active) {
+            return;
+        }
+        publish(TAB_UNSELECTED, item.id, item.key);
+        if (!this.items.size) {
+            return;
+        }
+        let newItem = this.items.maxBy(v => v.timestamp);
+        this.activateByTab(newItem.tab, newItem);
     }
 
     private createTabElement(iconClass: string, title: string, key: string) {
@@ -93,25 +128,26 @@ export default class  {
         .on("dblclick", e => this.tabDblClick(e));
     }
 
-    private sticky(tab: Element) {
-        _sticky = tab;
-        return tab.addClass("sticky");
+    private makeStickyTab(tab: Element) {
+        this.stickyTab = tab;
+        return tab.addClass(_sticky);
     }
 
     private tabClick(e: Event) {
         const target = e.target as Element;
-        if ((target as Element).hasClass("close")) {
-            this.removeByTab(target);
+        const currentTarget = e.currentTarget as Element;
+        if (target.hasClass("close")) {
+            this.removeByTab(currentTarget);
             return;
         }
-        this.activateByTab(e.currentTarget as Element);
+        this.activateByTab(currentTarget);
     }
 
     private tabDblClick(e: Event) {
         const tab = e.currentTarget as Element;
-        if (tab.hasClass("sticky")) {
-            tab.removeClass("sticky")
-            _sticky = null;
+        if (tab.hasClass(_sticky)) {
+            tab.removeClass(_sticky)
+            this.stickyTab = null;
         }
     }
     
@@ -125,7 +161,7 @@ export default class  {
         if (this.adjustTimeout) {
             clearTimeout(this.adjustTimeout);
         }
-        this.adjustTimeout = setTimeout(() => this.adjustHeaderHeight(), 10);
+        this.adjustTimeout = setTimeout(() => this.adjustHeaderHeight(), 25);
     }
 
     private adjustHeaderHeight() {
@@ -142,11 +178,11 @@ export default class  {
             lastTop = top;
             t.dataAttr("row", rows);
         }
-        if (_activeTab) {
-            if (_activeTab.dataAttr("row") as number != rows) {
-                _activeTab.addClass("upper-row");
+        if (this.activeTab) {
+            if (this.activeTab.dataAttr("row") as number != rows) {
+                this.activeTab.addClass("upper-row");
             } else {
-                _activeTab.removeClass("upper-row");
+                this.activeTab.removeClass("upper-row");
             }
         }
         if (rows != this.headerRows) {

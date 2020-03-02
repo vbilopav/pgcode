@@ -15,5 +15,35 @@ define(["require", "exports"], function (require, exports) {
         }
     };
     exports.default = null;
+    Map.prototype.first = function () {
+        return this.values().next();
+    };
+    Map.prototype.where = function* (predicate) {
+        for (let [key, value] of this) {
+            if (predicate(value)) {
+                yield value;
+            }
+        }
+        ;
+    };
+    Map.prototype.maxBy = function (predicate) {
+        let result;
+        let highest;
+        for (let [key, value] of this) {
+            if (result === undefined) {
+                result = value;
+                highest = predicate(value);
+            }
+            else {
+                const current = predicate(value);
+                if (current > highest) {
+                    result = value;
+                    highest = current;
+                }
+            }
+        }
+        ;
+        return result;
+    };
 });
 //# sourceMappingURL=extensions.js.map

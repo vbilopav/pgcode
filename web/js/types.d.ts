@@ -372,3 +372,13 @@ interface String {
 
     formatDateString(): string;
 }
+
+interface Map<K, V> {
+    first(): V
+}
+interface Map<K, V> {
+    where(predicate: (v: V) => boolean): V
+}
+interface Map<K, V> {
+    maxBy(predicate: (v: V) => any): V
+}
