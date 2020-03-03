@@ -26,10 +26,9 @@ define(["require", "exports", "app/types", "app/api", "app/ui/side-panel/panel"]
             }
         }
         addNewItem(item) {
-            const comment = item.comment ? String.html `<div class="item-subtext">${item.comment}</div>` : "";
-            let title = `id: ${item.id}\ntitle: ${item.title}\nmodified: ${item.timestamp}`;
+            let title = `${item.title}\nmodified: ${item.timestamp}`;
             if (item.comment) {
-                title = `title\ncomment: ${item.comment}`;
+                title = title + `\n\n${item.comment.substring(0, 200)}`;
             }
             this.createItemElement(String.html `
             <div>
@@ -38,7 +37,6 @@ define(["require", "exports", "app/types", "app/api", "app/ui/side-panel/panel"]
             </div>
             <div>
                 <div class="item-subtext">${item.timestamp.formatDateString()}</div>
-                ${comment}
             </div>
         `)
                 .dataAttr("item", item)

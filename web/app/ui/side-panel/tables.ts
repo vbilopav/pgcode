@@ -1,5 +1,5 @@
 import { Keys } from "app/types";
-import { ISchema } from "app/api";
+import { ISchema, TableId, ITableInfo } from "app/api";
 import Panel from "app/ui/side-panel/panel"
 
 export default class extends Panel {
@@ -19,12 +19,23 @@ export default class extends Panel {
         this.publishLength();
     }
 
-    private addNewItem(item: string) {
+    private addNewItem(item: ITableInfo) {
+        let title = `${item.name}\nestimated row count: ${item.estimate}`;
+        if (item.comment) {
+            title = title + `\n\n${item.comment.substring(0,200)}`;
+        }
         this.createItemElement(String.html`
-            <i class="icon-database"></i>
-            <span>${item}</span>
+            <div>
+                <i class="icon-database"></i>
+                <span>${item.name}</span>
+            </div>
+            <div>
+                <div class="item-subtext">count=${item.estimate}</div>
+            </div>
         `)
         .dataAttr("item", item)
+        .attr("title", title)
+        .attr("id", TableId(item.id))
         .appendElementTo(this.items);
     }
 }

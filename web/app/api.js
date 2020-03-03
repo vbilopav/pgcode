@@ -2,6 +2,9 @@ define(["require", "exports", "app/_sys/pubsub", "app/types"], function (require
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.ScriptId = id => `${types_1.Keys.SCRIPTS}${id}`;
+    exports.TableId = id => `${types_1.Keys.TABLES}${id}`;
+    exports.ViewId = id => `${types_1.Keys.VIEWS}${id}`;
+    exports.RoutineId = id => `${types_1.Keys.ROUTINES}${id}`;
     const _createResponse = (response, data) => Object({ ok: response.ok, status: response.status, data: data });
     const _fetchAndPublishStatus = async (url, init) => {
         pubsub_1.publish(pubsub_1.SET_APP_STATUS, types_1.AppStatus.BUSY);

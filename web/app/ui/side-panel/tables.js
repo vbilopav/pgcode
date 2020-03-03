@@ -1,4 +1,4 @@
-define(["require", "exports", "app/types", "app/ui/side-panel/panel"], function (require, exports, types_1, panel_1) {
+define(["require", "exports", "app/types", "app/api", "app/ui/side-panel/panel"], function (require, exports, types_1, api_1, panel_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class default_1 extends panel_1.default {
@@ -17,11 +17,22 @@ define(["require", "exports", "app/types", "app/ui/side-panel/panel"], function 
             this.publishLength();
         }
         addNewItem(item) {
+            let title = `${item.name}\nestimated row count: ${item.estimate}`;
+            if (item.comment) {
+                title = title + `\n\n${item.comment.substring(0, 200)}`;
+            }
             this.createItemElement(String.html `
-            <i class="icon-database"></i>
-            <span>${item}</span>
+            <div>
+                <i class="icon-database"></i>
+                <span>${item.name}</span>
+            </div>
+            <div>
+                <div class="item-subtext">count=${item.estimate}</div>
+            </div>
         `)
                 .dataAttr("item", item)
+                .attr("title", title)
+                .attr("id", api_1.TableId(item.id))
                 .appendElementTo(this.items);
         }
     }

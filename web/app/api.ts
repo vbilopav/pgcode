@@ -2,6 +2,9 @@ import { publish, SET_APP_STATUS } from "app/_sys/pubsub";
 import { AppStatus, Keys } from "app/types";
 
 export const ScriptId: (id: number) => string = id  => `${Keys.SCRIPTS}${id}`;
+export const TableId: (id: number) => string = id  => `${Keys.TABLES}${id}`;
+export const ViewId: (id: number) => string = id  => `${Keys.VIEWS}${id}`;
+export const RoutineId: (id: number) => string = id  => `${Keys.ROUTINES}${id}`;
 
 interface IResponse<T> {
     ok: boolean,
@@ -23,24 +26,25 @@ interface ISchemaResponse extends ISchema {
 export interface ISchema { 
     routines: Array<IRoutineInfo>,
     scripts: Array<IScriptInfo>,
-    tables: Array<string>,
-    views: Array<string>
+    tables: Array<ITableInfo>,
+    views: Array<ITableInfo>
 }
 
-export interface IConnectionInfo {
-    name: string, 
-    version: string,
-    host: string, 
-    port: number, 
-    database: string,
-    user: string 
+export interface ITableInfo {
+    id: number,
+    name: string,
+    estimate: number,
+    comment: string
 }
 
 export interface IRoutineInfo {
-    id: string,
+    id: number,
+    type: string
     language: string,
     name: string,
-    type: string
+    signature: string,
+    returns: string,
+    comment: string
 }
 
 export interface IScriptInfo {
@@ -60,6 +64,15 @@ interface IScriptContent {
 
 interface IInitialResponse { 
     connections: Array<IConnectionInfo>
+}
+
+export interface IConnectionInfo {
+    name: string, 
+    version: string,
+    host: string, 
+    port: number, 
+    database: string,
+    user: string 
 }
 
 const _createResponse:<T> (response: Response, data?: T) => IResponse<T> = (response, data) => Object({ok: response.ok, status: response.status, data: data});

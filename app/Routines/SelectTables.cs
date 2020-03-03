@@ -33,12 +33,26 @@ namespace Pgcode.Routines
        
         create or replace function {settings.PgCodeSchema}.{Name}(_data json) returns json as
         ${Name}$
-            select coalesce(json_agg(result.table_name), '[]')
+            select coalesce(json_agg(result), '[]')
             from (
+
                 select
-                    table_name
+                    pgtbl.relid as id,
+                    tbl.table_name as name,
+                    cl.reltuples as estimate,
+                    pgdesc.description as comment
+
                 from
-                    information_schema.tables
+                    information_schema.tables tbl
+                    
+                    inner join pg_catalog.pg_statio_all_tables pgtbl 
+                    on tbl.table_name = pgtbl.relname and pgtbl.schemaname = _data->>'schema'
+
+                    inner join pg_catalog.pg_class cl on pgtbl.relid = cl.oid
+
+                    left outer join pg_catalog.pg_description pgdesc
+                    on pgtbl.relid = pgdesc.objoid and pgdesc.objsubid = 0
+
                 where
                     table_schema = _data->>'schema' and table_type = _data->>'type'
 
