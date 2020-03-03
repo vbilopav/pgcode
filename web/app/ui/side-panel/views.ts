@@ -38,4 +38,9 @@ export default class extends Panel {
         .attr("id", ViewId(item.id))
         .appendElementTo(this.items);
     }
+
+    protected itemSelected(element: Element) {
+        const item = element.dataAttr("item") as ITableInfo;
+        this.mainPanel.activate(ViewId(item.id), item.name, Keys.VIEWS, "icon-database");
+    };
 }

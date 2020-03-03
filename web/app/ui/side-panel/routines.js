@@ -36,6 +36,11 @@ define(["require", "exports", "app/types", "app/api", "app/ui/side-panel/panel"]
                 .attr("id", api_1.RoutineId(item.id))
                 .appendElementTo(this.items);
         }
+        itemSelected(element) {
+            const item = element.dataAttr("item");
+            this.mainPanel.activate(api_1.RoutineId(item.id), item.signature, types_1.Keys.ROUTINES, "icon-database");
+        }
+        ;
     }
     exports.default = default_1;
 });

@@ -64,7 +64,7 @@ abstract class Splitter {
         dockPosition = 0,
         resizeIndex,
         maxDelta = 250, 
-        min = 150,
+        min = 100,
         events = { docked: (()=>{}), undocked: (()=>{}), changed: (()=>{}) },
         maxResizeDelta,
         storage

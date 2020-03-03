@@ -1,7 +1,7 @@
 import "vs/editor/editor.main";
 import { subscribe, publish, SPLITTER_CHANGED, TAB_SELECTED, TAB_UNSELECTED } from "app/_sys/pubsub";
 import { Keys } from "app/types";
-import { fetchScriptContent, IScriptInfo, ScriptId } from "app/api";
+//import { fetchScriptContent, IScriptInfo, ScriptId } from "app/api";
 
 interface Item {
     tab: Element;
@@ -50,8 +50,7 @@ export default class  {
         }
     }
 
-    public async activateScript(script: IScriptInfo) {
-        const id = ScriptId(script.id);
+    public activate(id: string, title: string, key: Keys, iconClass: string) {
         const item = this.items.get(id);
         if (item) {
             // tab already exists
@@ -59,14 +58,14 @@ export default class  {
 
         } else {
             // create a new tab
-            const tab = this.createTabElement("icon-doc-text", script.title, id);
+            const tab = this.createTabElement(iconClass, title, id);
             if (this.stickyTab) {
                 this.items.delete(this.stickyTab.id);
                 this.stickyTab.replaceWith(this.makeStickyTab(tab));
             } else {
                 this.makeStickyTab(tab).appendElementTo(this.tabs);
             }
-            let item = {tab, id, key: Keys.SCRIPTS} as Item;
+            let item = {tab, id, key} as Item;
             this.items.set(id, item);
             this.activateByTab(tab, item);
         }

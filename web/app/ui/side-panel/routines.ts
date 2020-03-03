@@ -39,4 +39,9 @@ export default class extends Panel {
         .attr("id", RoutineId(item.id))
         .appendElementTo(this.items);
     }
+
+    protected itemSelected(element: Element) {
+        const item = element.dataAttr("item") as IRoutineInfo;
+        this.mainPanel.activate(RoutineId(item.id), item.signature, Keys.ROUTINES, "icon-database");
+    };
 }

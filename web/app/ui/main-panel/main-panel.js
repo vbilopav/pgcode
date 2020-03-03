@@ -1,4 +1,4 @@
-define(["require", "exports", "app/_sys/pubsub", "app/types", "app/api", "vs/editor/editor.main"], function (require, exports, pubsub_1, types_1, api_1) {
+define(["require", "exports", "app/_sys/pubsub", "vs/editor/editor.main"], function (require, exports, pubsub_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     const _sticky = "sticky";
@@ -21,14 +21,13 @@ define(["require", "exports", "app/_sys/pubsub", "app/types", "app/api", "vs/edi
                 this.stickyTab = null;
             }
         }
-        async activateScript(script) {
-            const id = api_1.ScriptId(script.id);
+        activate(id, title, key, iconClass) {
             const item = this.items.get(id);
             if (item) {
                 this.activateByTab(item.tab);
             }
             else {
-                const tab = this.createTabElement("icon-doc-text", script.title, id);
+                const tab = this.createTabElement(iconClass, title, id);
                 if (this.stickyTab) {
                     this.items.delete(this.stickyTab.id);
                     this.stickyTab.replaceWith(this.makeStickyTab(tab));
@@ -36,7 +35,7 @@ define(["require", "exports", "app/_sys/pubsub", "app/types", "app/api", "vs/edi
                 else {
                     this.makeStickyTab(tab).appendElementTo(this.tabs);
                 }
-                let item = { tab, id, key: types_1.Keys.SCRIPTS };
+                let item = { tab, id, key };
                 this.items.set(id, item);
                 this.activateByTab(tab, item);
             }

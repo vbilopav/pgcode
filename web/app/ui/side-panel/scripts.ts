@@ -51,6 +51,7 @@ export default class extends Panel {
     }
 
     protected itemSelected(element: Element) {
-        this.mainPanel.activateScript(element.dataAttr("item") as IScriptInfo);
+        const item = element.dataAttr("item") as IScriptInfo;
+        this.mainPanel.activate(ScriptId(item.id), item.title, Keys.SCRIPTS, "icon-doc-text");
     };
 }
