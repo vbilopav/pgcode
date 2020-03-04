@@ -160,7 +160,7 @@ export default class  {
         if (this.adjustTimeout) {
             clearTimeout(this.adjustTimeout);
         }
-        this.adjustTimeout = setTimeout(() => this.adjustHeaderHeight(), 25);
+        this.adjustTimeout = setTimeout(() => this.adjustHeaderHeight(), 10);
     }
 
     private adjustHeaderHeight() {

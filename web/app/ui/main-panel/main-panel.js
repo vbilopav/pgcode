@@ -117,7 +117,7 @@ define(["require", "exports", "app/_sys/pubsub", "vs/editor/editor.main"], funct
             if (this.adjustTimeout) {
                 clearTimeout(this.adjustTimeout);
             }
-            this.adjustTimeout = setTimeout(() => this.adjustHeaderHeight(), 25);
+            this.adjustTimeout = setTimeout(() => this.adjustHeaderHeight(), 10);
         }
         adjustHeaderHeight() {
             if (this.adjustTimeout) {
