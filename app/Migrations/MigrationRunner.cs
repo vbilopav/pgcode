@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using Norm.Extensions;
-using Norm.Extensions.PostgreSQL;
 using Npgsql;
 
 namespace Pgcode.Migrations
@@ -47,7 +46,11 @@ namespace Pgcode.Migrations
                 return null;
             }
 
-            if (!_connection.TableExists("schema_version", _settings.PgCodeSchema))
+            if (_connection.Single(@"select 1
+                from
+                    information_schema.tables
+                where
+                    table_name = 'schema_version' and table_schema = @schema", _settings.PgCodeSchema).Count == 0)
             {
                 return null;
             }

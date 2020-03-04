@@ -5,10 +5,6 @@ VisualStudioVersion = 16.0.29503.13
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "pgcode", "pgcode.csproj", "{B9CA9BA2-1F64-4E91-8DAA-3BFC33C848DE}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Norm.Extensions.PostgreSQL", "..\..\NoOrm.Net\Norm.Extensions.PostgreSQL\Norm.Extensions.PostgreSQL.csproj", "{99648BBD-D94D-49F1-8013-52825946553A}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Norm", "..\..\NoOrm.Net\Norm\Norm.csproj", "{1A7BD91A-EB09-4B4B-AB8E-7486DD2B1A58}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -19,14 +15,6 @@ Global
 		{B9CA9BA2-1F64-4E91-8DAA-3BFC33C848DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B9CA9BA2-1F64-4E91-8DAA-3BFC33C848DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B9CA9BA2-1F64-4E91-8DAA-3BFC33C848DE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{99648BBD-D94D-49F1-8013-52825946553A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{99648BBD-D94D-49F1-8013-52825946553A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{99648BBD-D94D-49F1-8013-52825946553A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{99648BBD-D94D-49F1-8013-52825946553A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1A7BD91A-EB09-4B4B-AB8E-7486DD2B1A58}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1A7BD91A-EB09-4B4B-AB8E-7486DD2B1A58}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1A7BD91A-EB09-4B4B-AB8E-7486DD2B1A58}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1A7BD91A-EB09-4B4B-AB8E-7486DD2B1A58}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
