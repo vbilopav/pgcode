@@ -6,3 +6,7 @@ export enum Keys { SCRIPTS = "scripts", TABLES = "tables", VIEWS = "views", ROUT
 export interface IMain {
     moveToolbar(position: Position, ...args: any[]) : boolean
 }
+
+export interface ISidePanel {
+    unselectAll() : void
+}

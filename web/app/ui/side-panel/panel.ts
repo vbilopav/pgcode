@@ -3,6 +3,7 @@ import MainPanel from "app/ui/main-panel/main-panel";
 import { ISchema } from "app/api";
 import MonacoContextMenu from "app/controls/monaco-context-menu";
 import { ContextMenuCtorArgs, MenuItemType } from "app/controls/context-menu";
+import { ISidePanel } from "app/types";
 
 class PanelMenu extends MonacoContextMenu {
     protected adjust() {
@@ -25,6 +26,7 @@ export default abstract class Panel {
     protected readonly header: Element;
     protected readonly items: Element;
     protected mainPanel: MainPanel;
+    protected sidePanel: ISidePanel;
     private scrollTimeout: number;
 
     constructor(element: Element, key: string, menuItems: Array<MenuItemType> = []){
@@ -56,6 +58,20 @@ export default abstract class Panel {
         return this;
     }
 
+    public setSidePanelRef(sidePanel: ISidePanel) {
+        this.sidePanel = sidePanel;
+        return this;
+    }
+
+    public unselectAll() {
+        const active = this.items.findAll(".active");
+        if (active.length > 0) {
+            for(let unselect of active) {
+                this.unselectItemByElement(unselect as Element);
+            } 
+        }
+    }
+
     protected createItemElement(content: string) {
         return String.html`
         <div class="panel-item">
@@ -82,12 +98,7 @@ export default abstract class Panel {
         if (element.hasClass("active")) {
             return
         }
-        const active = this.items.findAll(".active");
-        if (active.length > 0) {
-            for(let unselect of active) {
-                this.unselectItemByElement(unselect as Element);
-            } 
-        }
+        this.sidePanel.unselectAll();
         this.selectItemByElement(element, true);
     }
 

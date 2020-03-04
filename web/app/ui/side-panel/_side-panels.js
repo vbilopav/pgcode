@@ -3,6 +3,7 @@ define(["require", "exports", "app/_sys/pubsub", "app/ui/side-panel/scripts", "a
     Object.defineProperty(exports, "__esModule", { value: true });
     class default_1 {
         constructor(element, mainPanel) {
+            this.panels = new Map();
             element.addClass("side-panel").html(String.html `
             <div style="display: none;">
                 <div></div>
@@ -25,16 +26,11 @@ define(["require", "exports", "app/_sys/pubsub", "app/ui/side-panel/scripts", "a
                 <div></div>
             </div>
         `);
-            const panels = {};
-            panels[types_1.Keys.SCRIPTS] = new scripts_1.default(element.children[0]).setMainPanelRef(mainPanel);
-            panels[types_1.Keys.TABLES] = new tables_1.default(element.children[1]).setMainPanelRef(mainPanel);
-            ;
-            panels[types_1.Keys.VIEWS] = new views_1.default(element.children[2]).setMainPanelRef(mainPanel);
-            ;
-            panels[types_1.Keys.ROUTINES] = new routines_1.default(element.children[3]).setMainPanelRef(mainPanel);
-            ;
-            panels[types_1.Keys.SEARCH] = new search_1.default(element.children[4]).setMainPanelRef(mainPanel);
-            ;
+            this.panels.set(types_1.Keys.SCRIPTS, new scripts_1.default(element.children[0]).setMainPanelRef(mainPanel).setSidePanelRef(this));
+            this.panels.set(types_1.Keys.TABLES, new tables_1.default(element.children[1]).setMainPanelRef(mainPanel).setSidePanelRef(this));
+            this.panels.set(types_1.Keys.VIEWS, new views_1.default(element.children[2]).setMainPanelRef(mainPanel).setSidePanelRef(this));
+            this.panels.set(types_1.Keys.ROUTINES, new routines_1.default(element.children[3]).setMainPanelRef(mainPanel).setSidePanelRef(this));
+            this.panels.set(types_1.Keys.SEARCH, new search_1.default(element.children[4]).setMainPanelRef(mainPanel).setSidePanelRef(this));
             pubsub_1.subscribe([
                 pubsub_1.STATE_CHANGED_SCRIPTS,
                 pubsub_1.STATE_CHANGED_TABLES,
@@ -42,8 +38,13 @@ define(["require", "exports", "app/_sys/pubsub", "app/ui/side-panel/scripts", "a
                 pubsub_1.STATE_CHANGED_ROUTINES,
                 pubsub_1.STATE_CHANGED_SEARCH
             ], (key, state) => {
-                panels[key].show(state);
+                this.panels.get(key).show(state);
             });
+        }
+        unselectAll() {
+            for (let panel of this.panels.values()) {
+                panel.unselectAll();
+            }
         }
     }
     exports.default = default_1;

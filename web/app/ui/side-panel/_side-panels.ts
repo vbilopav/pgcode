@@ -8,11 +8,12 @@ import Tables from "app/ui/side-panel/tables";
 import Views from "app/ui/side-panel/views";
 import Routines from "app/ui/side-panel/routines";
 import Search from "app/ui/side-panel/search";
-import { Keys } from "app/types";
+import { Keys, ISidePanel } from "app/types";
 
+export default class implements ISidePanel {
+    private panels: Map<string, Panel> = new Map<string, Panel>();
 
-export default class  {
-    constructor(element: Element, mainPanel: MainPanel){
+    constructor(element: Element, mainPanel: MainPanel) {
         element.addClass("side-panel").html(String.html`
             <div style="display: none;">
                 <div></div>
@@ -35,12 +36,12 @@ export default class  {
                 <div></div>
             </div>
         `);
-        const panels: Record<string, Panel> = {};
-        panels[Keys.SCRIPTS] = new Scripts(element.children[0]).setMainPanelRef(mainPanel);
-        panels[Keys.TABLES] = new Tables(element.children[1]).setMainPanelRef(mainPanel);;
-        panels[Keys.VIEWS] = new Views(element.children[2]).setMainPanelRef(mainPanel);;
-        panels[Keys.ROUTINES] = new Routines(element.children[3]).setMainPanelRef(mainPanel);;
-        panels[Keys.SEARCH] = new Search(element.children[4]).setMainPanelRef(mainPanel);;
+        
+        this.panels.set(Keys.SCRIPTS, new Scripts(element.children[0]).setMainPanelRef(mainPanel).setSidePanelRef(this));
+        this.panels.set(Keys.TABLES, new Tables(element.children[1]).setMainPanelRef(mainPanel).setSidePanelRef(this));
+        this.panels.set(Keys.VIEWS, new Views(element.children[2]).setMainPanelRef(mainPanel).setSidePanelRef(this));
+        this.panels.set(Keys.ROUTINES, new Routines(element.children[3]).setMainPanelRef(mainPanel).setSidePanelRef(this));
+        this.panels.set(Keys.SEARCH, new Search(element.children[4]).setMainPanelRef(mainPanel).setSidePanelRef(this));
         
         subscribe([
             STATE_CHANGED_SCRIPTS, 
@@ -49,7 +50,13 @@ export default class  {
             STATE_CHANGED_ROUTINES, 
             STATE_CHANGED_SEARCH
         ], (key: string, state: boolean) => {
-            panels[key].show(state);
+            this.panels.get(key).show(state);
         });
+    }
+
+    public unselectAll() {
+        for(let panel of this.panels.values()) {
+            panel.unselectAll();
+        }
     }
 }

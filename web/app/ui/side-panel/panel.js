@@ -42,6 +42,18 @@ define(["require", "exports", "app/_sys/pubsub", "app/controls/monaco-context-me
             this.mainPanel = mainPanel;
             return this;
         }
+        setSidePanelRef(sidePanel) {
+            this.sidePanel = sidePanel;
+            return this;
+        }
+        unselectAll() {
+            const active = this.items.findAll(".active");
+            if (active.length > 0) {
+                for (let unselect of active) {
+                    this.unselectItemByElement(unselect);
+                }
+            }
+        }
         createItemElement(content) {
             return String.html `
         <div class="panel-item">
@@ -64,12 +76,7 @@ define(["require", "exports", "app/_sys/pubsub", "app/controls/monaco-context-me
             if (element.hasClass("active")) {
                 return;
             }
-            const active = this.items.findAll(".active");
-            if (active.length > 0) {
-                for (let unselect of active) {
-                    this.unselectItemByElement(unselect);
-                }
-            }
+            this.sidePanel.unselectAll();
             this.selectItemByElement(element, true);
         }
         itemsDblClick(e) {
