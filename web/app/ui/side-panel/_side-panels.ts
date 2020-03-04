@@ -1,5 +1,11 @@
 import { 
-    subscribe, STATE_CHANGED_SCRIPTS, STATE_CHANGED_TABLES, STATE_CHANGED_VIEWS, STATE_CHANGED_ROUTINES, STATE_CHANGED_SEARCH
+    subscribe, 
+    STATE_CHANGED_SCRIPTS, 
+    STATE_CHANGED_TABLES, 
+    STATE_CHANGED_VIEWS, 
+    STATE_CHANGED_ROUTINES, 
+    STATE_CHANGED_SEARCH,
+    TAB_SELECTED
 } from "app/_sys/pubsub";
 import MainPanel from "app/ui/main-panel/main-panel";
 import Panel from "app/ui/side-panel/panel"
@@ -11,7 +17,7 @@ import Search from "app/ui/side-panel/search";
 import { Keys, ISidePanel } from "app/types";
 
 export default class implements ISidePanel {
-    private panels: Map<string, Panel> = new Map<string, Panel>();
+    private panels: Map<Keys, Panel> = new Map<Keys, Panel>();
 
     constructor(element: Element, mainPanel: MainPanel) {
         element.addClass("side-panel").html(String.html`
@@ -49,8 +55,18 @@ export default class implements ISidePanel {
             STATE_CHANGED_VIEWS, 
             STATE_CHANGED_ROUTINES, 
             STATE_CHANGED_SEARCH
-        ], (key: string, state: boolean) => {
+        ], (key: Keys, state: boolean) => {
             this.panels.get(key).show(state);
+        });
+
+        subscribe(TAB_SELECTED, (_, key: Keys) => {
+            for(let [current, panel] of this.panels) {
+                if (key == current) {
+                    panel.show(true);
+                } else {
+                    panel.show(false);
+                }
+            }
         });
     }
 

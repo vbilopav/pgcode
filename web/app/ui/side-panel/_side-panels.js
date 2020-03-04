@@ -40,6 +40,16 @@ define(["require", "exports", "app/_sys/pubsub", "app/ui/side-panel/scripts", "a
             ], (key, state) => {
                 this.panels.get(key).show(state);
             });
+            pubsub_1.subscribe(pubsub_1.TAB_SELECTED, (_, key) => {
+                for (let [current, panel] of this.panels) {
+                    if (key == current) {
+                        panel.show(true);
+                    }
+                    else {
+                        panel.show(false);
+                    }
+                }
+            });
         }
         unselectAll() {
             for (let panel of this.panels.values()) {
