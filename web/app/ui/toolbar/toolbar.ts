@@ -1,7 +1,13 @@
 import Storage from "app/_sys/storage";
 import { 
     publish, subscribe, 
-    STATE_CHANGED_ON, STATE_CHANGED_OFF, STATE_CHANGED, SIDEBAR_DOCKED, SIDEBAR_UNDOCKED, ITEM_COUNT_CHANGED
+    STATE_CHANGED_ON, 
+    STATE_CHANGED_OFF, 
+    STATE_CHANGED, 
+    SIDEBAR_DOCKED, 
+    SIDEBAR_UNDOCKED, 
+    ITEM_COUNT_CHANGED, 
+    TAB_SELECTED
 } from "app/_sys/pubsub";
 import { ContextMenuCtorArgs, MenuItemType } from "app/controls/context-menu";
 import MonacoContextMenu from "../../controls/monaco-context-menu";
@@ -9,9 +15,9 @@ import { Position, IMain, Keys } from "app/types";
 
 enum ButtonRoles { switch="switch", toggle="toggle" };
 const 
-    isInRole: (e: Element, role: ButtonRoles) => boolean = (e, role) => e.dataAttr("role") === role,
-    isSwitch: (e: Element) => boolean = e => isInRole(e, ButtonRoles.switch),
-    moveText = (position: Position) => position === Position.LEFT ? "Move Toolbar to Right" : "Move Toolbar to Left";
+    _isInRole: (e: Element, role: ButtonRoles) => boolean = (e, role) => e.dataAttr("role") === role,
+    _isSwitch: (e: Element) => boolean = e => _isInRole(e, ButtonRoles.switch),
+    _moveText = (position: Position) => position === Position.LEFT ? "Move Toolbar to Right" : "Move Toolbar to Left";
 
 interface IStorage {
     scripts: boolean;
@@ -24,7 +30,7 @@ interface IStorage {
 }
 
 const 
-    storage = new Storage({
+    _storage = new Storage({
         scripts: false, 
         tables: false, 
         views: false,
@@ -42,9 +48,9 @@ const
     }) as any as IStorage;
 
 const 
-    active = "active", 
-    docked = "docked",
-    items = [
+    _active = "active", 
+    _docked = "docked",
+    _items = [
         {id: `btn-${Keys.SCRIPTS}`, icon: "icon-doc-text", key: Keys.SCRIPTS, label: Keys.SCRIPTS, text: "Scripts", keyBinding: "Ctrl+S", role: ButtonRoles.switch},
         {id: `btn-${Keys.TABLES}`, icon: "icon-database", key: Keys.TABLES, label: Keys.TABLES, text: "Tables", keyBinding: "Ctrl+T", role: ButtonRoles.switch},
         {id: `btn-${Keys.VIEWS}`, icon: "icon-database", key: Keys.VIEWS, label: Keys.VIEWS, text: "Views", keyBinding: "Ctrl+V", role: ButtonRoles.switch},
@@ -61,7 +67,7 @@ export default class  {
     constructor(element: Element, position: Position, index: IMain) {
         let html = "";
         let menuItems = new Array<MenuItemType>();
-        for(let item of items) {
+        for(let item of _items) {
             html = html + String.html`
             <div class="${item.icon} ${item.id}" id="${item.id}" data-key="${item.key}" data-role="${item.role}" title="${item.label} (${item.keyBinding})">
                 <div class="marker"></div>
@@ -84,7 +90,7 @@ export default class  {
 
         menuItems.push({ splitter: true }, {
             id: "move", 
-            text: moveText(position), 
+            text: _moveText(position), 
             action: () => {
                 let newPosition = position == Position.LEFT ? Position.RIGHT : Position.LEFT;
                 if (index.moveToolbar(newPosition)) {
@@ -94,7 +100,7 @@ export default class  {
                     } else {
                         this.toolbar.removeClass("right");
                     }
-                    this.menu.updateMenuItem("move", {text: moveText(position)});
+                    this.menu.updateMenuItem("move", {text: _moveText(position)});
                 }
             }
         } as MenuItemType);
@@ -104,7 +110,7 @@ export default class  {
         
         for(let e of this.buttons) {
             const key = e.dataAttr("key");
-            this.setButtonState(e as HTMLElement, storage[key], key);
+            this.setButtonState(e as HTMLElement, _storage[key], key);
         }
 
         subscribe(SIDEBAR_DOCKED, () => this.sidebarDocked());
@@ -121,12 +127,29 @@ export default class  {
             let hint = btn.attr("title").split("\n");
             btn.attr("title", hint[0] + "\n" + count + " items");
         });
+        subscribe(TAB_SELECTED, (_, key: Keys) => { 
+            if (!key) {
+                return;
+            } 
+            for(let btn of this.buttons) {
+                const active = btn.hasClass(_active);
+                if (key === btn.dataAttr("key")) {
+                    if (!active) {
+                        btn.addClass(_active);
+                    }
+                } else {
+                    if (active) {
+                        btn.removeClass(_active);
+                    }
+                }
+            }
+        });
     }
 
     private sidebarDocked() {
-        this.toolbar.addClass(docked);
+        this.toolbar.addClass(_docked);
         for(let btn of this.buttons) {
-            if (btn.hasClass(active) && isSwitch(btn)) {
+            if (btn.hasClass(_active) && _isSwitch(btn)) {
                 this.menu.updateMenuItem(btn.dataAttr("key"), {checked: false});
             }
         }
@@ -134,63 +157,63 @@ export default class  {
 
     private sidebarUndocked() {
         let hasActive = false
-        for(let item of items) {
+        for(let item of _items) {
             if (item.role !== ButtonRoles.switch) {
                 continue;
             }
             let btn = this.buttons.namedItem(item.id);
-            if (btn.hasClass(active)) {
+            if (btn.hasClass(_active)) {
                 hasActive = true;
                 this.menu.updateMenuItem(btn.dataAttr("key"), {checked: true});
                 break;
             }
         }
-        if (!hasActive && storage.previousKey) {
-            let key = storage.previousKey;
+        if (!hasActive && _storage.previousKey) {
+            let key = _storage.previousKey;
             for(let btn of this.buttons) {
                 if (btn.dataAttr("key") === key) {
-                    btn.addClass(active);
-                    storage[key] = true;
+                    btn.addClass(_active);
+                    _storage[key] = true;
                     publish(STATE_CHANGED + key, key, true);
                     this.menu.updateMenuItem(key, {checked: true});
                     break;
                 }
             }
         }
-        this.toolbar.removeClass(docked);
+        this.toolbar.removeClass(_docked);
     } 
 
     private setButtonState(e: HTMLElement, state: boolean, key: string) {
-        if (e.hasClass(active) && !state) {
-            e.removeClass(active);
+        if (e.hasClass(_active) && !state) {
+            e.removeClass(_active);
             setTimeout(() => publish(STATE_CHANGED + key, key, false), 0);
-        } else if (!e.hasClass(active) && state) {
-            e.addClass(active);
+        } else if (!e.hasClass(_active) && state) {
+            e.addClass(_active);
             setTimeout(() => publish(STATE_CHANGED + key, key, true), 0);
         }
-        if (isSwitch(e)) {
+        if (_isSwitch(e)) {
             this.menu.updateMenuItem(key, {checked: state});
         }
     }
 
     private buttonClicked(e: HTMLElement) {
         const key = e.dataAttr("key");
-        let switchRole = isSwitch(e);
+        let switchRole = _isSwitch(e);
         
         const toggle = (state?: boolean): void => {
             if (state === undefined) {
-                state = e.hasClass(active);
+                state = e.hasClass(_active);
             }
             if (state) {
-                e.removeClass(active);
+                e.removeClass(_active);
                 if (switchRole) {
-                    storage.previousKey = key;
+                    _storage.previousKey = key;
                 }
             } else {
-                e.addClass(active);
+                e.addClass(_active);
             }
             state = !state;
-            storage[key] = state;
+            _storage[key] = state;
             publish(STATE_CHANGED + key, key, state);
             if (switchRole) {
                 this.menu.updateMenuItem(key, {checked: state});
@@ -200,15 +223,15 @@ export default class  {
         if (!switchRole) {
             toggle();
         } else {
-            const isDocked = this.toolbar.hasClass(docked);
+            const isDocked = this.toolbar.hasClass(_docked);
 
             for(let btn of this.buttons) {
-                if (isSwitch(btn) && e.id !== btn.id) {
+                if (_isSwitch(btn) && e.id !== btn.id) {
                     const key = btn.dataAttr("key");
-                    if (storage[key]) {
-                        storage[key] = false;
+                    if (_storage[key]) {
+                        _storage[key] = false;
                     }
-                    if (btn.hasClass(active)) {
+                    if (btn.hasClass(_active)) {
                         btn.removeClass("active");
                         publish(STATE_CHANGED + key, key, false);
                         this.menu.updateMenuItem(key, {checked: false});
@@ -221,7 +244,7 @@ export default class  {
                 toggle();
             }
 
-            if (!e.hasClass(active)) {
+            if (!e.hasClass(_active)) {
                 publish(STATE_CHANGED_OFF);
             } else {
                 publish(STATE_CHANGED_ON);

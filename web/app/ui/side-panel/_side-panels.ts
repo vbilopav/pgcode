@@ -60,6 +60,9 @@ export default class implements ISidePanel {
         });
 
         subscribe(TAB_SELECTED, (_, key: Keys) => {
+            if (!key) {
+                return;
+            }
             for(let [current, panel] of this.panels) {
                 if (key == current) {
                     panel.show(true);

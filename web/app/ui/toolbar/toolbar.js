@@ -7,8 +7,8 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "../../cont
         ButtonRoles["toggle"] = "toggle";
     })(ButtonRoles || (ButtonRoles = {}));
     ;
-    const isInRole = (e, role) => e.dataAttr("role") === role, isSwitch = e => isInRole(e, ButtonRoles.switch), moveText = (position) => position === types_1.Position.LEFT ? "Move Toolbar to Right" : "Move Toolbar to Left";
-    const storage = new storage_1.default({
+    const _isInRole = (e, role) => e.dataAttr("role") === role, _isSwitch = e => _isInRole(e, ButtonRoles.switch), _moveText = (position) => position === types_1.Position.LEFT ? "Move Toolbar to Right" : "Move Toolbar to Left";
+    const _storage = new storage_1.default({
         scripts: false,
         tables: false,
         views: false,
@@ -22,7 +22,7 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "../../cont
         }
         return value;
     });
-    const active = "active", docked = "docked", items = [
+    const _active = "active", _docked = "docked", _items = [
         { id: `btn-${types_1.Keys.SCRIPTS}`, icon: "icon-doc-text", key: types_1.Keys.SCRIPTS, label: types_1.Keys.SCRIPTS, text: "Scripts", keyBinding: "Ctrl+S", role: ButtonRoles.switch },
         { id: `btn-${types_1.Keys.TABLES}`, icon: "icon-database", key: types_1.Keys.TABLES, label: types_1.Keys.TABLES, text: "Tables", keyBinding: "Ctrl+T", role: ButtonRoles.switch },
         { id: `btn-${types_1.Keys.VIEWS}`, icon: "icon-database", key: types_1.Keys.VIEWS, label: types_1.Keys.VIEWS, text: "Views", keyBinding: "Ctrl+V", role: ButtonRoles.switch },
@@ -33,7 +33,7 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "../../cont
         constructor(element, position, index) {
             let html = "";
             let menuItems = new Array();
-            for (let item of items) {
+            for (let item of _items) {
                 html = html + String.html `
             <div class="${item.icon} ${item.id}" id="${item.id}" data-key="${item.key}" data-role="${item.role}" title="${item.label} (${item.keyBinding})">
                 <div class="marker"></div>
@@ -55,7 +55,7 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "../../cont
             }
             menuItems.push({ splitter: true }, {
                 id: "move",
-                text: moveText(position),
+                text: _moveText(position),
                 action: () => {
                     let newPosition = position == types_1.Position.LEFT ? types_1.Position.RIGHT : types_1.Position.LEFT;
                     if (index.moveToolbar(newPosition)) {
@@ -66,7 +66,7 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "../../cont
                         else {
                             this.toolbar.removeClass("right");
                         }
-                        this.menu.updateMenuItem("move", { text: moveText(position) });
+                        this.menu.updateMenuItem("move", { text: _moveText(position) });
                     }
                 }
             });
@@ -74,7 +74,7 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "../../cont
             this.buttons = this.toolbar.children.on("click", (e) => this.buttonClicked(e.currentTarget));
             for (let e of this.buttons) {
                 const key = e.dataAttr("key");
-                this.setButtonState(e, storage[key], key);
+                this.setButtonState(e, _storage[key], key);
             }
             pubsub_1.subscribe(pubsub_1.SIDEBAR_DOCKED, () => this.sidebarDocked());
             pubsub_1.subscribe(pubsub_1.SIDEBAR_UNDOCKED, () => this.sidebarUndocked());
@@ -90,73 +90,91 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "../../cont
                 let hint = btn.attr("title").split("\n");
                 btn.attr("title", hint[0] + "\n" + count + " items");
             });
+            pubsub_1.subscribe(pubsub_1.TAB_SELECTED, (_, key) => {
+                if (!key) {
+                    return;
+                }
+                for (let btn of this.buttons) {
+                    const active = btn.hasClass(_active);
+                    if (key === btn.dataAttr("key")) {
+                        if (!active) {
+                            btn.addClass(_active);
+                        }
+                    }
+                    else {
+                        if (active) {
+                            btn.removeClass(_active);
+                        }
+                    }
+                }
+            });
         }
         sidebarDocked() {
-            this.toolbar.addClass(docked);
+            this.toolbar.addClass(_docked);
             for (let btn of this.buttons) {
-                if (btn.hasClass(active) && isSwitch(btn)) {
+                if (btn.hasClass(_active) && _isSwitch(btn)) {
                     this.menu.updateMenuItem(btn.dataAttr("key"), { checked: false });
                 }
             }
         }
         sidebarUndocked() {
             let hasActive = false;
-            for (let item of items) {
+            for (let item of _items) {
                 if (item.role !== ButtonRoles.switch) {
                     continue;
                 }
                 let btn = this.buttons.namedItem(item.id);
-                if (btn.hasClass(active)) {
+                if (btn.hasClass(_active)) {
                     hasActive = true;
                     this.menu.updateMenuItem(btn.dataAttr("key"), { checked: true });
                     break;
                 }
             }
-            if (!hasActive && storage.previousKey) {
-                let key = storage.previousKey;
+            if (!hasActive && _storage.previousKey) {
+                let key = _storage.previousKey;
                 for (let btn of this.buttons) {
                     if (btn.dataAttr("key") === key) {
-                        btn.addClass(active);
-                        storage[key] = true;
+                        btn.addClass(_active);
+                        _storage[key] = true;
                         pubsub_1.publish(pubsub_1.STATE_CHANGED + key, key, true);
                         this.menu.updateMenuItem(key, { checked: true });
                         break;
                     }
                 }
             }
-            this.toolbar.removeClass(docked);
+            this.toolbar.removeClass(_docked);
         }
         setButtonState(e, state, key) {
-            if (e.hasClass(active) && !state) {
-                e.removeClass(active);
+            if (e.hasClass(_active) && !state) {
+                e.removeClass(_active);
                 setTimeout(() => pubsub_1.publish(pubsub_1.STATE_CHANGED + key, key, false), 0);
             }
-            else if (!e.hasClass(active) && state) {
-                e.addClass(active);
+            else if (!e.hasClass(_active) && state) {
+                e.addClass(_active);
                 setTimeout(() => pubsub_1.publish(pubsub_1.STATE_CHANGED + key, key, true), 0);
             }
-            if (isSwitch(e)) {
+            if (_isSwitch(e)) {
                 this.menu.updateMenuItem(key, { checked: state });
             }
         }
         buttonClicked(e) {
             const key = e.dataAttr("key");
-            let switchRole = isSwitch(e);
+            let switchRole = _isSwitch(e);
             const toggle = (state) => {
                 if (state === undefined) {
-                    state = e.hasClass(active);
+                    state = e.hasClass(_active);
                 }
                 if (state) {
-                    e.removeClass(active);
+                    e.removeClass(_active);
                     if (switchRole) {
-                        storage.previousKey = key;
+                        _storage.previousKey = key;
                     }
                 }
                 else {
-                    e.addClass(active);
+                    e.addClass(_active);
                 }
                 state = !state;
-                storage[key] = state;
+                _storage[key] = state;
                 pubsub_1.publish(pubsub_1.STATE_CHANGED + key, key, state);
                 if (switchRole) {
                     this.menu.updateMenuItem(key, { checked: state });
@@ -166,14 +184,14 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "../../cont
                 toggle();
             }
             else {
-                const isDocked = this.toolbar.hasClass(docked);
+                const isDocked = this.toolbar.hasClass(_docked);
                 for (let btn of this.buttons) {
-                    if (isSwitch(btn) && e.id !== btn.id) {
+                    if (_isSwitch(btn) && e.id !== btn.id) {
                         const key = btn.dataAttr("key");
-                        if (storage[key]) {
-                            storage[key] = false;
+                        if (_storage[key]) {
+                            _storage[key] = false;
                         }
-                        if (btn.hasClass(active)) {
+                        if (btn.hasClass(_active)) {
                             btn.removeClass("active");
                             pubsub_1.publish(pubsub_1.STATE_CHANGED + key, key, false);
                             this.menu.updateMenuItem(key, { checked: false });
@@ -186,7 +204,7 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "../../cont
                 else {
                     toggle();
                 }
-                if (!e.hasClass(active)) {
+                if (!e.hasClass(_active)) {
                     pubsub_1.publish(pubsub_1.STATE_CHANGED_OFF);
                 }
                 else {
