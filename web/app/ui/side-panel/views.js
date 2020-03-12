@@ -9,7 +9,7 @@ define(["require", "exports", "app/types", "app/api", "app/ui/side-panel/panel"]
                 { text: "Order descending" },
             ]);
         }
-        schemaChanged(data) {
+        schemaChanged(data, schema) {
             this.items.html("");
             for (let item of data.views) {
                 this.addNewItem(item);
@@ -37,7 +37,7 @@ define(["require", "exports", "app/types", "app/api", "app/ui/side-panel/panel"]
         }
         itemSelected(element) {
             const item = element.dataAttr("item");
-            this.mainPanel.activate(api_1.ViewId(item.id), item.name, types_1.Keys.VIEWS, "icon-database");
+            this.mainPanel.activate(api_1.ViewId(item.id), types_1.Keys.VIEWS, item);
         }
         ;
     }

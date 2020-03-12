@@ -8,5 +8,5 @@ export default class extends Panel {
         
     }
 
-    protected schemaChanged(data: ISchema) { }
+    protected schemaChanged(data: ISchema, schema: string) { }
 }

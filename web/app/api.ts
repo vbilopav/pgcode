@@ -20,24 +20,25 @@ interface IConnectionResponse extends ISchema {
 }
 
 interface ISchemaResponse extends ISchema { 
-    name: string
+    name: string,
 }
 
 export interface ISchema { 
     routines: Array<IRoutineInfo>,
     scripts: Array<IScriptInfo>,
     tables: Array<ITableInfo>,
-    views: Array<ITableInfo>
+    views: Array<ITableInfo>,
+    connection: string
 }
 
-export interface ITableInfo {
+export interface ITableInfo extends IItem {
     id: number,
     name: string,
     estimate: number,
     comment: string
 }
 
-export interface IRoutineInfo {
+export interface IRoutineInfo extends IItem {
     id: number,
     type: string
     language: string,
@@ -47,12 +48,17 @@ export interface IRoutineInfo {
     comment: string
 }
 
-export interface IScriptInfo {
+export interface IScriptInfo extends IItem {
     id: number,
     title: string,
     schema: string,
     comment: string,
     timestamp: string
+}
+
+export interface IItem {
+    schema: string,
+    connection: string
 }
 
 interface IScript extends IScriptInfo, IScriptContent {}
@@ -101,7 +107,11 @@ const _fetch:<T> (url: string) => Promise<IResponse<T>> = async url => {
 }
 
 let _currentSchema;
+let _currentConnection;
+
 const getCurrentSchema = () => _currentSchema;
+const getCurrentConnection = () => _currentSchema;
+
 const getTimezoneHeader: () => RequestInit = () => {
     return {headers: {"timezone": Intl.DateTimeFormat().resolvedOptions().timeZone}}
 };
@@ -110,17 +120,34 @@ export const fetchInitial: () => Promise<IResponse<IInitialResponse>> = async ()
     _fetchAndPublishStatus<IInitialResponse>("api/initial");
 
 export const fetchConnection: (name: string) => Promise<IResponse<IConnectionResponse>> = async name => {
-    const result = _fetchAndPublishStatus<IConnectionResponse>(`api/connection/${name}`, getTimezoneHeader());
-    _currentSchema = (await result).data.schemas.selected;
+    const result = await _fetchAndPublishStatus<IConnectionResponse>(`api/connection/${name}`, getTimezoneHeader());
+    if (!result.data) {
+        return null;
+    }
+    _currentSchema = result.data.schemas.selected;
+    _currentConnection = name;
+    result.data.connection = name;
     return result;
 }
 
 export const fetchSchema: (schema: string) => Promise<IResponse<ISchemaResponse>> = async schema => {
-    const result = _fetchAndPublishStatus<ISchemaResponse>(`api/schema/${schema}`);
-    _currentSchema = (await result).data.name;
+    const result = await _fetchAndPublishStatus<ISchemaResponse>(`api/schema/${schema}`);
+    if (!result.data) {
+        return null;
+    }
+    _currentSchema = result.data.name;
+    result.data.connection = getCurrentConnection();
     return result;
 }
 
-export const createScript: () => Promise<IResponse<IScript>> = async () => _fetch(`api/create-script/${getCurrentSchema()}`);
+export const createScript: () => Promise<IResponse<IScript>> = async () => {
+    const result = await _fetch<IScript>(`api/create-script/${getCurrentSchema()}`);
+    if (!result.data) {
+        return null;
+    }
+    result.data.connection = getCurrentConnection();
+    result.data.schema = getCurrentSchema();
+    return result;
+}
 
-export const fetchScriptContent: (id: number) => Promise<IResponse<IScriptContent>> = async id => _fetch(`api/script-content/${id}`);
+export const fetchScriptContent: (id: number) => Promise<IResponse<IScriptContent>> = id => _fetch(`api/script-content/${id}`);

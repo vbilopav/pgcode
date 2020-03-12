@@ -13,21 +13,23 @@ export default class extends Panel {
         ]);
     }
 
-    protected schemaChanged(data: ISchema) {
+    protected schemaChanged(data: ISchema, schema: string) {
         this.items.html("");
         for(let item of data.scripts) {
-            this.addNewItem(item);
+            this.addNewItem({schema: schema, connection: data.connection, ...item} as IScriptInfo);
         }
         this.publishLength();
     }
 
     private async createScript() {
+
         const response = await createScript();
         if (response.ok) {
             this.addNewItem(response.data as IScriptInfo);
             this.publishLength();
             //this.mainPanel activate with content
         }
+        
     }
 
     private addNewItem(item: IScriptInfo) {
@@ -52,6 +54,6 @@ export default class extends Panel {
 
     protected itemSelected(element: Element) {
         const item = element.dataAttr("item") as IScriptInfo;
-        this.mainPanel.activate(ScriptId(item.id), item.title, Keys.SCRIPTS, "icon-doc-text");
+        this.mainPanel.activate(ScriptId(item.id), Keys.SCRIPTS, item);
     };
 }

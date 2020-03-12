@@ -11,7 +11,7 @@ export default class extends Panel {
         ]);
     }
 
-    protected schemaChanged(data: ISchema) {
+    protected schemaChanged(data: ISchema, schema: string) {
         this.items.html("");
         for(let item of data.views) {
             this.addNewItem(item);
@@ -41,6 +41,6 @@ export default class extends Panel {
 
     protected itemSelected(element: Element) {
         const item = element.dataAttr("item") as ITableInfo;
-        this.mainPanel.activate(ViewId(item.id), item.name, Keys.VIEWS, "icon-database");
+        this.mainPanel.activate(ViewId(item.id), Keys.VIEWS, item);
     };
 }

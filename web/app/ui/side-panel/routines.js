@@ -9,10 +9,10 @@ define(["require", "exports", "app/types", "app/api", "app/ui/side-panel/panel"]
                 { text: "Order descending" },
             ]);
         }
-        schemaChanged(data) {
+        schemaChanged(data, schema) {
             this.items.html("");
             for (let item of data.routines) {
-                this.addNewItem(item);
+                this.addNewItem({ schema: schema, connection: data.connection, ...item });
             }
             this.publishLength();
         }
@@ -38,7 +38,7 @@ define(["require", "exports", "app/types", "app/api", "app/ui/side-panel/panel"]
         }
         itemSelected(element) {
             const item = element.dataAttr("item");
-            this.mainPanel.activate(api_1.RoutineId(item.id), item.signature, types_1.Keys.ROUTINES, "icon-database");
+            this.mainPanel.activate(api_1.RoutineId(item.id), types_1.Keys.ROUTINES, item);
         }
         ;
     }

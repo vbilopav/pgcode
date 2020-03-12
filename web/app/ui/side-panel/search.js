@@ -5,7 +5,7 @@ define(["require", "exports", "app/types", "app/ui/side-panel/panel"], function 
         constructor(element) {
             super(element, types_1.Keys.SEARCH);
         }
-        schemaChanged(data) { }
+        schemaChanged(data, schema) { }
     }
     exports.default = default_1;
 });

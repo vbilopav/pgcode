@@ -1,4 +1,4 @@
-define(["require", "exports", "app/_sys/pubsub", "vs/editor/editor.main"], function (require, exports, pubsub_1) {
+define(["require", "exports", "app/_sys/pubsub", "app/ui/main-panel/tabs", "vs/editor/editor.main"], function (require, exports, pubsub_1, tabs_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     const _sticky = "sticky";
@@ -21,13 +21,13 @@ define(["require", "exports", "app/_sys/pubsub", "vs/editor/editor.main"], funct
                 this.stickyTab = null;
             }
         }
-        activate(id, title, key, iconClass) {
+        activate(id, key, data) {
             const item = this.items.get(id);
             if (item) {
                 this.activateByTab(item.tab);
             }
             else {
-                const tab = this.createTabElement(iconClass, title, id);
+                const tab = this.createTabElement(id, key, data);
                 if (this.stickyTab) {
                     this.items.delete(this.stickyTab.id);
                     this.stickyTab.replaceWith(this.makeStickyTab(tab));
@@ -76,15 +76,8 @@ define(["require", "exports", "app/_sys/pubsub", "vs/editor/editor.main"], funct
             let newItem = this.items.maxBy(v => v.timestamp);
             this.activateByTab(newItem.tab, newItem);
         }
-        createTabElement(iconClass, title, key) {
-            return String.html `
-        <div class="tab">
-            <i class=${iconClass}></i>
-            <span class="title">${title}</span>
-            <i class="close" title="close">&#10006</i>
-        </div>`
-                .toElement()
-                .attr("id", key)
+        createTabElement(id, key, data) {
+            return tabs_1.createTabElement(id, key, data)
                 .on("click", e => this.tabClick(e))
                 .on("dblclick", e => this.tabDblClick(e));
         }

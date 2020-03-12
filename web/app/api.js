@@ -29,22 +29,41 @@ define(["require", "exports", "app/_sys/pubsub", "app/types"], function (require
         return _createResponse(response, await response.json());
     };
     let _currentSchema;
+    let _currentConnection;
     const getCurrentSchema = () => _currentSchema;
+    const getCurrentConnection = () => _currentSchema;
     const getTimezoneHeader = () => {
         return { headers: { "timezone": Intl.DateTimeFormat().resolvedOptions().timeZone } };
     };
     exports.fetchInitial = async () => _fetchAndPublishStatus("api/initial");
     exports.fetchConnection = async (name) => {
-        const result = _fetchAndPublishStatus(`api/connection/${name}`, getTimezoneHeader());
-        _currentSchema = (await result).data.schemas.selected;
+        const result = await _fetchAndPublishStatus(`api/connection/${name}`, getTimezoneHeader());
+        if (!result.data) {
+            return null;
+        }
+        _currentSchema = result.data.schemas.selected;
+        _currentConnection = name;
+        result.data.connection = name;
         return result;
     };
     exports.fetchSchema = async (schema) => {
-        const result = _fetchAndPublishStatus(`api/schema/${schema}`);
-        _currentSchema = (await result).data.name;
+        const result = await _fetchAndPublishStatus(`api/schema/${schema}`);
+        if (!result.data) {
+            return null;
+        }
+        _currentSchema = result.data.name;
+        result.data.connection = getCurrentConnection();
         return result;
     };
-    exports.createScript = async () => _fetch(`api/create-script/${getCurrentSchema()}`);
-    exports.fetchScriptContent = async (id) => _fetch(`api/script-content/${id}`);
+    exports.createScript = async () => {
+        const result = await _fetch(`api/create-script/${getCurrentSchema()}`);
+        if (!result.data) {
+            return null;
+        }
+        result.data.connection = getCurrentConnection();
+        result.data.schema = getCurrentSchema();
+        return result;
+    };
+    exports.fetchScriptContent = id => _fetch(`api/script-content/${id}`);
 });
 //# sourceMappingURL=api.js.map

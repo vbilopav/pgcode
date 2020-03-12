@@ -1,6 +1,7 @@
 import "vs/editor/editor.main";
 import { subscribe, publish, SPLITTER_CHANGED, TAB_SELECTED, TAB_UNSELECTED } from "app/_sys/pubsub";
 import { Keys } from "app/types";
+import { createTabElement } from "app/ui/main-panel/tabs";
 //import { fetchScriptContent, IScriptInfo, ScriptId } from "app/api";
 
 interface Item {
@@ -50,7 +51,7 @@ export default class  {
         }
     }
 
-    public activate(id: string, title: string, key: Keys, iconClass: string) {
+    public activate(id: string, key: Keys, data) {
         const item = this.items.get(id);
         if (item) {
             // tab already exists
@@ -58,7 +59,7 @@ export default class  {
 
         } else {
             // create a new tab
-            const tab = this.createTabElement(iconClass, title, id);
+            const tab = this.createTabElement(id, key, data);
             if (this.stickyTab) {
                 this.items.delete(this.stickyTab.id);
                 this.stickyTab.replaceWith(this.makeStickyTab(tab));
@@ -114,17 +115,10 @@ export default class  {
         this.activateByTab(newItem.tab, newItem);
     }
 
-    private createTabElement(iconClass: string, title: string, key: string) {
-        return (String.html`
-        <div class="tab">
-            <i class=${iconClass}></i>
-            <span class="title">${title}</span>
-            <i class="close" title="close">&#10006</i>
-        </div>` as string)
-        .toElement()
-        .attr("id", key)
-        .on("click", e => this.tabClick(e))
-        .on("dblclick", e => this.tabDblClick(e));
+    private createTabElement(id: string, key: Keys, data) {
+        return createTabElement(id, key, data)
+            .on("click", e => this.tabClick(e))
+            .on("dblclick", e => this.tabDblClick(e));
     }
 
     private makeStickyTab(tab: Element) {
