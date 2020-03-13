@@ -1,9 +1,8 @@
 import { subscribe, publish, SCHEMA_CHANGED, ITEM_COUNT_CHANGED, TAB_SELECTED, TAB_UNSELECTED } from "app/_sys/pubsub";
 import MainPanel from "app/ui/main-panel/main-panel";
-import { ISchema } from "app/api";
+import { ISchema, ISidePanel } from "app/api";
 import MonacoContextMenu from "app/controls/monaco-context-menu";
 import { ContextMenuCtorArgs, MenuItemType } from "app/controls/context-menu";
-import { ISidePanel } from "app/types";
 
 class PanelMenu extends MonacoContextMenu {
     protected adjust() {

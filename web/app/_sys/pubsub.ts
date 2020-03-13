@@ -1,4 +1,4 @@
-import { Keys } from "app/types";
+import { Keys } from "app/api";
 
 const _entries = {};
 
@@ -68,5 +68,5 @@ export const ITEM_COUNT_CHANGED: string = "item/count/"; //key: string, count: n
 
 export const SPLITTER_CHANGED: string = "splitter/changed"; //void
 
-export const TAB_SELECTED = `tab/selected`; //id: string, key: string
+export const TAB_SELECTED = `tab/selected`; //id: string, key: string, schema: string, connection: string 
 export const TAB_UNSELECTED = `tab/unselected`; //id: string, key: string

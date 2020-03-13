@@ -1,7 +1,6 @@
-import { Keys } from "app/types";
-import { IRoutineInfo, IScriptInfo, ITableInfo } from "app/api";
+import { ItemInfoType, IRoutineInfo, IScriptInfo, ITableInfo, Keys } from "app/api";
 
-export const createTabElement: (id: string, key: Keys, data: IRoutineInfo | IScriptInfo | ITableInfo) => Element = (id, key, data) => {
+export const createTabElement: (id: string, key: Keys, data: ItemInfoType) => Element = (id, key, data) => {
     let iconClass : string;
     let title : string;
     if (key === Keys.SCRIPTS) {
@@ -30,5 +29,5 @@ export const createTabElement: (id: string, key: Keys, data: IRoutineInfo | IScr
     .toElement()
     .dataAttr("data", data)
     .attr("id", id)
-    .attr("title", `${data.id} - ${title}\n\nSchema: ${data.schema}\nConnection: ${data.connection}\nComment: ${!data.comment ? "" : data.comment}`)
+    .attr("title", `${data.id} - ${title}\n\nSchema: ${data.schema}\nConnection: ${data.connection}\n\n: ${!data.comment ? "" : data.comment}`)
 }

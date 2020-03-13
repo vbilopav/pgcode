@@ -1,15 +1,15 @@
-define(["require", "exports", "app/_sys/storage", "app/ui/toolbar/toolbar", "./ui/side-panel/_side-panels", "app/ui/main-panel/main-panel", "app/ui/footer/footer", "app/controls/splitter", "app/types", "app/api", "app/_sys/pubsub", "app/extensions"], function (require, exports, storage_1, toolbar_1, _side_panels_1, main_panel_1, footer_1, splitter_1, types_1, api_1, pubsub_1) {
+define(["require", "exports", "app/_sys/storage", "app/ui/toolbar/toolbar", "./ui/side-panel/_side-panels", "app/ui/main-panel/main-panel", "app/ui/footer/footer", "app/controls/splitter", "app/api", "app/_sys/pubsub", "app/extensions"], function (require, exports, storage_1, toolbar_1, _side_panels_1, main_panel_1, footer_1, splitter_1, api_1, pubsub_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     const storage = new storage_1.default({
-        toolbarPosition: types_1.Position.LEFT,
-        sidePanelPosition: types_1.Position.LEFT,
+        toolbarPosition: api_1.Position.LEFT,
+        sidePanelPosition: api_1.Position.LEFT,
         sidePanelWidth: 250,
         sidePanelDocked: true,
-        theme: types_1.Themes.DARK
+        theme: api_1.Themes.DARK
     }, "main", (name, value) => name == "sidePanelDocked" ? JSON.parse(value) : value);
     const getGridTemplateData = () => {
-        let tpl = storage.toolbarPosition === types_1.Position.LEFT, spl = storage.sidePanelPosition === types_1.Position.LEFT, spw = storage.sidePanelWidth;
+        let tpl = storage.toolbarPosition === api_1.Position.LEFT, spl = storage.sidePanelPosition === api_1.Position.LEFT, spw = storage.sidePanelWidth;
         if (tpl && spl) {
             return ["toolbar side-panel main-splitter main-panel", `50px ${spw}px 5px auto`, 1];
         }
@@ -33,7 +33,7 @@ define(["require", "exports", "app/_sys/storage", "app/ui/toolbar/toolbar", "./u
             this.defaultTitle = "pgcode";
             this.initTheme();
             this.initElements();
-            this.setStatus(types_1.AppStatus.BUSY, []);
+            this.setStatus(api_1.AppStatus.BUSY, []);
             this.initComponents();
             this.initSplitter(this.initGrid());
             this.subscribeEvents();
@@ -50,8 +50,8 @@ define(["require", "exports", "app/_sys/storage", "app/ui/toolbar/toolbar", "./u
             return true;
         }
         setStatus(status, args) {
-            if (status == types_1.AppStatus.READY) {
-                if (this.status == types_1.AppStatus.READY) {
+            if (status == api_1.AppStatus.READY) {
+                if (this.status == api_1.AppStatus.READY) {
                     return;
                 }
                 this.status = status;
@@ -59,8 +59,8 @@ define(["require", "exports", "app/_sys/storage", "app/ui/toolbar/toolbar", "./u
                 clearInterval(this.loadingTimeout);
                 document.title = args.length ? `${args[0]} - ${this.defaultTitle}` : this.previousTitle;
             }
-            else if (status == types_1.AppStatus.BUSY) {
-                if (this.status == types_1.AppStatus.BUSY) {
+            else if (status == api_1.AppStatus.BUSY) {
+                if (this.status == api_1.AppStatus.BUSY) {
                     return;
                 }
                 this.status = status;
@@ -76,8 +76,8 @@ define(["require", "exports", "app/_sys/storage", "app/ui/toolbar/toolbar", "./u
                     }
                 }, loadingTitle.interval);
             }
-            else if (status == types_1.AppStatus.ERROR) {
-                if (this.status == types_1.AppStatus.ERROR) {
+            else if (status == api_1.AppStatus.ERROR) {
+                if (this.status == api_1.AppStatus.ERROR) {
                     return;
                 }
                 this.status = status;
@@ -87,8 +87,8 @@ define(["require", "exports", "app/_sys/storage", "app/ui/toolbar/toolbar", "./u
                 clearInterval(this.loadingTimeout);
                 document.title = args.length ? `NETWORK ERROR (${args[0]})` : "NETWORK ERROR";
             }
-            else if (status == types_1.AppStatus.NO_CONNECTION) {
-                if (this.status == types_1.AppStatus.NO_CONNECTION) {
+            else if (status == api_1.AppStatus.NO_CONNECTION) {
+                if (this.status == api_1.AppStatus.NO_CONNECTION) {
                     return;
                 }
                 this.status = status;

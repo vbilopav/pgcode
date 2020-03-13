@@ -35,7 +35,7 @@ define(["require", "exports", "app/_sys/pubsub", "app/ui/main-panel/tabs", "vs/e
                 else {
                     this.makeStickyTab(tab).appendElementTo(this.tabs);
                 }
-                let item = { tab, id, key };
+                let item = { tab, id, key, data };
                 this.items.set(id, item);
                 this.activateByTab(tab, item);
             }
@@ -57,7 +57,7 @@ define(["require", "exports", "app/_sys/pubsub", "app/ui/main-panel/tabs", "vs/e
                 item = this.items.get(id);
             }
             item.timestamp = new Date().getTime();
-            pubsub_1.publish(pubsub_1.TAB_SELECTED, item.id, item.key);
+            pubsub_1.publish(pubsub_1.TAB_SELECTED, item.id, item.key, item.data.schema, item.data.connection);
         }
         removeByTab(tab) {
             const id = tab.id, active = tab.hasClass(_active), sticky = tab.hasClass(_sticky), item = this.items.get(id);

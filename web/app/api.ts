@@ -1,10 +1,23 @@
 import { publish, SET_APP_STATUS } from "app/_sys/pubsub";
-import { AppStatus, Keys } from "app/types";
+//import { AppStatus, Keys } from "app/types";
 
 export const ScriptId: (id: number) => string = id  => `${Keys.SCRIPTS}${id}`;
 export const TableId: (id: number) => string = id  => `${Keys.TABLES}${id}`;
 export const ViewId: (id: number) => string = id  => `${Keys.VIEWS}${id}`;
 export const RoutineId: (id: number) => string = id  => `${Keys.ROUTINES}${id}`;
+
+export enum Position { LEFT = "left", RIGHT = "right" };
+export enum Themes { DARK = "dark", LIGHT = "light" };
+export enum AppStatus { READY = 0, BUSY = 1, ERROR = 2, NO_CONNECTION };
+export enum Keys { SCRIPTS = "scripts", TABLES = "tables", VIEWS = "views", ROUTINES = "routines", SEARCH = "search" };
+
+export interface IMain {
+    moveToolbar(position: Position, ...args: any[]) : boolean
+}
+
+export interface ISidePanel {
+    unselectAll() : void
+}
 
 interface IResponse<T> {
     ok: boolean,
@@ -80,6 +93,8 @@ export interface IConnectionInfo {
     database: string,
     user: string 
 }
+
+export type ItemInfoType = IRoutineInfo | IScriptInfo | ITableInfo;
 
 const _createResponse:<T> (response: Response, data?: T) => IResponse<T> = (response, data) => Object({ok: response.ok, status: response.status, data: data});
 

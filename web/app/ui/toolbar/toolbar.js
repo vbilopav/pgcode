@@ -1,4 +1,4 @@
-define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "../../controls/monaco-context-menu", "app/types"], function (require, exports, storage_1, pubsub_1, monaco_context_menu_1, types_1) {
+define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "../../controls/monaco-context-menu", "app/api"], function (require, exports, storage_1, pubsub_1, monaco_context_menu_1, api_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var ButtonRoles;
@@ -7,14 +7,14 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "../../cont
         ButtonRoles["toggle"] = "toggle";
     })(ButtonRoles || (ButtonRoles = {}));
     ;
-    const _isInRole = (e, role) => e.dataAttr("role") === role, _isSwitch = e => _isInRole(e, ButtonRoles.switch), _moveText = (position) => position === types_1.Position.LEFT ? "Move Toolbar to Right" : "Move Toolbar to Left";
+    const _isInRole = (e, role) => e.dataAttr("role") === role, _isSwitch = e => _isInRole(e, ButtonRoles.switch), _moveText = (position) => position === api_1.Position.LEFT ? "Move Toolbar to Right" : "Move Toolbar to Left";
     const _storage = new storage_1.default({
         scripts: false,
         tables: false,
         views: false,
         routines: false,
         search: false,
-        previousKey: types_1.Keys.SCRIPTS,
+        previousKey: api_1.Keys.SCRIPTS,
         pgcode: false
     }, "state", (name, value) => {
         if (name !== "previousKey") {
@@ -23,11 +23,11 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "../../cont
         return value;
     });
     const _active = "active", _docked = "docked", _items = [
-        { id: `btn-${types_1.Keys.SCRIPTS}`, icon: "icon-doc-text", key: types_1.Keys.SCRIPTS, label: types_1.Keys.SCRIPTS, text: "Scripts", keyBinding: "Ctrl+S", role: ButtonRoles.switch },
-        { id: `btn-${types_1.Keys.TABLES}`, icon: "icon-database", key: types_1.Keys.TABLES, label: types_1.Keys.TABLES, text: "Tables", keyBinding: "Ctrl+T", role: ButtonRoles.switch },
-        { id: `btn-${types_1.Keys.VIEWS}`, icon: "icon-database", key: types_1.Keys.VIEWS, label: types_1.Keys.VIEWS, text: "Views", keyBinding: "Ctrl+V", role: ButtonRoles.switch },
-        { id: `btn-${types_1.Keys.ROUTINES}`, icon: "icon-database", key: types_1.Keys.ROUTINES, label: types_1.Keys.ROUTINES, text: "Routines", keyBinding: "Ctrl+R", role: ButtonRoles.switch },
-        { id: `btn-${types_1.Keys.SEARCH}`, icon: "icon-search", key: types_1.Keys.SEARCH, label: types_1.Keys.SEARCH, text: "Search", keyBinding: "Ctrl+F", role: ButtonRoles.switch },
+        { id: `btn-${api_1.Keys.SCRIPTS}`, icon: "icon-doc-text", key: api_1.Keys.SCRIPTS, label: api_1.Keys.SCRIPTS, text: "Scripts", keyBinding: "Ctrl+S", role: ButtonRoles.switch },
+        { id: `btn-${api_1.Keys.TABLES}`, icon: "icon-database", key: api_1.Keys.TABLES, label: api_1.Keys.TABLES, text: "Tables", keyBinding: "Ctrl+T", role: ButtonRoles.switch },
+        { id: `btn-${api_1.Keys.VIEWS}`, icon: "icon-database", key: api_1.Keys.VIEWS, label: api_1.Keys.VIEWS, text: "Views", keyBinding: "Ctrl+V", role: ButtonRoles.switch },
+        { id: `btn-${api_1.Keys.ROUTINES}`, icon: "icon-database", key: api_1.Keys.ROUTINES, label: api_1.Keys.ROUTINES, text: "Routines", keyBinding: "Ctrl+R", role: ButtonRoles.switch },
+        { id: `btn-${api_1.Keys.SEARCH}`, icon: "icon-search", key: api_1.Keys.SEARCH, label: api_1.Keys.SEARCH, text: "Search", keyBinding: "Ctrl+F", role: ButtonRoles.switch },
     ];
     class default_1 {
         constructor(element, position, index) {
@@ -50,17 +50,17 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "../../cont
                 }
             }
             this.toolbar = element.addClass("toolbar").html(html);
-            if (position === types_1.Position.RIGHT) {
+            if (position === api_1.Position.RIGHT) {
                 this.toolbar.addClass("right");
             }
             menuItems.push({ splitter: true }, {
                 id: "move",
                 text: _moveText(position),
                 action: () => {
-                    let newPosition = position == types_1.Position.LEFT ? types_1.Position.RIGHT : types_1.Position.LEFT;
+                    let newPosition = position == api_1.Position.LEFT ? api_1.Position.RIGHT : api_1.Position.LEFT;
                     if (index.moveToolbar(newPosition)) {
                         position = newPosition;
-                        if (position === types_1.Position.RIGHT) {
+                        if (position === api_1.Position.RIGHT) {
                             this.toolbar.addClass("right");
                         }
                         else {

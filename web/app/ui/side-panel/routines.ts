@@ -1,5 +1,4 @@
-import { Keys } from "app/types";
-import { ISchema, IRoutineInfo, RoutineId } from "app/api";
+import { ISchema, IRoutineInfo, RoutineId, Keys } from "app/api";
 import Panel from "app/ui/side-panel/panel"
 
 export default class extends Panel {

@@ -1,14 +1,14 @@
 import "vs/editor/editor.main";
 import { subscribe, publish, SPLITTER_CHANGED, TAB_SELECTED, TAB_UNSELECTED } from "app/_sys/pubsub";
-import { Keys } from "app/types";
 import { createTabElement } from "app/ui/main-panel/tabs";
-//import { fetchScriptContent, IScriptInfo, ScriptId } from "app/api";
+import { ItemInfoType, Keys } from "app/api";
 
 interface Item {
-    tab: Element;
-    id: string;
-    key: Keys;
-    timestamp: number;
+    tab: Element,
+    id: string,
+    key: Keys,
+    timestamp: number,
+    data: ItemInfoType
 }
 const _sticky = "sticky";
 const _active = "active";
@@ -51,7 +51,7 @@ export default class  {
         }
     }
 
-    public activate(id: string, key: Keys, data) {
+    public activate(id: string, key: Keys, data: ItemInfoType) {
         const item = this.items.get(id);
         if (item) {
             // tab already exists
@@ -66,7 +66,7 @@ export default class  {
             } else {
                 this.makeStickyTab(tab).appendElementTo(this.tabs);
             }
-            let item = {tab, id, key} as Item;
+            let item = {tab, id, key, data} as Item;
             this.items.set(id, item);
             this.activateByTab(tab, item);
         }
@@ -90,7 +90,7 @@ export default class  {
             item = this.items.get(id);
         }
         item.timestamp = new Date().getTime();
-        publish(TAB_SELECTED, item.id, item.key);
+        publish(TAB_SELECTED, item.id, item.key, item.data.schema, item.data.connection);
     }
 
     private removeByTab(tab: Element) {

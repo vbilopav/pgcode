@@ -14,7 +14,7 @@ import Tables from "app/ui/side-panel/tables";
 import Views from "app/ui/side-panel/views";
 import Routines from "app/ui/side-panel/routines";
 import Search from "app/ui/side-panel/search";
-import { Keys, ISidePanel } from "app/types";
+import { Keys, ISidePanel } from "app/api";
 
 export default class implements ISidePanel {
     private panels: Map<Keys, Panel> = new Map<Keys, Panel>();
@@ -59,7 +59,7 @@ export default class implements ISidePanel {
             this.panels.get(key).show(state);
         });
 
-        subscribe(TAB_SELECTED, (_, key: Keys) => {
+        subscribe(TAB_SELECTED, (_, key: Keys) => { //!!
             if (!key) {
                 return;
             }

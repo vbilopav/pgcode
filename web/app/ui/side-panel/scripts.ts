@@ -1,5 +1,4 @@
-import { Keys } from "app/types";
-import { ISchema, IScriptInfo, createScript, ScriptId } from "app/api";
+import { ISchema, IScriptInfo, createScript, ScriptId, Keys } from "app/api";
 import Panel from "app/ui/side-panel/panel"
 
 export default class extends Panel {

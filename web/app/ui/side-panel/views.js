@@ -1,9 +1,9 @@
-define(["require", "exports", "app/types", "app/api", "app/ui/side-panel/panel"], function (require, exports, types_1, api_1, panel_1) {
+define(["require", "exports", "app/api", "app/ui/side-panel/panel"], function (require, exports, api_1, panel_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class default_1 extends panel_1.default {
         constructor(element) {
-            super(element, types_1.Keys.VIEWS, [
+            super(element, api_1.Keys.VIEWS, [
                 { text: "Filter" },
                 { text: "Order ascending" },
                 { text: "Order descending" },
@@ -37,7 +37,7 @@ define(["require", "exports", "app/types", "app/api", "app/ui/side-panel/panel"]
         }
         itemSelected(element) {
             const item = element.dataAttr("item");
-            this.mainPanel.activate(api_1.ViewId(item.id), types_1.Keys.VIEWS, item);
+            this.mainPanel.activate(api_1.ViewId(item.id), api_1.Keys.VIEWS, item);
         }
         ;
     }
