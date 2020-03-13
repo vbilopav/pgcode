@@ -59,8 +59,8 @@ define(["require", "exports", "app/_sys/pubsub"], function (require, exports, pu
     };
     let _currentSchema;
     let _currentConnection;
-    const getCurrentSchema = () => _currentSchema;
-    const getCurrentConnection = () => _currentSchema;
+    exports.getCurrentSchema = () => _currentSchema;
+    exports.getCurrentConnection = () => _currentSchema;
     const getTimezoneHeader = () => {
         return { headers: { "timezone": Intl.DateTimeFormat().resolvedOptions().timeZone } };
     };
@@ -81,16 +81,16 @@ define(["require", "exports", "app/_sys/pubsub"], function (require, exports, pu
             return null;
         }
         _currentSchema = result.data.name;
-        result.data.connection = getCurrentConnection();
+        result.data.connection = exports.getCurrentConnection();
         return result;
     };
     exports.createScript = async () => {
-        const result = await _fetch(`api/create-script/${getCurrentSchema()}`);
+        const result = await _fetch(`api/create-script/${exports.getCurrentSchema()}`);
         if (!result.data) {
             return null;
         }
-        result.data.connection = getCurrentConnection();
-        result.data.schema = getCurrentSchema();
+        result.data.connection = exports.getCurrentConnection();
+        result.data.schema = exports.getCurrentSchema();
         return result;
     };
     exports.fetchScriptContent = id => _fetch(`api/script-content/${id}`);

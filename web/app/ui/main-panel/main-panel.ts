@@ -1,7 +1,7 @@
 import "vs/editor/editor.main";
-import { subscribe, publish, SPLITTER_CHANGED, TAB_SELECTED, TAB_UNSELECTED } from "app/_sys/pubsub";
+import { subscribe, publish, SPLITTER_CHANGED, TAB_SELECTED, TAB_UNSELECTED, SCHEMA_CHANGED } from "app/_sys/pubsub";
 import { createTabElement } from "app/ui/main-panel/tabs";
-import { ItemInfoType, Keys } from "app/api";
+import { ItemInfoType, Keys, ISchema } from "app/api";
 
 interface Item {
     tab: Element,
@@ -33,6 +33,7 @@ export default class  {
         this.tabs = element.children[0];
         this.content = element.children[1];
         this.initHeaderAdjustment();
+        subscribe(SCHEMA_CHANGED, (data: ISchema, name: string) => this.schemaChanged(name, data.connection));
         /*
         monaco.editor.create(element as HTMLElement, {
             value: "",
@@ -70,6 +71,17 @@ export default class  {
             this.items.set(id, item);
             this.activateByTab(tab, item);
         }
+    }
+
+    private schemaChanged(schema: string, connection: string) {
+        if (!this.activeTab) {
+            return;
+        }
+        const item = this.items.get(this.activeTab.id);
+        if (!item) {
+            return;
+        }
+        setTimeout(() => publish(TAB_SELECTED, item.id, item.key, item.data.schema, item.data.connection), 0);
     }
 
     private activateByTab(tab: Element, item?: Item) {

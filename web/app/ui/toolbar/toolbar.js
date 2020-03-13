@@ -90,8 +90,11 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "../../cont
                 let hint = btn.attr("title").split("\n");
                 btn.attr("title", hint[0] + "\n" + count + " items");
             });
-            pubsub_1.subscribe(pubsub_1.TAB_SELECTED, (_, key) => {
+            pubsub_1.subscribe(pubsub_1.TAB_SELECTED, (_, key, schema, connection) => {
                 if (!key) {
+                    return;
+                }
+                if (schema !== api_1.getCurrentSchema() && connection !== api_1.getCurrentConnection()) {
                     return;
                 }
                 for (let btn of this.buttons) {

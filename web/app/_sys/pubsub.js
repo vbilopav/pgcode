@@ -1,4 +1,4 @@
-define(["require", "exports", "app/api"], function (require, exports, api_1) {
+define(["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     const _entries = {};
@@ -50,11 +50,11 @@ define(["require", "exports", "app/api"], function (require, exports, api_1) {
     exports.STATE_CHANGED_ON = "state/changed/on/";
     exports.STATE_CHANGED_OFF = "state/changed/off/";
     exports.STATE_CHANGED = "state/changed/";
-    exports.STATE_CHANGED_SCRIPTS = `state/changed/${api_1.Keys.SCRIPTS}`;
-    exports.STATE_CHANGED_TABLES = `state/changed/${api_1.Keys.TABLES}`;
-    exports.STATE_CHANGED_VIEWS = `state/changed/${api_1.Keys.VIEWS}`;
-    exports.STATE_CHANGED_ROUTINES = `state/changed/${api_1.Keys.ROUTINES}`;
-    exports.STATE_CHANGED_SEARCH = `state/changed/${api_1.Keys.SEARCH}`;
+    exports.STATE_CHANGED_SCRIPTS = `state/changed/scripts`;
+    exports.STATE_CHANGED_TABLES = `state/changed/tables`;
+    exports.STATE_CHANGED_VIEWS = `state/changed/views`;
+    exports.STATE_CHANGED_ROUTINES = `state/changed/routines`;
+    exports.STATE_CHANGED_SEARCH = `state/changed/search`;
     exports.SIDEBAR_DOCKED = "sidebar/docked/";
     exports.SIDEBAR_UNDOCKED = "sidebar/undocked/";
     exports.CLOSE_CONTEXT_MENU = "context-menu/close/";

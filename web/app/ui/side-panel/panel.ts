@@ -1,6 +1,6 @@
 import { subscribe, publish, SCHEMA_CHANGED, ITEM_COUNT_CHANGED, TAB_SELECTED, TAB_UNSELECTED } from "app/_sys/pubsub";
 import MainPanel from "app/ui/main-panel/main-panel";
-import { ISchema, ISidePanel } from "app/api";
+import { ISchema, ISidePanel, Keys } from "app/api";
 import MonacoContextMenu from "app/controls/monaco-context-menu";
 import { ContextMenuCtorArgs, MenuItemType } from "app/controls/context-menu";
 
@@ -20,7 +20,7 @@ class PanelMenu extends MonacoContextMenu {
 }
 
 export default abstract class Panel {
-    protected readonly key: string;
+    protected readonly key: Keys;
     protected readonly element: Element;
     protected readonly header: Element;
     protected readonly items: Element;
@@ -28,7 +28,7 @@ export default abstract class Panel {
     protected sidePanel: ISidePanel;
     private scrollTimeout: number;
 
-    constructor(element: Element, key: string, menuItems: Array<MenuItemType> = []){
+    constructor(element: Element, key: Keys, menuItems: Array<MenuItemType> = []){
         this.element = element;
         this.key = key;
         this.header = element.children[0].html(String.html`

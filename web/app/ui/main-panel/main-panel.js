@@ -14,6 +14,7 @@ define(["require", "exports", "app/_sys/pubsub", "app/ui/main-panel/tabs", "vs/e
             this.tabs = element.children[0];
             this.content = element.children[1];
             this.initHeaderAdjustment();
+            pubsub_1.subscribe(pubsub_1.SCHEMA_CHANGED, (data, name) => this.schemaChanged(name, data.connection));
         }
         unstickById(id) {
             if (this.stickyTab && this.stickyTab.id == id) {
@@ -39,6 +40,16 @@ define(["require", "exports", "app/_sys/pubsub", "app/ui/main-panel/tabs", "vs/e
                 this.items.set(id, item);
                 this.activateByTab(tab, item);
             }
+        }
+        schemaChanged(schema, connection) {
+            if (!this.activeTab) {
+                return;
+            }
+            const item = this.items.get(this.activeTab.id);
+            if (!item) {
+                return;
+            }
+            setTimeout(() => pubsub_1.publish(pubsub_1.TAB_SELECTED, item.id, item.key, item.data.schema, item.data.connection), 0);
         }
         activateByTab(tab, item) {
             for (let t of this.tabs.children) {

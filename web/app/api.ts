@@ -124,8 +124,8 @@ const _fetch:<T> (url: string) => Promise<IResponse<T>> = async url => {
 let _currentSchema;
 let _currentConnection;
 
-const getCurrentSchema = () => _currentSchema;
-const getCurrentConnection = () => _currentSchema;
+export const getCurrentSchema = () => _currentSchema;
+export const getCurrentConnection = () => _currentSchema;
 
 const getTimezoneHeader: () => RequestInit = () => {
     return {headers: {"timezone": Intl.DateTimeFormat().resolvedOptions().timeZone}}

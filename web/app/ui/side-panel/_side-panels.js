@@ -40,8 +40,11 @@ define(["require", "exports", "app/_sys/pubsub", "app/ui/side-panel/scripts", "a
             ], (key, state) => {
                 this.panels.get(key).show(state);
             });
-            pubsub_1.subscribe(pubsub_1.TAB_SELECTED, (_, key) => {
+            pubsub_1.subscribe(pubsub_1.TAB_SELECTED, (_, key, schema, connection) => {
                 if (!key) {
+                    return;
+                }
+                if (schema !== api_1.getCurrentSchema() && connection !== api_1.getCurrentConnection()) {
                     return;
                 }
                 for (let [current, panel] of this.panels) {

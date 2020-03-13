@@ -1,5 +1,3 @@
-import { Keys } from "app/api";
-
 const _entries = {};
 
 export const subscribe: (name: string | Array<string>, handler: (...args: any[]) => void) => number | void = (name, handler) => {
@@ -47,15 +45,16 @@ export const unsubscribe: (name: string, ref: number) => boolean = (name, ref) =
     return true;
 }
 
+//Keys { SCRIPTS = "scripts", TABLES = "tables", VIEWS = "views", ROUTINES = "routines", SEARCH = "search" };
 export const STATE_CHANGED_ON: string = "state/changed/on/"; // key: string
 export const STATE_CHANGED_OFF: string = "state/changed/off/"; // key: string
 export const STATE_CHANGED: string = "state/changed/"; // helper, key: string, state: bool
 
-export const STATE_CHANGED_SCRIPTS: string = `state/changed/${Keys.SCRIPTS}`; // key: string, state: bool
-export const STATE_CHANGED_TABLES: string = `state/changed/${Keys.TABLES}`; // key: string, state: bool
-export const STATE_CHANGED_VIEWS: string = `state/changed/${Keys.VIEWS}`; // key: string, state: bool
-export const STATE_CHANGED_ROUTINES: string = `state/changed/${Keys.ROUTINES}`; // key: string, state: bool
-export const STATE_CHANGED_SEARCH: string = `state/changed/${Keys.SEARCH}`; // key: string, state: bool
+export const STATE_CHANGED_SCRIPTS: string = `state/changed/scripts`; // key: string, state: bool
+export const STATE_CHANGED_TABLES: string = `state/changed/tables`; // key: string, state: bool
+export const STATE_CHANGED_VIEWS: string = `state/changed/views`; // key: string, state: bool
+export const STATE_CHANGED_ROUTINES: string = `state/changed/routines`; // key: string, state: bool
+export const STATE_CHANGED_SEARCH: string = `state/changed/search`; // key: string, state: bool
 
 export const SIDEBAR_DOCKED: string = "sidebar/docked/"; //void
 export const SIDEBAR_UNDOCKED: string = "sidebar/undocked/"; //void

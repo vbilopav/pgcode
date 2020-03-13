@@ -11,7 +11,7 @@ import {
 } from "app/_sys/pubsub";
 import { ContextMenuCtorArgs, MenuItemType } from "app/controls/context-menu";
 import MonacoContextMenu from "../../controls/monaco-context-menu";
-import { Position, IMain, Keys } from "app/api";
+import { Position, IMain, Keys, getCurrentSchema, getCurrentConnection } from "app/api";
 
 enum ButtonRoles { switch="switch", toggle="toggle" };
 const 
@@ -127,10 +127,13 @@ export default class  {
             let hint = btn.attr("title").split("\n");
             btn.attr("title", hint[0] + "\n" + count + " items");
         });
-        subscribe(TAB_SELECTED, (_, key: Keys) => { //!!
+        subscribe(TAB_SELECTED, (_, key: Keys, schema: string, connection: string) => { //!!
             if (!key) {
                 return;
             } 
+            if (schema !== getCurrentSchema() && connection !== getCurrentConnection()) {
+                return;
+            }
             for(let btn of this.buttons) {
                 const active = btn.hasClass(_active);
                 if (key === btn.dataAttr("key")) {
