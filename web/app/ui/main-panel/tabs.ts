@@ -2,24 +2,21 @@ import { ItemInfoType, IRoutineInfo, IScriptInfo, ITableInfo, Keys } from "app/a
 
 export const createTabElement: (id: string, key: Keys, data: ItemInfoType) => Element = (id, key, data) => {
     let iconClass : string;
-    let title : string;
+    let title = data.name;
+    
     if (key === Keys.SCRIPTS) {
         iconClass = "icon-doc-text";
-        title = (data as IScriptInfo).title;
-
     } else if (key === Keys.TABLES) {
         iconClass = "icon-database";
-        title = (data as ITableInfo).name;
 
     } else if (key === Keys.VIEWS) {
         iconClass = "icon-database";
         title = (data as ITableInfo).name;
-
     } else if (key === Keys.ROUTINES) {
         iconClass = "icon-database";
-        title = (data as IRoutineInfo).signature;
-
+        title = (data as IRoutineInfo).name;
     }
+
     return (String.html`
     <div class="tab">
         <i class=${iconClass}></i>

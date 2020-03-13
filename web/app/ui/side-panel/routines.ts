@@ -19,14 +19,14 @@ export default class extends Panel {
     }
 
     private addNewItem(item: IRoutineInfo) {
-        let title = `${item.signature}\nreturns ${item.returns}\n${item.language} ${item.type}`;
+        let title = `${item.name}\nreturns ${item.returns}\n${item.language} ${item.type}`;
         if (item.comment) {
             title = title + `\n\n${item.comment.substring(0,200)}`;
         }
         this.createItemElement(String.html`
             <div>
                 <i class="icon-database"></i>
-                <span>${item.signature}</span>
+                <span>${item.name}</span>
             </div>
             <div>
                 <div class="item-subtext">returns ${item.returns}</div>

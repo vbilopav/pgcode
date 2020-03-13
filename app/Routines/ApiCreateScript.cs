@@ -51,7 +51,7 @@ namespace Pgcode.Routines
                 insert into {settings.PgCodeSchema}.scripts (user_id, title, ""schema"")
                 values(_user_id, _title, _data->>'schema')
                 returning 
-                    id, title, comment, schema, comment, content, 
+                    id, title as name, comment, schema, comment, content, 
                     view_state as viewState, 
                     timestamp at time zone _timezone as ""timestamp""
             )

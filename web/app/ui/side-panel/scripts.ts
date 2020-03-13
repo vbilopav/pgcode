@@ -32,14 +32,14 @@ export default class extends Panel {
     }
 
     private addNewItem(item: IScriptInfo) {
-        let title = `${item.title}\nmodified: ${item.timestamp}`;
+        let title = `${item.name}\nmodified: ${item.timestamp}`;
         if (item.comment) {
             title = title + `\n\n${item.comment.substring(0,200)}`;
         }
         this.createItemElement(String.html`
             <div>
                 <i class="icon-doc-text"></i>
-                <span>${item.title}</span>
+                <span>${item.name}</span>
             </div>
             <div>
                 <div class="item-subtext">${item.timestamp.formatDateString()}</div>

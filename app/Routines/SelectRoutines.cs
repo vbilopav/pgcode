@@ -39,7 +39,7 @@ namespace Pgcode.Routines
                     proc.oid as id,
                     r.routine_type as type,
                     r.external_language as language,
-                    r.routine_name as name,
+                    r.routine_name as routine,
                     r.routine_name || 
                         '(' || 
                         array_to_string(
@@ -51,7 +51,7 @@ namespace Pgcode.Routines
                             ), 
                             ', '
                         ) ||
-                        ')' as signature,
+                        ')' as name,
                         
                     case    when    r.data_type = 'USER-DEFINED' and 
                                     r.type_udt_catalog is not null and 

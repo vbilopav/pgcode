@@ -39,7 +39,7 @@ namespace Pgcode.Routines
             from (
                 select 
                     id,
-                    title,
+                    title as name,
                     schema,
                     comment,
                     timestamp at time zone _timezone as ""timestamp""

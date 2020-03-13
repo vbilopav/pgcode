@@ -3,14 +3,12 @@ define(["require", "exports", "app/api"], function (require, exports, api_1) {
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.createTabElement = (id, key, data) => {
         let iconClass;
-        let title;
+        let title = data.name;
         if (key === api_1.Keys.SCRIPTS) {
             iconClass = "icon-doc-text";
-            title = data.title;
         }
         else if (key === api_1.Keys.TABLES) {
             iconClass = "icon-database";
-            title = data.name;
         }
         else if (key === api_1.Keys.VIEWS) {
             iconClass = "icon-database";
@@ -18,7 +16,7 @@ define(["require", "exports", "app/api"], function (require, exports, api_1) {
         }
         else if (key === api_1.Keys.ROUTINES) {
             iconClass = "icon-database";
-            title = data.signature;
+            title = data.name;
         }
         return String.html `
     <div class="tab">
