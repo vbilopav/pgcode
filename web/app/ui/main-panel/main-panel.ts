@@ -81,6 +81,9 @@ export default class  {
         if (!item) {
             return;
         }
+        if (item.data.schema !== schema || item.data.connection !== connection) {
+            return;
+        }
         setTimeout(() => publish(TAB_SELECTED, item.id, item.key, item.data.schema, item.data.connection), 0);
     }
 

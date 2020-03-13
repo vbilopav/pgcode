@@ -49,6 +49,9 @@ define(["require", "exports", "app/_sys/pubsub", "app/ui/main-panel/tabs", "vs/e
             if (!item) {
                 return;
             }
+            if (item.data.schema !== schema || item.data.connection !== connection) {
+                return;
+            }
             setTimeout(() => pubsub_1.publish(pubsub_1.TAB_SELECTED, item.id, item.key, item.data.schema, item.data.connection), 0);
         }
         activateByTab(tab, item) {
