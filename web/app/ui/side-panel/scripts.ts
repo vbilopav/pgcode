@@ -1,5 +1,6 @@
 import { ISchema, IScriptInfo, createScript, ScriptId, Keys } from "app/api";
-import Panel from "app/ui/side-panel/panel"
+import Panel from "app/ui/side-panel/panel";
+import { scriptTitle } from "app/ui/item-tooltip";
 
 export default class extends Panel {
     constructor(element: Element) {
@@ -32,10 +33,6 @@ export default class extends Panel {
     }
 
     private addNewItem(item: IScriptInfo) {
-        let title = `${item.name}\nmodified: ${item.timestamp}`;
-        if (item.comment) {
-            title = title + `\n\n${item.comment.substring(0,200)}`;
-        }
         this.createItemElement(String.html`
             <div>
                 <i class="icon-doc-text"></i>
@@ -46,7 +43,7 @@ export default class extends Panel {
             </div>
         `)
         .dataAttr("item", item)
-        .attr("title", title)
+        .attr("title", scriptTitle(item))
         .attr("id", ScriptId(item.id))
         .appendElementTo(this.items);
     }

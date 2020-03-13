@@ -1,4 +1,4 @@
-define(["require", "exports", "app/api", "app/ui/side-panel/panel"], function (require, exports, api_1, panel_1) {
+define(["require", "exports", "app/api", "app/ui/side-panel/panel", "app/ui/item-tooltip"], function (require, exports, api_1, panel_1, item_tooltip_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class default_1 extends panel_1.default {
@@ -17,10 +17,6 @@ define(["require", "exports", "app/api", "app/ui/side-panel/panel"], function (r
             this.publishLength();
         }
         addNewItem(item) {
-            let title = `${item.name}\nestimated row count: ${item.estimate}`;
-            if (item.comment) {
-                title = title + `\n\n${item.comment.substring(0, 200)}`;
-            }
             this.createItemElement(String.html `
             <div>
                 <i class="icon-database"></i>
@@ -31,7 +27,7 @@ define(["require", "exports", "app/api", "app/ui/side-panel/panel"], function (r
             </div>
         `)
                 .dataAttr("item", item)
-                .attr("title", title)
+                .attr("title", item_tooltip_1.tableTitle(item))
                 .attr("id", api_1.TableId(item.id))
                 .appendElementTo(this.items);
         }

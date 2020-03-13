@@ -1,5 +1,6 @@
 import { ISchema, ViewId, ITableInfo, Keys } from "app/api";
-import Panel from "app/ui/side-panel/panel"
+import Panel from "app/ui/side-panel/panel";
+import { viewTitle } from "app/ui/item-tooltip";
 
 export default class extends Panel {
     constructor(element: Element) {
@@ -19,10 +20,6 @@ export default class extends Panel {
     }
 
     private addNewItem(item: ITableInfo) {
-        let title = `${item.name}\nestimated row count: ${item.estimate}`;
-        if (item.comment) {
-            title = title + `\n\n${item.comment.substring(0,200)}`;
-        }
         this.createItemElement(String.html`
             <div>
                 <i class="icon-database"></i>
@@ -33,7 +30,7 @@ export default class extends Panel {
             </div>
         `)
         .dataAttr("item", item)
-        .attr("title", title)
+        .attr("title", viewTitle(item))
         .attr("id", ViewId(item.id))
         .appendElementTo(this.items);
     }

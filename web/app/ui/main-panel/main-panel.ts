@@ -1,4 +1,5 @@
 import "vs/editor/editor.main";
+import Storage from "app/_sys/storage";
 import { subscribe, publish, SPLITTER_CHANGED, TAB_SELECTED, TAB_UNSELECTED, SCHEMA_CHANGED } from "app/_sys/pubsub";
 import { createTabElement } from "app/ui/main-panel/tabs";
 import { ItemInfoType, Keys, ISchema } from "app/api";

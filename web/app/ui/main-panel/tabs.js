@@ -1,22 +1,25 @@
-define(["require", "exports", "app/api"], function (require, exports, api_1) {
+define(["require", "exports", "app/api", "app/ui/item-tooltip"], function (require, exports, api_1, item_tooltip_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.createTabElement = (id, key, data) => {
         let iconClass;
         let title = data.name;
+        let tip;
         if (key === api_1.Keys.SCRIPTS) {
             iconClass = "icon-doc-text";
+            tip = item_tooltip_1.scriptTitle(data);
         }
         else if (key === api_1.Keys.TABLES) {
             iconClass = "icon-database";
+            tip = item_tooltip_1.tableTitle(data);
         }
         else if (key === api_1.Keys.VIEWS) {
             iconClass = "icon-database";
-            title = data.name;
+            tip = item_tooltip_1.viewTitle(data);
         }
         else if (key === api_1.Keys.ROUTINES) {
             iconClass = "icon-database";
-            title = data.name;
+            tip = item_tooltip_1.routineTitle(data);
         }
         return String.html `
     <div class="tab">
@@ -27,7 +30,7 @@ define(["require", "exports", "app/api"], function (require, exports, api_1) {
             .toElement()
             .dataAttr("data", data)
             .attr("id", id)
-            .attr("title", `${data.id} - ${title}\n\nSchema: ${data.schema}\nConnection: ${data.connection}\n\n: ${!data.comment ? "" : data.comment}`);
+            .attr("title", tip);
     };
 });
 //# sourceMappingURL=tabs.js.map

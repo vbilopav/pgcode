@@ -45,8 +45,7 @@ export interface ISchema {
 }
 
 export interface ITableInfo extends IItem {
-    estimate: number,
-    comment: string
+    estimate: number
 }
 
 export interface IRoutineInfo extends IItem {
@@ -54,11 +53,9 @@ export interface IRoutineInfo extends IItem {
     type: string
     language: string,
     returns: string,
-    comment: string
 }
 
 export interface IScriptInfo extends IItem {
-    comment: string,
     timestamp: string
 }
 
@@ -66,7 +63,8 @@ export interface IItem {
     id: number,
     name: string,
     schema: string,
-    connection: string
+    connection: string,
+    comment: string,
 }
 
 interface IScript extends IScriptInfo, IScriptContent {}

@@ -1,20 +1,26 @@
 import { ItemInfoType, IRoutineInfo, IScriptInfo, ITableInfo, Keys } from "app/api";
+import { scriptTitle, tableTitle, viewTitle, routineTitle } from "app/ui/item-tooltip";
 
 export const createTabElement: (id: string, key: Keys, data: ItemInfoType) => Element = (id, key, data) => {
     let iconClass : string;
     let title = data.name;
-    
+    let tip: string;
     if (key === Keys.SCRIPTS) {
         iconClass = "icon-doc-text";
+        tip = scriptTitle(data as IScriptInfo);
+
     } else if (key === Keys.TABLES) {
         iconClass = "icon-database";
+        tip = tableTitle(data as ITableInfo);
 
     } else if (key === Keys.VIEWS) {
         iconClass = "icon-database";
-        title = (data as ITableInfo).name;
+        tip = viewTitle(data as ITableInfo);
+
     } else if (key === Keys.ROUTINES) {
         iconClass = "icon-database";
-        title = (data as IRoutineInfo).name;
+        tip = routineTitle(data as IRoutineInfo);
+
     }
 
     return (String.html`
@@ -26,5 +32,5 @@ export const createTabElement: (id: string, key: Keys, data: ItemInfoType) => El
     .toElement()
     .dataAttr("data", data)
     .attr("id", id)
-    .attr("title", `${data.id} - ${title}\n\nSchema: ${data.schema}\nConnection: ${data.connection}\n\n: ${!data.comment ? "" : data.comment}`)
+    .attr("title", tip)
 }

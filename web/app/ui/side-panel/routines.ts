@@ -1,5 +1,6 @@
 import { ISchema, IRoutineInfo, RoutineId, Keys } from "app/api";
-import Panel from "app/ui/side-panel/panel"
+import Panel from "app/ui/side-panel/panel";
+import { routineTitle } from "app/ui/item-tooltip";
 
 export default class extends Panel {
     constructor(element: Element) {
@@ -19,10 +20,6 @@ export default class extends Panel {
     }
 
     private addNewItem(item: IRoutineInfo) {
-        let title = `${item.name}\nreturns ${item.returns}\n${item.language} ${item.type}`;
-        if (item.comment) {
-            title = title + `\n\n${item.comment.substring(0,200)}`;
-        }
         this.createItemElement(String.html`
             <div>
                 <i class="icon-database"></i>
@@ -34,7 +31,7 @@ export default class extends Panel {
             </div>
         `)
         .dataAttr("item", item)
-        .attr("title", title)
+        .attr("title", routineTitle(item))
         .attr("id", RoutineId(item.id))
         .appendElementTo(this.items);
     }

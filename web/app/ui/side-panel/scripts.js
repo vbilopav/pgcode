@@ -1,4 +1,4 @@
-define(["require", "exports", "app/api", "app/ui/side-panel/panel"], function (require, exports, api_1, panel_1) {
+define(["require", "exports", "app/api", "app/ui/side-panel/panel", "app/ui/item-tooltip"], function (require, exports, api_1, panel_1, item_tooltip_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class default_1 extends panel_1.default {
@@ -26,10 +26,6 @@ define(["require", "exports", "app/api", "app/ui/side-panel/panel"], function (r
             }
         }
         addNewItem(item) {
-            let title = `${item.name}\nmodified: ${item.timestamp}`;
-            if (item.comment) {
-                title = title + `\n\n${item.comment.substring(0, 200)}`;
-            }
             this.createItemElement(String.html `
             <div>
                 <i class="icon-doc-text"></i>
@@ -40,7 +36,7 @@ define(["require", "exports", "app/api", "app/ui/side-panel/panel"], function (r
             </div>
         `)
                 .dataAttr("item", item)
-                .attr("title", title)
+                .attr("title", item_tooltip_1.scriptTitle(item))
                 .attr("id", api_1.ScriptId(item.id))
                 .appendElementTo(this.items);
         }
