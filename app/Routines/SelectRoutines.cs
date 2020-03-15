@@ -17,7 +17,6 @@ namespace Pgcode.Routines
         - name
         - return type
         - comment
-
         Params:
         - _data->>'schema' - schema name
 
@@ -61,7 +60,7 @@ namespace Pgcode.Routines
                             else r.data_type
                     end as returns,
                     
-                    pgdesc.description as comment
+                    {settings.PgCodeSchema}.{MaxStr.Name}(pgdesc.description) as comment
 
                 from 
                     information_schema.routines r

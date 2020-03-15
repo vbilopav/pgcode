@@ -42,17 +42,20 @@ class ProtectedLocalStorage implements Storage {
 export default class {
     private _storage: Storage = new ProtectedLocalStorage();
     private _namespace: string;
-    private _conversion: (name: string, value: string) => any;
+    private _get: (name: string, value: string) => any;
+    private _set: (name: string, value: any) => string;
     private _names: Array<string> = new Array<string>();
 
     constructor(
         model: Object, 
         namespace = "", 
-        conversion: (name: string, value: string) => any = (name, value) => value,
+        get: (name: string, value: string) => any = (name, value) => value,
+        set: (name: string, value: any) => string = (name, value) => value,
         storage: Storage = new ProtectedLocalStorage()) {
             this._storage = storage;
             this._namespace = namespace;
-            this._conversion = conversion;
+            this._get = get;
+            this._set = set;
             for(let [name, defaultValue] of Object.entries(model)) {
                 this.create(name, defaultValue);
             }
@@ -70,13 +73,13 @@ export default class {
                 if (value === null && defaultValue !== undefined) {
                     return defaultValue;
                 }
-                return this._conversion(name, value);
+                return this._get(name, value);
             },
             set: value => {
                 if (value === null) {
                     this._storage.removeItem(fullName);
                 } else {
-                    this._storage.setItem(fullName, value);
+                    this._storage.setItem(fullName, this._set(name, value));
                 }
             }
         });

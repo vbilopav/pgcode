@@ -76,8 +76,16 @@
         }
         & > div .item-subtext {
             font-size: 11px;
+            margin-top: 2px;
             opacity: 0.6;
             margin-left: 17px;
+        }
+        & > div .item-comment {
+            font-size: 11px;
+            opacity: 0.6;
+            margin-left: 17px;
+            margin-top: 5px;
+            font-style: italic;
         }
         & > div div, & > div span {
             white-space: nowrap;

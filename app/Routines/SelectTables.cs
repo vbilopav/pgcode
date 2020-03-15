@@ -11,13 +11,11 @@ namespace Pgcode.Routines
         public const string CommentMarkup = @"
 
         Returns json array with table names.
-
         Type of the table: 
         - `BASE TABLE` for a persistent base table (the normal table type)
         - `VIEW` for a view
         - `FOREIGN` for a foreign table
         - `LOCAL TEMPORARY` for a temporary table
-
         Params:
         - _data->>'type' - type of the table
         - _data->>'schema' - schema name
@@ -40,7 +38,7 @@ namespace Pgcode.Routines
                     pgtbl.relid as id,
                     tbl.table_name as name,
                     cl.reltuples as estimate,
-                    pgdesc.description as comment
+                    {settings.PgCodeSchema}.{MaxStr.Name}(pgdesc.description) as comment
 
                 from
                     information_schema.tables tbl

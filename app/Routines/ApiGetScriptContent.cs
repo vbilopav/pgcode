@@ -10,8 +10,7 @@ namespace Pgcode.Routines
         public const string Name = "api_get_script_content";
         public const string CommentMarkup = @"
 
-        Returns json object with script content and viewState
-
+        Returns json object with script content and viewState.
         Params:
         - _data->>'id' - script id
         - _data->>'schema' - schema name or null for all schemas

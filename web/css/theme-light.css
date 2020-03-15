@@ -382,8 +382,15 @@ body > div.container {
       color: #252526; }
     .side-panel > div > div:nth-child(2) > div .item-subtext {
       font-size: 11px;
+      margin-top: 2px;
       opacity: 0.6;
       margin-left: 17px; }
+    .side-panel > div > div:nth-child(2) > div .item-comment {
+      font-size: 11px;
+      opacity: 0.6;
+      margin-left: 17px;
+      margin-top: 5px;
+      font-style: italic; }
     .side-panel > div > div:nth-child(2) > div div, .side-panel > div > div:nth-child(2) > div span {
       white-space: nowrap;
       text-overflow: ellipsis;

@@ -33,6 +33,7 @@ export default class extends Panel {
     }
 
     private addNewItem(item: IScriptInfo) {
+        const comment = item.comment ? String.html`<div class="item-comment">${item.comment.replace("\n", "")}</div>` : "";
         this.createItemElement(String.html`
             <div>
                 <i class="icon-doc-text"></i>
@@ -40,6 +41,7 @@ export default class extends Panel {
             </div>
             <div>
                 <div class="item-subtext">${item.timestamp.formatDateString()}</div>
+                ${comment}
             </div>
         `)
         .dataAttr("item", item)

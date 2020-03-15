@@ -1,42 +1,22 @@
 define(["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    const getTitle = (title, sub, item) => `${title}\n` +
+        `connection: ${item.connection}\n` +
+        `schema: ${item.schema}` +
+        (sub ? "\n" + sub : "") +
+        (item.comment ? `\n\n${item.comment}` : "");
     exports.routineTitle = (item) => {
-        let title = `Routine id ${item.id}\n`;
-        title += `${item.name}\n`;
-        title += `returns ${item.returns}\n`;
-        title += `${item.language} ${item.type}`;
-        if (item.comment) {
-            title = title + `\n\n${item.comment.substring(0, 200)}`;
-        }
-        return title;
+        return getTitle(`${item.language.toLowerCase()} ${item.type.toLowerCase()} ${item.name} returns ${item.returns}`, null, item);
     };
     exports.scriptTitle = (item) => {
-        let title = `Script id ${item.id}\n`;
-        title += `${item.name}\n`;
-        title += `modified: ${item.timestamp}`;
-        if (item.comment) {
-            title = title + `\n\n${item.comment.substring(0, 200)}`;
-        }
-        return title;
+        return getTitle(`script: ${item.name}`, `modified: ${item.timestamp}`, item);
     };
     exports.tableTitle = (item) => {
-        let title = `Table id ${item.id}\n`;
-        title += `${item.name}\n`;
-        title += `estimated row count: ${item.estimate}`;
-        if (item.comment) {
-            title = title + `\n\n${item.comment.substring(0, 200)}`;
-        }
-        return title;
+        return getTitle(`table: ${item.name}`, `estimated count ≈ ${item.estimate}`, item);
     };
     exports.viewTitle = (item) => {
-        let title = `View id ${item.id}\n`;
-        title += `${item.name}\n`;
-        title += `estimated row count: ${item.estimate}`;
-        if (item.comment) {
-            title = title + `\n\n${item.comment.substring(0, 200)}`;
-        }
-        return title;
+        return getTitle(`view: ${item.name}`, `estimated count ≈ ${item.estimate}`, item);
     };
 });
 //# sourceMappingURL=item-tooltip.js.map

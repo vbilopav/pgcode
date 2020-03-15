@@ -60,7 +60,7 @@ define(["require", "exports", "app/_sys/pubsub"], function (require, exports, pu
     let _currentSchema;
     let _currentConnection;
     exports.getCurrentSchema = () => _currentSchema;
-    exports.getCurrentConnection = () => _currentSchema;
+    exports.getCurrentConnection = () => _currentConnection;
     const getTimezoneHeader = () => {
         return { headers: { "timezone": Intl.DateTimeFormat().resolvedOptions().timeZone } };
     };

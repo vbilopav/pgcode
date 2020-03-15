@@ -118,7 +118,7 @@ let _currentSchema;
 let _currentConnection;
 
 export const getCurrentSchema = () => _currentSchema;
-export const getCurrentConnection = () => _currentSchema;
+export const getCurrentConnection = () => _currentConnection;
 
 const getTimezoneHeader: () => RequestInit = () => {
     return {headers: {"timezone": Intl.DateTimeFormat().resolvedOptions().timeZone}}

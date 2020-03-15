@@ -11,8 +11,38 @@ interface Item {
     timestamp: number,
     data: ItemInfoType
 }
+
+interface IStorageItem {
+    id: string,
+    key: Keys,
+    timestamp: number,
+    data: ItemInfoType
+}
+
+interface IStorage {
+    stickyId: string,
+    activeId: string,
+    items: Array<[string, IStorageItem]>
+}
+
 const _sticky = "sticky";
 const _active = "active";
+
+const 
+    _storage = new Storage({
+            stickyId: null,
+            activeId: null,
+            items: []
+        } as IStorage, 
+        "tabs", 
+        (name, value) => name === "items" ? JSON.parse(value) : value,
+        (name, value) => name === "items" ? JSON.stringify(value) : value
+    ) as any as IStorage;
+
+const 
+    _updateStorageTabItems: (items: Map<string, Item>) => void = items => setTimeout(() => 
+        _storage.items = Array.from<[string, Item], [string, IStorageItem]>(items.entries(), (v: [string, Item], k: number) => 
+        [v[0], {id: v[1].id, key: v[1].key, timestamp: v[1].timestamp, data: v[1].data} as IStorageItem]), 0);
 
 export default class  {
     private element: Element;
@@ -50,6 +80,7 @@ export default class  {
         if (this.stickyTab && this.stickyTab.id == id) {
             this.stickyTab.removeClass(_sticky);
             this.stickyTab = null;
+            _storage.stickyId = null;
         }
     }
 
@@ -63,15 +94,19 @@ export default class  {
             // create a new tab
             const tab = this.createTabElement(id, key, data);
             if (this.stickyTab) {
+                //this.deleteItem(this.stickyTab.id);
                 this.items.delete(this.stickyTab.id);
+                _storage.stickyId = null;
                 this.stickyTab.replaceWith(this.makeStickyTab(tab));
             } else {
                 this.makeStickyTab(tab).appendElementTo(this.tabs);
             }
             let item = {tab, id, key, data} as Item;
+            //this.setItem(id, item);
             this.items.set(id, item);
             this.activateByTab(tab, item);
         }
+        _updateStorageTabItems(this.items);
     }
 
     private schemaChanged(schema: string, connection: string) {
@@ -93,10 +128,12 @@ export default class  {
             if (t.hasClass(_active)) {
                 t.removeClass(_active);
                 let remove = this.items.get(t.id);
+                _storage.activeId = null;
                 publish(TAB_UNSELECTED, remove.id, remove.key);
             }
         }
         this.activeTab = tab.addClass(_active);
+        _storage.activeId = tab.id;
         this.activated(tab.id, item);
         this.initiateHeaderAdjust();
     }
@@ -115,10 +152,13 @@ export default class  {
             active = tab.hasClass(_active), 
             sticky = tab.hasClass(_sticky), 
             item = this.items.get(id);
+        //this.deleteItem(id);
         this.items.delete(id);
+        _storage.activeId = null;
         tab.remove();
         if (sticky) {
             this.stickyTab = null;
+            _storage.stickyId = null;
         }
         if (!active) {
             return;
@@ -129,6 +169,7 @@ export default class  {
         }
         let newItem = this.items.maxBy(v => v.timestamp);
         this.activateByTab(newItem.tab, newItem);
+        _updateStorageTabItems(this.items);
     }
 
     private createTabElement(id: string, key: Keys, data) {
@@ -139,6 +180,7 @@ export default class  {
 
     private makeStickyTab(tab: Element) {
         this.stickyTab = tab;
+        _storage.stickyId = tab.id;
         return tab.addClass(_sticky);
     }
 
@@ -150,6 +192,7 @@ export default class  {
             return;
         }
         this.activateByTab(currentTarget);
+        _updateStorageTabItems(this.items);
     }
 
     private tabDblClick(e: Event) {

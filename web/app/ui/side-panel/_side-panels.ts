@@ -10,8 +10,7 @@ import {
 import MainPanel from "app/ui/main-panel/main-panel";
 import Panel from "app/ui/side-panel/panel"
 import Scripts from "app/ui/side-panel/scripts";
-import Tables from "app/ui/side-panel/tables";
-import Views from "app/ui/side-panel/views";
+import { Tables, Views } from "app/ui/side-panel/tables";
 import Routines from "app/ui/side-panel/routines";
 import Search from "app/ui/side-panel/search";
 import { Keys, ISidePanel, getCurrentSchema, getCurrentConnection } from "app/api";

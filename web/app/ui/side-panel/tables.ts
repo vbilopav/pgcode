@@ -2,9 +2,9 @@ import { ISchema, TableId, ITableInfo, Keys } from "app/api";
 import Panel from "app/ui/side-panel/panel";
 import { tableTitle } from "app/ui/item-tooltip";
 
-export default class extends Panel {
-    constructor(element: Element) {
-        super(element, Keys.TABLES, [
+abstract class TablePanel extends Panel {
+    constructor(element: Element, keyName: string) {
+        super(element, keyName as Keys, [
             {text: "Filter"},
             {text: "Order ascending"},
             {text: "Order descending"},
@@ -13,20 +13,22 @@ export default class extends Panel {
 
     protected schemaChanged(data: ISchema, schema: string) {
         this.items.html("");
-        for(let item of data.tables) {
+        for(let item of data[this.key]) {
             this.addNewItem({schema: schema, connection: data.connection, ...item} as ITableInfo);
         }
         this.publishLength();
     }
 
     private addNewItem(item: ITableInfo) {
+        const comment = item.comment ? String.html`<div class="item-comment">${item.comment.replace("\n", "")}</div>` : "";
         this.createItemElement(String.html`
             <div>
                 <i class="icon-database"></i>
                 <span>${item.name}</span>
             </div>
             <div>
-                <div class="item-subtext">count=${item.estimate}</div>
+                <div class="item-subtext">count ≈ ${item.estimate}</div>
+                ${comment}
             </div>
         `)
         .dataAttr("item", item)
@@ -37,6 +39,18 @@ export default class extends Panel {
     
     protected itemSelected(element: Element) {
         const item = element.dataAttr("item") as ITableInfo;
-        this.mainPanel.activate(TableId(item.id), Keys.TABLES, item);
+        this.mainPanel.activate(TableId(item.id), this.key, item);
     };
+}
+
+export class Tables extends TablePanel {
+    constructor(element: Element) {
+        super(element, Keys.TABLES)
+    }
+}
+
+export class Views extends TablePanel { 
+    constructor(element: Element) {
+        super(element, Keys.VIEWS)
+    }
 }

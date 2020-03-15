@@ -1,8 +1,14 @@
-define(["require", "exports", "app/_sys/pubsub", "app/ui/main-panel/tabs", "vs/editor/editor.main"], function (require, exports, pubsub_1, tabs_1) {
+define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/ui/main-panel/tabs", "vs/editor/editor.main"], function (require, exports, storage_1, pubsub_1, tabs_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     const _sticky = "sticky";
     const _active = "active";
+    const _storage = new storage_1.default({
+        stickyId: null,
+        activeId: null,
+        items: []
+    }, "tabs", (name, value) => name === "items" ? JSON.parse(value) : value, (name, value) => name === "items" ? JSON.stringify(value) : value);
+    const _updateStorageTabItems = items => setTimeout(() => _storage.items = Array.from(items.entries(), (v, k) => [v[0], { id: v[1].id, key: v[1].key, timestamp: v[1].timestamp, data: v[1].data }]), 0);
     class default_1 {
         constructor(element) {
             this.headerRows = 1;
@@ -20,6 +26,7 @@ define(["require", "exports", "app/_sys/pubsub", "app/ui/main-panel/tabs", "vs/e
             if (this.stickyTab && this.stickyTab.id == id) {
                 this.stickyTab.removeClass(_sticky);
                 this.stickyTab = null;
+                _storage.stickyId = null;
             }
         }
         activate(id, key, data) {
@@ -31,6 +38,7 @@ define(["require", "exports", "app/_sys/pubsub", "app/ui/main-panel/tabs", "vs/e
                 const tab = this.createTabElement(id, key, data);
                 if (this.stickyTab) {
                     this.items.delete(this.stickyTab.id);
+                    _storage.stickyId = null;
                     this.stickyTab.replaceWith(this.makeStickyTab(tab));
                 }
                 else {
@@ -40,6 +48,7 @@ define(["require", "exports", "app/_sys/pubsub", "app/ui/main-panel/tabs", "vs/e
                 this.items.set(id, item);
                 this.activateByTab(tab, item);
             }
+            _updateStorageTabItems(this.items);
         }
         schemaChanged(schema, connection) {
             if (!this.activeTab) {
@@ -59,10 +68,12 @@ define(["require", "exports", "app/_sys/pubsub", "app/ui/main-panel/tabs", "vs/e
                 if (t.hasClass(_active)) {
                     t.removeClass(_active);
                     let remove = this.items.get(t.id);
+                    _storage.activeId = null;
                     pubsub_1.publish(pubsub_1.TAB_UNSELECTED, remove.id, remove.key);
                 }
             }
             this.activeTab = tab.addClass(_active);
+            _storage.activeId = tab.id;
             this.activated(tab.id, item);
             this.initiateHeaderAdjust();
         }
@@ -76,9 +87,11 @@ define(["require", "exports", "app/_sys/pubsub", "app/ui/main-panel/tabs", "vs/e
         removeByTab(tab) {
             const id = tab.id, active = tab.hasClass(_active), sticky = tab.hasClass(_sticky), item = this.items.get(id);
             this.items.delete(id);
+            _storage.activeId = null;
             tab.remove();
             if (sticky) {
                 this.stickyTab = null;
+                _storage.stickyId = null;
             }
             if (!active) {
                 return;
@@ -89,6 +102,7 @@ define(["require", "exports", "app/_sys/pubsub", "app/ui/main-panel/tabs", "vs/e
             }
             let newItem = this.items.maxBy(v => v.timestamp);
             this.activateByTab(newItem.tab, newItem);
+            _updateStorageTabItems(this.items);
         }
         createTabElement(id, key, data) {
             return tabs_1.createTabElement(id, key, data)
@@ -97,6 +111,7 @@ define(["require", "exports", "app/_sys/pubsub", "app/ui/main-panel/tabs", "vs/e
         }
         makeStickyTab(tab) {
             this.stickyTab = tab;
+            _storage.stickyId = tab.id;
             return tab.addClass(_sticky);
         }
         tabClick(e) {
@@ -107,6 +122,7 @@ define(["require", "exports", "app/_sys/pubsub", "app/ui/main-panel/tabs", "vs/e
                 return;
             }
             this.activateByTab(currentTarget);
+            _updateStorageTabItems(this.items);
         }
         tabDblClick(e) {
             const tab = e.currentTarget;

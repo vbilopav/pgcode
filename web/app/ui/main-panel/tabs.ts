@@ -30,7 +30,7 @@ export const createTabElement: (id: string, key: Keys, data: ItemInfoType) => El
         <i class="close" title="close">&#10006</i>
     </div>` as string)
     .toElement()
-    .dataAttr("data", data)
+    //.dataAttr("data", data)
     .attr("id", id)
     .attr("title", tip)
 }

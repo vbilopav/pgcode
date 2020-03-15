@@ -28,7 +28,6 @@ define(["require", "exports", "app/api", "app/ui/item-tooltip"], function (requi
         <i class="close" title="close">&#10006</i>
     </div>`
             .toElement()
-            .dataAttr("data", data)
             .attr("id", id)
             .attr("title", tip);
     };

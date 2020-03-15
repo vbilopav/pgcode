@@ -26,6 +26,7 @@ define(["require", "exports", "app/api", "app/ui/side-panel/panel", "app/ui/item
             }
         }
         addNewItem(item) {
+            const comment = item.comment ? String.html `<div class="item-comment">${item.comment.replace("\n", "")}</div>` : "";
             this.createItemElement(String.html `
             <div>
                 <i class="icon-doc-text"></i>
@@ -33,6 +34,7 @@ define(["require", "exports", "app/api", "app/ui/side-panel/panel", "app/ui/item
             </div>
             <div>
                 <div class="item-subtext">${item.timestamp.formatDateString()}</div>
+                ${comment}
             </div>
         `)
                 .dataAttr("item", item)

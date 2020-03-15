@@ -10,9 +10,7 @@ namespace Pgcode.Routines
         public const string Name = "select_scripts";
         public const string CommentMarkup = @"
 
-        Returns json array with script `id` and `name`
-        
-
+        Returns json array with script `id` and `name`.
         Params:
         - _data->>'userId' - user id or null for all users
         - _data->>'schema' - schema name or null for all schemas
@@ -41,7 +39,7 @@ namespace Pgcode.Routines
                     id,
                     title as name,
                     schema,
-                    comment,
+                    {settings.PgCodeSchema}.{MaxStr.Name}(comment) as comment,
                     timestamp at time zone _timezone as ""timestamp""
                 from 
                     {settings.PgCodeSchema}.scripts

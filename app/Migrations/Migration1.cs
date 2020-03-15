@@ -12,6 +12,7 @@ namespace Pgcode.Migrations
 
         public IEnumerable<IMigration> Routines => new List<IMigration>
         {
+            new MaxStr(Version),
             new SelectRoutines(Version),
             new SelectSchemata(Version),
             new SelectTables(Version),
@@ -56,7 +57,7 @@ namespace Pgcode.Migrations
                 user_id varchar not null,
                 title varchar not null,
                 schema varchar null,
-                comment varchar null,
+                comment text null,
                 content text not null default '',
                 view_state json null,
                 timestamp timestamp with time zone not null default transaction_timestamp()

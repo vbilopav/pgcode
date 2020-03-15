@@ -10,8 +10,7 @@ namespace Pgcode.Routines
         public const string Name = "select_schemata";
         public const string CommentMarkup = @"
         
-        Returns schema names json array filtered by `skipPattern`
-
+        Returns schema names json array filtered by `skipPattern`.
         Params:
         - _data->>'skipPattern' - skip pattern not similiar to
 

@@ -11,7 +11,6 @@ namespace Pgcode.Routines
         public const string CommentMarkup = @"
 
         Creates a new script. Returns script record.
-
         Params:
         - _data->>'userId' - user id. Cannot be null.
         - _data->>'title' - script title (if not supplied it will be named automatically: ""Script [number]"" )
@@ -51,7 +50,7 @@ namespace Pgcode.Routines
                 insert into {settings.PgCodeSchema}.scripts (user_id, title, ""schema"")
                 values(_user_id, _title, _data->>'schema')
                 returning 
-                    id, title as name, comment, schema, comment, content, 
+                    id, title as name, {settings.PgCodeSchema}.{MaxStr.Name}(comment) as comment, schema, content, 
                     view_state as viewState, 
                     timestamp at time zone _timezone as ""timestamp""
             )

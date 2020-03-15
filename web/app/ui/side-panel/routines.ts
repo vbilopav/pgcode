@@ -20,14 +20,15 @@ export default class extends Panel {
     }
 
     private addNewItem(item: IRoutineInfo) {
+        const comment = item.comment ? String.html`<div class="item-comment">${item.comment.replace("\n", "")}</div>` : "";
         this.createItemElement(String.html`
             <div>
                 <i class="icon-database"></i>
                 <span>${item.name}</span>
             </div>
             <div>
-                <div class="item-subtext">returns ${item.returns}</div>
-                <div class="item-subtext">${item.language} ${item.type}</div>
+                <div class="item-subtext">${item.language} ${item.type} returns ${item.returns}</div>
+                ${comment}
             </div>
         `)
         .dataAttr("item", item)

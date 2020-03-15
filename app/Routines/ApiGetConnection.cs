@@ -18,7 +18,6 @@ namespace Pgcode.Routines
         - tables (value from `{SelectTables.Name}`)
         - views (value from `{SelectTables.Name}`)
         - routines (value from `{SelectRoutines.Name}`)
-
         Params:
         - `_data->>'userId'`
         - `_data->>'defaultSchema'`

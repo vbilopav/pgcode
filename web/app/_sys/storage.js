@@ -34,12 +34,13 @@ define(["require", "exports"], function (require, exports) {
         }
     }
     class default_1 {
-        constructor(model, namespace = "", conversion = (name, value) => value, storage = new ProtectedLocalStorage()) {
+        constructor(model, namespace = "", get = (name, value) => value, set = (name, value) => value, storage = new ProtectedLocalStorage()) {
             this._storage = new ProtectedLocalStorage();
             this._names = new Array();
             this._storage = storage;
             this._namespace = namespace;
-            this._conversion = conversion;
+            this._get = get;
+            this._set = set;
             for (let [name, defaultValue] of Object.entries(model)) {
                 this.create(name, defaultValue);
             }
@@ -55,14 +56,14 @@ define(["require", "exports"], function (require, exports) {
                     if (value === null && defaultValue !== undefined) {
                         return defaultValue;
                     }
-                    return this._conversion(name, value);
+                    return this._get(name, value);
                 },
                 set: value => {
                     if (value === null) {
                         this._storage.removeItem(fullName);
                     }
                     else {
-                        this._storage.setItem(fullName, value);
+                        this._storage.setItem(fullName, this._set(name, value));
                     }
                 }
             });
