@@ -4,12 +4,8 @@ import { subscribe, publish, SPLITTER_CHANGED, TAB_SELECTED, TAB_UNSELECTED, SCH
 import { createTabElement } from "app/ui/main-panel/tabs";
 import { ItemInfoType, Keys, ISchema } from "app/api";
 
-interface Item {
-    tab: Element,
-    id: string,
-    key: Keys,
-    timestamp: number,
-    data: ItemInfoType
+interface Item extends IStorageItem {
+    tab: Element
 }
 
 interface IStorageItem {
@@ -41,8 +37,9 @@ const
 
 const 
     _updateStorageTabItems: (items: Map<string, Item>) => void = items => setTimeout(() => 
-        _storage.items = Array.from<[string, Item], [string, IStorageItem]>(items.entries(), (v: [string, Item], k: number) => 
-        [v[0], {id: v[1].id, key: v[1].key, timestamp: v[1].timestamp, data: v[1].data} as IStorageItem]), 0);
+        _storage.items = Array.from<[string, Item], [string, IStorageItem]>(items.entries(), (v: [string, Item], k: number) => {
+            return [v[0], { id: v[1].id, key: v[1].key, timestamp: v[1].timestamp, data: v[1].data } as IStorageItem];
+        }), 0);
 
 export default class  {
     private element: Element;
@@ -64,7 +61,9 @@ export default class  {
         this.tabs = element.children[0];
         this.content = element.children[1];
         this.initHeaderAdjustment();
+        this.restoreItems();
         subscribe(SCHEMA_CHANGED, (data: ISchema, name: string) => this.schemaChanged(name, data.connection));
+        
         /*
         monaco.editor.create(element as HTMLElement, {
             value: "",
@@ -94,19 +93,35 @@ export default class  {
             // create a new tab
             const tab = this.createTabElement(id, key, data);
             if (this.stickyTab) {
-                //this.deleteItem(this.stickyTab.id);
                 this.items.delete(this.stickyTab.id);
                 _storage.stickyId = null;
                 this.stickyTab.replaceWith(this.makeStickyTab(tab));
             } else {
                 this.makeStickyTab(tab).appendElementTo(this.tabs);
             }
-            let item = {tab, id, key, data} as Item;
-            //this.setItem(id, item);
-            this.items.set(id, item);
+            this.items.set(id, {tab, id, key, data} as Item);
             this.activateByTab(tab, item);
         }
         _updateStorageTabItems(this.items);
+    }
+
+    private restoreItems() {
+        const stickyId = _storage.stickyId;
+        const activeId = _storage.activeId;
+        for(let [id, storageItem] of _storage.items) {
+            const tab = this.createTabElement(id, storageItem.key, storageItem.data).appendElementTo(this.tabs);
+            if (id === stickyId) {
+                this.stickyTab = tab.addClass(_sticky);
+            }
+            if (id === activeId) {
+                this.activeTab = tab.addClass(_active);
+            }
+            this.items.set(id, {tab, ...storageItem} as Item);
+        }
+        if (this.activeTab) {
+            this.activated(this.activeTab.id);
+            this.initiateHeaderAdjust();
+        }
     }
 
     private schemaChanged(schema: string, connection: string) {

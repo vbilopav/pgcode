@@ -8,18 +8,7 @@ const getTitle = (title: string, sub: string, item: IItem) =>
     (item.comment ? `\n\n${item.comment}` : "");
 
 
-export const routineTitle = (item: IRoutineInfo) => {
-    return getTitle(`${item.language.toLowerCase()} ${item.type.toLowerCase()} ${item.name} returns ${item.returns}`, null, item);
-}
-
-export const scriptTitle = (item: IScriptInfo) => {
-    return getTitle(`script: ${item.name}`, `modified: ${item.timestamp}`, item);
-}
-
-export const tableTitle = (item: ITableInfo) => {
-    return getTitle(`table: ${item.name}`, `estimated count ≈ ${item.estimate}`, item);
-}
-
-export const viewTitle = (item: ITableInfo) => {
-    return getTitle(`view: ${item.name}`, `estimated count ≈ ${item.estimate}`, item);
-}
+export const routineTitle = (item: IRoutineInfo) => getTitle(`${item.language.toLowerCase()} ${item.type.toLowerCase()} ${item.name} returns ${item.returns}`, null, item)
+export const scriptTitle = (item: IScriptInfo) => getTitle(`script: ${item.name}`, `modified: ${item.timestamp.formatDateString()}`, item)
+export const tableTitle = (item: ITableInfo) => getTitle(`table: ${item.name}`, `estimated count ≈ ${item.estimate}`, item)
+export const viewTitle = (item: ITableInfo) => getTitle(`view: ${item.name}`, `estimated count ≈ ${item.estimate}`, item)

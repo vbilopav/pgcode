@@ -8,7 +8,9 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/ui/mai
         activeId: null,
         items: []
     }, "tabs", (name, value) => name === "items" ? JSON.parse(value) : value, (name, value) => name === "items" ? JSON.stringify(value) : value);
-    const _updateStorageTabItems = items => setTimeout(() => _storage.items = Array.from(items.entries(), (v, k) => [v[0], { id: v[1].id, key: v[1].key, timestamp: v[1].timestamp, data: v[1].data }]), 0);
+    const _updateStorageTabItems = items => setTimeout(() => _storage.items = Array.from(items.entries(), (v, k) => {
+        return [v[0], { id: v[1].id, key: v[1].key, timestamp: v[1].timestamp, data: v[1].data }];
+    }), 0);
     class default_1 {
         constructor(element) {
             this.headerRows = 1;
@@ -20,6 +22,7 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/ui/mai
             this.tabs = element.children[0];
             this.content = element.children[1];
             this.initHeaderAdjustment();
+            this.restoreItems();
             pubsub_1.subscribe(pubsub_1.SCHEMA_CHANGED, (data, name) => this.schemaChanged(name, data.connection));
         }
         unstickById(id) {
@@ -44,11 +47,28 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/ui/mai
                 else {
                     this.makeStickyTab(tab).appendElementTo(this.tabs);
                 }
-                let item = { tab, id, key, data };
-                this.items.set(id, item);
+                this.items.set(id, { tab, id, key, data });
                 this.activateByTab(tab, item);
             }
             _updateStorageTabItems(this.items);
+        }
+        restoreItems() {
+            const stickyId = _storage.stickyId;
+            const activeId = _storage.activeId;
+            for (let [id, storageItem] of _storage.items) {
+                const tab = this.createTabElement(id, storageItem.key, storageItem.data).appendElementTo(this.tabs);
+                if (id === stickyId) {
+                    this.stickyTab = tab.addClass(_sticky);
+                }
+                if (id === activeId) {
+                    this.activeTab = tab.addClass(_active);
+                }
+                this.items.set(id, { tab, ...storageItem });
+            }
+            if (this.activeTab) {
+                this.activated(this.activeTab.id);
+                this.initiateHeaderAdjust();
+            }
         }
         schemaChanged(schema, connection) {
             if (!this.activeTab) {
