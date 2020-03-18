@@ -62,7 +62,7 @@ export default class implements ISidePanel {
             if (!key) {
                 return;
             }
-            if (schema !== getCurrentSchema() && connection !== getCurrentConnection()) {
+            if (schema !== getCurrentSchema() || connection !== getCurrentConnection()) {
                 return;
             }
             for(let [current, panel] of this.panels) {

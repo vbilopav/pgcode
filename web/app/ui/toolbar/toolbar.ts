@@ -131,7 +131,7 @@ export default class  {
             if (!key) {
                 return;
             } 
-            if (schema !== getCurrentSchema() && connection !== getCurrentConnection()) {
+            if (schema !== getCurrentSchema() || connection !== getCurrentConnection()) {
                 return;
             }
             for(let btn of this.buttons) {
