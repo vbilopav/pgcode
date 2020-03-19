@@ -322,6 +322,8 @@ body > div.container {
       clip-path: inset(-5px -5px -5px -5px); }
   .main-panel > div:nth-child(2) {
     grid-area: content; }
+    .main-panel > div:nth-child(2) .content {
+      height: 100%; }
 
 .side-panel {
   grid-area: side-panel;

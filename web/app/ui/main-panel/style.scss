@@ -87,5 +87,9 @@
     
     & > div:nth-child(2) {
         grid-area: content;
+
+        .content {
+            height: 100%;
+        }
     }
 }

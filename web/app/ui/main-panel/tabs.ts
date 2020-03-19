@@ -1,7 +1,7 @@
 import { ItemInfoType, IRoutineInfo, IScriptInfo, ITableInfo, Keys } from "app/api";
 import { scriptTitle, tableTitle, viewTitle, routineTitle } from "app/ui/item-tooltip";
 
-export const createTabElement: (id: string, key: Keys, data: ItemInfoType) => Element = (id, key, data) => {
+const createTabElement: (id: string, key: Keys, data: ItemInfoType) => Element = (id, key, data) => {
     let iconClass : string;
     let title = data.name;
     let tip: string;
@@ -34,3 +34,5 @@ export const createTabElement: (id: string, key: Keys, data: ItemInfoType) => El
     .attr("id", id)
     .attr("title", tip)
 }
+
+export default createTabElement;

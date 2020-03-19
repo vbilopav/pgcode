@@ -1,4 +1,4 @@
-define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/ui/main-panel/tabs", "vs/editor/editor.main"], function (require, exports, storage_1, pubsub_1, tabs_1) {
+define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/ui/main-panel/tabs", "app/ui/main-panel/content"], function (require, exports, storage_1, pubsub_1, tabs_1, content_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     const _sticky = "sticky";
@@ -20,7 +20,7 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/ui/mai
                 <div></div>
             `);
             this.tabs = element.children[0];
-            this.content = element.children[1];
+            this.content = new content_1.default(element.children[1]);
             this.initHeaderAdjustment();
             this.restoreItems();
             pubsub_1.subscribe(pubsub_1.SCHEMA_CHANGED, (data, name) => this.schemaChanged(name, data.connection));
@@ -38,7 +38,7 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/ui/mai
                 this.activateByTab(item.tab);
             }
             else {
-                const tab = this.createTabElement(id, key, data);
+                const tab = this.createNew(id, key, data);
                 if (this.stickyTab) {
                     this.items.delete(this.stickyTab.id);
                     _storage.stickyId = null;
@@ -56,7 +56,7 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/ui/mai
             const stickyId = _storage.stickyId;
             const activeId = _storage.activeId;
             for (let [id, storageItem] of _storage.items) {
-                const tab = this.createTabElement(id, storageItem.key, storageItem.data).appendElementTo(this.tabs);
+                const tab = this.createNew(id, storageItem.key, storageItem.data).appendElementTo(this.tabs);
                 if (id === stickyId) {
                     this.stickyTab = tab.addClass(_sticky);
                 }
@@ -102,6 +102,7 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/ui/mai
                 item = this.items.get(id);
             }
             item.timestamp = new Date().getTime();
+            this.content.activate(id);
             pubsub_1.publish(pubsub_1.TAB_SELECTED, item.id, item.key, item.data.schema, item.data.connection);
         }
         removeByTab(tab) {
@@ -124,8 +125,9 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/ui/mai
             this.activateByTab(newItem.tab, newItem);
             _updateStorageTabItems(this.items);
         }
-        createTabElement(id, key, data) {
-            return tabs_1.createTabElement(id, key, data)
+        createNew(id, key, data) {
+            this.content.createNew(id, key, data);
+            return tabs_1.default(id, key, data)
                 .on("click", e => this.tabClick(e))
                 .on("dblclick", e => this.tabDblClick(e));
         }

@@ -1,7 +1,7 @@
 define(["require", "exports", "app/api", "app/ui/item-tooltip"], function (require, exports, api_1, item_tooltip_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.createTabElement = (id, key, data) => {
+    const createTabElement = (id, key, data) => {
         let iconClass;
         let title = data.name;
         let tip;
@@ -31,5 +31,6 @@ define(["require", "exports", "app/api", "app/ui/item-tooltip"], function (requi
             .attr("id", id)
             .attr("title", tip);
     };
+    exports.default = createTabElement;
 });
 //# sourceMappingURL=tabs.js.map

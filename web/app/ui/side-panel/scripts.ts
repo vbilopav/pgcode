@@ -22,7 +22,6 @@ export default class extends Panel {
     }
 
     private async createScript() {
-
         const response = await createScript();
         if (response.ok) {
             this.addNewItem(response.data as IScriptInfo);

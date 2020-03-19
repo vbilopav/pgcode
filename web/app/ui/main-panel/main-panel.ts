@@ -1,7 +1,7 @@
-import "vs/editor/editor.main";
 import Storage from "app/_sys/storage";
 import { subscribe, publish, SPLITTER_CHANGED, TAB_SELECTED, TAB_UNSELECTED, SCHEMA_CHANGED } from "app/_sys/pubsub";
-import { createTabElement } from "app/ui/main-panel/tabs";
+import createTabElement from "app/ui/main-panel/tabs";
+import Content from "app/ui/main-panel/content";
 import { ItemInfoType, Keys, ISchema } from "app/api";
 
 interface Item extends IStorageItem {
@@ -44,7 +44,7 @@ const
 export default class  {
     private element: Element;
     private tabs: Element;
-    private content: Element;
+    private content: Content;
     private headerHeight: number;
     private headerRows: number = 1;
     private adjustTimeout: number;
@@ -59,20 +59,10 @@ export default class  {
                 <div></div>
             `);
         this.tabs = element.children[0];
-        this.content = element.children[1];
+        this.content = new Content(element.children[1]);
         this.initHeaderAdjustment();
         this.restoreItems();
         subscribe(SCHEMA_CHANGED, (data: ISchema, name: string) => this.schemaChanged(name, data.connection));
-        
-        /*
-        monaco.editor.create(element as HTMLElement, {
-            value: "",
-            language: "pgsql",
-            theme: "vs-dark",
-            renderWhitespace: "all",
-            automaticLayout: false
-        });
-        */
     }
 
     public unstickById(id: string) {
@@ -91,7 +81,7 @@ export default class  {
 
         } else {
             // create a new tab
-            const tab = this.createTabElement(id, key, data);
+            const tab = this.createNew(id, key, data);
             if (this.stickyTab) {
                 this.items.delete(this.stickyTab.id);
                 _storage.stickyId = null;
@@ -109,7 +99,7 @@ export default class  {
         const stickyId = _storage.stickyId;
         const activeId = _storage.activeId;
         for(let [id, storageItem] of _storage.items) {
-            const tab = this.createTabElement(id, storageItem.key, storageItem.data).appendElementTo(this.tabs);
+            const tab = this.createNew(id, storageItem.key, storageItem.data).appendElementTo(this.tabs);
             if (id === stickyId) {
                 this.stickyTab = tab.addClass(_sticky);
             }
@@ -158,6 +148,7 @@ export default class  {
             item = this.items.get(id);
         }
         item.timestamp = new Date().getTime();
+        this.content.activate(id);
         publish(TAB_SELECTED, item.id, item.key, item.data.schema, item.data.connection);
     }
 
@@ -187,7 +178,8 @@ export default class  {
         _updateStorageTabItems(this.items);
     }
 
-    private createTabElement(id: string, key: Keys, data) {
+    private createNew(id: string, key: Keys, data) {
+        this.content.createNew(id, key, data);
         return createTabElement(id, key, data)
             .on("click", e => this.tabClick(e))
             .on("dblclick", e => this.tabDblClick(e));
