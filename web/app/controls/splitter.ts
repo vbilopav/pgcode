@@ -23,7 +23,7 @@ interface SplitterCtorArgs {
     maxDelta: number, 
     min: number,
     events: SplitterEvents,
-    maxResizeDelta?: number,
+    maxResize?: number,
     storage?: IStorage
 }
 
@@ -34,20 +34,20 @@ interface INewPositionResult {
 
 abstract class Splitter {
     private cursor: string;
-    private dockPosition: number;
+    private readonly dockPosition: number;
     private events: SplitterEvents;
     private storage: IStorage;
     private docked: boolean;
     private resizeIndex: number;
-    private maxDelta: number;
-    private min: number;
+    private readonly maxDelta: number;
+    private readonly min: number;
     private startingPosition: number;
 
     protected container: Element;
     protected autoIndex: number;
     protected element: Element;
     protected offset: number | [number, number];
-    protected maxResizeDelta?: number;
+    protected maxResize?: number;
 
     protected mouseEventPositionProperty: string;
     protected gridTemplateName: string;
@@ -57,7 +57,7 @@ abstract class Splitter {
     protected abstract calculateDelta(rect: DOMRect, currentPos: number): number;
     protected abstract getMin(currentPos: number, calculatedPos: number): number;
 
-    constructor({
+    protected constructor({
         name,
         element,
         container,
@@ -66,7 +66,7 @@ abstract class Splitter {
         maxDelta = 250, 
         min = 100,
         events = { docked: (()=>{}), undocked: (()=>{}), changed: (()=>{}) },
-        maxResizeDelta,
+        maxResize,
         storage
     }: SplitterCtorArgs) {
         this.element = element || (() => {throw new Error("element is required")})();
@@ -80,7 +80,7 @@ abstract class Splitter {
         this.resizeIndex = resizeIndex !== undefined ? resizeIndex : (() => {throw new Error("resizeIndex is required")})();
         this.maxDelta = maxDelta;
         this.min = min;
-        this.maxResizeDelta = maxResizeDelta;
+        this.maxResize = maxResize ? maxResize : maxDelta;
     }
 
     public updateIndexesAndAdjust(resizeIndex?: number) {
@@ -262,7 +262,7 @@ class VerticalSplitter extends Splitter {
 
     public start(): Splitter {
         super.start();
-        if (this.maxResizeDelta) {
+        if (this.maxResize) {
             let last = window.innerWidth;
             window.on("resize", () => {
                 if (this.isDocked) {
@@ -272,7 +272,7 @@ class VerticalSplitter extends Splitter {
                     w = window.innerWidth,
                     delta = w - last;
                     last = w;
-                if (w - v.previousPosition < this.maxResizeDelta) {
+                if (w - v.previousPosition < this.maxResize) {
                     this.move(delta, v);
                 }
             });
@@ -296,7 +296,7 @@ class VerticalSplitter extends Splitter {
     protected getMin(currentPos: number, calculatedPos: number): number {
         return currentPos;
     }
-};
+}
 
 class HorizontalSplitter extends Splitter {
     constructor(args: SplitterCtorArgs) {
@@ -309,7 +309,22 @@ class HorizontalSplitter extends Splitter {
 
     public start(): Splitter {
         super.start();
-        // ...
+        if (this.maxResize) {
+            let last = window.innerHeight;
+            window.on("resize", () => {
+                if (this.isDocked) {
+                    return;
+                }
+                let v = this.getValuesOrSetNewPos(),
+                    h = window.innerHeight,
+                    delta = h - last;
+                last = h;
+                if (h - v.previousPosition < this.maxResize) {
+                    this.move(delta, v);
+                }
+            });
+        }
+        
         return this;
     }
 
@@ -328,7 +343,7 @@ class HorizontalSplitter extends Splitter {
     protected getMin(currentPos: number, calculatedPos: number): number {
         return calculatedPos;
     }
-};
+}
 
 
 export {Splitter, VerticalSplitter, HorizontalSplitter, SplitterCtorArgs};

@@ -4,7 +4,7 @@ define(["require", "exports", "app/_sys/storage"], function (require, exports, s
     const defaultStorage = { position: null, docked: true };
     const createStorage = (name) => new storage_1.default(defaultStorage, name, (name, value) => name == "docked" ? JSON.parse(value) : value);
     class Splitter {
-        constructor({ name, element, container, dockPosition = 0, resizeIndex, maxDelta = 250, min = 100, events = { docked: (() => { }), undocked: (() => { }), changed: (() => { }) }, maxResizeDelta, storage }) {
+        constructor({ name, element, container, dockPosition = 0, resizeIndex, maxDelta = 250, min = 100, events = { docked: (() => { }), undocked: (() => { }), changed: (() => { }) }, maxResize, storage }) {
             this.element = element || (() => { throw new Error("element is required"); })();
             this.container = container || (() => { throw new Error("container is required"); })();
             this.cursor = document.body.css("cursor");
@@ -16,7 +16,7 @@ define(["require", "exports", "app/_sys/storage"], function (require, exports, s
             this.resizeIndex = resizeIndex !== undefined ? resizeIndex : (() => { throw new Error("resizeIndex is required"); })();
             this.maxDelta = maxDelta;
             this.min = min;
-            this.maxResizeDelta = maxResizeDelta;
+            this.maxResize = maxResize ? maxResize : maxDelta;
         }
         updateIndexesAndAdjust(resizeIndex) {
             if (resizeIndex !== undefined) {
@@ -183,7 +183,7 @@ define(["require", "exports", "app/_sys/storage"], function (require, exports, s
         }
         start() {
             super.start();
-            if (this.maxResizeDelta) {
+            if (this.maxResize) {
                 let last = window.innerWidth;
                 window.on("resize", () => {
                     if (this.isDocked) {
@@ -191,7 +191,7 @@ define(["require", "exports", "app/_sys/storage"], function (require, exports, s
                     }
                     let v = this.getValuesOrSetNewPos(), w = window.innerWidth, delta = w - last;
                     last = w;
-                    if (w - v.previousPosition < this.maxResizeDelta) {
+                    if (w - v.previousPosition < this.maxResize) {
                         this.move(delta, v);
                     }
                 });
@@ -213,7 +213,6 @@ define(["require", "exports", "app/_sys/storage"], function (require, exports, s
         }
     }
     exports.VerticalSplitter = VerticalSplitter;
-    ;
     class HorizontalSplitter extends Splitter {
         constructor(args) {
             super(args);
@@ -224,6 +223,19 @@ define(["require", "exports", "app/_sys/storage"], function (require, exports, s
         }
         start() {
             super.start();
+            if (this.maxResize) {
+                let last = window.innerHeight;
+                window.on("resize", () => {
+                    if (this.isDocked) {
+                        return;
+                    }
+                    let v = this.getValuesOrSetNewPos(), h = window.innerHeight, delta = h - last;
+                    last = h;
+                    if (h - v.previousPosition < this.maxResize) {
+                        this.move(delta, v);
+                    }
+                });
+            }
             return this;
         }
         calculatePosition(currentPos, e) {
@@ -240,6 +252,5 @@ define(["require", "exports", "app/_sys/storage"], function (require, exports, s
         }
     }
     exports.HorizontalSplitter = HorizontalSplitter;
-    ;
 });
 //# sourceMappingURL=splitter.js.map

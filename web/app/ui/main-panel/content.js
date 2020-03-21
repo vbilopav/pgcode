@@ -1,4 +1,4 @@
-define(["require", "exports", "vs/editor/editor.main"], function (require, exports) {
+define(["require", "exports", "app/controls/splitter", "app/api", "vs/editor/editor.main"], function (require, exports, splitter_1, api_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class default_1 {
@@ -18,7 +18,7 @@ define(["require", "exports", "vs/editor/editor.main"], function (require, expor
                 .appendElementTo(this.container);
         }
         activate(id) {
-            var e = this.container.find("#" + id);
+            const e = this.container.find("#" + id);
             if (!e.length) {
                 return;
             }
@@ -28,10 +28,29 @@ define(["require", "exports", "vs/editor/editor.main"], function (require, expor
             this.active = e.showElement();
         }
         createElement(id, key, data) {
+            if (key == api_1.Keys.SCRIPTS) {
+                const element = String.html `
+                <div>
+                    <div class="editor">${data.name}</div>
+                    <div></div><!-- main splitter vertical -->
+                    <div class="grid"></div><!-- main panel -->
+                </div>`
+                    .toElement()
+                    .addClass("split-content")
+                    .css("grid-template-rows", "auto 5px 50px");
+                new splitter_1.HorizontalSplitter({
+                    element: element.children[1],
+                    container: element,
+                    resizeIndex: 2,
+                    maxDelta: 100,
+                    min: 25,
+                }).start();
+                return element;
+            }
             return String.html `
-        <div>
-            ${key.toString()}:  ${data.name}
-        </div>`
+            <div>
+                ${key.toString()}:  ${data.name}
+            </div>`
                 .toElement();
         }
     }

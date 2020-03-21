@@ -85,11 +85,25 @@
         }
     }
     
+    // content
     & > div:nth-child(2) {
         grid-area: content;
+        
+        .split-content {
+            display: grid;
+
+            & > .main-split {
+                background: initial;
+                margin-left: -3px;
+                padding-right: 3px;
+            }
+        }
 
         .content {
             height: 100%;
+        }
+
+        .editor {
         }
     }
 }

@@ -180,7 +180,6 @@ new (class implements IMain {
             element: this.container.children[2],
             container: this.container,
             resizeIndex: resizeIndex,
-            maxResizeDelta: 100,
             events: {
                 docked: () => publish([SIDEBAR_DOCKED, SPLITTER_CHANGED]),
                 undocked: () => publish([SIDEBAR_UNDOCKED, SPLITTER_CHANGED]),

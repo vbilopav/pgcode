@@ -322,6 +322,12 @@ body > div.container {
       clip-path: inset(-5px -5px -5px -5px); }
   .main-panel > div:nth-child(2) {
     grid-area: content; }
+    .main-panel > div:nth-child(2) .split-content {
+      display: grid; }
+      .main-panel > div:nth-child(2) .split-content > .main-split {
+        background: initial;
+        margin-left: -3px;
+        padding-right: 3px; }
     .main-panel > div:nth-child(2) .content {
       height: 100%; }
 
