@@ -10,8 +10,36 @@ import "vs/editor/editor.main";
         });
         */
 import {HorizontalSplitter, SplitterCtorArgs} from "app/controls/splitter";
-import { ItemInfoType, IRoutineInfo, IScriptInfo, ITableInfo, Keys } from "app/api";
-import {publish, SIDEBAR_DOCKED, SIDEBAR_UNDOCKED, SPLITTER_CHANGED} from "../../_sys/pubsub";
+import {ItemInfoType, IRoutineInfo, IScriptInfo, ITableInfo, Keys} from "app/api";
+import Storage from "app/_sys/storage";
+//import {publish, SIDEBAR_DOCKED, SIDEBAR_UNDOCKED, SPLITTER_CHANGED} from "../../_sys/pubsub";
+
+interface IStorageSplitterItem { height?: number, docked?: boolean }
+interface IStorage {
+    splitter: {[id: string]: IStorageSplitterItem }
+}
+const 
+    _defaultSplitValue: IStorageSplitterItem = {height: 50, docked: true};
+const
+    _storage = new Storage(
+        {splitter: {}}, 
+        "content",
+        (name, value) =>  JSON.parse(value) as IStorage,
+            (name, value) =>  JSON.stringify(value)
+    ) as any as IStorage;
+const
+    _getSplitterVal: (id: string) => IStorageSplitterItem = id => {
+        const s = _storage.splitter, v = s[id];
+        if (!v) {
+            return _defaultSplitValue;
+        }
+        return v;
+    },
+    _setSplitterVal: (id: string, item: IStorageSplitterItem) => void = (id, item) => {
+        const s = _storage.splitter, v = s[id];
+        s[id] = {...(v ? v : _defaultSplitValue), ...item};
+        _storage.splitter = s;
+    };
 
 
 export default class  {
@@ -45,12 +73,7 @@ export default class  {
         }
         this.active = e.showElement();
     }
-
-    /*
-                <div></div><!-- side panel -->
-                <div></div><!-- main splitter vertical -->
-                <div></div><!-- main panel -->
-    */
+    
     public createElement(id: string, key: Keys, data: ItemInfoType) {
         if (key == Keys.SCRIPTS) {
             const element = (String.html`
@@ -61,36 +84,30 @@ export default class  {
                 </div>` as string)
                 .toElement()
                 .addClass("split-content")
-                .css("grid-template-rows", "auto 5px 50px");
-
+                .css("grid-template-rows", `auto 5px ${_getSplitterVal(id).height}px`);
+            
             new HorizontalSplitter({
                 element: element.children[1],
                 container: element,
                 resizeIndex: 2,
                 maxDelta: 100,
                 min: 25,
-                /*
-                events: {
-                    docked: () => publish([SIDEBAR_DOCKED, SPLITTER_CHANGED]),
-                    undocked: () => publish([SIDEBAR_UNDOCKED, SPLITTER_CHANGED]),
-                    changed: () => publish(SPLITTER_CHANGED)
-                },
+                
                 storage: {
                     get position() {
-                        return storage.sidePanelWidth
+                        return _getSplitterVal(id).height
                     },
                     set position(value: number) {
-                        storage.sidePanelWidth = value;
+                        _setSplitterVal(id, {height: value});
                     },
                     get docked() {
-                        return storage.sidePanelDocked
+                        return _getSplitterVal(id).docked;
                     },
                     set docked(value: boolean) {
-                        storage.sidePanelDocked = value;
+                        _setSplitterVal(id, {docked: value});
                     }
                 } as any
-                */
-                 
+                
             } as SplitterCtorArgs).start();
             
             return element;

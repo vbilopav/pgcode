@@ -43,7 +43,7 @@ const
 
 export default class  {
     private element: Element;
-    private tabs: Element;
+    private readonly tabs: Element;
     private content: Content;
     private headerHeight: number;
     private headerRows: number = 1;
@@ -158,9 +158,7 @@ export default class  {
             active = tab.hasClass(_active), 
             sticky = tab.hasClass(_sticky), 
             item = this.items.get(id);
-        //this.deleteItem(id);
         this.items.delete(id);
-        _storage.activeId = null;
         tab.remove();
         if (sticky) {
             this.stickyTab = null;
@@ -169,13 +167,13 @@ export default class  {
         if (!active) {
             return;
         }
+        _storage.activeId = null;
         publish(TAB_UNSELECTED, item.id, item.key);
         if (!this.items.size) {
             return;
         }
         let newItem = this.items.maxBy(v => v.timestamp);
         this.activateByTab(newItem.tab, newItem);
-        _updateStorageTabItems(this.items);
     }
 
     private createNew(id: string, key: Keys, data) {
@@ -196,6 +194,7 @@ export default class  {
         const currentTarget = e.currentTarget as Element;
         if (target.hasClass("close")) {
             this.removeByTab(currentTarget);
+            _updateStorageTabItems(this.items);
             return;
         }
         this.activateByTab(currentTarget);

@@ -41,9 +41,9 @@ class ProtectedLocalStorage implements Storage {
 
 export default class {
     private _storage: Storage = new ProtectedLocalStorage();
-    private _namespace: string;
-    private _get: (name: string, value: string) => any;
-    private _set: (name: string, value: any) => string;
+    private readonly _namespace: string;
+    private readonly _get: (name: string, value: string) => any;
+    private readonly _set: (name: string, value: any) => string;
     private _names: Array<string> = new Array<string>();
 
     constructor(

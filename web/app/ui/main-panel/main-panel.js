@@ -108,7 +108,6 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/ui/mai
         removeByTab(tab) {
             const id = tab.id, active = tab.hasClass(_active), sticky = tab.hasClass(_sticky), item = this.items.get(id);
             this.items.delete(id);
-            _storage.activeId = null;
             tab.remove();
             if (sticky) {
                 this.stickyTab = null;
@@ -117,13 +116,13 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/ui/mai
             if (!active) {
                 return;
             }
+            _storage.activeId = null;
             pubsub_1.publish(pubsub_1.TAB_UNSELECTED, item.id, item.key);
             if (!this.items.size) {
                 return;
             }
             let newItem = this.items.maxBy(v => v.timestamp);
             this.activateByTab(newItem.tab, newItem);
-            _updateStorageTabItems(this.items);
         }
         createNew(id, key, data) {
             this.content.createNew(id, key, data);
@@ -141,6 +140,7 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/ui/mai
             const currentTarget = e.currentTarget;
             if (target.hasClass("close")) {
                 this.removeByTab(currentTarget);
+                _updateStorageTabItems(this.items);
                 return;
             }
             this.activateByTab(currentTarget);
