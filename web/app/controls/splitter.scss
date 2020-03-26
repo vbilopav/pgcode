@@ -10,10 +10,12 @@
     left: -5px;
     position: relative;
     background-color: transparent;
+    z-index: 1;
 }
 .main-split-h {
     cursor: ns-resize;
     border-top: 1px $splitter-border-color dotted;
+    z-index: 1;
 }
 .split-moving {
     border-color: $panel-color;

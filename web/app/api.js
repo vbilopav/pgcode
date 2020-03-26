@@ -10,13 +10,11 @@ define(["require", "exports", "app/_sys/pubsub"], function (require, exports, pu
         Position["LEFT"] = "left";
         Position["RIGHT"] = "right";
     })(Position = exports.Position || (exports.Position = {}));
-    ;
     var Themes;
     (function (Themes) {
         Themes["DARK"] = "dark";
         Themes["LIGHT"] = "light";
     })(Themes = exports.Themes || (exports.Themes = {}));
-    ;
     var AppStatus;
     (function (AppStatus) {
         AppStatus[AppStatus["READY"] = 0] = "READY";
@@ -24,7 +22,6 @@ define(["require", "exports", "app/_sys/pubsub"], function (require, exports, pu
         AppStatus[AppStatus["ERROR"] = 2] = "ERROR";
         AppStatus[AppStatus["NO_CONNECTION"] = 3] = "NO_CONNECTION";
     })(AppStatus = exports.AppStatus || (exports.AppStatus = {}));
-    ;
     var Keys;
     (function (Keys) {
         Keys["SCRIPTS"] = "scripts";
@@ -33,7 +30,10 @@ define(["require", "exports", "app/_sys/pubsub"], function (require, exports, pu
         Keys["ROUTINES"] = "routines";
         Keys["SEARCH"] = "search";
     })(Keys = exports.Keys || (exports.Keys = {}));
-    ;
+    var Languages;
+    (function (Languages) {
+        Languages["PGSQL"] = "pgsql";
+    })(Languages = exports.Languages || (exports.Languages = {}));
     const _createResponse = (response, data) => Object({ ok: response.ok, status: response.status, data: data });
     const _fetchAndPublishStatus = async (url, init) => {
         pubsub_1.publish(pubsub_1.SET_APP_STATUS, AppStatus.BUSY);

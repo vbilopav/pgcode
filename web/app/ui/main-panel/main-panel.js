@@ -109,6 +109,7 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/ui/mai
             const id = tab.id, active = tab.hasClass(_active), sticky = tab.hasClass(_sticky), item = this.items.get(id);
             this.items.delete(id);
             tab.remove();
+            this.content.remove(id);
             if (sticky) {
                 this.stickyTab = null;
                 _storage.stickyId = null;

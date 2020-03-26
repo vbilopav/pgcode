@@ -160,6 +160,7 @@ export default class  {
             item = this.items.get(id);
         this.items.delete(id);
         tab.remove();
+        this.content.remove(id);
         if (sticky) {
             this.stickyTab = null;
             _storage.stickyId = null;

@@ -198,7 +198,7 @@ new (class implements IMain {
                 set docked(value: boolean) {
                     storage.sidePanelDocked = value;
                 }
-            } as any
+            }
         } as SplitterCtorArgs).start() as VerticalSplitter;
     }
 
