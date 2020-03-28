@@ -1,7 +1,6 @@
 ﻿using Npgsql;
-using Pgcode.Migrations;
 
-namespace Pgcode.Routines
+namespace Pgcode.Migrations._1.Routines
 {
     public class SelectScripts : IMigration
     {

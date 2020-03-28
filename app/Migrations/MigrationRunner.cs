@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using Norm.Extensions;
 using Npgsql;
+using Pgcode.Migrations._1;
 
 namespace Pgcode.Migrations
 {

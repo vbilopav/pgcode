@@ -2,9 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using Npgsql;
-using Pgcode.Routines;
+using Pgcode.Migrations._1.Routines;
+using Pgcode.Migrations._1.Tables;
 
-namespace Pgcode.Migrations
+namespace Pgcode.Migrations._1
 {
     public class Migration1 : IMigration
     {
@@ -36,34 +37,15 @@ namespace Pgcode.Migrations
                 create schema {settings.PgCodeSchema};
                 set search_path to {settings.PgCodeSchema};
 
-                create table if not exists schema_version (
-                    version int not null primary key,
-                    timestamp timestamp with time zone not null default transaction_timestamp()
-                );
+                {new SchemaVersion(Version).Up(settings, connection)}
             end if;
 
             if exists(select version from schema_version where version = _version) then
                 return;
             end if;
 
-            create table users (
-                id varchar not null primary key,
-                data jsonb not null default '{{}}',
-                timestamp timestamp with time zone not null default transaction_timestamp()
-            );
-
-            create table scripts (
-                id int not null generated always as identity primary key,
-                user_id varchar not null,
-                title varchar not null,
-                schema varchar null,
-                comment text null,
-                content text not null default '',
-                view_state json null,
-                timestamp timestamp with time zone not null default transaction_timestamp()
-            );
-            
-            create index IDX_scripts_user_id on scripts using btree (user_id);
+            {new Users(Version).Up(settings, connection)}
+            {new Scripts(Version).Up(settings, connection)}
 
             {string.Join(Environment.NewLine, Routines.Select(m => m.Up(settings, connection)))}
 
