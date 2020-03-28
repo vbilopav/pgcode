@@ -296,7 +296,8 @@ body > div.container {
         text-overflow: ellipsis;
         overflow: hidden;
         white-space: nowrap;
-        max-width: 360px; }
+        max-width: 360px;
+        padding-bottom: 1px; }
       .main-panel > div:nth-child(1) > div.tab > i.close {
         align-self: end;
         font: inherit;
@@ -402,7 +403,8 @@ body > div.container {
     .side-panel > div > div:nth-child(2) > div div, .side-panel > div > div:nth-child(2) > div span {
       white-space: nowrap;
       text-overflow: ellipsis;
-      overflow: hidden; }
+      overflow: hidden;
+      padding-bottom: 1px; }
   .side-panel > div > div:nth-child(2)::-webkit-scrollbar {
     width: 8px;
     height: 8px; }

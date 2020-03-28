@@ -1,4 +1,5 @@
 ﻿using Npgsql;
+using Pgcode.Migrations._1.Routines;
 
 namespace Pgcode.Migrations._1.Tables
 {
@@ -17,7 +18,7 @@ namespace Pgcode.Migrations._1.Tables
         public string Up(Settings settings, NpgsqlConnection connection) => (_forVersion != Version ? "" : $@"
 
         create table {settings.PgCodeSchema}.{Name} (
-            id int not null generated always as identity primary key,
+            id bigint not null primary key default {IdGenerator.Name}(),
             user_id varchar not null,
             title varchar not null,
             schema varchar null,

@@ -111,6 +111,17 @@ export default abstract class Panel {
         if (emitEvents) {
             this.itemSelected(element);
         }
+        if (this.items.overflownY()) {
+            const elementRect = element.getClientRects();
+            const itemsRect = this.items.getClientRects();
+            console.log(element);
+            if (elementRect[0].top < itemsRect[0].top) {
+                element.scrollIntoView({behavior: "instant", block: "start", inline: "start"} as any as ScrollIntoViewOptions)
+            }
+            if (elementRect[0].top + elementRect[0].height > itemsRect[0].top + itemsRect[0].height) {
+                element.scrollIntoView({behavior: "instant", block: "end", inline: "end"} as any as ScrollIntoViewOptions);
+            }
+        }
     }
 
     private unselectItemByElement(element: Element, emitEvents = true) {

@@ -44,6 +44,7 @@ namespace Pgcode.Migrations._1
                 return;
             end if;
 
+            {new IdGenerator(Version).Up(settings, connection)}
             {new Users(Version).Up(settings, connection)}
             {new Scripts(Version).Up(settings, connection)}
 

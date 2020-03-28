@@ -88,6 +88,17 @@ define(["require", "exports", "app/_sys/pubsub", "app/controls/monaco-context-me
             if (emitEvents) {
                 this.itemSelected(element);
             }
+            if (this.items.overflownY()) {
+                const elementRect = element.getClientRects();
+                const itemsRect = this.items.getClientRects();
+                console.log(element);
+                if (elementRect[0].top < itemsRect[0].top) {
+                    element.scrollIntoView({ behavior: "instant", block: "start", inline: "start" });
+                }
+                if (elementRect[0].top + elementRect[0].height > itemsRect[0].top + itemsRect[0].height) {
+                    element.scrollIntoView({ behavior: "instant", block: "end", inline: "end" });
+                }
+            }
         }
         unselectItemByElement(element, emitEvents = true) {
             element.removeClass("active");
