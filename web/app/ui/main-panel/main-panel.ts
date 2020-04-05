@@ -2,7 +2,7 @@ import Storage from "app/_sys/storage";
 import { subscribe, publish, SPLITTER_CHANGED, TAB_SELECTED, TAB_UNSELECTED, SCHEMA_CHANGED } from "app/_sys/pubsub";
 import createTabElement from "app/ui/main-panel/tabs";
 import Content from "app/ui/main-panel/content";
-import { ItemInfoType, Keys, ISchema } from "app/api";
+import {ItemInfoType, Keys, ISchema, classes, IScriptContent, ItemContentArgs} from "app/api";
 
 interface Item extends IStorageItem {
     tab: Element
@@ -20,9 +20,6 @@ interface IStorage {
     activeId: string,
     items: Array<[string, IStorageItem]>
 }
-
-const _sticky = "sticky";
-const _active = "active";
 
 const 
     _storage = new Storage({
@@ -67,13 +64,13 @@ export default class  {
 
     public unstickById(id: string) {
         if (this.stickyTab && this.stickyTab.id == id) {
-            this.stickyTab.removeClass(_sticky);
+            this.stickyTab.removeClass(classes.sticky);
             this.stickyTab = null;
             _storage.stickyId = null;
         }
     }
 
-    public activate(id: string, key: Keys, data: ItemInfoType) {
+    public activate(id: string, key: Keys, data: ItemInfoType, contentArgs = ItemContentArgs) {
         const item = this.items.get(id);
         if (item) {
             // tab already exists
@@ -81,13 +78,17 @@ export default class  {
 
         } else {
             // create a new tab
-            const tab = this.createNew(id, key, data);
-            if (this.stickyTab) {
-                this.items.delete(this.stickyTab.id);
-                _storage.stickyId = null;
-                this.stickyTab.replaceWith(this.makeStickyTab(tab));
+            const tab = this.createNew(id, key, data, contentArgs.content);
+            if (contentArgs.sticky) {
+                if (this.stickyTab) {
+                    this.items.delete(this.stickyTab.id);
+                    _storage.stickyId = null;
+                    this.stickyTab.replaceWith(this.makeStickyTab(tab));
+                } else {
+                    this.makeStickyTab(tab).appendElementTo(this.tabs);
+                }
             } else {
-                this.makeStickyTab(tab).appendElementTo(this.tabs);
+                tab.appendElementTo(this.tabs);
             }
             this.items.set(id, {tab, id, key, data} as Item);
             this.activateByTab(tab, item);
@@ -101,10 +102,10 @@ export default class  {
         for(let [id, storageItem] of _storage.items) {
             const tab = this.createNew(id, storageItem.key, storageItem.data).appendElementTo(this.tabs);
             if (id === stickyId) {
-                this.stickyTab = tab.addClass(_sticky);
+                this.stickyTab = tab.addClass(classes.sticky);
             }
             if (id === activeId) {
-                this.activeTab = tab.addClass(_active);
+                this.activeTab = tab.addClass(classes.active);
             }
             this.items.set(id, {tab, ...storageItem} as Item);
         }
@@ -130,14 +131,14 @@ export default class  {
 
     private activateByTab(tab: Element, item?: Item) {
         for(let t of this.tabs.children) {
-            if (t.hasClass(_active)) {
-                t.removeClass(_active);
+            if (t.hasClass(classes.active)) {
+                t.removeClass(classes.active);
                 let remove = this.items.get(t.id);
                 _storage.activeId = null;
                 publish(TAB_UNSELECTED, remove.id, remove.key);
             }
         }
-        this.activeTab = tab.addClass(_active);
+        this.activeTab = tab.addClass(classes.active);
         _storage.activeId = tab.id;
         this.activated(tab.id, item);
         this.initiateHeaderAdjust();
@@ -155,8 +156,8 @@ export default class  {
     private removeByTab(tab: Element) {
         const 
             id = tab.id, 
-            active = tab.hasClass(_active), 
-            sticky = tab.hasClass(_sticky), 
+            active = tab.hasClass(classes.active), 
+            sticky = tab.hasClass(classes.sticky), 
             item = this.items.get(id);
         this.items.delete(id);
         tab.remove();
@@ -177,8 +178,8 @@ export default class  {
         this.activateByTab(newItem.tab, newItem);
     }
 
-    private createNew(id: string, key: Keys, data) {
-        this.content.createNew(id, key, data);
+    private createNew(id: string, key: Keys, data: ItemInfoType, content: IScriptContent = null) {
+        this.content.createNew(id, key, data, content);
         return createTabElement(id, key, data)
             .on("click", e => this.tabClick(e))
             .on("dblclick", e => this.tabDblClick(e));
@@ -187,7 +188,7 @@ export default class  {
     private makeStickyTab(tab: Element) {
         this.stickyTab = tab;
         _storage.stickyId = tab.id;
-        return tab.addClass(_sticky);
+        return tab.addClass(classes.sticky);
     }
 
     private tabClick(e: Event) {
@@ -204,8 +205,8 @@ export default class  {
 
     private tabDblClick(e: Event) {
         const tab = e.currentTarget as Element;
-        if (tab.hasClass(_sticky)) {
-            tab.removeClass(_sticky)
+        if (tab.hasClass(classes.sticky)) {
+            tab.removeClass(classes.sticky);
             this.stickyTab = null;
         }
     }

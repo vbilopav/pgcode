@@ -1,10 +1,11 @@
 import { publish, SET_APP_STATUS } from "app/_sys/pubsub";
-//import { AppStatus, Keys } from "app/types";
 
 export const ScriptId: (id: number) => string = id  => `${Keys.SCRIPTS}${id}`;
 export const TableId: (id: number) => string = id  => `${Keys.TABLES}${id}`;
 export const ViewId: (id: number) => string = id  => `${Keys.VIEWS}${id}`;
 export const RoutineId: (id: number) => string = id  => `${Keys.ROUTINES}${id}`;
+
+export const classes = {active: "active", sticky: "sticky", docked: "docked"};
 
 export enum Position { LEFT = "left", RIGHT = "right" }
 export enum Themes { DARK = "dark", LIGHT = "light" }
@@ -19,6 +20,9 @@ export interface IMain {
 export interface ISidePanel {
     unselectAll() : void
 }
+
+interface IItemContentArgs {content: IScriptContent, sticky: boolean}
+export const ItemContentArgs: IItemContentArgs = {content: null, sticky: true};
 
 interface IResponse<T> {
     ok: boolean,
@@ -70,7 +74,7 @@ export interface IItem {
 
 interface IScript extends IScriptInfo, IScriptContent {}
 
-interface IScriptContent {
+export interface IScriptContent {
     content: string,
     viewState: string
 }
@@ -113,7 +117,7 @@ const _fetch:<T> (url: string) => Promise<IResponse<T>> = async url => {
         return _createResponse(response);
     }
     return _createResponse(response, await response.json());
-}
+};
 
 let _currentSchema;
 let _currentConnection;

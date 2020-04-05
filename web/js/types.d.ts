@@ -356,7 +356,7 @@ interface String {
     /**
      * Returns hash code of string instance
      */
-    hashCode(): Number
+    hashCode(): number
     /**
      * Converts kebab name in a string to camel cased name
      */

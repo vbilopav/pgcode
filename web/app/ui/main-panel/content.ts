@@ -1,8 +1,9 @@
 import Editor from "app/ui/main-panel/editor";
 import {HorizontalSplitter, SplitterCtorArgs} from "app/controls/splitter";
-import {ItemInfoType, Keys, Languages} from "app/api";
+import {classes, IScriptContent, ItemInfoType, Keys, Languages} from "app/api";
 import Storage from "app/_sys/storage";
-import {publish, SIDEBAR_DOCKED, SIDEBAR_UNDOCKED, SPLITTER_CHANGED} from "../../_sys/pubsub";
+
+//import {publish, SIDEBAR_DOCKED, SIDEBAR_UNDOCKED, SPLITTER_CHANGED} from "../../_sys/pubsub";
 
 interface IStorageSplitterItem { height?: number, docked?: boolean }
 interface IStorage {
@@ -30,9 +31,6 @@ const
         _storage.splitter = s;
     };
 
-const _active = "active";
-
-
 export default class  {
     private readonly container: Element;
     private active: Element;
@@ -41,7 +39,7 @@ export default class  {
         this.container = element;
     }
 
-    public createNew(id: string, key: Keys, data: ItemInfoType) {
+    public createNew(id: string, key: Keys, data: ItemInfoType, content: IScriptContent = null) {
         if (this.active) {
             this.active.hideElement();
         }
@@ -51,7 +49,22 @@ export default class  {
             .dataAttr("key", key)
             .dataAttr("data", data)
             .addClass("content")
-            .appendElementTo(this.container)
+            .appendElementTo(this.container);
+        
+        // load item
+        if (key === Keys.ROUTINES) {
+            console.log(`get the content for routine with id ${data.id}`);
+        } else if (key === Keys.SCRIPTS) {
+            console.log(`get the content for script with id ${data.id}`);
+        } else if (key === Keys.TABLES) {
+            console.log(`get the content for table with id ${data.id}`);
+        } else if (key === Keys.VIEWS) {
+            console.log(`get the content for view with id ${data.id}`);
+        }
+        
+        if (content !== null) {
+            console.log("I haz a content", content);
+        }
     }
 
     public activate(id: string) {
@@ -60,9 +73,9 @@ export default class  {
             return
         }
         if (this.active) {
-            this.active.hideElement().removeClass(_active);
+            this.active.hideElement().removeClass(classes.active);
         }
-        this.active = e.showElement().addClass(_active);
+        this.active = e.showElement().addClass(classes.active);
         setTimeout(() => this.executeEditor(e, editor => editor.layout()), 0);
     }
 

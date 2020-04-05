@@ -13,12 +13,11 @@ define(["require", "exports", "app/ui/main-panel/editor", "app/controls/splitter
         s[id] = { ...(v ? v : _defaultSplitValue), ...item };
         _storage.splitter = s;
     };
-    const _active = "active";
     class default_1 {
         constructor(element) {
             this.container = element;
         }
-        createNew(id, key, data) {
+        createNew(id, key, data, content = null) {
             if (this.active) {
                 this.active.hideElement();
             }
@@ -29,6 +28,21 @@ define(["require", "exports", "app/ui/main-panel/editor", "app/controls/splitter
                 .dataAttr("data", data)
                 .addClass("content")
                 .appendElementTo(this.container);
+            if (key === api_1.Keys.ROUTINES) {
+                console.log(`get the content for routine with id ${data.id}`);
+            }
+            else if (key === api_1.Keys.SCRIPTS) {
+                console.log(`get the content for script with id ${data.id}`);
+            }
+            else if (key === api_1.Keys.TABLES) {
+                console.log(`get the content for table with id ${data.id}`);
+            }
+            else if (key === api_1.Keys.VIEWS) {
+                console.log(`get the content for view with id ${data.id}`);
+            }
+            if (content !== null) {
+                console.log("I haz a content", content);
+            }
         }
         activate(id) {
             const e = this.container.find("#" + id);
@@ -36,9 +50,9 @@ define(["require", "exports", "app/ui/main-panel/editor", "app/controls/splitter
                 return;
             }
             if (this.active) {
-                this.active.hideElement().removeClass(_active);
+                this.active.hideElement().removeClass(api_1.classes.active);
             }
-            this.active = e.showElement().addClass(_active);
+            this.active = e.showElement().addClass(api_1.classes.active);
             setTimeout(() => this.executeEditor(e, editor => editor.layout()), 0);
         }
         remove(id) {

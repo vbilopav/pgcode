@@ -5,6 +5,7 @@ define(["require", "exports", "app/_sys/pubsub"], function (require, exports, pu
     exports.TableId = id => `${Keys.TABLES}${id}`;
     exports.ViewId = id => `${Keys.VIEWS}${id}`;
     exports.RoutineId = id => `${Keys.ROUTINES}${id}`;
+    exports.classes = { active: "active", sticky: "sticky", docked: "docked" };
     var Position;
     (function (Position) {
         Position["LEFT"] = "left";
@@ -34,6 +35,7 @@ define(["require", "exports", "app/_sys/pubsub"], function (require, exports, pu
     (function (Languages) {
         Languages["PGSQL"] = "pgsql";
     })(Languages = exports.Languages || (exports.Languages = {}));
+    exports.ItemContentArgs = { content: null, sticky: true };
     const _createResponse = (response, data) => Object({ ok: response.ok, status: response.status, data: data });
     const _fetchAndPublishStatus = async (url, init) => {
         pubsub_1.publish(pubsub_1.SET_APP_STATUS, AppStatus.BUSY);

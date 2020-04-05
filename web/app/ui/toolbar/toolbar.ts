@@ -11,7 +11,7 @@ import {
 } from "app/_sys/pubsub";
 import { ContextMenuCtorArgs, MenuItemType } from "app/controls/context-menu";
 import MonacoContextMenu from "../../controls/monaco-context-menu";
-import { Position, IMain, Keys, getCurrentSchema, getCurrentConnection } from "app/api";
+import { Position, IMain, Keys, getCurrentSchema, getCurrentConnection, classes } from "app/api";
 
 enum ButtonRoles { switch="switch", toggle="toggle" };
 const 
@@ -47,9 +47,7 @@ const
         return value;
     }) as any as IStorage;
 
-const 
-    _active = "active", 
-    _docked = "docked",
+const
     _items = [
         {id: `btn-${Keys.SCRIPTS}`, icon: "icon-doc-text", key: Keys.SCRIPTS, label: Keys.SCRIPTS, text: "Scripts", keyBinding: "Ctrl+S", role: ButtonRoles.switch},
         {id: `btn-${Keys.TABLES}`, icon: "icon-database", key: Keys.TABLES, label: Keys.TABLES, text: "Tables", keyBinding: "Ctrl+T", role: ButtonRoles.switch},
@@ -60,7 +58,7 @@ const
     ];
 
 export default class  {
-    private buttons: HTMLCollection;
+    private readonly buttons: HTMLCollection;
     private toolbar: Element;
     private menu: MonacoContextMenu;
 
@@ -135,14 +133,14 @@ export default class  {
                 return;
             }
             for(let btn of this.buttons) {
-                const active = btn.hasClass(_active);
+                const active = btn.hasClass(classes.active);
                 if (key === btn.dataAttr("key")) {
                     if (!active) {
-                        btn.addClass(_active);
+                        btn.addClass(classes.active);
                     }
                 } else {
                     if (active) {
-                        btn.removeClass(_active);
+                        btn.removeClass(classes.active);
                     }
                 }
             }
@@ -150,9 +148,9 @@ export default class  {
     }
 
     private sidebarDocked() {
-        this.toolbar.addClass(_docked);
+        this.toolbar.addClass(classes.docked);
         for(let btn of this.buttons) {
-            if (btn.hasClass(_active) && _isSwitch(btn)) {
+            if (btn.hasClass(classes.active) && _isSwitch(btn)) {
                 this.menu.updateMenuItem(btn.dataAttr("key"), {checked: false});
             }
         }
@@ -165,7 +163,7 @@ export default class  {
                 continue;
             }
             let btn = this.buttons.namedItem(item.id);
-            if (btn.hasClass(_active)) {
+            if (btn.hasClass(classes.active)) {
                 hasActive = true;
                 this.menu.updateMenuItem(btn.dataAttr("key"), {checked: true});
                 break;
@@ -175,7 +173,7 @@ export default class  {
             let key = _storage.previousKey;
             for(let btn of this.buttons) {
                 if (btn.dataAttr("key") === key) {
-                    btn.addClass(_active);
+                    btn.addClass(classes.active);
                     _storage[key] = true;
                     publish(STATE_CHANGED + key, key, true);
                     this.menu.updateMenuItem(key, {checked: true});
@@ -183,15 +181,15 @@ export default class  {
                 }
             }
         }
-        this.toolbar.removeClass(_docked);
+        this.toolbar.removeClass(classes.docked);
     } 
 
     private setButtonState(e: HTMLElement, state: boolean, key: string) {
-        if (e.hasClass(_active) && !state) {
-            e.removeClass(_active);
+        if (e.hasClass(classes.active) && !state) {
+            e.removeClass(classes.active);
             setTimeout(() => publish(STATE_CHANGED + key, key, false), 0);
-        } else if (!e.hasClass(_active) && state) {
-            e.addClass(_active);
+        } else if (!e.hasClass(classes.active) && state) {
+            e.addClass(classes.active);
             setTimeout(() => publish(STATE_CHANGED + key, key, true), 0);
         }
         if (_isSwitch(e)) {
@@ -205,15 +203,15 @@ export default class  {
         
         const toggle = (state?: boolean): void => {
             if (state === undefined) {
-                state = e.hasClass(_active);
+                state = e.hasClass(classes.active);
             }
             if (state) {
-                e.removeClass(_active);
+                e.removeClass(classes.active);
                 if (switchRole) {
                     _storage.previousKey = key;
                 }
             } else {
-                e.addClass(_active);
+                e.addClass(classes.active);
             }
             state = !state;
             _storage[key] = state;
@@ -226,7 +224,7 @@ export default class  {
         if (!switchRole) {
             toggle();
         } else {
-            const isDocked = this.toolbar.hasClass(_docked);
+            const isDocked = this.toolbar.hasClass(classes.docked);
 
             for(let btn of this.buttons) {
                 if (_isSwitch(btn) && e.id !== btn.id) {
@@ -234,7 +232,7 @@ export default class  {
                     if (_storage[key]) {
                         _storage[key] = false;
                     }
-                    if (btn.hasClass(_active)) {
+                    if (btn.hasClass(classes.active)) {
                         btn.removeClass("active");
                         publish(STATE_CHANGED + key, key, false);
                         this.menu.updateMenuItem(key, {checked: false});
@@ -247,7 +245,7 @@ export default class  {
                 toggle();
             }
 
-            if (!e.hasClass(_active)) {
+            if (!e.hasClass(classes.active)) {
                 publish(STATE_CHANGED_OFF);
             } else {
                 publish(STATE_CHANGED_ON);

@@ -1,5 +1,6 @@
 ﻿import "vs/editor/editor.main";
 import IStandaloneCodeEditor = monaco.editor.IStandaloneCodeEditor;
+import {classes} from "app/api";
 import {subscribe, SIDEBAR_DOCKED, SPLITTER_CHANGED, SIDEBAR_UNDOCKED} from "app/_sys/pubsub";
 
 export default class {
@@ -30,7 +31,7 @@ export default class {
     }
     
     public layout() {
-        if (!this.content.hasClass("active")) {
+        if (!this.content.hasClass(classes.active)) {
             return;
         }
         this.monaco.layout({

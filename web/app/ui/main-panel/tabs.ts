@@ -33,6 +33,6 @@ const createTabElement: (id: string, key: Keys, data: ItemInfoType) => Element =
     //.dataAttr("data", data)
     .attr("id", id)
     .attr("title", tip)
-}
+};
 
 export default createTabElement;

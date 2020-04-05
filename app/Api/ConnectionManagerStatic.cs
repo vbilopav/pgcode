@@ -179,7 +179,7 @@ namespace Pgcode.Api
                 value.Connection.Notice += (sender, args) =>
                 {
                     var severity = args.Notice.Severity;
-                    var msg = $"{args.Notice.MessageText}{Environment.NewLine}";
+                    var msg = $"{args.Notice.Where}:{Environment.NewLine}{args.Notice.MessageText}{Environment.NewLine}";
                     if (InfoLevels.Contains(severity))
                     {
                         value.Logger.LogInformation(msg);

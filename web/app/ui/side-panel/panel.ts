@@ -1,6 +1,6 @@
 import { subscribe, publish, SCHEMA_CHANGED, ITEM_COUNT_CHANGED, TAB_SELECTED, TAB_UNSELECTED } from "app/_sys/pubsub";
 import MainPanel from "app/ui/main-panel/main-panel";
-import { ISchema, ISidePanel, Keys } from "app/api";
+import { ISchema, ISidePanel, IScriptContent, Keys, classes, ItemContentArgs } from "app/api";
 import MonacoContextMenu from "app/controls/monaco-context-menu";
 import { ContextMenuCtorArgs, MenuItemType } from "app/controls/context-menu";
 
@@ -28,7 +28,7 @@ export default abstract class Panel {
     protected sidePanel: ISidePanel;
     private scrollTimeout: number;
 
-    constructor(element: Element, key: Keys, menuItems: Array<MenuItemType> = []){
+    protected constructor(element: Element, key: Keys, menuItems: Array<MenuItemType> = []){
         this.element = element;
         this.key = key;
         this.header = element.children[0].html(String.html`
@@ -81,7 +81,7 @@ export default abstract class Panel {
 
     protected abstract schemaChanged(data: ISchema, name: string) : void;
 
-    protected itemSelected(element: Element) : void {};
+    protected itemSelected(element: Element, contentArgs = ItemContentArgs) : void {};
 
     protected itemUnselected(element: Element) : void {};
 
@@ -89,12 +89,32 @@ export default abstract class Panel {
         publish(ITEM_COUNT_CHANGED, this.key, this.items.children.length);
     }
 
+    protected selectItemByElement(element: Element, emitEvents = true, contentArgs = ItemContentArgs) {
+        if ((element as ElementResult).length === 0) {
+            return;
+        }
+        element.addClass(classes.active);
+        if (emitEvents) {
+            this.itemSelected(element, contentArgs);
+        }
+        if (this.items.overflownY()) {
+            const elementRect = element.getClientRects();
+            const itemsRect = this.items.getClientRects();
+            if (elementRect[0].top < itemsRect[0].top) {
+                element.scrollIntoView({behavior: "instant", block: "start", inline: "start"} as any as ScrollIntoViewOptions)
+            }
+            if (elementRect[0].top + elementRect[0].height > itemsRect[0].top + itemsRect[0].height) {
+                element.scrollIntoView({behavior: "instant", block: "end", inline: "end"} as any as ScrollIntoViewOptions);
+            }
+        }
+    }
+
     private itemsClick(e: Event){
         const element = (e.target as Element).closest("div.panel-item");
         if (!element) {
             return;
         }
-        if (element.hasClass("active")) {
+        if (element.hasClass(classes.active)) {
             return
         }
         this.sidePanel.unselectAll();
@@ -105,27 +125,9 @@ export default abstract class Panel {
         const element = (e.target as Element).closest("div.panel-item");
         this.mainPanel.unstickById(element.id);
     }
-
-    private selectItemByElement(element: Element, emitEvents = true) {
-        element.addClass("active");
-        if (emitEvents) {
-            this.itemSelected(element);
-        }
-        if (this.items.overflownY()) {
-            const elementRect = element.getClientRects();
-            const itemsRect = this.items.getClientRects();
-            console.log(element);
-            if (elementRect[0].top < itemsRect[0].top) {
-                element.scrollIntoView({behavior: "instant", block: "start", inline: "start"} as any as ScrollIntoViewOptions)
-            }
-            if (elementRect[0].top + elementRect[0].height > itemsRect[0].top + itemsRect[0].height) {
-                element.scrollIntoView({behavior: "instant", block: "end", inline: "end"} as any as ScrollIntoViewOptions);
-            }
-        }
-    }
-
+    
     private unselectItemByElement(element: Element, emitEvents = true) {
-        element.removeClass("active");
+        element.removeClass(classes.active);
         if (emitEvents) {
             this.itemUnselected(element);
         }
@@ -138,8 +140,8 @@ export default abstract class Panel {
                 target: this.header.find(".btn"),
                 event: "click",
                 items: menuItems,
-                onOpen: menu => menu.target.addClass("active"),
-                onClose: menu => menu.target.removeClass("active")
+                onOpen: menu => menu.target.addClass(classes.active),
+                onClose: menu => menu.target.removeClass(classes.active)
             } as ContextMenuCtorArgs);
         } else {
             this.header.find(".btn").remove();

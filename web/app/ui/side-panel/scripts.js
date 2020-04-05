@@ -21,13 +21,14 @@ define(["require", "exports", "app/api", "app/ui/side-panel/panel", "app/ui/item
         async createScript() {
             const response = await api_1.createScript();
             if (response.ok) {
-                this.addNewItem(response.data);
+                this.sidePanel.unselectAll();
+                this.selectItemByElement(this.addNewItem(response.data), true, { content: response.data, sticky: false });
                 this.publishLength();
             }
         }
         addNewItem(item) {
             const comment = item.comment ? String.html `<div class="item-comment">${item.comment.replace("\n", "")}</div>` : "";
-            this.createItemElement(String.html `
+            return this.createItemElement(String.html `
             <div>
                 <i class="icon-doc-text"></i>
                 <span>${item.name}</span>
@@ -42,9 +43,9 @@ define(["require", "exports", "app/api", "app/ui/side-panel/panel", "app/ui/item
                 .attr("id", api_1.ScriptId(item.id))
                 .appendElementTo(this.items);
         }
-        itemSelected(element) {
+        itemSelected(element, contentArgs = api_1.ItemContentArgs) {
             const item = element.dataAttr("item");
-            this.mainPanel.activate(api_1.ScriptId(item.id), api_1.Keys.SCRIPTS, item);
+            this.mainPanel.activate(api_1.ScriptId(item.id), api_1.Keys.SCRIPTS, item, contentArgs);
         }
         ;
     }

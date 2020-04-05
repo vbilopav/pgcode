@@ -1,4 +1,4 @@
-define(["require", "exports", "app/_sys/pubsub", "vs/editor/editor.main"], function (require, exports, pubsub_1) {
+define(["require", "exports", "app/api", "app/_sys/pubsub", "vs/editor/editor.main"], function (require, exports, api_1, pubsub_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class default_1 {
@@ -21,7 +21,7 @@ define(["require", "exports", "app/_sys/pubsub", "vs/editor/editor.main"], funct
             this.monaco.dispose();
         }
         layout() {
-            if (!this.content.hasClass("active")) {
+            if (!this.content.hasClass(api_1.classes.active)) {
                 return;
             }
             this.monaco.layout({

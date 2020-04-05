@@ -22,7 +22,7 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "../../cont
         }
         return value;
     });
-    const _active = "active", _docked = "docked", _items = [
+    const _items = [
         { id: `btn-${api_1.Keys.SCRIPTS}`, icon: "icon-doc-text", key: api_1.Keys.SCRIPTS, label: api_1.Keys.SCRIPTS, text: "Scripts", keyBinding: "Ctrl+S", role: ButtonRoles.switch },
         { id: `btn-${api_1.Keys.TABLES}`, icon: "icon-database", key: api_1.Keys.TABLES, label: api_1.Keys.TABLES, text: "Tables", keyBinding: "Ctrl+T", role: ButtonRoles.switch },
         { id: `btn-${api_1.Keys.VIEWS}`, icon: "icon-database", key: api_1.Keys.VIEWS, label: api_1.Keys.VIEWS, text: "Views", keyBinding: "Ctrl+V", role: ButtonRoles.switch },
@@ -98,24 +98,24 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "../../cont
                     return;
                 }
                 for (let btn of this.buttons) {
-                    const active = btn.hasClass(_active);
+                    const active = btn.hasClass(api_1.classes.active);
                     if (key === btn.dataAttr("key")) {
                         if (!active) {
-                            btn.addClass(_active);
+                            btn.addClass(api_1.classes.active);
                         }
                     }
                     else {
                         if (active) {
-                            btn.removeClass(_active);
+                            btn.removeClass(api_1.classes.active);
                         }
                     }
                 }
             });
         }
         sidebarDocked() {
-            this.toolbar.addClass(_docked);
+            this.toolbar.addClass(api_1.classes.docked);
             for (let btn of this.buttons) {
-                if (btn.hasClass(_active) && _isSwitch(btn)) {
+                if (btn.hasClass(api_1.classes.active) && _isSwitch(btn)) {
                     this.menu.updateMenuItem(btn.dataAttr("key"), { checked: false });
                 }
             }
@@ -127,7 +127,7 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "../../cont
                     continue;
                 }
                 let btn = this.buttons.namedItem(item.id);
-                if (btn.hasClass(_active)) {
+                if (btn.hasClass(api_1.classes.active)) {
                     hasActive = true;
                     this.menu.updateMenuItem(btn.dataAttr("key"), { checked: true });
                     break;
@@ -137,7 +137,7 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "../../cont
                 let key = _storage.previousKey;
                 for (let btn of this.buttons) {
                     if (btn.dataAttr("key") === key) {
-                        btn.addClass(_active);
+                        btn.addClass(api_1.classes.active);
                         _storage[key] = true;
                         pubsub_1.publish(pubsub_1.STATE_CHANGED + key, key, true);
                         this.menu.updateMenuItem(key, { checked: true });
@@ -145,15 +145,15 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "../../cont
                     }
                 }
             }
-            this.toolbar.removeClass(_docked);
+            this.toolbar.removeClass(api_1.classes.docked);
         }
         setButtonState(e, state, key) {
-            if (e.hasClass(_active) && !state) {
-                e.removeClass(_active);
+            if (e.hasClass(api_1.classes.active) && !state) {
+                e.removeClass(api_1.classes.active);
                 setTimeout(() => pubsub_1.publish(pubsub_1.STATE_CHANGED + key, key, false), 0);
             }
-            else if (!e.hasClass(_active) && state) {
-                e.addClass(_active);
+            else if (!e.hasClass(api_1.classes.active) && state) {
+                e.addClass(api_1.classes.active);
                 setTimeout(() => pubsub_1.publish(pubsub_1.STATE_CHANGED + key, key, true), 0);
             }
             if (_isSwitch(e)) {
@@ -165,16 +165,16 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "../../cont
             let switchRole = _isSwitch(e);
             const toggle = (state) => {
                 if (state === undefined) {
-                    state = e.hasClass(_active);
+                    state = e.hasClass(api_1.classes.active);
                 }
                 if (state) {
-                    e.removeClass(_active);
+                    e.removeClass(api_1.classes.active);
                     if (switchRole) {
                         _storage.previousKey = key;
                     }
                 }
                 else {
-                    e.addClass(_active);
+                    e.addClass(api_1.classes.active);
                 }
                 state = !state;
                 _storage[key] = state;
@@ -187,14 +187,14 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "../../cont
                 toggle();
             }
             else {
-                const isDocked = this.toolbar.hasClass(_docked);
+                const isDocked = this.toolbar.hasClass(api_1.classes.docked);
                 for (let btn of this.buttons) {
                     if (_isSwitch(btn) && e.id !== btn.id) {
                         const key = btn.dataAttr("key");
                         if (_storage[key]) {
                             _storage[key] = false;
                         }
-                        if (btn.hasClass(_active)) {
+                        if (btn.hasClass(api_1.classes.active)) {
                             btn.removeClass("active");
                             pubsub_1.publish(pubsub_1.STATE_CHANGED + key, key, false);
                             this.menu.updateMenuItem(key, { checked: false });
@@ -207,7 +207,7 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "../../cont
                 else {
                     toggle();
                 }
-                if (!e.hasClass(_active)) {
+                if (!e.hasClass(api_1.classes.active)) {
                     pubsub_1.publish(pubsub_1.STATE_CHANGED_OFF);
                 }
                 else {

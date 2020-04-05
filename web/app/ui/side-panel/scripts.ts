@@ -1,4 +1,4 @@
-import { ISchema, IScriptInfo, createScript, ScriptId, Keys } from "app/api";
+import { ISchema, IScriptInfo, IScriptContent, createScript, ScriptId, Keys, ItemContentArgs } from "app/api";
 import Panel from "app/ui/side-panel/panel";
 import { scriptTitle } from "app/ui/item-tooltip";
 
@@ -24,16 +24,23 @@ export default class extends Panel {
     private async createScript() {
         const response = await createScript();
         if (response.ok) {
-            this.addNewItem(response.data as IScriptInfo);
+            this.sidePanel.unselectAll();
+            
+            //ItemContentArgs
+            //this.selectItemByElement(this.addNewItem(response.data as IScriptInfo), true, 
+            
+            this.selectItemByElement(
+                this.addNewItem(response.data as IScriptInfo), 
+                true, 
+                {content: response.data as IScriptContent, sticky: false});
             this.publishLength();
-            //this.mainPanel activate with content
         }
         
     }
 
     private addNewItem(item: IScriptInfo) {
         const comment = item.comment ? String.html`<div class="item-comment">${item.comment.replace("\n", "")}</div>` : "";
-        this.createItemElement(String.html`
+        return this.createItemElement(String.html`
             <div>
                 <i class="icon-doc-text"></i>
                 <span>${item.name}</span>
@@ -46,11 +53,11 @@ export default class extends Panel {
         .dataAttr("item", item)
         .attr("title", scriptTitle(item))
         .attr("id", ScriptId(item.id))
-        .appendElementTo(this.items);
+        .appendElementTo(this.items) as Element; 
     }
 
-    protected itemSelected(element: Element) {
+    protected itemSelected(element: Element, contentArgs = ItemContentArgs) {
         const item = element.dataAttr("item") as IScriptInfo;
-        this.mainPanel.activate(ScriptId(item.id), Keys.SCRIPTS, item);
+        this.mainPanel.activate(ScriptId(item.id), Keys.SCRIPTS, item, contentArgs);
     };
 }

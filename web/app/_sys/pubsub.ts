@@ -1,12 +1,26 @@
-const _entries = {};
+const _entries: Record<string, Array<(...args: any[]) => void>> = {};
+const _hashes: Record<number, boolean> = {};
 
-export const subscribe: (name: string | Array<string>, handler: (...args: any[]) => void) => number | void = (name, handler) => {
+export const subscribe: (
+    name: string | Array<string>, 
+    handler: (...args: any[]) => void,
+    skipDups?: boolean) => number | void = (name, handler, skipDups) => {
     const doSub: (topic: string) => number = topic => {
         let entry = _entries[topic];
         if (!entry) {
             entry = _entries[topic] = [];
         } 
-        return _entries[topic].push(handler) - 1;
+        const hash = (topic + handler).hashCode();
+        if (!skipDups) {
+            _hashes[hash] = true;
+            _entries[topic].push(handler);
+        } else {
+            if (!_hashes[hash]) {
+                _hashes[hash] = true;
+                return _entries[topic].push(handler) - 1;
+            }
+        }
+        return hash;
     };
     if (name instanceof Array) {
         for(let n of name) {
@@ -15,7 +29,7 @@ export const subscribe: (name: string | Array<string>, handler: (...args: any[])
     } else {
         return doSub(name);
     }
-}
+};
 
 export const publish: (name: string | Array<string>, ...args: any[]) => void = (name, ...args) => {
     const doPub: (topic: string) => void = topic => {
@@ -34,16 +48,16 @@ export const publish: (name: string | Array<string>, ...args: any[]) => void = (
     } else {
         doPub(name);
     }
-}
+};
 
 export const unsubscribe: (name: string, ref: number) => boolean = (name, ref) => {
     let entry = _entries[name];
     if (!entry) {
-        return false;;
+        return false;
     }
     entry.splice(ref, 1);
     return true;
-}
+};
 
 //Keys { SCRIPTS = "scripts", TABLES = "tables", VIEWS = "views", ROUTINES = "routines", SEARCH = "search" };
 export const STATE_CHANGED_ON: string = "state/changed/on/"; // key: string

@@ -1,8 +1,6 @@
-define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/ui/main-panel/tabs", "app/ui/main-panel/content"], function (require, exports, storage_1, pubsub_1, tabs_1, content_1) {
+define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/ui/main-panel/tabs", "app/ui/main-panel/content", "app/api"], function (require, exports, storage_1, pubsub_1, tabs_1, content_1, api_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    const _sticky = "sticky";
-    const _active = "active";
     const _storage = new storage_1.default({
         stickyId: null,
         activeId: null,
@@ -27,25 +25,30 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/ui/mai
         }
         unstickById(id) {
             if (this.stickyTab && this.stickyTab.id == id) {
-                this.stickyTab.removeClass(_sticky);
+                this.stickyTab.removeClass(api_1.classes.sticky);
                 this.stickyTab = null;
                 _storage.stickyId = null;
             }
         }
-        activate(id, key, data) {
+        activate(id, key, data, contentArgs = api_1.ItemContentArgs) {
             const item = this.items.get(id);
             if (item) {
                 this.activateByTab(item.tab);
             }
             else {
-                const tab = this.createNew(id, key, data);
-                if (this.stickyTab) {
-                    this.items.delete(this.stickyTab.id);
-                    _storage.stickyId = null;
-                    this.stickyTab.replaceWith(this.makeStickyTab(tab));
+                const tab = this.createNew(id, key, data, contentArgs.content);
+                if (contentArgs.sticky) {
+                    if (this.stickyTab) {
+                        this.items.delete(this.stickyTab.id);
+                        _storage.stickyId = null;
+                        this.stickyTab.replaceWith(this.makeStickyTab(tab));
+                    }
+                    else {
+                        this.makeStickyTab(tab).appendElementTo(this.tabs);
+                    }
                 }
                 else {
-                    this.makeStickyTab(tab).appendElementTo(this.tabs);
+                    tab.appendElementTo(this.tabs);
                 }
                 this.items.set(id, { tab, id, key, data });
                 this.activateByTab(tab, item);
@@ -58,10 +61,10 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/ui/mai
             for (let [id, storageItem] of _storage.items) {
                 const tab = this.createNew(id, storageItem.key, storageItem.data).appendElementTo(this.tabs);
                 if (id === stickyId) {
-                    this.stickyTab = tab.addClass(_sticky);
+                    this.stickyTab = tab.addClass(api_1.classes.sticky);
                 }
                 if (id === activeId) {
-                    this.activeTab = tab.addClass(_active);
+                    this.activeTab = tab.addClass(api_1.classes.active);
                 }
                 this.items.set(id, { tab, ...storageItem });
             }
@@ -85,14 +88,14 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/ui/mai
         }
         activateByTab(tab, item) {
             for (let t of this.tabs.children) {
-                if (t.hasClass(_active)) {
-                    t.removeClass(_active);
+                if (t.hasClass(api_1.classes.active)) {
+                    t.removeClass(api_1.classes.active);
                     let remove = this.items.get(t.id);
                     _storage.activeId = null;
                     pubsub_1.publish(pubsub_1.TAB_UNSELECTED, remove.id, remove.key);
                 }
             }
-            this.activeTab = tab.addClass(_active);
+            this.activeTab = tab.addClass(api_1.classes.active);
             _storage.activeId = tab.id;
             this.activated(tab.id, item);
             this.initiateHeaderAdjust();
@@ -106,7 +109,7 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/ui/mai
             pubsub_1.publish(pubsub_1.TAB_SELECTED, item.id, item.key, item.data.schema, item.data.connection);
         }
         removeByTab(tab) {
-            const id = tab.id, active = tab.hasClass(_active), sticky = tab.hasClass(_sticky), item = this.items.get(id);
+            const id = tab.id, active = tab.hasClass(api_1.classes.active), sticky = tab.hasClass(api_1.classes.sticky), item = this.items.get(id);
             this.items.delete(id);
             tab.remove();
             this.content.remove(id);
@@ -125,8 +128,8 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/ui/mai
             let newItem = this.items.maxBy(v => v.timestamp);
             this.activateByTab(newItem.tab, newItem);
         }
-        createNew(id, key, data) {
-            this.content.createNew(id, key, data);
+        createNew(id, key, data, content = null) {
+            this.content.createNew(id, key, data, content);
             return tabs_1.default(id, key, data)
                 .on("click", e => this.tabClick(e))
                 .on("dblclick", e => this.tabDblClick(e));
@@ -134,7 +137,7 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/ui/mai
         makeStickyTab(tab) {
             this.stickyTab = tab;
             _storage.stickyId = tab.id;
-            return tab.addClass(_sticky);
+            return tab.addClass(api_1.classes.sticky);
         }
         tabClick(e) {
             const target = e.target;
@@ -149,8 +152,8 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/ui/mai
         }
         tabDblClick(e) {
             const tab = e.currentTarget;
-            if (tab.hasClass(_sticky)) {
-                tab.removeClass(_sticky);
+            if (tab.hasClass(api_1.classes.sticky)) {
+                tab.removeClass(api_1.classes.sticky);
                 this.stickyTab = null;
             }
         }

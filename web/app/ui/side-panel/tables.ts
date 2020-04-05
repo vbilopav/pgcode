@@ -1,4 +1,4 @@
-import { ISchema, TableId, ITableInfo, Keys } from "app/api";
+import {ISchema, TableId, ITableInfo, Keys, ItemContentArgs} from "app/api";
 import Panel from "app/ui/side-panel/panel";
 import { tableTitle } from "app/ui/item-tooltip";
 
@@ -37,7 +37,7 @@ abstract class TablePanel extends Panel {
         .appendElementTo(this.items);
     }
     
-    protected itemSelected(element: Element) {
+    protected itemSelected(element: Element, contentArgs = ItemContentArgs) {
         const item = element.dataAttr("item") as ITableInfo;
         this.mainPanel.activate(TableId(item.id), this.key, item);
     };

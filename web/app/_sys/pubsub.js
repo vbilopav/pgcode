@@ -2,13 +2,25 @@ define(["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     const _entries = {};
-    exports.subscribe = (name, handler) => {
+    const _hashes = {};
+    exports.subscribe = (name, handler, skipDups) => {
         const doSub = topic => {
             let entry = _entries[topic];
             if (!entry) {
                 entry = _entries[topic] = [];
             }
-            return _entries[topic].push(handler) - 1;
+            const hash = (topic + handler).hashCode();
+            if (!skipDups) {
+                _hashes[hash] = true;
+                _entries[topic].push(handler);
+            }
+            else {
+                if (!_hashes[hash]) {
+                    _hashes[hash] = true;
+                    return _entries[topic].push(handler) - 1;
+                }
+            }
+            return hash;
         };
         if (name instanceof Array) {
             for (let n of name) {
@@ -42,7 +54,6 @@ define(["require", "exports"], function (require, exports) {
         let entry = _entries[name];
         if (!entry) {
             return false;
-            ;
         }
         entry.splice(ref, 1);
         return true;

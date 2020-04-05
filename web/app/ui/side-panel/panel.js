@@ -1,4 +1,4 @@
-define(["require", "exports", "app/_sys/pubsub", "app/controls/monaco-context-menu"], function (require, exports, pubsub_1, monaco_context_menu_1) {
+define(["require", "exports", "app/_sys/pubsub", "app/api", "app/controls/monaco-context-menu"], function (require, exports, pubsub_1, api_1, monaco_context_menu_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class PanelMenu extends monaco_context_menu_1.default {
@@ -61,19 +61,38 @@ define(["require", "exports", "app/_sys/pubsub", "app/controls/monaco-context-me
         </div>`
                 .toElement();
         }
-        itemSelected(element) { }
+        itemSelected(element, contentArgs = api_1.ItemContentArgs) { }
         ;
         itemUnselected(element) { }
         ;
         publishLength() {
             pubsub_1.publish(pubsub_1.ITEM_COUNT_CHANGED, this.key, this.items.children.length);
         }
+        selectItemByElement(element, emitEvents = true, contentArgs = api_1.ItemContentArgs) {
+            if (element.length === 0) {
+                return;
+            }
+            element.addClass(api_1.classes.active);
+            if (emitEvents) {
+                this.itemSelected(element, contentArgs);
+            }
+            if (this.items.overflownY()) {
+                const elementRect = element.getClientRects();
+                const itemsRect = this.items.getClientRects();
+                if (elementRect[0].top < itemsRect[0].top) {
+                    element.scrollIntoView({ behavior: "instant", block: "start", inline: "start" });
+                }
+                if (elementRect[0].top + elementRect[0].height > itemsRect[0].top + itemsRect[0].height) {
+                    element.scrollIntoView({ behavior: "instant", block: "end", inline: "end" });
+                }
+            }
+        }
         itemsClick(e) {
             const element = e.target.closest("div.panel-item");
             if (!element) {
                 return;
             }
-            if (element.hasClass("active")) {
+            if (element.hasClass(api_1.classes.active)) {
                 return;
             }
             this.sidePanel.unselectAll();
@@ -83,25 +102,8 @@ define(["require", "exports", "app/_sys/pubsub", "app/controls/monaco-context-me
             const element = e.target.closest("div.panel-item");
             this.mainPanel.unstickById(element.id);
         }
-        selectItemByElement(element, emitEvents = true) {
-            element.addClass("active");
-            if (emitEvents) {
-                this.itemSelected(element);
-            }
-            if (this.items.overflownY()) {
-                const elementRect = element.getClientRects();
-                const itemsRect = this.items.getClientRects();
-                console.log(element);
-                if (elementRect[0].top < itemsRect[0].top) {
-                    element.scrollIntoView({ behavior: "instant", block: "start", inline: "start" });
-                }
-                if (elementRect[0].top + elementRect[0].height > itemsRect[0].top + itemsRect[0].height) {
-                    element.scrollIntoView({ behavior: "instant", block: "end", inline: "end" });
-                }
-            }
-        }
         unselectItemByElement(element, emitEvents = true) {
-            element.removeClass("active");
+            element.removeClass(api_1.classes.active);
             if (emitEvents) {
                 this.itemUnselected(element);
             }
@@ -113,8 +115,8 @@ define(["require", "exports", "app/_sys/pubsub", "app/controls/monaco-context-me
                     target: this.header.find(".btn"),
                     event: "click",
                     items: menuItems,
-                    onOpen: menu => menu.target.addClass("active"),
-                    onClose: menu => menu.target.removeClass("active")
+                    onOpen: menu => menu.target.addClass(api_1.classes.active),
+                    onClose: menu => menu.target.removeClass(api_1.classes.active)
                 });
             }
             else {
