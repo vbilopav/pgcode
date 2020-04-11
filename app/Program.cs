@@ -46,7 +46,7 @@ namespace Pgcode
 
             Settings = new Settings();
             var config = configBuilder.Build();
-            config.Bind(Settings);
+            config.Bind("pgcode", Settings);
 
             if (args.Length > 0 && args[0].StartsWith("--schema-upgrade"))
             {
