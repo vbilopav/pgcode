@@ -53,14 +53,14 @@ define(["require", "exports", "app/ui/main-panel/editor", "app/controls/splitter
                 this.active.hideElement().removeClass(api_1.classes.active);
             }
             this.active = e.showElement().addClass(api_1.classes.active);
-            setTimeout(() => this.executeEditor(e, editor => editor.layout()), 0);
+            setTimeout(() => this.editor(e).layout().focus(), 0);
         }
         remove(id) {
             const e = this.container.find("#" + id);
             if (!e.length) {
                 return;
             }
-            this.executeEditor(e, editor => editor.dispose());
+            this.editor(e).dispose();
             e.remove();
         }
         createElement(id, key) {
@@ -83,7 +83,7 @@ define(["require", "exports", "app/ui/main-panel/editor", "app/controls/splitter
                 .toElement()
                 .addClass("split-content")
                 .css("grid-template-rows", `auto 5px ${_getSplitterVal(id).height}px`);
-            const editor = new editor_1.default(element.children[0], element, lang);
+            const editor = new editor_1.Editor(element.children[0], element, lang);
             element.dataAttr("editor", editor);
             new splitter_1.HorizontalSplitter({
                 element: element.children[1],
@@ -92,9 +92,9 @@ define(["require", "exports", "app/ui/main-panel/editor", "app/controls/splitter
                 maxDelta: 100,
                 min: 25,
                 events: {
-                    docked: () => editor.layout(),
-                    undocked: () => editor.layout(),
-                    changed: () => editor.layout()
+                    docked: () => { editor.layout(); },
+                    undocked: () => { editor.layout(); },
+                    changed: () => { editor.layout(); }
                 },
                 storage: {
                     get position() {
@@ -113,11 +113,12 @@ define(["require", "exports", "app/ui/main-panel/editor", "app/controls/splitter
             }).start();
             return element;
         }
-        executeEditor(e, callback) {
+        editor(e) {
             const editor = e.dataAttr("editor");
             if (editor) {
-                callback(editor);
+                return editor;
             }
+            return editor_1.nullEditor;
         }
     }
     exports.default = default_1;

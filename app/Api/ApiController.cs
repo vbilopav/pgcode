@@ -54,6 +54,6 @@ namespace Pgcode.Api
         public async ValueTask<ContentResult> CreateScript(string schema) => await Api.CreateScript(UserId, schema);
 
         [HttpGet("script-content/{id}")]
-        public async ValueTask<ContentResult> ScriptContent(int id) => await Api.GetCreateContent(id);
+        public async ValueTask<ContentResult> ScriptContent(int id) => await Api.ApiGetScriptContent(id);
     }
 }

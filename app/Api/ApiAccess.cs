@@ -60,7 +60,7 @@ namespace Pgcode.Api
         public async ValueTask<ContentResult> CreateScript(string userId, string schema) =>
             await UserConnection.GetContentResultAsync(ApiCreateScript.Name, new { userId, schema });
 
-        public async ValueTask<ContentResult> GetCreateContent(int id) =>
-            await UserConnection.GetContentResultAsync(ApiGetScriptContent.Name, new { id });
+        public async ValueTask<ContentResult> ApiGetScriptContent(int id) =>
+            await UserConnection.GetContentResultAsync(Migrations._1.Routines.ApiGetScriptContent.Name, new { id });
     }
 }

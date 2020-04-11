@@ -1,4 +1,4 @@
-import Editor from "app/ui/main-panel/editor";
+import {Editor, IEditor, nullEditor} from "app/ui/main-panel/editor";
 import {HorizontalSplitter, SplitterCtorArgs} from "app/controls/splitter";
 import {classes, IScriptContent, ItemInfoType, Keys, Languages} from "app/api";
 import Storage from "app/_sys/storage";
@@ -76,7 +76,7 @@ export default class  {
             this.active.hideElement().removeClass(classes.active);
         }
         this.active = e.showElement().addClass(classes.active);
-        setTimeout(() => this.executeEditor(e, editor => editor.layout()), 0);
+        setTimeout(() => this.editor(e).layout().focus(), 0);
     }
 
     public remove(id: string) {
@@ -84,7 +84,7 @@ export default class  {
         if (!e.length) {
             return
         }
-        this.executeEditor(e, editor => editor.dispose());
+        this.editor(e).dispose();
         e.remove();
     }
     
@@ -119,9 +119,9 @@ export default class  {
             maxDelta: 100,
             min: 25,
             events: {
-                docked: () => editor.layout(),
-                undocked: () => editor.layout(),
-                changed: () => editor.layout()
+                docked: () => {editor.layout()},
+                undocked: () => {editor.layout()},
+                changed: () => {editor.layout()}
             },
             storage: {
                 get position() {
@@ -141,11 +141,12 @@ export default class  {
 
         return element;
     }
-    
-    private executeEditor(e: Element, callback: (editor: Editor) => void) {
-        const editor = e.dataAttr("editor") as Editor;
+
+    private editor(e: Element): IEditor {
+        const editor = e.dataAttr("editor") as IEditor;
         if (editor) {
-            callback(editor);
+            return editor;
         }
+        return nullEditor;
     }
 }

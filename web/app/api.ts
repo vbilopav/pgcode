@@ -109,7 +109,7 @@ const _fetchAndPublishStatus:<T> (url: string, init?: RequestInit) => Promise<IR
         publish(SET_APP_STATUS, AppStatus.ERROR, error.message);
         throw error;
     }
-}
+};
 
 const _fetch:<T> (url: string) => Promise<IResponse<T>> = async url => {
     const response = await fetch(url);
@@ -129,8 +129,7 @@ const getTimezoneHeader: () => RequestInit = () => {
     return {headers: {"timezone": Intl.DateTimeFormat().resolvedOptions().timeZone}}
 };
 
-export const fetchInitial: () => Promise<IResponse<IInitialResponse>> = async () => 
-    _fetchAndPublishStatus<IInitialResponse>("api/initial");
+export const fetchInitial: () => Promise<IResponse<IInitialResponse>> = async () => _fetchAndPublishStatus<IInitialResponse>("api/initial");
 
 export const fetchConnection: (name: string) => Promise<IResponse<IConnectionResponse>> = async name => {
     const result = await _fetchAndPublishStatus<IConnectionResponse>(`api/connection/${name}`, getTimezoneHeader());
@@ -141,7 +140,7 @@ export const fetchConnection: (name: string) => Promise<IResponse<IConnectionRes
     _currentConnection = name;
     result.data.connection = name;
     return result;
-}
+};
 
 export const fetchSchema: (schema: string) => Promise<IResponse<ISchemaResponse>> = async schema => {
     const result = await _fetchAndPublishStatus<ISchemaResponse>(`api/schema/${schema}`);
@@ -151,7 +150,7 @@ export const fetchSchema: (schema: string) => Promise<IResponse<ISchemaResponse>
     _currentSchema = result.data.name;
     result.data.connection = getCurrentConnection();
     return result;
-}
+};
 
 export const createScript: () => Promise<IResponse<IScript>> = async () => {
     const result = await _fetch<IScript>(`api/create-script/${getCurrentSchema()}`);
@@ -161,6 +160,6 @@ export const createScript: () => Promise<IResponse<IScript>> = async () => {
     result.data.connection = getCurrentConnection();
     result.data.schema = getCurrentSchema();
     return result;
-}
+};
 
 export const fetchScriptContent: (id: number) => Promise<IResponse<IScriptContent>> = id => _fetch(`api/script-content/${id}`);

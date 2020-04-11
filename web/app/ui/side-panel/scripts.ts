@@ -25,14 +25,7 @@ export default class extends Panel {
         const response = await createScript();
         if (response.ok) {
             this.sidePanel.unselectAll();
-            
-            //ItemContentArgs
-            //this.selectItemByElement(this.addNewItem(response.data as IScriptInfo), true, 
-            
-            this.selectItemByElement(
-                this.addNewItem(response.data as IScriptInfo), 
-                true, 
-                {content: response.data as IScriptContent, sticky: false});
+            this.selectItemByElement(this.addNewItem(response.data as IScriptInfo), true, {content: response.data as IScriptContent, sticky: false});
             this.publishLength();
         }
         
