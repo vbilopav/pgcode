@@ -30,55 +30,65 @@ namespace Pgcode.Migrations._1.Routines
        
         create or replace function {settings.PgCodeSchema}.{Name}(_data json) returns json as
         ${Name}$
+
             select coalesce(json_agg(result), '[]')
             from (
 
-                select
-                    proc.oid as id,
-                    r.routine_type as type,
-                    r.external_language as language,
-                    r.routine_name as routine,
-                    r.routine_name || 
-                        '(' || 
-                        array_to_string(
-                            array_agg(
-                                case    when p.parameter_mode = 'IN' 
-                                        then '' else lower(p.parameter_mode) || ' ' 
-                                end || coalesce(case when p.data_type = 'ARRAY' then regexp_replace(p.udt_name, '^[_]', '')  || '[]' else p.data_type end, '')
-                                order by p.ordinal_position
-                            ), 
-                            ', '
-                        ) ||
-                        ')' as name,
+                select 
+                    {settings.PgCodeSchema}.{HashCode.Name}(type || language || name) as id,
+                    type, 
+                    language, 
+                    name, 
+                    returns, 
+                    comment
+                from (
+
+                    select
+                        r.routine_type as type,
+                        r.external_language as language,
+                        r.routine_name || 
+                            '(' || 
+                            array_to_string(
+                                array_agg(
+                                    case    when p.parameter_mode = 'IN' 
+                                            then '' else lower(p.parameter_mode) || ' ' 
+                                    end || coalesce(case when p.data_type = 'ARRAY' then regexp_replace(p.udt_name, '^[_]', '')  || '[]' else p.data_type end, '')
+                                    order by p.ordinal_position
+                                ), 
+                                ', '
+                            ) ||
+                            ')' as name,
+                            
+                        case    when    r.data_type = 'USER-DEFINED' and 
+                                        r.type_udt_catalog is not null and 
+                                        r.type_udt_schema is not null and 
+                                        r.type_udt_name is not null 
+                                then 'setof ' || r.type_udt_name
+                                else r.data_type
+                        end as returns,
                         
-                    case    when    r.data_type = 'USER-DEFINED' and 
-                                    r.type_udt_catalog is not null and 
-                                    r.type_udt_schema is not null and 
-                                    r.type_udt_name is not null 
-                            then 'setof ' || r.type_udt_name
-                            else r.data_type
-                    end as returns,
-                    
-                    {settings.PgCodeSchema}.{MaxStr.Name}(pgdesc.description) as comment
+                        {settings.PgCodeSchema}.{MaxStr.Name}(pgdesc.description) as comment
 
-                from 
-                    information_schema.routines r
-                    left outer join information_schema.parameters p 
-                    on r.specific_name = p.specific_name and r.specific_schema = p.specific_schema
-                    
-                    inner join pg_catalog.pg_proc proc on r.routine_name = proc.proname
-                    left outer join pg_catalog.pg_description pgdesc on proc.oid = pgdesc.objoid
+                    from 
+                        information_schema.routines r
+                        left outer join information_schema.parameters p 
+                        on r.specific_name = p.specific_name and r.specific_schema = p.specific_schema
+                        
+                        inner join pg_catalog.pg_proc proc on r.routine_name = proc.proname
+                        left outer join pg_catalog.pg_description pgdesc on proc.oid = pgdesc.objoid
 
-                where
-                    r.specific_schema = _data->>'schema'
-                    and r.external_language <> 'INTERNAL'
+                    where
+                        r.specific_schema = _data->>'schema'
+                        and r.external_language <> 'INTERNAL'
 
-                group by
-                    proc.oid, r.routine_type, r.external_language, r.routine_name, 
-                    r.data_type, r.type_udt_catalog, r.type_udt_schema, r.type_udt_name, 
-                    pgdesc.description
+                    group by
+                        proc.oid, r.routine_type, r.external_language, r.routine_name, 
+                        r.data_type, r.type_udt_catalog, r.type_udt_schema, r.type_udt_name, 
+                        pgdesc.description
+                ) sub
 
-            ) as result;
+            ) result;
+
         ${Name}$
         language sql security definer stable;
         comment on function {settings.PgCodeSchema}.{Name}(json) is ${Name}_comment${CommentMarkup.Trim()}${Name}_comment$;

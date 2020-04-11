@@ -54,7 +54,6 @@ export interface ITableInfo extends IItem {
 }
 
 export interface IRoutineInfo extends IItem {
-    routine: string
     type: string
     language: string,
     returns: string,

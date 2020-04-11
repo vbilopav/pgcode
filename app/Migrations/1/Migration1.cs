@@ -4,6 +4,7 @@ using System.Linq;
 using Npgsql;
 using Pgcode.Migrations._1.Routines;
 using Pgcode.Migrations._1.Tables;
+using HashCode = Pgcode.Migrations._1.Routines.HashCode;
 
 namespace Pgcode.Migrations._1
 {
@@ -13,6 +14,7 @@ namespace Pgcode.Migrations._1
 
         public IEnumerable<IMigration> Routines => new List<IMigration>
         {
+            new HashCode(Version),
             new MaxStr(Version),
             new SelectRoutines(Version),
             new SelectSchemata(Version),

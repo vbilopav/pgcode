@@ -34,7 +34,7 @@ namespace Pgcode.Migrations._1.Routines
             from (
 
                 select
-                    pgtbl.relid as id,
+                    {settings.PgCodeSchema}.{HashCode.Name}(pgtbl.schemaname || '.' || tbl.table_name) as id,
                     tbl.table_name as name,
                     cl.reltuples as estimate,
                     {settings.PgCodeSchema}.{MaxStr.Name}(pgdesc.description) as comment
