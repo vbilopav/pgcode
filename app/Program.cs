@@ -39,6 +39,8 @@ namespace Pgcode
             var configBuilder = new ConfigurationBuilder()
                 .AddJsonFile(Path.Join(Directory.GetCurrentDirectory(), "appsettings.json"), optional: false, reloadOnChange: false)
                 .AddJsonFile(Path.Join(Directory.GetCurrentDirectory(), "settings.json"), optional: true, reloadOnChange: false)
+                .AddJsonFile(Path.Join(Directory.GetCurrentDirectory(), "appsettings.Development.json"), optional: true, reloadOnChange: false)
+                .AddJsonFile(Path.Join(Directory.GetCurrentDirectory(), "settings.Development.json"), optional: true, reloadOnChange: false)
                 .AddCommandLine(args)
                 .AddEnvironmentVariables("PGCODE_");
 
