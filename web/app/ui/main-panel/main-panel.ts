@@ -58,8 +58,11 @@ export default class  {
         this.tabs = element.children[0];
         this.content = new Content(element.children[1]);
         this.initHeaderAdjustment();
-        this.restoreItems();
-        subscribe(SCHEMA_CHANGED, (data: ISchema, name: string) => this.schemaChanged(name, data.connection));
+        
+        subscribe(SCHEMA_CHANGED, (data: ISchema, name: string) => {
+            this.restoreItems();
+            this.schemaChanged(name, data.connection);
+        });
     }
 
     public unstickById(id: string) {

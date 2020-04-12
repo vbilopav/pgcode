@@ -20,8 +20,10 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/ui/mai
             this.tabs = element.children[0];
             this.content = new content_1.default(element.children[1]);
             this.initHeaderAdjustment();
-            this.restoreItems();
-            pubsub_1.subscribe(pubsub_1.SCHEMA_CHANGED, (data, name) => this.schemaChanged(name, data.connection));
+            pubsub_1.subscribe(pubsub_1.SCHEMA_CHANGED, (data, name) => {
+                this.restoreItems();
+                this.schemaChanged(name, data.connection);
+            });
         }
         unstickById(id) {
             if (this.stickyTab && this.stickyTab.id == id) {

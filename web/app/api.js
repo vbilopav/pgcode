@@ -66,16 +66,20 @@ define(["require", "exports", "app/_sys/pubsub"], function (require, exports, pu
     const getTimezoneHeader = () => {
         return { headers: { "timezone": Intl.DateTimeFormat().resolvedOptions().timeZone } };
     };
-    exports.fetchInitial = async () => _fetchAndPublishStatus("api/initial");
+    const fetchInitial = async () => _fetchAndPublishStatus("api/initial");
     exports.fetchConnection = async (name) => {
         const result = await _fetchAndPublishStatus(`api/connection/${name}`, getTimezoneHeader());
         if (!result.data) {
-            return null;
+            return result;
         }
         _currentSchema = result.data.schemas.selected;
         _currentConnection = name;
         result.data.connection = name;
         return result;
+    };
+    exports.initializeApi = async () => {
+        const initial = await fetchInitial();
+        pubsub_1.publish(pubsub_1.API_INITIAL, initial);
     };
     exports.fetchSchema = async (schema) => {
         const result = await _fetchAndPublishStatus(`api/schema/${schema}`);

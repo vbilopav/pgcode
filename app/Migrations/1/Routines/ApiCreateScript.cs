@@ -49,7 +49,7 @@ namespace Pgcode.Migrations._1.Routines
                 insert into {settings.PgCodeSchema}.scripts (user_id, title, ""schema"")
                 values(_user_id, _title, _data->>'schema')
                 returning 
-                    id, title as name, {settings.PgCodeSchema}.{MaxStr.Name}(comment) as comment, schema, content, 
+                    id::text, title as name, {settings.PgCodeSchema}.{MaxStr.Name}(comment) as comment, schema, content, 
                     view_state as viewState, 
                     timestamp at time zone _timezone as ""timestamp""
             )

@@ -1,11 +1,12 @@
 ﻿using System;
-using System.Globalization;
+using System.Data;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Norm.Extensions;
 using Npgsql;
+using NpgsqlTypes;
 
 namespace Pgcode.Api
 {
@@ -14,19 +15,25 @@ namespace Pgcode.Api
         public static async ValueTask<string> GetStringAsync<T>(this ConnectionData data, string name, T parameters)
         {
             var (command, dataParam) = GetCommand(data, name, parameters);
-            return await data.Connection.SingleAsync<string>(command, dataParam);
+            return await data.Connection
+                .AsProcedure()
+                .SingleAsync<string>(command, new NpgsqlParameter("_data", NpgsqlDbType.Json) { Value = dataParam });
         }
 
         public static async ValueTask ExecAsync<T>(this ConnectionData data, string name, T parameters)
         {
             var (command, dataParam) = GetCommand(data, name, parameters);
-            await data.Connection.ExecuteAsync(command, dataParam);
+            await data.Connection
+                .AsProcedure()
+                .ExecuteAsync(command, new NpgsqlParameter("_data", NpgsqlDbType.Json) { Value = dataParam });
         }
 
         public static void Exec<T>(this ConnectionData data, string name, T parameters)
         {
             var (command, dataParam) = GetCommand(data, name, parameters);
-            data.Connection.Execute(command, dataParam);
+            data.Connection
+                .AsProcedure()
+                .Execute(command, new NpgsqlParameter("_data", NpgsqlDbType.Json) { Value = dataParam });
         }
 
         public static async ValueTask<ContentResult> GetContentResultAsync<T>(this ConnectionData data, string name, T parameters) =>
@@ -39,12 +46,12 @@ namespace Pgcode.Api
 
         private static (string command, string dataParam) GetCommand<T>(ConnectionData data, string name, T parameters)
         {
-            var command = $"select {Program.Settings.PgCodeSchema}.{name}(@_data::json)";
+            var command = $"{Program.Settings.PgCodeSchema}.{name}";
             var dataParam = JsonSerializer.Serialize(parameters);
 
             if (data.Logger != null && Program.Settings.LogPgCodeDbCommands)
             {
-                var msg = $"{command.Replace("@_data", $"'{dataParam}'")}{Environment.NewLine}";
+                var msg = $"select {command}('{dataParam}'::json){Environment.NewLine}";
                 data.Logger.LogInformation(msg);
             }
             return (command, dataParam);

@@ -37,7 +37,7 @@ define(["require", "exports", "app/_sys/storage", "app/ui/toolbar/toolbar", "./u
             this.initComponents();
             this.initSplitter(this.initGrid());
             this.subscribeEvents();
-            this.initializeApi();
+            api_1.initializeApi();
             document.title = this.defaultTitle;
         }
         moveToolbar(position) {
@@ -169,10 +169,6 @@ define(["require", "exports", "app/_sys/storage", "app/ui/toolbar/toolbar", "./u
             });
             pubsub_1.subscribe(pubsub_1.SET_APP_STATUS, (status, ...args) => this.setStatus(status, args));
             document.body.on("contextmenu", e => e.preventDefault());
-        }
-        async initializeApi() {
-            const initial = await api_1.fetchInitial();
-            pubsub_1.publish(pubsub_1.API_INITIAL, initial);
         }
     })();
 });

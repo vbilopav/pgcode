@@ -1,14 +1,14 @@
 import {Editor, IEditor, nullEditor} from "app/ui/main-panel/editor";
 import {HorizontalSplitter, SplitterCtorArgs} from "app/controls/splitter";
-import {classes, IScriptContent, ItemInfoType, Keys, Languages} from "app/api";
+import {classes, IScriptContent, ItemInfoType, Keys, Languages, fetchScriptContent} from "app/api";
 import Storage from "app/_sys/storage";
 
-//import {publish, SIDEBAR_DOCKED, SIDEBAR_UNDOCKED, SPLITTER_CHANGED} from "../../_sys/pubsub";
-
 interface IStorageSplitterItem { height?: number, docked?: boolean }
+
 interface IStorage {
     splitter: {[id: string]: IStorageSplitterItem }
 }
+
 const 
     _defaultSplitValue: IStorageSplitterItem = {height: 50, docked: true};
 const
@@ -35,36 +35,30 @@ export default class  {
     private readonly container: Element;
     private active: Element;
 
-    constructor(element: Element){
+    constructor(element: Element) {
         this.container = element;
     }
 
-    public createNew(id: string, key: Keys, data: ItemInfoType, content: IScriptContent = null) {
+    public async createNew(id: string, key: Keys, data: ItemInfoType, content: IScriptContent = null) {
         if (this.active) {
             this.active.hideElement();
         }
-        this.active = this.createElement(id, key)
+        this.active = this.createElement(id, key, content)
             .hideElement()
             .attr("id", id)
             .dataAttr("key", key)
             .dataAttr("data", data)
             .addClass("content")
             .appendElementTo(this.container);
-        
-        // load item
-        if (key === Keys.ROUTINES) {
-            console.log(`get the content for routine with id ${data.id}`);
-        } else if (key === Keys.SCRIPTS) {
-            console.log(`get the content for script with id ${data.id}`);
-        } else if (key === Keys.TABLES) {
-            console.log(`get the content for table with id ${data.id}`);
-        } else if (key === Keys.VIEWS) {
-            console.log(`get the content for view with id ${data.id}`);
+
+
+        if (!content && key === Keys.SCRIPTS) {
+            const response = await fetchScriptContent(data.id);
+            if (response.ok) {
+                this.editor(this.active).setContent(response.data);
+            }
         }
         
-        if (content !== null) {
-            console.log("I haz a content", content);
-        }
     }
 
     public activate(id: string) {
@@ -88,9 +82,9 @@ export default class  {
         e.remove();
     }
     
-    public createElement(id: string, key: Keys) {
+    public createElement(id: string, key: Keys, content: IScriptContent = null) {
         if (key == Keys.SCRIPTS) {
-            return this.createSplit(id, Languages.PGSQL);
+            return this.createSplitEditor(id, Languages.PGSQL, content);
         }
         return (String.html`
             <div>
@@ -99,7 +93,7 @@ export default class  {
                 .toElement()
     }
 
-    private createSplit(id: string, lang: Languages) {
+    private createSplitEditor(id: string, lang: Languages, content: IScriptContent = null) {
         const element = (String.html`
             <div>
                 <div class="editor"></div>

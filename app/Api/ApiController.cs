@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Pgcode.Api
 {
+
     [Route("api")]
     public class ApiController : Controller
     {
@@ -48,12 +49,21 @@ namespace Pgcode.Api
         }
 
         [HttpGet("schema/{schema}")]
-        public async ValueTask<ContentResult> Schema(string schema) => await Api.GetSchema(UserId, schema);
+        public async ValueTask<ContentResult> Schema(string schema)
+        {
+            return await Api.GetSchema(UserId, schema);
+        }
 
         [HttpGet("create-script/{schema}")]
-        public async ValueTask<ContentResult> CreateScript(string schema) => await Api.CreateScript(UserId, schema);
+        public async ValueTask<ContentResult> CreateScript(string schema)
+        {
+            return await Api.CreateScript(UserId, schema);
+        }
 
         [HttpGet("script-content/{id}")]
-        public async ValueTask<ContentResult> ScriptContent(int id) => await Api.ApiGetScriptContent(id);
+        public async ValueTask<ContentResult> ScriptContent(int id)
+        {
+            return await Api.ApiGetScriptContent(id);
+        }
     }
 }

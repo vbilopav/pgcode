@@ -17,31 +17,22 @@ define(["require", "exports", "app/ui/main-panel/editor", "app/controls/splitter
         constructor(element) {
             this.container = element;
         }
-        createNew(id, key, data, content = null) {
+        async createNew(id, key, data, content = null) {
             if (this.active) {
                 this.active.hideElement();
             }
-            this.active = this.createElement(id, key)
+            this.active = this.createElement(id, key, content)
                 .hideElement()
                 .attr("id", id)
                 .dataAttr("key", key)
                 .dataAttr("data", data)
                 .addClass("content")
                 .appendElementTo(this.container);
-            if (key === api_1.Keys.ROUTINES) {
-                console.log(`get the content for routine with id ${data.id}`);
-            }
-            else if (key === api_1.Keys.SCRIPTS) {
-                console.log(`get the content for script with id ${data.id}`);
-            }
-            else if (key === api_1.Keys.TABLES) {
-                console.log(`get the content for table with id ${data.id}`);
-            }
-            else if (key === api_1.Keys.VIEWS) {
-                console.log(`get the content for view with id ${data.id}`);
-            }
-            if (content !== null) {
-                console.log("I haz a content", content);
+            if (!content && key === api_1.Keys.SCRIPTS) {
+                const response = await api_1.fetchScriptContent(data.id);
+                if (response.ok) {
+                    this.editor(this.active).setContent(response.data);
+                }
             }
         }
         activate(id) {
@@ -63,9 +54,9 @@ define(["require", "exports", "app/ui/main-panel/editor", "app/controls/splitter
             this.editor(e).dispose();
             e.remove();
         }
-        createElement(id, key) {
+        createElement(id, key, content = null) {
             if (key == api_1.Keys.SCRIPTS) {
-                return this.createSplit(id, api_1.Languages.PGSQL);
+                return this.createSplitEditor(id, api_1.Languages.PGSQL, content);
             }
             return String.html `
             <div>
@@ -73,7 +64,7 @@ define(["require", "exports", "app/ui/main-panel/editor", "app/controls/splitter
             </div>`
                 .toElement();
         }
-        createSplit(id, lang) {
+        createSplitEditor(id, lang, content = null) {
             const element = String.html `
             <div>
                 <div class="editor"></div>

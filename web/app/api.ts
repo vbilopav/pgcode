@@ -1,4 +1,4 @@
-import { publish, SET_APP_STATUS } from "app/_sys/pubsub";
+import {API_INITIAL, publish, SET_APP_STATUS} from "app/_sys/pubsub";
 
 export const ScriptId: (id: number) => string = id  => `${Keys.SCRIPTS}${id}`;
 export const TableId: (id: number) => string = id  => `${Keys.TABLES}${id}`;
@@ -93,7 +93,8 @@ export interface IConnectionInfo {
 
 export type ItemInfoType = IRoutineInfo | IScriptInfo | ITableInfo;
 
-const _createResponse:<T> (response: Response, data?: T) => IResponse<T> = (response, data) => Object({ok: response.ok, status: response.status, data: data});
+const _createResponse:<T> (response: Response, data?: T) => IResponse<T> = (response, data) => 
+    Object({ok: response.ok, status: response.status, data: data});
 
 const _fetchAndPublishStatus:<T> (url: string, init?: RequestInit) => Promise<IResponse<T>> = async (url, init) => {
     publish(SET_APP_STATUS, AppStatus.BUSY);
@@ -128,17 +129,22 @@ const getTimezoneHeader: () => RequestInit = () => {
     return {headers: {"timezone": Intl.DateTimeFormat().resolvedOptions().timeZone}}
 };
 
-export const fetchInitial: () => Promise<IResponse<IInitialResponse>> = async () => _fetchAndPublishStatus<IInitialResponse>("api/initial");
+const fetchInitial: () => Promise<IResponse<IInitialResponse>> = async () => _fetchAndPublishStatus<IInitialResponse>("api/initial");
 
 export const fetchConnection: (name: string) => Promise<IResponse<IConnectionResponse>> = async name => {
     const result = await _fetchAndPublishStatus<IConnectionResponse>(`api/connection/${name}`, getTimezoneHeader());
     if (!result.data) {
-        return null;
+        return result;
     }
     _currentSchema = result.data.schemas.selected;
     _currentConnection = name;
     result.data.connection = name;
     return result;
+};
+
+export const initializeApi = async () => {
+    const initial = await fetchInitial();
+    publish(API_INITIAL, initial);
 };
 
 export const fetchSchema: (schema: string) => Promise<IResponse<ISchemaResponse>> = async schema => {
@@ -161,4 +167,5 @@ export const createScript: () => Promise<IResponse<IScript>> = async () => {
     return result;
 };
 
-export const fetchScriptContent: (id: number) => Promise<IResponse<IScriptContent>> = id => _fetch(`api/script-content/${id}`);
+export const fetchScriptContent: (id: number) => Promise<IResponse<IScriptContent>> = id => 
+    _fetch(`api/script-content/${id}`);

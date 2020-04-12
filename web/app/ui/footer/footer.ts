@@ -87,7 +87,7 @@ export default class  {
                         const name = storage.connection;
                         const selected = response.data.connections.filter(c => c.name === name);
                         if (!selected.length) {
-                            storage.connection = name
+                            storage.connection = name;
                             this.selectConnection();
                         } else {
                             this.selectConnection(selected[0]);

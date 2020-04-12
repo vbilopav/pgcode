@@ -6,21 +6,24 @@ define(["require", "exports", "app/api", "app/_sys/pubsub", "vs/editor/editor.ma
         initiateLayout() { return this; }
         layout() { return this; }
         focus() { return this; }
-        setValues(value, viewState) { return this; }
+        setContent(value) { return this; }
     })();
     class Editor {
-        constructor(container, content, language) {
+        constructor(container, content, language, scriptContent = null) {
             this.container = container;
             this.content = content;
             const element = String.html `<div style="position: fixed;"></div>`.toElement();
             this.container.append(element);
             this.monaco = monaco.editor.create(element, {
-                value: "",
+                value: scriptContent ? scriptContent.content : "",
                 language,
                 theme: "vs-dark",
                 renderWhitespace: "all",
                 automaticLayout: false
             });
+            if (scriptContent && scriptContent.viewState) {
+                this.monaco.restoreViewState(JSON.parse(scriptContent.viewState));
+            }
             window.on("resize", () => this.initiateLayout());
             pubsub_1.subscribe([pubsub_1.SIDEBAR_DOCKED, pubsub_1.SPLITTER_CHANGED, pubsub_1.SIDEBAR_UNDOCKED], () => this.initiateLayout());
         }
@@ -51,10 +54,10 @@ define(["require", "exports", "app/api", "app/_sys/pubsub", "vs/editor/editor.ma
             }
             return this;
         }
-        setValues(value, viewState) {
-            this.monaco.setValue(value);
-            if (viewState) {
-                this.monaco.restoreViewState(JSON.parse(viewState));
+        setContent(value) {
+            this.monaco.setValue(value.content);
+            if (value.viewState) {
+                this.monaco.restoreViewState(JSON.parse(value.viewState));
             }
             return this;
         }

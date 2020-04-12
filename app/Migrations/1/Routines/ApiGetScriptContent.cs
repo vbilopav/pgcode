@@ -25,14 +25,17 @@ namespace Pgcode.Migrations._1.Routines
 
         create or replace function {settings.PgCodeSchema}.{Name}(_data json) returns json as
         ${Name}$
-            select json_build_object(
-                'content', content, 
-                'viewState', view_state
-            )
-            from
-                {settings.PgCodeSchema}.scripts
-            where
-                (id = (_data->>'id')::int);
+            select coalesce(
+                (select json_build_object(
+                    'content', content, 
+                    'viewState', view_state
+                )
+                from
+                    {settings.PgCodeSchema}.scripts
+                where
+                    (id = (_data->>'id')::bigint)), 
+                (select json_build_object('content', '', 'viewState', null))
+            );
         ${Name}$
         language sql security definer stable;
         comment on function {settings.PgCodeSchema}.{Name}(json) is ${Name}_comment${CommentMarkup.Trim()}${Name}_comment$;

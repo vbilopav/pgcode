@@ -1,5 +1,5 @@
 ﻿import "vs/editor/editor.main";
-import {classes} from "app/api";
+import {classes, IScriptContent} from "app/api";
 import {SIDEBAR_DOCKED, SIDEBAR_UNDOCKED, SPLITTER_CHANGED, subscribe} from "app/_sys/pubsub";
 import IStandaloneCodeEditor = monaco.editor.IStandaloneCodeEditor;
 import ICodeEditorViewState = monaco.editor.ICodeEditorViewState;
@@ -9,7 +9,7 @@ export interface IEditor {
     layout(): IEditor;
     initiateLayout(): IEditor;
     focus(): IEditor;
-    setValues(value: string, viewState: string) : IEditor;
+    setContent(value: IScriptContent) : IEditor;
 }
 
 export const nullEditor = new (class implements IEditor {
@@ -17,7 +17,7 @@ export const nullEditor = new (class implements IEditor {
     initiateLayout() {return this}
     layout() {return this}
     focus() {return this}
-    setValues(value: string, viewState: string) {return this}
+    setContent(value: IScriptContent) {return this}
 })();
 
 export class Editor implements IEditor {
@@ -26,18 +26,21 @@ export class Editor implements IEditor {
     private container: Element;
     private layoutTimeout: number;
     
-    constructor(container: Element, content: Element, language: string) {
+    constructor(container: Element, content: Element, language: string, scriptContent: IScriptContent = null) {
         this.container = container;
         this.content = content;
         const element = String.html`<div style="position: fixed;"></div>`.toElement();
         this.container.append(element);
         this.monaco = monaco.editor.create(element as HTMLElement, {
-            value: "",
+            value: scriptContent ? scriptContent.content : "",
             language,
             theme: "vs-dark",
             renderWhitespace: "all",
             automaticLayout: false
         });
+        if (scriptContent && scriptContent.viewState) {
+            this.monaco.restoreViewState(JSON.parse(scriptContent.viewState) as ICodeEditorViewState);
+        }
 
         window.on("resize", () => this.initiateLayout());
         subscribe([SIDEBAR_DOCKED, SPLITTER_CHANGED, SIDEBAR_UNDOCKED], () =>  this.initiateLayout());
@@ -74,10 +77,10 @@ export class Editor implements IEditor {
         return this;
     }
 
-    setValues(value: string, viewState: string) {
-        this.monaco.setValue(value);
-        if (viewState) {
-            this.monaco.restoreViewState(JSON.parse(viewState) as ICodeEditorViewState);
+    setContent(value: IScriptContent) {
+        this.monaco.setValue(value.content);
+        if (value.viewState) {
+            this.monaco.restoreViewState(JSON.parse(value.viewState) as ICodeEditorViewState);
         }
         return this;
     }

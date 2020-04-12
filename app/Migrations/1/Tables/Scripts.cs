@@ -18,7 +18,7 @@ namespace Pgcode.Migrations._1.Tables
         public string Up(Settings settings, NpgsqlConnection connection) => (_forVersion != Version ? "" : $@"
 
         create table {settings.PgCodeSchema}.{Name} (
-            id bigint not null primary key default {IdGenerator.Name}(),
+            id int not null generated always as identity primary key,
             user_id varchar not null,
             title varchar not null,
             schema varchar null,
