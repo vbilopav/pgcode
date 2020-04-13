@@ -21,17 +21,18 @@ define(["require", "exports", "app/ui/main-panel/editor", "app/controls/splitter
             if (this.active) {
                 this.active.hideElement();
             }
-            this.active = this.createElement(id, key, content)
+            const newElement = this.createElement(id, key, content)
                 .hideElement()
                 .attr("id", id)
                 .dataAttr("key", key)
                 .dataAttr("data", data)
                 .addClass("content")
                 .appendElementTo(this.container);
+            this.active = newElement;
             if (!content && key === api_1.Keys.SCRIPTS) {
                 const response = await api_1.fetchScriptContent(data.connection, data.id);
                 if (response.ok) {
-                    this.editor(this.active).setContent(response.data);
+                    this.editor(newElement).setContent(response.data);
                 }
             }
         }

@@ -85,7 +85,7 @@ export class Editor implements IEditor {
         return this;
     }
 
-    initiateSaveContent() {
+    private initiateSaveContent() {
         timeout(() => {
             
             //console.log(this.content.dataAttr("data"), this.monaco.getValue(), this.monaco.saveViewState());

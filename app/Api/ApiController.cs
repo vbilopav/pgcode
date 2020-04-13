@@ -13,9 +13,7 @@ namespace Pgcode.Api
         private readonly ConnectionManager _connectionManager;
         private readonly Settings _settings;
 
-        // ReSharper disable once InconsistentNaming
-        private string userId => User.Identity.Name;
-
+        private string UserId => User.Identity.Name;
 
         public ApiController(ConnectionManager connectionManager, Settings settings)
         {
@@ -42,34 +40,35 @@ namespace Pgcode.Api
             };
 
         [HttpGet("connection/{connection}")]
-        public async ValueTask<ContentResult> GetConnection(string connection) =>
-            await GetConnectionData(connection).GetContentResultAsync(ApiGetConnection.Name, new
+        public ContentResult GetConnection(string connection)
+        {
+            return GetConnectionData(connection).GetContentResult(ApiGetConnection.Name, new
             {
-                userId,
+                userId = UserId,
                 defaultSchema = _settings.DefaultSchema,
                 timezone = HttpContext.Request.Headers["timezone"].ToString(),
                 skipSchemaPattern = _settings.SkipSchemaPattern
             });
+        }
 
         [HttpGet("schema/{connection}/{schema}")]
-        public async ValueTask<ContentResult> GetSchema(string connection, string schema)
+        public ContentResult GetSchema(string connection, string schema)
         {
-            return await GetConnectionData(connection)
-                .GetContentResultAsync(ApiGetSchema.Name, new { userId, schema });
+            return GetConnectionData(connection).GetContentResult(ApiGetSchema.Name, new { userId = UserId, schema });
         }
 
         [HttpGet("create-script/{connection}/{schema}")]
-        public async ValueTask<ContentResult> GetCreateScript(string connection, string schema)
+        public ContentResult GetCreateScript(string connection, string schema)
         {
             // clone and store new connection
-            return await GetConnectionData(connection).GetContentResultAsync(ApiCreateScript.Name, new { userId, schema });
+            return GetConnectionData(connection).GetContentResult(ApiCreateScript.Name, new { userId = UserId, schema });
         }
 
         [HttpGet("script-content/{connection}/{id}")]
-        public async ValueTask<ContentResult> GetScriptContent(string connection, int id)
+        public ContentResult GetScriptContent(string connection, int id)
         {
             // clone and store new connection
-            return await GetConnectionData(connection).GetContentResultAsync(ApiGetScriptContent.Name, new { id });
+            return GetConnectionData(connection).GetContentResult(ApiGetScriptContent.Name, new { id });
         }
 
         private ConnectionData GetConnectionData(string name) => _connectionManager.GetConnectionDataByName(name);

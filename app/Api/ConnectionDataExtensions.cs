@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Data;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -12,35 +13,34 @@ namespace Pgcode.Api
 {
     public static class ConnectionDataExtensions
     {
-        public static async ValueTask<string> GetStringAsync<T>(this ConnectionData data, string name, T parameters)
+        public static string GetString<T>(this ConnectionData data, string name, T parameters)
         {
-            var (command, dataParam) = GetCommand(data, name, parameters);
-            return await data.Connection
-                .AsProcedure()
-                .SingleAsync<string>(command, new NpgsqlParameter("_data", NpgsqlDbType.Json) { Value = dataParam });
-        }
+            lock (data.Connection)
+            {
+                var (command, dataParam) = GetCommand(data, name, parameters);
+                return data.Connection
+                    .AsProcedure()
+                    .Single<string>(command, new NpgsqlParameter("_data", NpgsqlDbType.Json) {Value = dataParam});
+            }
 
-        public static async ValueTask ExecAsync<T>(this ConnectionData data, string name, T parameters)
-        {
-            var (command, dataParam) = GetCommand(data, name, parameters);
-            await data.Connection
-                .AsProcedure()
-                .ExecuteAsync(command, new NpgsqlParameter("_data", NpgsqlDbType.Json) { Value = dataParam });
         }
 
         public static void Exec<T>(this ConnectionData data, string name, T parameters)
         {
-            var (command, dataParam) = GetCommand(data, name, parameters);
-            data.Connection
-                .AsProcedure()
-                .Execute(command, new NpgsqlParameter("_data", NpgsqlDbType.Json) { Value = dataParam });
+            lock (data.Connection)
+            {
+                var (command, dataParam) = GetCommand(data, name, parameters);
+                data.Connection
+                    .AsProcedure()
+                    .Execute(command, new NpgsqlParameter("_data", NpgsqlDbType.Json) { Value = dataParam });
+            }
         }
 
-        public static async ValueTask<ContentResult> GetContentResultAsync<T>(this ConnectionData data, string name, T parameters) =>
+        public static ContentResult GetContentResult<T>(this ConnectionData data, string name, T parameters) =>
             new ContentResult
             {
                 StatusCode = 200,
-                Content = await data.GetStringAsync(name, parameters),
+                Content = data.GetString(name, parameters),
                 ContentType = "application/javascript; charset=UTF-8"
             };
 
