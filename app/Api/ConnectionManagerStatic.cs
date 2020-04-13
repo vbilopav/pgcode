@@ -1,12 +1,10 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Data;
 using System.Linq;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Norm.Extensions;
 using Npgsql;
 using Pgcode.Migrations;
 
@@ -15,7 +13,6 @@ namespace Pgcode.Api
     public sealed partial class ConnectionManager
     {
         private static ImmutableDictionary<string, ConnectionData> _connections;
-        private static readonly ConcurrentDictionary<string, string> ConnectionNamesByUserId = new ConcurrentDictionary<string, string>();
         private static readonly IEnumerable<string> InfoLevels = new[] { "INFO", "NOTICE", "LOG" };
         private static readonly IEnumerable<string> ErrorLevels = new[] { "ERROR", "PANIC" };
 

@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using Npgsql;
 
 namespace Pgcode.Api
 {
@@ -17,26 +15,7 @@ namespace Pgcode.Api
             }
             throw new ApiException($"Unknown connection name {connectionName}", 404);
         }
-
-        public void SetConnectionNameByUserId(string userId, string connectionName)
-        {
-            if (!_connections.Keys.Contains(connectionName))
-            {
-                throw new ApiException($"Unknown connection name {connectionName}", 404);
-            }
-            ConnectionNamesByUserId.AddOrUpdate(userId, connectionName, (key, value) => connectionName);
-        }
-
-        public ConnectionData GetConnectionDataByUserId(string userId)
-        {
-            if (ConnectionNamesByUserId.TryGetValue(userId, out var name))
-            {
-                return GetConnectionDataByName(name);
-            }
-
-            throw new ApiException($"Unknown userId {userId}", 404);
-        }
-
+        
         public void Dispose()
         {
             ReleaseUnmanagedResources();

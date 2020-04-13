@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Pgcode.Migrations._1.Routines;
 
 namespace Pgcode.Api
 {
@@ -10,17 +11,16 @@ namespace Pgcode.Api
     public class ApiController : Controller
     {
         private readonly ConnectionManager _connectionManager;
-        private readonly ApiAccess _api;
+        private readonly Settings _settings;
 
-        protected string UserId => User.Identity.Name;
-        protected ApiAccess Api => _api.ForUserId(UserId);
+        // ReSharper disable once InconsistentNaming
+        private string userId => User.Identity.Name;
 
-        public ApiController(
-            ConnectionManager connectionManager,
-            ApiAccess api)
+
+        public ApiController(ConnectionManager connectionManager, Settings settings)
         {
             _connectionManager = connectionManager;
-            _api = api;
+            _settings = settings;
         }
 
         [HttpGet("initial")]
@@ -42,28 +42,36 @@ namespace Pgcode.Api
             };
 
         [HttpGet("connection/{connection}")]
-        public async ValueTask<ContentResult> GetConnection(string connection)
+        public async ValueTask<ContentResult> GetConnection(string connection) =>
+            await GetConnectionData(connection).GetContentResultAsync(ApiGetConnection.Name, new
+            {
+                userId,
+                defaultSchema = _settings.DefaultSchema,
+                timezone = HttpContext.Request.Headers["timezone"].ToString(),
+                skipSchemaPattern = _settings.SkipSchemaPattern
+            });
+
+        [HttpGet("schema/{connection}/{schema}")]
+        public async ValueTask<ContentResult> GetSchema(string connection, string schema)
         {
-            _connectionManager.SetConnectionNameByUserId(UserId, connection);
-            return await Api.GetConnection(UserId, HttpContext.Request.Headers["timezone"].ToString());
+            return await GetConnectionData(connection)
+                .GetContentResultAsync(ApiGetSchema.Name, new { userId, schema });
         }
 
-        [HttpGet("schema/{schema}")]
-        public async ValueTask<ContentResult> Schema(string schema)
+        [HttpGet("create-script/{connection}/{schema}")]
+        public async ValueTask<ContentResult> GetCreateScript(string connection, string schema)
         {
-            return await Api.GetSchema(UserId, schema);
+            // clone and store new connection
+            return await GetConnectionData(connection).GetContentResultAsync(ApiCreateScript.Name, new { userId, schema });
         }
 
-        [HttpGet("create-script/{schema}")]
-        public async ValueTask<ContentResult> CreateScript(string schema)
+        [HttpGet("script-content/{connection}/{id}")]
+        public async ValueTask<ContentResult> GetScriptContent(string connection, int id)
         {
-            return await Api.CreateScript(UserId, schema);
+            // clone and store new connection
+            return await GetConnectionData(connection).GetContentResultAsync(ApiGetScriptContent.Name, new { id });
         }
 
-        [HttpGet("script-content/{id}")]
-        public async ValueTask<ContentResult> ScriptContent(int id)
-        {
-            return await Api.ApiGetScriptContent(id);
-        }
+        private ConnectionData GetConnectionData(string name) => _connectionManager.GetConnectionDataByName(name);
     }
 }

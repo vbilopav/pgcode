@@ -52,7 +52,7 @@ export default class  {
             .appendElementTo(this.container);
         
         if (!content && key === Keys.SCRIPTS) {
-            const response = await fetchScriptContent(data.id);
+            const response = await fetchScriptContent(data.connection, data.id);
             if (response.ok) {
                 this.editor(this.active).setContent(response.data);
             }

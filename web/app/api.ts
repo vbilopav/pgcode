@@ -148,7 +148,7 @@ export const initializeApi = async () => {
 };
 
 export const fetchSchema: (schema: string) => Promise<IResponse<ISchemaResponse>> = async schema => {
-    const result = await _fetchAndPublishStatus<ISchemaResponse>(`api/schema/${schema}`);
+    const result = await _fetchAndPublishStatus<ISchemaResponse>(`api/schema/${getCurrentConnection()}/${schema}`);
     if (!result.data) {
         return null;
     }
@@ -158,7 +158,7 @@ export const fetchSchema: (schema: string) => Promise<IResponse<ISchemaResponse>
 };
 
 export const createScript: () => Promise<IResponse<IScript>> = async () => {
-    const result = await _fetch<IScript>(`api/create-script/${getCurrentSchema()}`);
+    const result = await _fetch<IScript>(`api/create-script/${getCurrentConnection()}/${getCurrentSchema()}`);
     if (!result.data) {
         return null;
     }
@@ -167,5 +167,5 @@ export const createScript: () => Promise<IResponse<IScript>> = async () => {
     return result;
 };
 
-export const fetchScriptContent: (id: number) => Promise<IResponse<IScriptContent>> = id => 
-    _fetch(`api/script-content/${id}`);
+export const fetchScriptContent: (connection: string, id: number) => Promise<IResponse<IScriptContent>> = (connection, id) => 
+    _fetch(`api/script-content/${connection}/${id}`);

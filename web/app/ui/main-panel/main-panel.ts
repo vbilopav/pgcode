@@ -38,8 +38,6 @@ const
         _storage.items = Array.from<[string, Item], [string, IStorageItem]>(items.entries(), (v: [string, Item], k: number) => {
             return [v[0], { id: v[1].id, key: v[1].key, timestamp: v[1].timestamp, data: v[1].data } as IStorageItem];
         }));
-let
-    _restored = false;
 
 export default class  {
     private element: Element;
@@ -47,7 +45,6 @@ export default class  {
     private content: Content;
     private headerHeight: number;
     private headerRows: number = 1;
-    //private adjustTimeout: number;
     private activeTab: Element;
     private stickyTab: Element;
     private items: Map<string, Item> = new Map<string, Item>();
@@ -61,14 +58,9 @@ export default class  {
         this.tabs = element.children[0];
         this.content = new Content(element.children[1]);
         this.initHeaderAdjustment();
-        
-        subscribe(SCHEMA_CHANGED, (data: ISchema, name: string) => {
-            if (!_restored) {
-                this.restoreItems();
-                _restored = true;
-            }
-            this.schemaChanged(name, data.connection);
-        });
+
+        this.restoreItems();
+        subscribe(SCHEMA_CHANGED, (data: ISchema, name: string) => this.schemaChanged(name, data.connection));
     }
 
     public unstickById(id: string) {
@@ -227,21 +219,10 @@ export default class  {
     }
 
     private initiateHeaderAdjust() {
-/*
-        if (this.adjustTimeout) {
-            clearTimeout(this.adjustTimeout);
-        }
-        this.adjustTimeout = setTimeout(() => this.adjustHeaderHeight(), 10);
-*/
         timeout(() => this.adjustHeaderHeight(), 10, "main-panel-adjust");
     }
 
     private adjustHeaderHeight() {
-/*
-        if (this.adjustTimeout) {
-            clearTimeout(this.adjustTimeout);
-        }
- */
         let lastTop: number;
         let rows: number = 1;
         for(let t of this.tabs.children) {
@@ -263,6 +244,5 @@ export default class  {
             this.element.css("grid-template-rows", `${rows * this.headerHeight}px auto`);
             this.headerRows = rows;
         }
-       // this.adjustTimeout = undefined;
     }
 }

@@ -1,4 +1,4 @@
-define(["require", "exports", "app/_sys/pubsub", "app/api", "app/controls/monaco-context-menu", "../../_sys/timeout"], function (require, exports, pubsub_1, api_1, monaco_context_menu_1, timeout_1) {
+define(["require", "exports", "app/_sys/pubsub", "app/api", "app/controls/monaco-context-menu", "app/_sys/timeout"], function (require, exports, pubsub_1, api_1, monaco_context_menu_1, timeout_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class PanelMenu extends monaco_context_menu_1.default {

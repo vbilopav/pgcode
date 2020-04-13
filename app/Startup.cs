@@ -16,7 +16,6 @@ namespace Pgcode
 
             services.AddSingleton<ConnectionManager, ConnectionManager>();
             services.AddSingleton(Program.Settings);
-            services.AddScoped<ApiAccess, ApiAccess>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)

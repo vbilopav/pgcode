@@ -29,7 +29,7 @@ define(["require", "exports", "app/ui/main-panel/editor", "app/controls/splitter
                 .addClass("content")
                 .appendElementTo(this.container);
             if (!content && key === api_1.Keys.SCRIPTS) {
-                const response = await api_1.fetchScriptContent(data.id);
+                const response = await api_1.fetchScriptContent(data.connection, data.id);
                 if (response.ok) {
                     this.editor(this.active).setContent(response.data);
                 }
