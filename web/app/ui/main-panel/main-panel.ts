@@ -37,6 +37,8 @@ const
         _storage.items = Array.from<[string, Item], [string, IStorageItem]>(items.entries(), (v: [string, Item], k: number) => {
             return [v[0], { id: v[1].id, key: v[1].key, timestamp: v[1].timestamp, data: v[1].data } as IStorageItem];
         }), 0);
+let
+    _restored = false;
 
 export default class  {
     private element: Element;
@@ -60,7 +62,10 @@ export default class  {
         this.initHeaderAdjustment();
         
         subscribe(SCHEMA_CHANGED, (data: ISchema, name: string) => {
-            this.restoreItems();
+            if (!_restored) {
+                this.restoreItems();
+                _restored = true;
+            }
             this.schemaChanged(name, data.connection);
         });
     }

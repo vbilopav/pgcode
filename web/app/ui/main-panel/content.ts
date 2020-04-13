@@ -50,8 +50,7 @@ export default class  {
             .dataAttr("data", data)
             .addClass("content")
             .appendElementTo(this.container);
-
-
+        
         if (!content && key === Keys.SCRIPTS) {
             const response = await fetchScriptContent(data.id);
             if (response.ok) {

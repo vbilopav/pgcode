@@ -9,6 +9,7 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/ui/mai
     const _updateStorageTabItems = items => setTimeout(() => _storage.items = Array.from(items.entries(), (v, k) => {
         return [v[0], { id: v[1].id, key: v[1].key, timestamp: v[1].timestamp, data: v[1].data }];
     }), 0);
+    let _restored = false;
     class default_1 {
         constructor(element) {
             this.headerRows = 1;
@@ -21,7 +22,10 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/ui/mai
             this.content = new content_1.default(element.children[1]);
             this.initHeaderAdjustment();
             pubsub_1.subscribe(pubsub_1.SCHEMA_CHANGED, (data, name) => {
-                this.restoreItems();
+                if (!_restored) {
+                    this.restoreItems();
+                    _restored = true;
+                }
                 this.schemaChanged(name, data.connection);
             });
         }
