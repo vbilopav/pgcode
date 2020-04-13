@@ -15,24 +15,12 @@ namespace Pgcode.Api
     {
         public static string GetString<T>(this ConnectionData data, string name, T parameters)
         {
+            var (command, dataParam) = GetCommand(data, name, parameters);
             lock (data.Connection)
             {
-                var (command, dataParam) = GetCommand(data, name, parameters);
                 return data.Connection
                     .AsProcedure()
                     .Single<string>(command, new NpgsqlParameter("_data", NpgsqlDbType.Json) {Value = dataParam});
-            }
-
-        }
-
-        public static void Exec<T>(this ConnectionData data, string name, T parameters)
-        {
-            lock (data.Connection)
-            {
-                var (command, dataParam) = GetCommand(data, name, parameters);
-                data.Connection
-                    .AsProcedure()
-                    .Execute(command, new NpgsqlParameter("_data", NpgsqlDbType.Json) { Value = dataParam });
             }
         }
 
