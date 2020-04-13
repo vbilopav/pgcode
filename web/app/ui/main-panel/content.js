@@ -44,7 +44,7 @@ define(["require", "exports", "app/ui/main-panel/editor", "app/controls/splitter
                 this.active.hideElement().removeClass(api_1.classes.active);
             }
             this.active = e.showElement().addClass(api_1.classes.active);
-            setTimeout(() => this.editor(e).layout().focus(), 0);
+            setTimeout(() => this.editor(e).layout().focus());
         }
         remove(id) {
             const e = this.container.find("#" + id);

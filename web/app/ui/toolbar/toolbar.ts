@@ -187,10 +187,10 @@ export default class  {
     private setButtonState(e: HTMLElement, state: boolean, key: string) {
         if (e.hasClass(classes.active) && !state) {
             e.removeClass(classes.active);
-            setTimeout(() => publish(STATE_CHANGED + key, key, false), 0);
+            setTimeout(() => publish(STATE_CHANGED + key, key, false));
         } else if (!e.hasClass(classes.active) && state) {
             e.addClass(classes.active);
-            setTimeout(() => publish(STATE_CHANGED + key, key, true), 0);
+            setTimeout(() => publish(STATE_CHANGED + key, key, true));
         }
         if (_isSwitch(e)) {
             this.menu.updateMenuItem(key, {checked: state});

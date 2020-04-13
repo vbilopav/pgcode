@@ -3,6 +3,7 @@ import {classes, IScriptContent} from "app/api";
 import {SIDEBAR_DOCKED, SIDEBAR_UNDOCKED, SPLITTER_CHANGED, subscribe} from "app/_sys/pubsub";
 import IStandaloneCodeEditor = monaco.editor.IStandaloneCodeEditor;
 import ICodeEditorViewState = monaco.editor.ICodeEditorViewState;
+import timeout from "app/_sys/timeout";
 
 export interface IEditor {
     dispose(): IEditor;
@@ -24,8 +25,7 @@ export class Editor implements IEditor {
     private monaco: IStandaloneCodeEditor;
     private readonly content: Element;
     private container: Element;
-    private layoutTimeout: number;
-    
+
     constructor(container: Element, content: Element, language: string, scriptContent: IScriptContent = null) {
         this.container = container;
         this.content = content;
@@ -42,6 +42,9 @@ export class Editor implements IEditor {
             this.monaco.restoreViewState(JSON.parse(scriptContent.viewState) as ICodeEditorViewState);
         }
 
+        this.monaco.onDidChangeModelContent(() => this.initiateSaveContent());
+        this.monaco.onDidChangeCursorPosition(() => this.initiateSaveContent());
+        
         window.on("resize", () => this.initiateLayout());
         subscribe([SIDEBAR_DOCKED, SPLITTER_CHANGED, SIDEBAR_UNDOCKED], () =>  this.initiateLayout());
     }
@@ -63,10 +66,7 @@ export class Editor implements IEditor {
     }
 
     initiateLayout() {
-        if (this.layoutTimeout) {
-            clearTimeout(this.layoutTimeout);
-        }
-        this.layoutTimeout = setTimeout(() => this.layout(), 25);
+        timeout(() => this.layout(), 25, "editor-layout");
         return this;
     }
 
@@ -82,6 +82,16 @@ export class Editor implements IEditor {
         if (value.viewState) {
             this.monaco.restoreViewState(JSON.parse(value.viewState) as ICodeEditorViewState);
         }
+        return this;
+    }
+
+    initiateSaveContent() {
+        timeout(() => {
+            
+            //console.log(this.content.dataAttr("data"), this.monaco.getValue(), this.monaco.saveViewState());
+            console.log(this.monaco.getValue().hashCode());
+            
+        }, 1000, "editor-save");
         return this;
     }
 }

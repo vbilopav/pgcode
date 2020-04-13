@@ -150,11 +150,11 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "../../cont
         setButtonState(e, state, key) {
             if (e.hasClass(api_1.classes.active) && !state) {
                 e.removeClass(api_1.classes.active);
-                setTimeout(() => pubsub_1.publish(pubsub_1.STATE_CHANGED + key, key, false), 0);
+                setTimeout(() => pubsub_1.publish(pubsub_1.STATE_CHANGED + key, key, false));
             }
             else if (!e.hasClass(api_1.classes.active) && state) {
                 e.addClass(api_1.classes.active);
-                setTimeout(() => pubsub_1.publish(pubsub_1.STATE_CHANGED + key, key, true), 0);
+                setTimeout(() => pubsub_1.publish(pubsub_1.STATE_CHANGED + key, key, true));
             }
             if (_isSwitch(e)) {
                 this.menu.updateMenuItem(key, { checked: state });

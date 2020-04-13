@@ -69,7 +69,7 @@ export default class  {
             this.active.hideElement().removeClass(classes.active);
         }
         this.active = e.showElement().addClass(classes.active);
-        setTimeout(() => this.editor(e).layout().focus(), 0);
+        setTimeout(() => this.editor(e).layout().focus());
     }
 
     public remove(id: string) {

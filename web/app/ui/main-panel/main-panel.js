@@ -1,4 +1,4 @@
-define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/ui/main-panel/tabs", "app/ui/main-panel/content", "app/api"], function (require, exports, storage_1, pubsub_1, tabs_1, content_1, api_1) {
+define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/ui/main-panel/tabs", "app/ui/main-panel/content", "app/api", "app/_sys/timeout"], function (require, exports, storage_1, pubsub_1, tabs_1, content_1, api_1, timeout_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     const _storage = new storage_1.default({
@@ -8,7 +8,7 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/ui/mai
     }, "tabs", (name, value) => name === "items" ? JSON.parse(value) : value, (name, value) => name === "items" ? JSON.stringify(value) : value);
     const _updateStorageTabItems = items => setTimeout(() => _storage.items = Array.from(items.entries(), (v, k) => {
         return [v[0], { id: v[1].id, key: v[1].key, timestamp: v[1].timestamp, data: v[1].data }];
-    }), 0);
+    }));
     let _restored = false;
     class default_1 {
         constructor(element) {
@@ -90,7 +90,7 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/ui/mai
             if (item.data.schema !== schema || item.data.connection !== connection) {
                 return;
             }
-            setTimeout(() => pubsub_1.publish(pubsub_1.TAB_SELECTED, item.id, item.key, item.data.schema, item.data.connection), 0);
+            setTimeout(() => pubsub_1.publish(pubsub_1.TAB_SELECTED, item.id, item.key, item.data.schema, item.data.connection));
         }
         activateByTab(tab, item) {
             for (let t of this.tabs.children) {
@@ -169,15 +169,9 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/ui/mai
             pubsub_1.subscribe(pubsub_1.SPLITTER_CHANGED, () => this.initiateHeaderAdjust());
         }
         initiateHeaderAdjust() {
-            if (this.adjustTimeout) {
-                clearTimeout(this.adjustTimeout);
-            }
-            this.adjustTimeout = setTimeout(() => this.adjustHeaderHeight(), 10);
+            timeout_1.default(() => this.adjustHeaderHeight(), 10, "main-panel-adjust");
         }
         adjustHeaderHeight() {
-            if (this.adjustTimeout) {
-                clearTimeout(this.adjustTimeout);
-            }
             let lastTop;
             let rows = 1;
             for (let t of this.tabs.children) {
@@ -200,7 +194,6 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/ui/mai
                 this.element.css("grid-template-rows", `${rows * this.headerHeight}px auto`);
                 this.headerRows = rows;
             }
-            this.adjustTimeout = undefined;
         }
     }
     exports.default = default_1;

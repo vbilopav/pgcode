@@ -1,4 +1,4 @@
-define(["require", "exports", "app/api", "app/_sys/pubsub", "vs/editor/editor.main"], function (require, exports, api_1, pubsub_1) {
+define(["require", "exports", "app/api", "app/_sys/pubsub", "app/_sys/timeout", "vs/editor/editor.main"], function (require, exports, api_1, pubsub_1, timeout_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.nullEditor = new (class {
@@ -24,6 +24,8 @@ define(["require", "exports", "app/api", "app/_sys/pubsub", "vs/editor/editor.ma
             if (scriptContent && scriptContent.viewState) {
                 this.monaco.restoreViewState(JSON.parse(scriptContent.viewState));
             }
+            this.monaco.onDidChangeModelContent(() => this.initiateSaveContent());
+            this.monaco.onDidChangeCursorPosition(() => this.initiateSaveContent());
             window.on("resize", () => this.initiateLayout());
             pubsub_1.subscribe([pubsub_1.SIDEBAR_DOCKED, pubsub_1.SPLITTER_CHANGED, pubsub_1.SIDEBAR_UNDOCKED], () => this.initiateLayout());
         }
@@ -42,10 +44,7 @@ define(["require", "exports", "app/api", "app/_sys/pubsub", "vs/editor/editor.ma
             return this;
         }
         initiateLayout() {
-            if (this.layoutTimeout) {
-                clearTimeout(this.layoutTimeout);
-            }
-            this.layoutTimeout = setTimeout(() => this.layout(), 25);
+            timeout_1.default(() => this.layout(), 25, "editor-layout");
             return this;
         }
         focus() {
@@ -59,6 +58,12 @@ define(["require", "exports", "app/api", "app/_sys/pubsub", "vs/editor/editor.ma
             if (value.viewState) {
                 this.monaco.restoreViewState(JSON.parse(value.viewState));
             }
+            return this;
+        }
+        initiateSaveContent() {
+            timeout_1.default(() => {
+                console.log(this.monaco.getValue().hashCode());
+            }, 1000, "editor-save");
             return this;
         }
     }

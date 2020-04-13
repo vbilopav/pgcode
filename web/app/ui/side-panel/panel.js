@@ -1,4 +1,4 @@
-define(["require", "exports", "app/_sys/pubsub", "app/api", "app/controls/monaco-context-menu"], function (require, exports, pubsub_1, api_1, monaco_context_menu_1) {
+define(["require", "exports", "app/_sys/pubsub", "app/api", "app/controls/monaco-context-menu", "../../_sys/timeout"], function (require, exports, pubsub_1, api_1, monaco_context_menu_1, timeout_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class PanelMenu extends monaco_context_menu_1.default {
@@ -136,18 +136,14 @@ define(["require", "exports", "app/_sys/pubsub", "app/api", "app/controls/monaco
             this.toggleHeaderShadow();
         }
         toggleHeaderShadow() {
-            if (this.scrollTimeout) {
-                clearTimeout(this.scrollTimeout);
-            }
-            this.scrollTimeout = setTimeout(() => {
+            timeout_1.default(() => {
                 if (this.items.scrollHeight > this.items.clientHeight && this.items.scrollTop) {
                     this.header.addClass("shadow");
                 }
                 else {
                     this.header.removeClass("shadow");
                 }
-                this.scrollTimeout = undefined;
-            }, 10);
+            }, 10, "panel-scroll");
         }
     }
     exports.default = Panel;

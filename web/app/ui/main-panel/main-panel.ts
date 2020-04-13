@@ -3,6 +3,7 @@ import { subscribe, publish, SPLITTER_CHANGED, TAB_SELECTED, TAB_UNSELECTED, SCH
 import createTabElement from "app/ui/main-panel/tabs";
 import Content from "app/ui/main-panel/content";
 import {ItemInfoType, Keys, ISchema, classes, IScriptContent, ItemContentArgs} from "app/api";
+import timeout from "app/_sys/timeout";
 
 interface Item extends IStorageItem {
     tab: Element
@@ -36,7 +37,7 @@ const
     _updateStorageTabItems: (items: Map<string, Item>) => void = items => setTimeout(() => 
         _storage.items = Array.from<[string, Item], [string, IStorageItem]>(items.entries(), (v: [string, Item], k: number) => {
             return [v[0], { id: v[1].id, key: v[1].key, timestamp: v[1].timestamp, data: v[1].data } as IStorageItem];
-        }), 0);
+        }));
 let
     _restored = false;
 
@@ -46,7 +47,7 @@ export default class  {
     private content: Content;
     private headerHeight: number;
     private headerRows: number = 1;
-    private adjustTimeout: number;
+    //private adjustTimeout: number;
     private activeTab: Element;
     private stickyTab: Element;
     private items: Map<string, Item> = new Map<string, Item>();
@@ -134,7 +135,7 @@ export default class  {
         if (item.data.schema !== schema || item.data.connection !== connection) {
             return;
         }
-        setTimeout(() => publish(TAB_SELECTED, item.id, item.key, item.data.schema, item.data.connection), 0);
+        setTimeout(() => publish(TAB_SELECTED, item.id, item.key, item.data.schema, item.data.connection));
     }
 
     private activateByTab(tab: Element, item?: Item) {
@@ -226,16 +227,21 @@ export default class  {
     }
 
     private initiateHeaderAdjust() {
+/*
         if (this.adjustTimeout) {
             clearTimeout(this.adjustTimeout);
         }
         this.adjustTimeout = setTimeout(() => this.adjustHeaderHeight(), 10);
+*/
+        timeout(() => this.adjustHeaderHeight(), 10, "main-panel-adjust");
     }
 
     private adjustHeaderHeight() {
+/*
         if (this.adjustTimeout) {
             clearTimeout(this.adjustTimeout);
         }
+ */
         let lastTop: number;
         let rows: number = 1;
         for(let t of this.tabs.children) {
@@ -257,6 +263,6 @@ export default class  {
             this.element.css("grid-template-rows", `${rows * this.headerHeight}px auto`);
             this.headerRows = rows;
         }
-        this.adjustTimeout = undefined;
+       // this.adjustTimeout = undefined;
     }
 }

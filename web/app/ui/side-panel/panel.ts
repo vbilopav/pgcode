@@ -3,6 +3,7 @@ import MainPanel from "app/ui/main-panel/main-panel";
 import { ISchema, ISidePanel, IScriptContent, Keys, classes, ItemContentArgs } from "app/api";
 import MonacoContextMenu from "app/controls/monaco-context-menu";
 import { ContextMenuCtorArgs, MenuItemType } from "app/controls/context-menu";
+import timeout from "../../_sys/timeout";
 
 class PanelMenu extends MonacoContextMenu {
     protected adjust() {
@@ -26,8 +27,7 @@ export default abstract class Panel {
     protected readonly items: Element;
     protected mainPanel: MainPanel;
     protected sidePanel: ISidePanel;
-    private scrollTimeout: number;
-
+    
     protected constructor(element: Element, key: Keys, menuItems: Array<MenuItemType> = []){
         this.element = element;
         this.key = key;
@@ -162,16 +162,12 @@ export default abstract class Panel {
     }
 
     private toggleHeaderShadow() {
-        if (this.scrollTimeout) {
-            clearTimeout(this.scrollTimeout);
-        }
-        this.scrollTimeout = setTimeout(() => {
+        timeout(() => {
             if (this.items.scrollHeight > this.items.clientHeight && this.items.scrollTop) {
                 this.header.addClass("shadow");
             } else {
                 this.header.removeClass("shadow");
             }
-            this.scrollTimeout = undefined;
-        }, 10);
+        }, 10, "panel-scroll");
     }
 }
