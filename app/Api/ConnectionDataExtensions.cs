@@ -19,6 +19,7 @@ namespace Pgcode.Api
             lock (data.Connection)
             {
                 return data.Connection
+                    .Prepared()
                     .AsProcedure()
                     .Single<string>(command, new NpgsqlParameter("_data", NpgsqlDbType.Json) {Value = dataParam});
             }

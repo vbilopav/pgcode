@@ -62,7 +62,9 @@ define(["require", "exports", "app/api", "app/_sys/pubsub", "app/_sys/timeout", 
         }
         initiateSaveContent() {
             timeout_1.default(() => {
+                console.log(this.content.dataAttr("data"), this.monaco.getValue(), this.monaco.saveViewState());
                 console.log(this.monaco.getValue().hashCode());
+                console.log("--------------------------------");
             }, 1000, "editor-save");
             return this;
         }
