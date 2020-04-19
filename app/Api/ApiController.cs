@@ -1,7 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Primitives;
+using Pgcode.ApiModels;
 using Pgcode.Migrations._1.Routines;
 
 namespace Pgcode.Api
@@ -12,13 +17,15 @@ namespace Pgcode.Api
     {
         private readonly ConnectionManager _connectionManager;
         private readonly Settings _settings;
+        private readonly ILogger<ApiController> _logger;
 
         private string UserId => User.Identity.Name;
 
-        public ApiController(ConnectionManager connectionManager, Settings settings)
+        public ApiController(ConnectionManager connectionManager, Settings settings, ILogger<ApiController> logger)
         {
             _connectionManager = connectionManager;
             _settings = settings;
+            _logger = logger;
         }
 
         [HttpGet("initial")]
@@ -52,23 +59,28 @@ namespace Pgcode.Api
         }
 
         [HttpGet("schema/{connection}/{schema}")]
-        public ContentResult GetSchema(string connection, string schema)
-        {
-            return GetConnectionData(connection).GetContentResult(ApiGetSchema.Name, new { userId = UserId, schema });
-        }
+        public ContentResult GetSchema(string connection, string schema) => 
+            GetConnectionData(connection).GetContentResult(ApiGetSchema.Name, new { userId = UserId, schema });
 
-        [HttpGet("create-script/{connection}/{schema}")]
-        public ContentResult GetCreateScript(string connection, string schema)
-        {
-            // clone and store new connection
-            return GetConnectionData(connection).GetContentResult(ApiCreateScript.Name, new { userId = UserId, schema });
-        }
+        [HttpGet("script-create/{connection}/{schema}")]
+        public ContentResult GetCreateScript(string connection, string schema) => 
+            GetConnectionData(connection).GetContentResult(ApiCreateScript.Name, new { userId = UserId, schema });
 
         [HttpGet("script-content/{connection}/{id}")]
-        public ContentResult GetScriptContent(string connection, int id)
+        public ContentResult GetScriptContent(string connection, int id) => 
+            GetConnectionData(connection).GetContentResult(ApiGetScriptContent.Name, new { id });
+
+        [HttpPost("script-content/{connection}/{id}/{viewState}")]
+        public async ValueTask PostScriptContent(string connection, int id, string viewState)
         {
-            // clone and store new connection
-            return GetConnectionData(connection).GetContentResult(ApiGetScriptContent.Name, new { id });
+            viewState = Request.ContainsHeader(Strings.ViewStateIsNull) ? null : viewState;
+            string content = null;
+            if (!Request.ContainsHeader(Strings.ContentIsNull))
+            {
+                using var stream = new StreamReader(Request.Body);
+                content = await stream.ReadToEndAsync();
+            }
+            GetConnectionData(connection).Execute(ApiSaveScript.Name, new {id, content, viewState});
         }
 
         private ConnectionData GetConnectionData(string name) => _connectionManager.GetConnectionDataByName(name);

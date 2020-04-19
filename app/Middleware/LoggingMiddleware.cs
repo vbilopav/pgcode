@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Npgsql;
 using Pgcode.Api;
+using Pgcode.ApiModels;
 
 namespace Pgcode.Middleware
 {

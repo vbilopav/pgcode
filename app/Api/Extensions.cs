@@ -1,17 +1,18 @@
 ﻿using System;
-using System.Data;
+using System.Collections.Generic;
 using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Primitives;
 using Norm.Extensions;
 using Npgsql;
 using NpgsqlTypes;
+using Pgcode.ApiModels;
 
 namespace Pgcode.Api
 {
-    public static class ConnectionDataExtensions
+    public static class Extensions
     {
         public static string GetString<T>(this ConnectionData data, string name, T parameters)
         {
@@ -21,7 +22,19 @@ namespace Pgcode.Api
                 return data.Connection
                     .Prepared()
                     .AsProcedure()
-                    .Single<string>(command, new NpgsqlParameter("_data", NpgsqlDbType.Json) {Value = dataParam});
+                    .Single<string>(command, GetParam(dataParam));
+            }
+        }
+
+        public static void Execute<T>(this ConnectionData data, string name, T parameters)
+        {
+            var (command, dataParam) = GetCommand(data, name, parameters);
+            lock (data.Connection)
+            {
+                data.Connection
+                    .Prepared()
+                    .AsProcedure()
+                    .Execute(command, GetParam(dataParam));
             }
         }
 
@@ -30,8 +43,11 @@ namespace Pgcode.Api
             {
                 StatusCode = 200,
                 Content = data.GetString(name, parameters),
-                ContentType = "application/javascript; charset=UTF-8"
+                ContentType = Strings.JsonContentType
             };
+
+        public static bool ContainsHeader(this HttpRequest request, string name) => 
+            request.Headers.Contains(new KeyValuePair<string, StringValues>(name, "1"));
 
         private static (string command, string dataParam) GetCommand<T>(ConnectionData data, string name, T parameters)
         {
@@ -45,5 +61,8 @@ namespace Pgcode.Api
             }
             return (command, dataParam);
         }
+
+        private static NpgsqlParameter GetParam(string value) => 
+            new NpgsqlParameter(Strings.Param, NpgsqlDbType.Json) { Value = value };
     }
 }

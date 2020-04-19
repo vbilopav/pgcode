@@ -1,9 +1,9 @@
 ﻿import "vs/editor/editor.main";
-import {classes, IScriptContent} from "app/api";
+import {classes, IScriptContent, saveScriptContent, IItem} from "app/api";
 import {SIDEBAR_DOCKED, SIDEBAR_UNDOCKED, SPLITTER_CHANGED, subscribe} from "app/_sys/pubsub";
 import IStandaloneCodeEditor = monaco.editor.IStandaloneCodeEditor;
 import ICodeEditorViewState = monaco.editor.ICodeEditorViewState;
-import timeout from "app/_sys/timeout";
+import {timeout, timeoutAsync} from "app/_sys/timeout";
 
 export interface IEditor {
     dispose(): IEditor;
@@ -80,19 +80,34 @@ export class Editor implements IEditor {
     setContent(value: IScriptContent) {
         this.monaco.setValue(value.content);
         if (value.viewState) {
-            this.monaco.restoreViewState(JSON.parse(value.viewState) as ICodeEditorViewState);
+            this.monaco.restoreViewState(value.viewState as any as ICodeEditorViewState);
         }
         return this;
     }
 
     private initiateSaveContent() {
-        timeout(() => {
-            
-            console.log(this.content.dataAttr("data"), this.monaco.getValue(), this.monaco.saveViewState());
-            console.log(this.monaco.getValue().hashCode());
-            console.log("--------------------------------");
-            
-        }, 1000, "editor-save");
+        timeoutAsync(async () => {
+            let content = this.monaco.getValue();
+            let viewState = JSON.stringify(this.monaco.saveViewState());
+            const contentHash = content.hashCode();
+            const viewStateHash = viewState.hashCode();
+            const data = this.content.dataAttr("data") as IItem;
+            if (contentHash === this.content.dataAttr("contentHash")) {
+                content = null;
+            }
+            if (viewStateHash === this.content.dataAttr("viewStateHash")) {
+                viewState = null;
+            }
+            if (content || viewState) {
+                await saveScriptContent(data.connection, data.id, content, viewState);
+            }
+            if (content) {
+                this.content.dataAttr("contentHash", contentHash);
+            }
+            if (viewState) {
+                this.content.dataAttr("viewStateHash", viewStateHash);
+            }
+        }, 500, "editor-save");
         return this;
     }
 }

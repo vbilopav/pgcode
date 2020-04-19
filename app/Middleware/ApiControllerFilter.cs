@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Logging;
 using Pgcode.Api;
+using Pgcode.ApiModels;
 
 namespace Pgcode.Middleware
 {
@@ -28,7 +29,7 @@ namespace Pgcode.Middleware
             var exception = context.Exception as ApiException;
             if (exception is null && context.Exception is Npgsql.PostgresException postgresException)
             {
-                exception = new ApiException("PostgresException", postgresException);
+                exception = new ApiException(postgresException.Message, postgresException);
             }
 
             if (exception != null)

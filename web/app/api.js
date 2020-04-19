@@ -91,7 +91,7 @@ define(["require", "exports", "app/_sys/pubsub"], function (require, exports, pu
         return result;
     };
     exports.createScript = async () => {
-        const result = await _fetch(`api/create-script/${exports.getCurrentConnection()}/${exports.getCurrentSchema()}`);
+        const result = await _fetch(`api/script-create/${exports.getCurrentConnection()}/${exports.getCurrentSchema()}`);
         if (!result.data) {
             return null;
         }
@@ -100,5 +100,17 @@ define(["require", "exports", "app/_sys/pubsub"], function (require, exports, pu
         return result;
     };
     exports.fetchScriptContent = (connection, id) => _fetch(`api/script-content/${connection}/${id}`);
+    exports.saveScriptContent = (connection, id, content, viewState) => {
+        return fetch(`api/script-content/${connection}/${id}/${encodeURIComponent(viewState)}`, {
+            method: 'POST',
+            headers: {
+                "Accept": "text/plain",
+                "Content-Type": "text/plain",
+                "_null-content": content === null ? "1" : "",
+                "_null-view-state": viewState === null ? "1" : ""
+            },
+            body: content
+        });
+    };
 });
 //# sourceMappingURL=api.js.map

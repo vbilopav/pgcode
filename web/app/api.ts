@@ -158,7 +158,7 @@ export const fetchSchema: (schema: string) => Promise<IResponse<ISchemaResponse>
 };
 
 export const createScript: () => Promise<IResponse<IScript>> = async () => {
-    const result = await _fetch<IScript>(`api/create-script/${getCurrentConnection()}/${getCurrentSchema()}`);
+    const result = await _fetch<IScript>(`api/script-create/${getCurrentConnection()}/${getCurrentSchema()}`);
     if (!result.data) {
         return null;
     }
@@ -169,3 +169,18 @@ export const createScript: () => Promise<IResponse<IScript>> = async () => {
 
 export const fetchScriptContent: (connection: string, id: number) => Promise<IResponse<IScriptContent>> = (connection, id) => 
     _fetch(`api/script-content/${connection}/${id}`);
+
+export const saveScriptContent: (connection: string, id: number, content: string, viewState: string) => 
+    Promise<Response> = (connection, id, content, viewState) => {
+    
+    return fetch(`api/script-content/${connection}/${id}/${encodeURIComponent(viewState)}`, {
+        method: 'POST',
+        headers: {
+            "Accept": "text/plain",
+            "Content-Type": "text/plain",
+            "_null-content": content === null ? "1" : "",
+            "_null-view-state": viewState === null ? "1" : ""
+        },
+        body: content
+    });
+};

@@ -3,7 +3,7 @@ import MainPanel from "app/ui/main-panel/main-panel";
 import { ISchema, ISidePanel, Keys, classes, ItemContentArgs } from "app/api";
 import MonacoContextMenu from "app/controls/monaco-context-menu";
 import { ContextMenuCtorArgs, MenuItemType } from "app/controls/context-menu";
-import timeout from "app/_sys/timeout";
+import {timeout} from "app/_sys/timeout";
 
 class PanelMenu extends MonacoContextMenu {
     protected adjust() {

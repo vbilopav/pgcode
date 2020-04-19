@@ -111,6 +111,10 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/ui/mai
         removeByTab(tab) {
             const id = tab.id, active = tab.hasClass(api_1.classes.active), sticky = tab.hasClass(api_1.classes.sticky), item = this.items.get(id);
             this.items.delete(id);
+            const tabId = tab.dataAttr("tabId");
+            if (tabId) {
+                console.log("script tab closed", tabId);
+            }
             tab.remove();
             this.content.remove(id);
             if (sticky) {
@@ -163,7 +167,7 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/ui/mai
             pubsub_1.subscribe(pubsub_1.SPLITTER_CHANGED, () => this.initiateHeaderAdjust());
         }
         initiateHeaderAdjust() {
-            timeout_1.default(() => this.adjustHeaderHeight(), 10, "main-panel-adjust");
+            timeout_1.timeout(() => this.adjustHeaderHeight(), 10, "main-panel-adjust");
         }
         adjustHeaderHeight() {
             let lastTop;

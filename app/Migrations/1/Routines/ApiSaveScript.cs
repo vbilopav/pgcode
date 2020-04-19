@@ -32,23 +32,23 @@ namespace Pgcode.Migrations._1.Routines
             if (_data->>'content' is null and _data->>'viewState' is not null) then
 
                 update {settings.PgCodeSchema}.scripts
-                set view_state = (_data->>'viewState'::json)
+                set view_state = (_data->>'viewState')::json
                 where
-                    id = (_data->>'id'::int);
+                    id = (_data->>'id')::int;
 
             elsif (_data->>'content' is not null and _data->>'viewState' is null) then
 
                 update {settings.PgCodeSchema}.scripts
                 set content = _data->>'content'
                 where
-                    id = (_data->>'id'::int);
+                    id = (_data->>'id')::int;
     
-            elsif (_data->>'content' is not null and _data->>'viewState' is noz null) then
+            elsif (_data->>'content' is not null and _data->>'viewState' is not null) then
 
                 update {settings.PgCodeSchema}.scripts
-                set content = _data->>'content', view_state = (_data->>'viewState'::json)
+                set content = _data->>'content', view_state = (_data->>'viewState')::json
                 where
-                    id = (_data->>'id'::int);
+                    id = (_data->>'id')::int;
 
             else
                 raise exception 'content and viewState are missing!';

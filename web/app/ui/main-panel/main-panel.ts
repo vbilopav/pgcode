@@ -3,7 +3,7 @@ import { subscribe, publish, SPLITTER_CHANGED, TAB_SELECTED, TAB_UNSELECTED, SCH
 import createTabElement from "app/ui/main-panel/tabs";
 import Content from "app/ui/main-panel/content";
 import {ItemInfoType, Keys, ISchema, classes, IScriptContent, ItemContentArgs} from "app/api";
-import timeout from "app/_sys/timeout";
+import {timeout} from "app/_sys/timeout";
 
 interface Item extends IStorageItem {
     tab: Element
@@ -161,7 +161,12 @@ export default class  {
             sticky = tab.hasClass(classes.sticky), 
             item = this.items.get(id);
         this.items.delete(id);
+        const tabId = tab.dataAttr("tabId");
+        if (tabId) {
+            console.log("script tab closed", tabId);
+        }
         tab.remove();
+        
         this.content.remove(id);
         if (sticky) {
             this.stickyTab = null;

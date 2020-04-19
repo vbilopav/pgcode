@@ -44,7 +44,7 @@ define(["require", "exports", "app/api", "app/_sys/pubsub", "app/_sys/timeout", 
             return this;
         }
         initiateLayout() {
-            timeout_1.default(() => this.layout(), 25, "editor-layout");
+            timeout_1.timeout(() => this.layout(), 25, "editor-layout");
             return this;
         }
         focus() {
@@ -56,16 +56,33 @@ define(["require", "exports", "app/api", "app/_sys/pubsub", "app/_sys/timeout", 
         setContent(value) {
             this.monaco.setValue(value.content);
             if (value.viewState) {
-                this.monaco.restoreViewState(JSON.parse(value.viewState));
+                this.monaco.restoreViewState(value.viewState);
             }
             return this;
         }
         initiateSaveContent() {
-            timeout_1.default(() => {
-                console.log(this.content.dataAttr("data"), this.monaco.getValue(), this.monaco.saveViewState());
-                console.log(this.monaco.getValue().hashCode());
-                console.log("--------------------------------");
-            }, 1000, "editor-save");
+            timeout_1.timeoutAsync(async () => {
+                let content = this.monaco.getValue();
+                let viewState = JSON.stringify(this.monaco.saveViewState());
+                const contentHash = content.hashCode();
+                const viewStateHash = viewState.hashCode();
+                const data = this.content.dataAttr("data");
+                if (contentHash === this.content.dataAttr("contentHash")) {
+                    content = null;
+                }
+                if (viewStateHash === this.content.dataAttr("viewStateHash")) {
+                    viewState = null;
+                }
+                if (content || viewState) {
+                    await api_1.saveScriptContent(data.connection, data.id, content, viewState);
+                }
+                if (content) {
+                    this.content.dataAttr("contentHash", contentHash);
+                }
+                if (viewState) {
+                    this.content.dataAttr("viewStateHash", viewStateHash);
+                }
+            }, 500, "editor-save");
             return this;
         }
     }

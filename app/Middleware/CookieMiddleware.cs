@@ -3,6 +3,7 @@ using System.Security.Claims;
 using System.Security.Principal;
 using System.Text.Json;
 using Microsoft.AspNetCore.Http;
+using Pgcode.Api;
 
 namespace Pgcode.Middleware
 {
@@ -13,8 +14,6 @@ namespace Pgcode.Middleware
 
     public class CookieMiddleware : IMiddleware
     {
-        private const string CookieName = "pgcode";
-
         private static readonly JsonSerializerOptions JsonOptions = new JsonSerializerOptions
         {
             IgnoreNullValues = false,
@@ -31,7 +30,7 @@ namespace Pgcode.Middleware
 
         public void ProcessCookieAndAddIdentity(HttpContext context)
         {
-            var cookieModel = context.Request.Cookies.TryGetValue(CookieName, out var value)
+            var cookieModel = context.Request.Cookies.TryGetValue(Strings.CookieName, out var value)
                 ? JsonSerializer.Deserialize<CookieUserProfileModel>(value, JsonOptions)
                 : new CookieUserProfileModel();
 
@@ -47,7 +46,7 @@ namespace Pgcode.Middleware
 
             context.User = new ClaimsPrincipal();
             context.User.AddIdentity(new GenericIdentity(cookieModel.User));
-            context.Response.Cookies.Append(CookieName, JsonSerializer.Serialize(cookieModel, JsonOptions), CookieOptions);
+            context.Response.Cookies.Append(Strings.CookieName, JsonSerializer.Serialize(cookieModel, JsonOptions), CookieOptions);
         }
 
         public void ProcessHttpContext(HttpContext context)

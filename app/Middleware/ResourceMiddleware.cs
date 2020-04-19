@@ -6,6 +6,7 @@ using System.Resources;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Primitives;
+using Pgcode.Api;
 
 namespace Pgcode.Middleware
 {
@@ -41,16 +42,16 @@ namespace Pgcode.Middleware
         {
             foreach (var key in EndpointKeys)
             {
-                var resourceId = key == "/" ? "/index.html" : key;
+                var resourceId = key == "/" ? $"/{Strings.DefaultFile}" : key;
                 var (mimeType, isBinary) = resourceId.Split('.').Last() switch
                 {
-                    "html" => ("text/html; charset=UTF-8", false),
-                    "css" => ("text/css; charset=UTF-8", false),
-                    "js" => ("application/javascript; charset=UTF-8", false),
-                    "ico" => ("image/x-icon; charset=UTF-8", true),
-                    "woff2" => ("font/woff2; charset=UTF-8", true),
-                    "json" => (key == "/manifest.json" ? "application/manifest+json; charset=UTF-8" : "application/json; charset=UTF-8", false),
-                    "png" => ("image/png; charset=UTF-8", true),
+                    "html" => (Strings.HtmlContentType, false),
+                    "css" => (Strings.CssContentType, false),
+                    "js" => (Strings.JsContentType, false),
+                    "ico" => (Strings.IcoContentType, true),
+                    "woff2" => (Strings.Woff2ContentType, true),
+                    "json" => (key == "/manifest.json" ? Strings.ManifestContentType : Strings.JsonContentType, false),
+                    "png" => (Strings.PngContentType, true),
                     _ => throw new NotSupportedException()
                 };
                 if (isBinary)

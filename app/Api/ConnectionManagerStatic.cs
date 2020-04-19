@@ -7,6 +7,7 @@ using System.Threading;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Npgsql;
+using Pgcode.ApiModels;
 using Pgcode.Migrations;
 
 namespace Pgcode.Api

@@ -136,7 +136,7 @@ define(["require", "exports", "app/_sys/pubsub", "app/api", "app/controls/monaco
             this.toggleHeaderShadow();
         }
         toggleHeaderShadow() {
-            timeout_1.default(() => {
+            timeout_1.timeout(() => {
                 if (this.items.scrollHeight > this.items.clientHeight && this.items.scrollTop) {
                     this.header.addClass("shadow");
                 }
