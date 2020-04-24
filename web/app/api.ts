@@ -1,6 +1,7 @@
 import {API_INITIAL, publish, SET_APP_STATUS} from "app/_sys/pubsub";
 import "vs/editor/editor.main";
 import ICodeEditorViewState = monaco.editor.ICodeEditorViewState;
+import INewScrollPosition = monaco.editor.INewScrollPosition;
 
 export const ScriptId: (id: number) => string = id  => `${Keys.SCRIPTS}${id}`;
 export const TableId: (id: number) => string = id  => `${Keys.TABLES}${id}`;
@@ -77,7 +78,8 @@ interface IScript extends IScriptInfo, IScriptContent {}
 
 export interface IScriptContent {
     content: string,
-    viewState: ICodeEditorViewState
+    viewState?: ICodeEditorViewState
+    scrollPosition?: INewScrollPosition
 }
 
 interface IInitialResponse { 
@@ -185,3 +187,16 @@ export const saveScriptContent: (connection: string, id: number, content: string
         body: content
     });
 
+
+export const saveScriptScrollPosition: (connection: string, id: number, top?: number, left?: number) => 
+    Promise<IResponse<string>> = async  (connection, id, top, left) => {
+
+    return await _fetch<string>(`api/script-scroll-position/${connection}`, {
+        method: 'POST',
+        headers: {
+            "Accept": "application/json; charset=UTF-8",
+            "Content-Type": "application/json; charset=UTF-8",
+        },
+        body: JSON.stringify({id, top, left})
+    });
+}

@@ -26,18 +26,6 @@ namespace Pgcode.Api
             }
         }
 
-        public static void Execute<T>(this ConnectionData data, string name, T parameters)
-        {
-            var (command, dataParam) = GetCommand(data, name, parameters);
-            lock (data.Connection)
-            {
-                data.Connection
-                    .Prepared()
-                    .AsProcedure()
-                    .Execute(command, GetParam(dataParam));
-            }
-        }
-
         public static ContentResult GetContentResult<T>(this ConnectionData data, string name, T parameters) =>
             new ContentResult
             {

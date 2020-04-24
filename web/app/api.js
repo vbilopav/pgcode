@@ -110,5 +110,15 @@ define(["require", "exports", "app/_sys/pubsub", "vs/editor/editor.main"], funct
         },
         body: content
     });
+    exports.saveScriptScrollPosition = async (connection, id, top, left) => {
+        return await _fetch(`api/script-scroll-position/${connection}`, {
+            method: 'POST',
+            headers: {
+                "Accept": "application/json; charset=UTF-8",
+                "Content-Type": "application/json; charset=UTF-8",
+            },
+            body: JSON.stringify({ id, top, left })
+        });
+    };
 });
 //# sourceMappingURL=api.js.map

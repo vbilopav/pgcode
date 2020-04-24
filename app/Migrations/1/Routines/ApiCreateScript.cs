@@ -1,4 +1,5 @@
 ﻿using Npgsql;
+using Pgcode.Migrations._1.Tables;
 
 namespace Pgcode.Migrations._1.Routines
 {
@@ -30,10 +31,12 @@ namespace Pgcode.Migrations._1.Routines
         declare _user_id varchar;
         declare _timezone varchar;
         declare _result json;
+        declare _id int;
         begin
 
             _title := _data->>'title';
             _user_id := _data->>'userId';
+            _id := nextval('{settings.PgCodeSchema}.{Scripts.Name}_id_seq');
 
             if (_user_id is null) then
                 raise exception 'userId parameter is missing';
@@ -42,14 +45,21 @@ namespace Pgcode.Migrations._1.Routines
             _timezone := coalesce({settings.PgCodeSchema}.{GetProfileValue.Name}(_data->>'userId', 'timezone'), current_setting('timezone'));
             
             if (_title is null) then
-                _title := 'Script ' || (select count(*) + 1 from {settings.PgCodeSchema}.scripts where user_id = _user_id);
+                _title := 'Script ' || _id::varchar;
             end if;
 
             with cte as (
-                insert into {settings.PgCodeSchema}.scripts (user_id, title, ""schema"")
-                values(_user_id, _title, _data->>'schema')
+                insert into {settings.PgCodeSchema}.scripts (
+                    id, user_id, title, ""schema""
+                )
+                values(
+                    _id, _user_id, _title, _data->>'schema'
+                )
                 returning 
-                    id::text, title as name, {settings.PgCodeSchema}.{MaxStr.Name}(comment) as comment, schema, content, 
+                    id::text, 
+                    title as name, {settings.PgCodeSchema}.{MaxStr.Name}(comment) as comment, 
+                    schema, 
+                    content, 
                     view_state as viewState, 
                     timestamp at time zone _timezone as ""timestamp""
             )

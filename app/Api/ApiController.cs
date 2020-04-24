@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -75,13 +76,18 @@ namespace Pgcode.Api
         {
             viewState = Request.ContainsHeader(Strings.ViewStateIsNull) ? null : viewState;
             string content = null;
-            if (!Request.ContainsHeader(Strings.ContentIsNull))
+            if (Request.ContainsHeader(Strings.ContentIsNull))
             {
-                using var stream = new StreamReader(Request.Body);
-                content = await stream.ReadToEndAsync();
+                return GetConnectionData(connection).GetContentResult(ApiSaveScript.Name, new { id, content, viewState });
             }
+            using var stream = new StreamReader(Request.Body);
+            content = await stream.ReadToEndAsync();
             return GetConnectionData(connection).GetContentResult(ApiSaveScript.Name, new {id, content, viewState});
         }
+
+        [HttpPost("script-scroll-position/{connection}")]
+        public ContentResult PostScriptScrollPosition(string connection, [FromBody]object data) => 
+            GetConnectionData(connection).GetContentResult(ApiSaveScriptScrollPosition.Name, data);
 
         private ConnectionData GetConnectionData(string name) => _connectionManager.GetConnectionDataByName(name);
     }

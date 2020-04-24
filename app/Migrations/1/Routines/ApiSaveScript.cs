@@ -9,13 +9,13 @@ namespace Pgcode.Migrations._1.Routines
         public const string Name = "api_save_script";
         public const string CommentMarkup = @"
 
-        Updates script content cotnent or view state.
+        Updates script cotnent or view state.
         Params:
         - _data->>'id' - script id.
         - _data->>'content' - new script content, null skips saving
         - _data->>'viewState' - new script view state, null skips saving
 
-        returns void
+        returns timestamp json string
         ";
 
         public ApiSaveScript(int forVersion)

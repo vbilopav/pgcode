@@ -17,14 +17,17 @@ namespace Pgcode.Migrations._1.Tables
 
         public string Up(Settings settings, NpgsqlConnection connection) => (_forVersion != Version ? "" : $@"
 
+        create sequence if not exists {settings.PgCodeSchema}.{Name}_id_seq;
+
         create table {settings.PgCodeSchema}.{Name} (
-            id int not null generated always as identity primary key,
+            id int not null primary key default nextval('{settings.PgCodeSchema}.{Name}_id_seq'),
             user_id varchar not null,
             title varchar not null,
             schema varchar null,
             comment text null,
             content text not null default '',
             view_state json null,
+            scroll_position json null,
             timestamp timestamp with time zone not null default transaction_timestamp()
         );
         

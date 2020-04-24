@@ -2,21 +2,23 @@
 
 namespace Pgcode.Migrations._1.Routines
 {
-    public class ApiGetScriptContent : IMigration
+    public class ApiSaveScriptScrollPosition : IMigration
     {
         private readonly int _forVersion;
         public const int Version = 1;
-        public const string Name = "api_get_script_content";
+        public const string Name = "api_save_script_scroll_position";
         public const string CommentMarkup = @"
 
-        Returns json object with script content and viewState.
+        Updates script content scroll poistion.
         Params:
-        - _data->>'id' - script id
-        - _data->>'schema' - schema name or null for all schemas
+        - _data->>'id' - script id.
+        - _data->>'top'
+        - _data->>'left'
 
+        returns timestamp json string
         ";
 
-        public ApiGetScriptContent(int forVersion)
+        public ApiSaveScriptScrollPosition(int forVersion)
         {
             _forVersion = forVersion;
         }
@@ -25,20 +27,23 @@ namespace Pgcode.Migrations._1.Routines
 
         create or replace function {settings.PgCodeSchema}.{Name}(_data json) returns json as
         ${Name}$
-            select coalesce(
-                (select json_build_object(
-                    'content', content, 
-                    'viewState', view_state,
-                    'scrollPosition', scroll_position
+        declare _timestamp timestamp with time zone;
+        begin
+
+            update {settings.PgCodeSchema}.scripts
+            set 
+                scroll_position = json_build_object(
+                    'top', (_data->>'top')::int,
+                    'left', (_data->>'left')::int
                 )
-                from
-                    {settings.PgCodeSchema}.scripts
-                where
-                    (id = (_data->>'id')::bigint)), 
-                (select json_build_object('content', '', 'viewState', null))
-            );
+            where
+                id = (_data->>'id')::int
+            returning timestamp into _timestamp;
+
+            return to_json(_timestamp);
+        end
         ${Name}$
-        language sql security definer stable;
+        language plpgsql security definer volatile;
         comment on function {settings.PgCodeSchema}.{Name}(json) is ${Name}_comment${CommentMarkup.Trim()}${Name}_comment$;
         revoke all on function {settings.PgCodeSchema}.{Name}(json) from public;
         grant execute on function {settings.PgCodeSchema}.{Name}(json) to {connection.UserName};

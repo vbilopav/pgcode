@@ -14,21 +14,18 @@ define(["require", "exports", "app/api", "app/_sys/pubsub", "app/_sys/timeout", 
             this.content = content;
             const element = String.html `<div style="position: fixed;"></div>`.toElement();
             this.container.append(element);
-            const value = scriptContent ? scriptContent.content : "";
             this.monaco = monaco.editor.create(element, {
-                value: value,
                 language,
                 theme: "vs-dark",
                 renderWhitespace: "all",
                 automaticLayout: false
             });
-            this.content.dataAttr("contentHash", value.hashCode());
-            if (scriptContent && scriptContent.viewState) {
-                this.monaco.restoreViewState(scriptContent.viewState);
-                this.content.dataAttr("viewStateHash", JSON.stringify(scriptContent.viewState).hashCode());
+            if (scriptContent) {
+                this.setContent(scriptContent);
             }
             this.monaco.onDidChangeModelContent(() => this.initiateSaveContent());
             this.monaco.onDidChangeCursorPosition(() => this.initiateSaveContent());
+            this.monaco.onDidScrollChange(() => this.initiateSaveScroll());
             window.on("resize", () => this.initiateLayout());
             pubsub_1.subscribe([pubsub_1.SIDEBAR_DOCKED, pubsub_1.SPLITTER_CHANGED, pubsub_1.SIDEBAR_UNDOCKED], () => this.initiateLayout());
         }
@@ -57,15 +54,18 @@ define(["require", "exports", "app/api", "app/_sys/pubsub", "app/_sys/timeout", 
             return this;
         }
         setContent(value) {
-            this.monaco.setValue(value.content);
-            if (value.viewState) {
-                this.monaco.restoreViewState(value.viewState);
-            }
             if (value.content != null) {
+                this.monaco.setValue(value.content);
                 this.content.dataAttr("contentHash", value.content.hashCode());
             }
-            if (value.viewState != null) {
+            if (value.viewState) {
+                this.monaco.restoreViewState(value.viewState);
                 this.content.dataAttr("viewStateHash", JSON.stringify(value.viewState).hashCode());
+            }
+            if (value.scrollPosition) {
+                this.content.dataAttr("scrollTop", value.scrollPosition.scrollTop);
+                this.content.dataAttr("scrollLeft", value.scrollPosition.scrollLeft);
+                this.monaco.setScrollPosition(value.scrollPosition);
             }
             return this;
         }
@@ -96,6 +96,17 @@ define(["require", "exports", "app/api", "app/_sys/pubsub", "app/_sys/timeout", 
                     this.content.dataAttr("viewStateHash", viewStateHash);
                 }
             }, 500, "editor-save");
+        }
+        initiateSaveScroll() {
+            timeout_1.timeoutAsync(async () => {
+                let top = this.monaco.getScrollTop();
+                let left = this.monaco.getScrollLeft();
+                if (top != this.content.dataAttr("scrollTop") || left != this.content.dataAttr("scrollLeft")) {
+                    this.content.dataAttr("scrollTop", top).dataAttr("scrollLeft", left);
+                    const data = this.content.dataAttr("data");
+                    await api_1.saveScriptScrollPosition(data.connection, data.id, top, left);
+                }
+            }, 1000, "editor-scroll");
         }
     }
     exports.Editor = Editor;
