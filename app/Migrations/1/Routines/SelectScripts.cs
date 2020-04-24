@@ -47,6 +47,9 @@ namespace Pgcode.Migrations._1.Routines
                     and
                     (_user_id is null or user_id = _user_id)
 
+                order by 
+                        id
+
             ) as result;
 
         end

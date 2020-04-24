@@ -1,4 +1,6 @@
 import {API_INITIAL, publish, SET_APP_STATUS} from "app/_sys/pubsub";
+import "vs/editor/editor.main";
+import ICodeEditorViewState = monaco.editor.ICodeEditorViewState;
 
 export const ScriptId: (id: number) => string = id  => `${Keys.SCRIPTS}${id}`;
 export const TableId: (id: number) => string = id  => `${Keys.TABLES}${id}`;
@@ -75,7 +77,7 @@ interface IScript extends IScriptInfo, IScriptContent {}
 
 export interface IScriptContent {
     content: string,
-    viewState: string
+    viewState: ICodeEditorViewState
 }
 
 interface IInitialResponse { 
@@ -111,8 +113,8 @@ const _fetchAndPublishStatus:<T> (url: string, init?: RequestInit) => Promise<IR
     }
 };
 
-const _fetch:<T> (url: string) => Promise<IResponse<T>> = async url => {
-    const response = await fetch(url);
+const _fetch:<T> (url: string, init?: RequestInit) => Promise<IResponse<T>> = async (url, init) => {
+    const response = await fetch(url, init);
     if (!response.ok) {
         return _createResponse(response);
     }
@@ -171,9 +173,8 @@ export const fetchScriptContent: (connection: string, id: number) => Promise<IRe
     _fetch(`api/script-content/${connection}/${id}`);
 
 export const saveScriptContent: (connection: string, id: number, content: string, viewState: string) => 
-    Promise<Response> = (connection, id, content, viewState) => {
-    
-    return fetch(`api/script-content/${connection}/${id}/${encodeURIComponent(viewState)}`, {
+    Promise<IResponse<string>> = async (connection, id, content, viewState) => 
+    await _fetch<string>(`api/script-content/${connection}/${id}/${encodeURIComponent(viewState)}`, {
         method: 'POST',
         headers: {
             "Accept": "text/plain",
@@ -183,4 +184,4 @@ export const saveScriptContent: (connection: string, id: number, content: string
         },
         body: content
     });
-};
+

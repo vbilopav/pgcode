@@ -1,4 +1,4 @@
-define(["require", "exports", "app/api", "app/ui/side-panel/panel", "app/ui/item-tooltip"], function (require, exports, api_1, panel_1, item_tooltip_1) {
+define(["require", "exports", "app/api", "app/ui/side-panel/panel", "app/ui/item-tooltip", "app/_sys/pubsub"], function (require, exports, api_1, panel_1, item_tooltip_1, pubsub_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class default_1 extends panel_1.default {
@@ -10,6 +10,7 @@ define(["require", "exports", "app/api", "app/ui/side-panel/panel", "app/ui/item
                 { text: "Order ascending" },
                 { text: "Order descending" },
             ]);
+            pubsub_1.subscribe(pubsub_1.SCRIPT_UPDATED, (data) => this.items.find(`#${api_1.ScriptId(data.id)}`).find(".item-subtext").html(data.timestamp.formatDateString()));
         }
         schemaChanged(data, schema) {
             this.items.html("");

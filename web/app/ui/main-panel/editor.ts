@@ -1,8 +1,9 @@
 ﻿import "vs/editor/editor.main";
-import {classes, IScriptContent, saveScriptContent, IItem} from "app/api";
-import {SIDEBAR_DOCKED, SIDEBAR_UNDOCKED, SPLITTER_CHANGED, subscribe} from "app/_sys/pubsub";
+import {classes, IScriptContent, saveScriptContent, IScriptInfo} from "app/api";
+import {
+    SIDEBAR_DOCKED, SIDEBAR_UNDOCKED, SPLITTER_CHANGED, SCRIPT_UPDATED, subscribe, publish
+} from "app/_sys/pubsub";
 import IStandaloneCodeEditor = monaco.editor.IStandaloneCodeEditor;
-import ICodeEditorViewState = monaco.editor.ICodeEditorViewState;
 import {timeout, timeoutAsync} from "app/_sys/timeout";
 
 export interface IEditor {
@@ -31,17 +32,20 @@ export class Editor implements IEditor {
         this.content = content;
         const element = String.html`<div style="position: fixed;"></div>`.toElement();
         this.container.append(element);
+        const value = scriptContent ? scriptContent.content : "";
         this.monaco = monaco.editor.create(element as HTMLElement, {
-            value: scriptContent ? scriptContent.content : "",
+            value: value,
             language,
             theme: "vs-dark",
             renderWhitespace: "all",
             automaticLayout: false
         });
+        this.content.dataAttr("contentHash", value.hashCode());
         if (scriptContent && scriptContent.viewState) {
-            this.monaco.restoreViewState(JSON.parse(scriptContent.viewState) as ICodeEditorViewState);
+            this.monaco.restoreViewState(scriptContent.viewState);
+            this.content.dataAttr("viewStateHash", JSON.stringify(scriptContent.viewState).hashCode());
         }
-
+        
         this.monaco.onDidChangeModelContent(() => this.initiateSaveContent());
         this.monaco.onDidChangeCursorPosition(() => this.initiateSaveContent());
         
@@ -80,7 +84,13 @@ export class Editor implements IEditor {
     setContent(value: IScriptContent) {
         this.monaco.setValue(value.content);
         if (value.viewState) {
-            this.monaco.restoreViewState(value.viewState as any as ICodeEditorViewState);
+            this.monaco.restoreViewState(value.viewState);
+        }
+        if (value.content != null) {
+            this.content.dataAttr("contentHash", value.content.hashCode());
+        }
+        if (value.viewState != null) {
+            this.content.dataAttr("viewStateHash", JSON.stringify(value.viewState).hashCode());
         }
         return this;
     }
@@ -91,23 +101,26 @@ export class Editor implements IEditor {
             let viewState = JSON.stringify(this.monaco.saveViewState());
             const contentHash = content.hashCode();
             const viewStateHash = viewState.hashCode();
-            const data = this.content.dataAttr("data") as IItem;
+            const data = this.content.dataAttr("data") as IScriptInfo;
             if (contentHash === this.content.dataAttr("contentHash")) {
                 content = null;
             }
             if (viewStateHash === this.content.dataAttr("viewStateHash")) {
                 viewState = null;
             }
-            if (content || viewState) {
-                await saveScriptContent(data.connection, data.id, content, viewState);
+            if (content !== null || viewState != null) {
+                let response = await saveScriptContent(data.connection, data.id, content, viewState);
+                if (response.ok) {
+                    data.timestamp = response.data;
+                    publish(SCRIPT_UPDATED, data);
+                }
             }
-            if (content) {
+            if (content != null) {
                 this.content.dataAttr("contentHash", contentHash);
             }
-            if (viewState) {
+            if (viewState != null) {
                 this.content.dataAttr("viewStateHash", viewStateHash);
             }
         }, 500, "editor-save");
-        return this;
     }
 }

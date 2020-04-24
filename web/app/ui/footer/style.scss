@@ -1,5 +1,6 @@
 .footer {
     grid-area: footer;
+    z-index: 1;
     color: $footer-color;
     background-color: $footer-background-color;
     user-select: none;

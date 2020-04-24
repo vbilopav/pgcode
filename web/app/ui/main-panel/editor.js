@@ -14,15 +14,18 @@ define(["require", "exports", "app/api", "app/_sys/pubsub", "app/_sys/timeout", 
             this.content = content;
             const element = String.html `<div style="position: fixed;"></div>`.toElement();
             this.container.append(element);
+            const value = scriptContent ? scriptContent.content : "";
             this.monaco = monaco.editor.create(element, {
-                value: scriptContent ? scriptContent.content : "",
+                value: value,
                 language,
                 theme: "vs-dark",
                 renderWhitespace: "all",
                 automaticLayout: false
             });
+            this.content.dataAttr("contentHash", value.hashCode());
             if (scriptContent && scriptContent.viewState) {
-                this.monaco.restoreViewState(JSON.parse(scriptContent.viewState));
+                this.monaco.restoreViewState(scriptContent.viewState);
+                this.content.dataAttr("viewStateHash", JSON.stringify(scriptContent.viewState).hashCode());
             }
             this.monaco.onDidChangeModelContent(() => this.initiateSaveContent());
             this.monaco.onDidChangeCursorPosition(() => this.initiateSaveContent());
@@ -58,6 +61,12 @@ define(["require", "exports", "app/api", "app/_sys/pubsub", "app/_sys/timeout", 
             if (value.viewState) {
                 this.monaco.restoreViewState(value.viewState);
             }
+            if (value.content != null) {
+                this.content.dataAttr("contentHash", value.content.hashCode());
+            }
+            if (value.viewState != null) {
+                this.content.dataAttr("viewStateHash", JSON.stringify(value.viewState).hashCode());
+            }
             return this;
         }
         initiateSaveContent() {
@@ -73,17 +82,20 @@ define(["require", "exports", "app/api", "app/_sys/pubsub", "app/_sys/timeout", 
                 if (viewStateHash === this.content.dataAttr("viewStateHash")) {
                     viewState = null;
                 }
-                if (content || viewState) {
-                    await api_1.saveScriptContent(data.connection, data.id, content, viewState);
+                if (content !== null || viewState != null) {
+                    let response = await api_1.saveScriptContent(data.connection, data.id, content, viewState);
+                    if (response.ok) {
+                        data.timestamp = response.data;
+                        pubsub_1.publish(pubsub_1.SCRIPT_UPDATED, data);
+                    }
                 }
-                if (content) {
+                if (content != null) {
                     this.content.dataAttr("contentHash", contentHash);
                 }
-                if (viewState) {
+                if (viewState != null) {
                     this.content.dataAttr("viewStateHash", viewStateHash);
                 }
             }, 500, "editor-save");
-            return this;
         }
     }
     exports.Editor = Editor;

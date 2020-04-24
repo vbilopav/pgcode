@@ -71,7 +71,7 @@ namespace Pgcode.Api
             GetConnectionData(connection).GetContentResult(ApiGetScriptContent.Name, new { id });
 
         [HttpPost("script-content/{connection}/{id}/{viewState}")]
-        public async ValueTask PostScriptContent(string connection, int id, string viewState)
+        public async ValueTask<ContentResult> PostScriptContent(string connection, int id, string viewState)
         {
             viewState = Request.ContainsHeader(Strings.ViewStateIsNull) ? null : viewState;
             string content = null;
@@ -80,7 +80,7 @@ namespace Pgcode.Api
                 using var stream = new StreamReader(Request.Body);
                 content = await stream.ReadToEndAsync();
             }
-            GetConnectionData(connection).Execute(ApiSaveScript.Name, new {id, content, viewState});
+            return GetConnectionData(connection).GetContentResult(ApiSaveScript.Name, new {id, content, viewState});
         }
 
         private ConnectionData GetConnectionData(string name) => _connectionManager.GetConnectionDataByName(name);

@@ -76,5 +76,6 @@ define(["require", "exports"], function (require, exports) {
     exports.SPLITTER_CHANGED = "splitter/changed";
     exports.TAB_SELECTED = `tab/selected`;
     exports.TAB_UNSELECTED = `tab/unselected`;
+    exports.SCRIPT_UPDATED = `script/updated`;
 });
 //# sourceMappingURL=pubsub.js.map

@@ -101,7 +101,7 @@ new (class implements IMain {
             this.status = status;
             this.overlay.hideElement().css("opacity", "0");
             clearInterval(this.loadingTimeout);
-            document.title = args.length ? `${args[0]} - ${this.defaultTitle}` : this.previousTitle;
+            document.title = args.length ? `${this.defaultTitle}: ${args[0]}` : this.previousTitle;
 
         } else if (status == AppStatus.BUSY) {
             if (this.status == AppStatus.BUSY) {

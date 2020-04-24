@@ -25,35 +25,46 @@ namespace Pgcode.Migrations._1.Routines
 
         public string Up(Settings settings, NpgsqlConnection connection) => (_forVersion != Version ? "" : $@"
 
-        create or replace function {settings.PgCodeSchema}.{Name}(_data json) returns void as
+        create or replace function {settings.PgCodeSchema}.{Name}(_data json) returns json as
         ${Name}$
+        declare _timestamp timestamp with time zone;
         begin
 
             if (_data->>'content' is null and _data->>'viewState' is not null) then
 
                 update {settings.PgCodeSchema}.scripts
-                set view_state = (_data->>'viewState')::json
+                set 
+                    view_state = (_data->>'viewState')::json,
+                    timestamp = transaction_timestamp()
                 where
-                    id = (_data->>'id')::int;
+                    id = (_data->>'id')::int
+                returning timestamp into _timestamp;
 
             elsif (_data->>'content' is not null and _data->>'viewState' is null) then
 
                 update {settings.PgCodeSchema}.scripts
-                set content = _data->>'content'
+                set 
+                    content = _data->>'content',
+                    timestamp = transaction_timestamp()
                 where
-                    id = (_data->>'id')::int;
+                    id = (_data->>'id')::int
+                returning timestamp into _timestamp;
     
             elsif (_data->>'content' is not null and _data->>'viewState' is not null) then
 
                 update {settings.PgCodeSchema}.scripts
-                set content = _data->>'content', view_state = (_data->>'viewState')::json
+                set 
+                    content = _data->>'content', view_state = (_data->>'viewState')::json,
+                    timestamp = transaction_timestamp()
                 where
-                    id = (_data->>'id')::int;
+                    id = (_data->>'id')::int
+                returning timestamp into _timestamp;
 
             else
                 raise exception 'content and viewState are missing!';
             end if;
 
+            return to_json(_timestamp);
         end
         ${Name}$
         language plpgsql security definer volatile;

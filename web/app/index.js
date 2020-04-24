@@ -57,7 +57,7 @@ define(["require", "exports", "app/_sys/storage", "app/ui/toolbar/toolbar", "./u
                 this.status = status;
                 this.overlay.hideElement().css("opacity", "0");
                 clearInterval(this.loadingTimeout);
-                document.title = args.length ? `${args[0]} - ${this.defaultTitle}` : this.previousTitle;
+                document.title = args.length ? `${this.defaultTitle}: ${args[0]}` : this.previousTitle;
             }
             else if (status == api_1.AppStatus.BUSY) {
                 if (this.status == api_1.AppStatus.BUSY) {

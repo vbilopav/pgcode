@@ -83,3 +83,5 @@ export const SPLITTER_CHANGED: string = "splitter/changed"; //void
 
 export const TAB_SELECTED = `tab/selected`; //id: string, key: string, schema: string, connection: string 
 export const TAB_UNSELECTED = `tab/unselected`; //id: string, key: string
+
+export const SCRIPT_UPDATED = `script/updated`; //data: IScriptInfo

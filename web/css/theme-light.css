@@ -183,6 +183,7 @@ body > div.container {
 
 .footer {
   grid-area: footer;
+  z-index: 1;
   color: #ffffff;
   background-color: #007ACC;
   user-select: none;

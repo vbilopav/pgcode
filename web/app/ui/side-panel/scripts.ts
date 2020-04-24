@@ -1,6 +1,9 @@
-import { ISchema, IScriptInfo, IScriptContent, createScript, ScriptId, Keys, ItemContentArgs } from "app/api";
+import { 
+    ISchema, IScriptInfo, IScriptContent, createScript, ScriptId, Keys, ItemContentArgs 
+} from "app/api";
 import Panel from "app/ui/side-panel/panel";
 import { scriptTitle } from "app/ui/item-tooltip";
+import {SCRIPT_UPDATED, subscribe} from "app/_sys/pubsub";
 
 export default class extends Panel {
     constructor(element: Element) {
@@ -11,6 +14,8 @@ export default class extends Panel {
             {text: "Order ascending"},
             {text: "Order descending"},
         ]);
+        subscribe(SCRIPT_UPDATED, (data: IScriptInfo) => 
+            this.items.find(`#${ScriptId(data.id)}`).find(".item-subtext").html(data.timestamp.formatDateString()));
     }
 
     protected schemaChanged(data: ISchema, schema: string) {

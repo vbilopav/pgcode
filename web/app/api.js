@@ -1,4 +1,4 @@
-define(["require", "exports", "app/_sys/pubsub"], function (require, exports, pubsub_1) {
+define(["require", "exports", "app/_sys/pubsub", "vs/editor/editor.main"], function (require, exports, pubsub_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.ScriptId = id => `${Keys.SCRIPTS}${id}`;
@@ -52,8 +52,8 @@ define(["require", "exports", "app/_sys/pubsub"], function (require, exports, pu
             throw error;
         }
     };
-    const _fetch = async (url) => {
-        const response = await fetch(url);
+    const _fetch = async (url, init) => {
+        const response = await fetch(url, init);
         if (!response.ok) {
             return _createResponse(response);
         }
@@ -100,17 +100,15 @@ define(["require", "exports", "app/_sys/pubsub"], function (require, exports, pu
         return result;
     };
     exports.fetchScriptContent = (connection, id) => _fetch(`api/script-content/${connection}/${id}`);
-    exports.saveScriptContent = (connection, id, content, viewState) => {
-        return fetch(`api/script-content/${connection}/${id}/${encodeURIComponent(viewState)}`, {
-            method: 'POST',
-            headers: {
-                "Accept": "text/plain",
-                "Content-Type": "text/plain",
-                "_null-content": content === null ? "1" : "",
-                "_null-view-state": viewState === null ? "1" : ""
-            },
-            body: content
-        });
-    };
+    exports.saveScriptContent = async (connection, id, content, viewState) => await _fetch(`api/script-content/${connection}/${id}/${encodeURIComponent(viewState)}`, {
+        method: 'POST',
+        headers: {
+            "Accept": "text/plain",
+            "Content-Type": "text/plain",
+            "_null-content": content === null ? "1" : "",
+            "_null-view-state": viewState === null ? "1" : ""
+        },
+        body: content
+    });
 });
 //# sourceMappingURL=api.js.map
