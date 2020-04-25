@@ -33,8 +33,8 @@ namespace Pgcode.Migrations._1.Routines
             update {settings.PgCodeSchema}.scripts
             set 
                 scroll_position = json_build_object(
-                    'top', (_data->>'top')::int,
-                    'left', (_data->>'left')::int
+                    'scrollTop', (_data->>'scrollTop')::int,
+                    'scrollLeft', (_data->>'scrollLeft')::int
                 )
             where
                 id = (_data->>'id')::int

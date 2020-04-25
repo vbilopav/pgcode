@@ -188,8 +188,8 @@ export const saveScriptContent: (connection: string, id: number, content: string
     });
 
 
-export const saveScriptScrollPosition: (connection: string, id: number, top?: number, left?: number) => 
-    Promise<IResponse<string>> = async  (connection, id, top, left) => {
+export const saveScriptScrollPosition: (connection: string, id: number, scrollTop?: number, scrollLeft?: number) => 
+    Promise<IResponse<string>> = async  (connection, id, scrollTop, scrollLeft) => {
 
     return await _fetch<string>(`api/script-scroll-position/${connection}`, {
         method: 'POST',
@@ -197,6 +197,6 @@ export const saveScriptScrollPosition: (connection: string, id: number, top?: nu
             "Accept": "application/json; charset=UTF-8",
             "Content-Type": "application/json; charset=UTF-8",
         },
-        body: JSON.stringify({id, top, left})
+        body: JSON.stringify({id, scrollTop, scrollLeft})
     });
 }
