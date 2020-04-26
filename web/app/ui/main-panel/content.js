@@ -75,7 +75,7 @@ define(["require", "exports", "app/ui/main-panel/editor", "app/controls/splitter
                 .toElement()
                 .addClass("split-content")
                 .css("grid-template-rows", `auto 5px ${_getSplitterVal(id).height}px`);
-            const editor = new editor_1.Editor(element.children[0], element, lang);
+            const editor = new editor_1.Editor(id, element.children[0], element, lang);
             element.dataAttr("editor", editor);
             new splitter_1.HorizontalSplitter({
                 element: element.children[1],

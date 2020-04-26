@@ -25,11 +25,13 @@ export const nullEditor = new (class implements IEditor {
 })();
 
 export class Editor implements IEditor {
+    private id: string;
     private monaco: IStandaloneCodeEditor;
     private readonly content: Element;
     private container: Element;
 
-    constructor(container: Element, content: Element, language: string, scriptContent: IScriptContent = null) {
+    constructor(id: string, container: Element, content: Element, language: string, scriptContent: IScriptContent = null) {
+        this.id = id;
         this.container = container;
         this.content = content;
         const element = String.html`<div style="position: fixed;"></div>`.toElement();
@@ -68,7 +70,7 @@ export class Editor implements IEditor {
     }
 
     initiateLayout() {
-        timeout(() => this.layout(), 25, "editor-layout");
+        timeout(() => this.layout(), 50, `${this.id}-editor-layout`);
         return this;
     }
 
@@ -122,7 +124,7 @@ export class Editor implements IEditor {
             if (viewState != null) {
                 this.content.dataAttr("viewStateHash", viewStateHash);
             }
-        }, 500, "editor-save");
+        }, 500, `${this.id}-editor-save`);
     }
 
     private initiateSaveScroll() {
@@ -134,6 +136,6 @@ export class Editor implements IEditor {
                 const data = this.content.dataAttr("data") as IScriptInfo;
                 await saveScriptScrollPosition(data.connection, data.id, top, left);
             }
-        }, 1000, "editor-scroll");
+        }, 1000, `${this.id}-editor-scroll`);
     }
 }

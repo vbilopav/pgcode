@@ -101,7 +101,7 @@ export default class  {
             .toElement()
             .addClass("split-content")
             .css("grid-template-rows", `auto 5px ${_getSplitterVal(id).height}px`);
-        const editor = new Editor(element.children[0], element, lang);
+        const editor = new Editor(id, element.children[0], element, lang);
         element.dataAttr("editor", editor);
         
         new HorizontalSplitter({

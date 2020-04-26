@@ -9,7 +9,8 @@ define(["require", "exports", "app/api", "app/_sys/pubsub", "app/_sys/timeout", 
         setContent(value) { return this; }
     })();
     class Editor {
-        constructor(container, content, language, scriptContent = null) {
+        constructor(id, container, content, language, scriptContent = null) {
+            this.id = id;
             this.container = container;
             this.content = content;
             const element = String.html `<div style="position: fixed;"></div>`.toElement();
@@ -44,7 +45,7 @@ define(["require", "exports", "app/api", "app/_sys/pubsub", "app/_sys/timeout", 
             return this;
         }
         initiateLayout() {
-            timeout_1.timeout(() => this.layout(), 25, "editor-layout");
+            timeout_1.timeout(() => this.layout(), 50, `${this.id}-editor-layout`);
             return this;
         }
         focus() {
@@ -95,7 +96,7 @@ define(["require", "exports", "app/api", "app/_sys/pubsub", "app/_sys/timeout", 
                 if (viewState != null) {
                     this.content.dataAttr("viewStateHash", viewStateHash);
                 }
-            }, 500, "editor-save");
+            }, 500, `${this.id}-editor-save`);
         }
         initiateSaveScroll() {
             timeout_1.timeoutAsync(async () => {
@@ -106,7 +107,7 @@ define(["require", "exports", "app/api", "app/_sys/pubsub", "app/_sys/timeout", 
                     const data = this.content.dataAttr("data");
                     await api_1.saveScriptScrollPosition(data.connection, data.id, top, left);
                 }
-            }, 1000, "editor-scroll");
+            }, 1000, `${this.id}-editor-scroll`);
         }
     }
     exports.Editor = Editor;
