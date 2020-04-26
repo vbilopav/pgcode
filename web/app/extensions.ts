@@ -43,3 +43,12 @@ Map.prototype.maxBy = function<V> (predicate: (v: V) => any) {
     };
     return result;
 };
+
+Map.prototype.switchByKeys = function (key1: string, key2: string) {
+    const array = Array.from(this.entries()) as [];
+    const keys = Array.from(this.keys());
+    const key1Idx = keys.indexOf(key1);
+    const key2Idx = keys.indexOf(key2);
+    [array[key1Idx], array[key2Idx]] = [array[key2Idx], array[key1Idx]];
+    return new Map(array);
+}

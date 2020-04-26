@@ -112,6 +112,10 @@ interface Element {
      * If state is not present, adds visibility: visible attribute, otherwise toggles between visible and hidden and returns same instance.
      */
     visible(state?: boolean): Element
+
+    clone(deep?: boolean): Element;
+
+    switchPlaces(target: Element): Element;
 }
 /**
  * Set of JQuery-like extensions on NodeList prototype.
@@ -375,10 +379,7 @@ interface String {
 
 interface Map<K, V> {
     first(): V
-}
-interface Map<K, V> {
     where(predicate: (v: V) => boolean): V
-}
-interface Map<K, V> {
     maxBy(predicate: (v: V) => any): V
+    switchByKeys(key1: string, key2: string): Map<K, V>
 }

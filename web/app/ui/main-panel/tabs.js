@@ -25,7 +25,7 @@ define(["require", "exports", "app/api", "app/ui/item-tooltip"], function (requi
             tip = item_tooltip_1.routineTitle(data);
         }
         return String.html `
-        <div class="tab">
+        <div class="tab" draggable="true">
             <i class=${iconClass}></i>
             <span class="title">${title}</span>
             <i class="close" title="close">&#10006</i>

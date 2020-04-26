@@ -97,6 +97,10 @@
                 background: initial;
                 margin-left: -3px;
                 padding-right: 3px;
+                
+                box-shadow: 0px 0px 4px 1px #000000;
+                clip-path: inset(-4px 0px 0px 0px);
+                
             }
         }
 

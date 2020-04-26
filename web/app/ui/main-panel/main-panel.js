@@ -136,7 +136,21 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/ui/mai
             this.content.createNew(id, key, data, content);
             return tabs_1.default(id, key, data)
                 .on("click", e => this.tabClick(e))
-                .on("dblclick", e => this.tabDblClick(e));
+                .on("dblclick", e => this.tabDblClick(e))
+                .on("dragstart", e => {
+                this.activateByTab(e.currentTarget);
+                e.dataTransfer.setData("tab-id", e.currentTarget.id);
+            })
+                .on("dragover", e => e.preventDefault())
+                .on("dragenter", e => e.currentTarget.addClass("drop-target"))
+                .on("dragleave", e => e.currentTarget.removeClass("drop-target"))
+                .on("drop", e => {
+                e.preventDefault();
+                const target = e.currentTarget.removeClass("drop-target");
+                const tab = this.items.get(e.dataTransfer.getData("tab-id")).tab;
+                tab.switchPlaces(target);
+                _updateStorageTabItems(this.items.switchByKeys(target.id, tab.id));
+            });
         }
         makeStickyTab(tab) {
             this.stickyTab = tab;

@@ -4,7 +4,7 @@ define(["js/extensions/apply"], ({loadExtensions, applyExtensions, applyExtensio
         "HTMLElement": [
             "addClass", "appendElement", "appendElementTo", "attr", "css", "dataAttr", "find", "findAll", "forEachChild", "hasClass",
             "hideElement", "html", "off", "on", "overflownX", "overflownY", "removeAttr", "removeClass", "setFocus", "showElement", 
-            "toggleClass", "trigger", "visible"
+            "toggleClass", "trigger", "visible", "clone", "switchPlaces"
         ],
         "String": ["hashCode", "html", "toElement", "toCamelCase", "createElement"]
     }).then(() => {

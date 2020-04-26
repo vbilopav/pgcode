@@ -214,3 +214,14 @@ $panel-item-active-border-color: default;
 @if $theme == "light" {
     $panel-item-active-border-color: #c5c5c557;
 }
+
+//
+// DROP TARGET BACKGROUND COLOR
+//
+$drop-target-background-color: default;
+@if $theme == "dark" {
+    $drop-target-background-color: #3b3e41;
+} 
+@if $theme == "light" {
+    $drop-target-background-color: #3b3e41;
+}

@@ -45,5 +45,13 @@ define(["require", "exports"], function (require, exports) {
         ;
         return result;
     };
+    Map.prototype.switchByKeys = function (key1, key2) {
+        const array = Array.from(this.entries());
+        const keys = Array.from(this.keys());
+        const key1Idx = keys.indexOf(key1);
+        const key2Idx = keys.indexOf(key2);
+        [array[key1Idx], array[key2Idx]] = [array[key2Idx], array[key1Idx]];
+        return new Map(array);
+    };
 });
 //# sourceMappingURL=extensions.js.map

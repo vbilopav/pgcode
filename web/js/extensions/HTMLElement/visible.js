@@ -1,6 +1,6 @@
 define(["js/extensions/test-proto", "js/extensions/HTMLElement/css"], test => {
 
-    test(HTMLElement, ["visible",]);
+    test(HTMLElement, ["visible"]);
 
     HTMLElement.prototype.visible = function(state) {
         if (state !== undefined) {
