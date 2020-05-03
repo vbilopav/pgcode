@@ -1,11 +1,18 @@
-import { ItemInfoType, IRoutineInfo, IScriptInfo, ITableInfo, Keys } from "app/api";
+import { 
+    ItemInfoType, 
+    IRoutineInfo, 
+    IScriptInfo, 
+    ITableInfo, 
+    Keys,
+    ScriptId
+} from "app/api";
 import { scriptTitle, tableTitle, viewTitle, routineTitle } from "app/ui/item-tooltip";
+import { Item } from "app/ui/main-panel/main-panel";
 
-const createTabElement: (id: string, key: Keys, data: ItemInfoType) => Element = (id, key, data) => {
+export const createTabElement: (id: string, key: Keys, data: ItemInfoType) => Element = (id, key, data) => {
     let iconClass : string;
     let title = data.name;
     let tip: string;
-    let tabId: string;
     if (key === Keys.SCRIPTS) {
         iconClass = "icon-doc-text";
         tip = scriptTitle(data as IScriptInfo);
@@ -33,4 +40,10 @@ const createTabElement: (id: string, key: Keys, data: ItemInfoType) => Element =
         .attr("title", tip);
 };
 
-export default createTabElement;
+export const updateScriptTabElement: (items: Map<string, Item>, data: IScriptInfo) => void = (items, data) => {
+    const item = items.get(ScriptId(data.id))
+    if (!item) {
+        return
+    }
+    item.tab.attr("title", scriptTitle(data));
+}

@@ -7,7 +7,7 @@ import {
     STATE_CHANGED_SEARCH,
     TAB_SELECTED
 } from "app/_sys/pubsub";
-import MainPanel from "app/ui/main-panel/main-panel";
+import { MainPanel } from "app/ui/main-panel/main-panel";
 import Panel from "app/ui/side-panel/panel"
 import Scripts from "app/ui/side-panel/scripts";
 import { Tables, Views } from "app/ui/side-panel/tables";

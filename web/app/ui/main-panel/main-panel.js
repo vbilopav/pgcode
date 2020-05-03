@@ -9,7 +9,7 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/ui/mai
     const _updateStorageTabItems = items => setTimeout(() => _storage.items = Array.from(items.entries(), (v, k) => {
         return [v[0], { id: v[1].id, key: v[1].key, timestamp: v[1].timestamp, data: v[1].data }];
     }));
-    class default_1 {
+    class MainPanel {
         constructor(element) {
             this.headerRows = 1;
             this.items = new Map();
@@ -22,6 +22,7 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/ui/mai
             this.initHeaderAdjustment();
             this.restoreItems();
             pubsub_1.subscribe(pubsub_1.SCHEMA_CHANGED, (data, name) => this.schemaChanged(name, data.connection));
+            pubsub_1.subscribe(pubsub_1.SCRIPT_UPDATED, data => tabs_1.updateScriptTabElement(this.items, data));
         }
         unstickById(id) {
             if (this.stickyTab && this.stickyTab.id == id) {
@@ -132,7 +133,7 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/ui/mai
             this.activateByTab(newItem.tab, newItem);
         }
         createNewTab(id, key, data, contentArgs = api_1.ItemContentArgs) {
-            return tabs_1.default(id, key, data)
+            return tabs_1.createTabElement(id, key, data)
                 .on("click", e => this.tabClick(e))
                 .on("dblclick", e => this.tabDblClick(e))
                 .on("dragstart", e => {
@@ -208,6 +209,6 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/ui/mai
             }
         }
     }
-    exports.default = default_1;
+    exports.MainPanel = MainPanel;
 });
 //# sourceMappingURL=main-panel.js.map

@@ -151,7 +151,7 @@ define(["require", "exports", "app/_sys/storage", "app/ui/toolbar/toolbar", "./u
             }).start();
         }
         initComponents() {
-            const mainPanel = new main_panel_1.default(this.container.children[3]);
+            const mainPanel = new main_panel_1.MainPanel(this.container.children[3]);
             new toolbar_1.default(this.container.children[0], storage.toolbarPosition, this);
             new _side_panels_1.default(this.container.children[1], mainPanel);
             new footer_1.default(this.container.children[4]);

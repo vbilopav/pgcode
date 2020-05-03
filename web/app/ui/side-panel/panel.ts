@@ -1,5 +1,5 @@
 import { subscribe, publish, SCHEMA_CHANGED, ITEM_COUNT_CHANGED, TAB_SELECTED, TAB_UNSELECTED } from "app/_sys/pubsub";
-import MainPanel from "app/ui/main-panel/main-panel";
+import { MainPanel } from "app/ui/main-panel/main-panel";
 import { ISchema, ISidePanel, Keys, classes, ItemContentArgs } from "app/api";
 import MonacoContextMenu from "app/controls/monaco-context-menu";
 import { ContextMenuCtorArgs, MenuItemType } from "app/controls/context-menu";

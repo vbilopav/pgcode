@@ -1,11 +1,13 @@
 import Storage from "app/_sys/storage";
-import { subscribe, publish, SPLITTER_CHANGED, TAB_SELECTED, TAB_UNSELECTED, SCHEMA_CHANGED } from "app/_sys/pubsub";
-import createTabElement from "app/ui/main-panel/tabs";
+import { 
+    subscribe, publish, SPLITTER_CHANGED, TAB_SELECTED, TAB_UNSELECTED, SCHEMA_CHANGED, SCRIPT_UPDATED 
+} from "app/_sys/pubsub";
+import { createTabElement, updateScriptTabElement } from "app/ui/main-panel/tabs";
 import Content from "app/ui/main-panel/content";
-import {ItemInfoType, Keys, ISchema, classes, ItemContentArgs} from "app/api";
-import {timeout} from "app/_sys/timeout";
+import { ItemInfoType, Keys, ISchema, classes, ItemContentArgs } from "app/api";
+import { timeout } from "app/_sys/timeout";
 
-interface Item extends IStorageItem {
+export interface Item extends IStorageItem {
     tab: Element
 }
 
@@ -39,7 +41,7 @@ const
             return [v[0], { id: v[1].id, key: v[1].key, timestamp: v[1].timestamp, data: v[1].data } as IStorageItem];
         }));
 
-export default class  {
+export class MainPanel {
     private element: Element;
     private readonly tabs: Element;
     private content: Content;
@@ -61,6 +63,7 @@ export default class  {
 
         this.restoreItems();
         subscribe(SCHEMA_CHANGED, (data: ISchema, name: string) => this.schemaChanged(name, data.connection));
+        subscribe(SCRIPT_UPDATED, data => updateScriptTabElement(this.items, data));
     }
 
     public unstickById(id: string) {

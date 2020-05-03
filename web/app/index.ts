@@ -1,7 +1,7 @@
 import Storage from "app/_sys/storage";
 import Toolbar from "app/ui/toolbar/toolbar";
 import SidePanel from "./ui/side-panel/_side-panels";
-import MainPanel from "app/ui/main-panel/main-panel";
+import { MainPanel } from "app/ui/main-panel/main-panel";
 import Footer from "app/ui/footer/footer";
 import {Splitter, VerticalSplitter, SplitterCtorArgs} from "app/controls/splitter";
 import { Position, Themes, AppStatus, IMain, initializeApi } from "app/api";

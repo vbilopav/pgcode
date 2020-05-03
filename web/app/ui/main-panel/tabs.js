@@ -1,11 +1,10 @@
 define(["require", "exports", "app/api", "app/ui/item-tooltip"], function (require, exports, api_1, item_tooltip_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    const createTabElement = (id, key, data) => {
+    exports.createTabElement = (id, key, data) => {
         let iconClass;
         let title = data.name;
         let tip;
-        let tabId;
         if (key === api_1.Keys.SCRIPTS) {
             iconClass = "icon-doc-text";
             tip = item_tooltip_1.scriptTitle(data);
@@ -32,6 +31,12 @@ define(["require", "exports", "app/api", "app/ui/item-tooltip"], function (requi
             .attr("id", id)
             .attr("title", tip);
     };
-    exports.default = createTabElement;
+    exports.updateScriptTabElement = (items, data) => {
+        const item = items.get(api_1.ScriptId(data.id));
+        if (!item) {
+            return;
+        }
+        item.tab.attr("title", item_tooltip_1.scriptTitle(data));
+    };
 });
 //# sourceMappingURL=tabs.js.map
