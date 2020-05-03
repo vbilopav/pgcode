@@ -11,6 +11,7 @@ define(["require", "exports", "app/api", "app/_sys/pubsub", "app/_sys/timeout", 
     class Editor {
         constructor(id, container, content, language, scriptContent = null) {
             this.id = id;
+            console.log("editor created", this.id);
             this.container = container;
             this.content = content;
             const element = String.html `<div style="position: fixed;"></div>`.toElement();
@@ -32,6 +33,7 @@ define(["require", "exports", "app/api", "app/_sys/pubsub", "app/_sys/timeout", 
         }
         dispose() {
             this.monaco.dispose();
+            console.log("editor disposed", this.id);
             return this;
         }
         layout() {

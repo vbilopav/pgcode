@@ -34,8 +34,7 @@ namespace Pgcode.Migrations._1.Routines
 
                 update {settings.PgCodeSchema}.scripts
                 set 
-                    view_state = (_data->>'viewState')::json,
-                    timestamp = transaction_timestamp()
+                    view_state = (_data->>'viewState')::json
                 where
                     id = (_data->>'id')::int
                 returning timestamp into _timestamp;

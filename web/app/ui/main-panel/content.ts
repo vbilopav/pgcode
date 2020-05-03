@@ -1,6 +1,6 @@
 import {Editor, IEditor, nullEditor} from "app/ui/main-panel/editor";
 import {HorizontalSplitter, SplitterCtorArgs} from "app/controls/splitter";
-import {classes, IScriptContent, ItemInfoType, Keys, Languages, fetchScriptContent} from "app/api";
+import {classes, IScriptContent, ItemInfoType, Keys, Languages, fetchScriptContent, ItemContentArgs} from "app/api";
 import Storage from "app/_sys/storage";
 
 interface IStorageSplitterItem { height?: number, docked?: boolean }
@@ -34,24 +34,47 @@ const
 export default class  {
     private readonly container: Element;
     private active: Element;
+    private stickyId: string;
 
     constructor(element: Element) {
         this.container = element;
     }
 
-    public async createNew(id: string, key: Keys, data: ItemInfoType, content: IScriptContent = null) {
-        if (this.active) {
-            this.active.hideElement();
+    public disposeEditor(id: string) {
+        const e = this.getContentElement(id);
+        if (!e.length) {
+            return
         }
-        const newElement = this.createElement(id, key, content)
+        this.editor(e).dispose();
+    }
+
+    public async createOrActivateContent(id: string, key: Keys, data: ItemInfoType, contentArgs = {content: null, sticky: false}) {
+        if (contentArgs.sticky) {
+            if (this.stickyId && id != this.stickyId) {
+                const e = this.getContentElement(this.stickyId);
+                if (e.length) {
+                    this.editor(e).dispose();
+                    e.remove();
+                }
+            }
+            this.stickyId = id;
+        }
+        await this.createNewContent(id, key, data, contentArgs);
+        this.activate(id);
+    }
+
+    public async createNewContent(id: string, key: Keys, data: ItemInfoType, contentArgs = {content: null, sticky: false}) {
+        if (contentArgs.sticky) {
+            this.stickyId = id;
+        }
+        const newElement = this.createElement(id, key, contentArgs.content)
             .hideElement()
             .attr("id", id)
             .dataAttr("key", key)
             .dataAttr("data", data)
             .addClass("content")
             .appendElementTo(this.container);
-        this.active = newElement;
-        if (!content && key === Keys.SCRIPTS) {
+        if (!contentArgs.content && key === Keys.SCRIPTS) {
             const response = await fetchScriptContent(data.connection, data.id);
             if (response.ok) {
                 this.editor(newElement).setContent(response.data);
@@ -59,16 +82,26 @@ export default class  {
         }
     }
 
+
+    public setStickStatus(id: string, value: boolean) {
+        if (value) {
+            this.stickyId = id;
+        } else {
+            this.stickyId = undefined;
+        }
+    }
+
     public activate(id: string) {
-        const e = this.container.find("#" + id);
+        const e = this.getContentElement(id);
         if (!e.length) {
-            return
+            return false;
         }
         if (this.active) {
             this.active.hideElement().removeClass(classes.active);
         }
         this.active = e.showElement().addClass(classes.active);
         setTimeout(() => this.editor(e).layout().focus());
+        return true;
     }
 
     public remove(id: string) {
@@ -140,5 +173,9 @@ export default class  {
             return editor;
         }
         return nullEditor;
+    }
+
+    private getContentElement(id: string) {
+        return this.container.find("#" + id);
     }
 }

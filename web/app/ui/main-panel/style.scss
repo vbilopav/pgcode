@@ -76,7 +76,8 @@
             }
         }
         & > div.tab.sticky {
-            & > span.title {
+            & > span.title,
+            & > i::before {
                 font-style: italic;
                 width: 100%;
             }
@@ -108,7 +109,9 @@
             height: 100%;
         }
 
+        /*
         .editor {
         }
+        */
     }
 }

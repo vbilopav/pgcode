@@ -32,6 +32,7 @@ export class Editor implements IEditor {
 
     constructor(id: string, container: Element, content: Element, language: string, scriptContent: IScriptContent = null) {
         this.id = id;
+        console.log("editor created", this.id);
         this.container = container;
         this.content = content;
         const element = String.html`<div style="position: fixed;"></div>`.toElement();
@@ -55,6 +56,7 @@ export class Editor implements IEditor {
 
     dispose() {
         this.monaco.dispose();
+        console.log("editor disposed", this.id);
         return this;
     }
 

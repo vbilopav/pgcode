@@ -17,35 +17,64 @@ define(["require", "exports", "app/ui/main-panel/editor", "app/controls/splitter
         constructor(element) {
             this.container = element;
         }
-        async createNew(id, key, data, content = null) {
-            if (this.active) {
-                this.active.hideElement();
+        disposeEditor(id) {
+            const e = this.getContentElement(id);
+            if (!e.length) {
+                return;
             }
-            const newElement = this.createElement(id, key, content)
+            this.editor(e).dispose();
+        }
+        async createOrActivateContent(id, key, data, contentArgs = { content: null, sticky: false }) {
+            if (contentArgs.sticky) {
+                if (this.stickyId && id != this.stickyId) {
+                    const e = this.getContentElement(this.stickyId);
+                    if (e.length) {
+                        this.editor(e).dispose();
+                        e.remove();
+                    }
+                }
+                this.stickyId = id;
+            }
+            await this.createNewContent(id, key, data, contentArgs);
+            this.activate(id);
+        }
+        async createNewContent(id, key, data, contentArgs = { content: null, sticky: false }) {
+            if (contentArgs.sticky) {
+                this.stickyId = id;
+            }
+            const newElement = this.createElement(id, key, contentArgs.content)
                 .hideElement()
                 .attr("id", id)
                 .dataAttr("key", key)
                 .dataAttr("data", data)
                 .addClass("content")
                 .appendElementTo(this.container);
-            this.active = newElement;
-            if (!content && key === api_1.Keys.SCRIPTS) {
+            if (!contentArgs.content && key === api_1.Keys.SCRIPTS) {
                 const response = await api_1.fetchScriptContent(data.connection, data.id);
                 if (response.ok) {
                     this.editor(newElement).setContent(response.data);
                 }
             }
         }
+        setStickStatus(id, value) {
+            if (value) {
+                this.stickyId = id;
+            }
+            else {
+                this.stickyId = undefined;
+            }
+        }
         activate(id) {
-            const e = this.container.find("#" + id);
+            const e = this.getContentElement(id);
             if (!e.length) {
-                return;
+                return false;
             }
             if (this.active) {
                 this.active.hideElement().removeClass(api_1.classes.active);
             }
             this.active = e.showElement().addClass(api_1.classes.active);
             setTimeout(() => this.editor(e).layout().focus());
+            return true;
         }
         remove(id) {
             const e = this.container.find("#" + id);
@@ -111,6 +140,9 @@ define(["require", "exports", "app/ui/main-panel/editor", "app/controls/splitter
                 return editor;
             }
             return editor_1.nullEditor;
+        }
+        getContentElement(id) {
+            return this.container.find("#" + id);
         }
     }
     exports.default = default_1;
