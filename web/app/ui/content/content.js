@@ -1,4 +1,4 @@
-define(["require", "exports", "app/ui/main-panel/editor", "app/controls/splitter", "app/api", "app/_sys/storage"], function (require, exports, editor_1, splitter_1, api_1, storage_1) {
+define(["require", "exports", "app/ui/content/editor", "app/controls/splitter", "app/api", "app/_sys/storage"], function (require, exports, editor_1, splitter_1, api_1, storage_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     const _defaultSplitValue = { height: 50, docked: true };

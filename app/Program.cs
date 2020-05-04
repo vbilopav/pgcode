@@ -128,7 +128,7 @@ namespace Pgcode
 
             Console.WriteLine("Hit CTRL-C to stop the server");
 
-            if (ArgsInclude(args, "-o", "--open") || Environment.IsDevelopment())
+            if (ArgsInclude(args, "-o", "--open"))
             {
                 OpenDefaultBrowser(url);
             }

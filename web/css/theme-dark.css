@@ -273,75 +273,77 @@ body > div.container {
   .main-panel > div {
     width: 100%;
     height: 100%; }
-  .main-panel > div:nth-child(1) {
-    grid-area: tabs;
-    user-select: none;
-    background-color: #252526;
-    margin-left: -4px;
-    padding-right: 4px;
-    display: flex;
-    flex-wrap: wrap; }
-    .main-panel > div:nth-child(1) > div.tab {
-      transition-duration: 0.2s;
-      min-width: 100px;
-      max-width: 400px;
-      display: grid;
-      grid-template-columns: 20px auto 20px;
-      padding-left: 10px;
-      padding-right: 10px;
-      cursor: pointer;
+
+.main-panel > div:nth-child(1) {
+  grid-area: tabs;
+  user-select: none;
+  background-color: #252526;
+  margin-left: -4px;
+  padding-right: 4px;
+  display: flex;
+  flex-wrap: wrap; }
+  .main-panel > div:nth-child(1) > div.tab {
+    transition-duration: 0.2s;
+    min-width: 100px;
+    max-width: 400px;
+    display: grid;
+    grid-template-columns: 20px auto 20px;
+    padding-left: 10px;
+    padding-right: 10px;
+    cursor: pointer;
+    overflow: hidden;
+    border-right: 1px #1E1E1E solid;
+    border-bottom: 1px #1E1E1E solid; }
+    .main-panel > div:nth-child(1) > div.tab > i, .main-panel > div:nth-child(1) > div.tab > span {
+      margin: auto; }
+    .main-panel > div:nth-child(1) > div.tab > span.title {
+      margin-left: 5px;
+      text-overflow: ellipsis;
       overflow: hidden;
-      border-right: 1px #1E1E1E solid;
-      border-bottom: 1px #1E1E1E solid; }
-      .main-panel > div:nth-child(1) > div.tab > i, .main-panel > div:nth-child(1) > div.tab > span {
-        margin: auto; }
-      .main-panel > div:nth-child(1) > div.tab > span.title {
-        margin-left: 5px;
-        text-overflow: ellipsis;
-        overflow: hidden;
-        white-space: nowrap;
-        max-width: 360px;
-        padding-bottom: 1px; }
-      .main-panel > div:nth-child(1) > div.tab > i.close {
-        align-self: end;
-        font: inherit;
-        visibility: hidden;
-        font-size: 14px; }
-      .main-panel > div:nth-child(1) > div.tab > i.close:hover {
-        visibility: visible; }
-    .main-panel > div:nth-child(1) > div.tab:hover > i.close {
+      white-space: nowrap;
+      max-width: 360px;
+      padding-bottom: 1px; }
+    .main-panel > div:nth-child(1) > div.tab > i.close {
+      align-self: end;
+      font: inherit;
+      visibility: hidden;
+      font-size: 14px; }
+    .main-panel > div:nth-child(1) > div.tab > i.close:hover {
       visibility: visible; }
-    .main-panel > div:nth-child(1) > div.tab.active:nth-child(1) {
-      clip-path: inset(-5px -5px 0px 0px); }
-    .main-panel > div:nth-child(1) > div.tab.active {
-      color: #ffffff;
-      background-color: #1E1E1E;
-      box-shadow: 0px 0px 4px 2px #000000;
-      clip-path: inset(-5px -5px 0px -5px); }
-      .main-panel > div:nth-child(1) > div.tab.active > i.close {
-        visibility: visible; }
-    .main-panel > div:nth-child(1) > div.tab.sticky > span.title,
-    .main-panel > div:nth-child(1) > div.tab.sticky > i::before {
-      font-style: italic;
-      width: 100%; }
-    .main-panel > div:nth-child(1) > div.tab.active.upper-row {
-      clip-path: inset(-5px -5px -5px -5px); }
-  .main-panel > div:nth-child(2) {
-    grid-area: content;
-    /*
+  .main-panel > div:nth-child(1) > div.tab:hover > i.close {
+    visibility: visible; }
+  .main-panel > div:nth-child(1) > div.tab.active:nth-child(1) {
+    clip-path: inset(-5px -5px 0px 0px); }
+  .main-panel > div:nth-child(1) > div.tab.active {
+    color: #ffffff;
+    background-color: #1E1E1E;
+    box-shadow: 0px 0px 4px 2px #000000;
+    clip-path: inset(-5px -5px 0px -5px); }
+    .main-panel > div:nth-child(1) > div.tab.active > i.close {
+      visibility: visible; }
+  .main-panel > div:nth-child(1) > div.tab.sticky > span.title,
+  .main-panel > div:nth-child(1) > div.tab.sticky > i::before {
+    font-style: italic;
+    width: 100%; }
+  .main-panel > div:nth-child(1) > div.tab.active.upper-row {
+    clip-path: inset(-5px -5px -5px -5px); }
+
+.main-panel > div:nth-child(2) {
+  grid-area: content;
+  /*
         .editor {
         }
         */ }
-    .main-panel > div:nth-child(2) .split-content {
-      display: grid; }
-      .main-panel > div:nth-child(2) .split-content > .main-split {
-        background: initial;
-        margin-left: -3px;
-        padding-right: 3px;
-        box-shadow: 0px 0px 4px 1px #000000;
-        clip-path: inset(-4px 0px 0px 0px); }
-    .main-panel > div:nth-child(2) .content {
-      height: 100%; }
+  .main-panel > div:nth-child(2) .split-content {
+    display: grid; }
+    .main-panel > div:nth-child(2) .split-content > .main-split {
+      background: initial;
+      margin-left: -3px;
+      padding-right: 3px;
+      box-shadow: 0px 0px 4px 1px #000000;
+      clip-path: inset(-4px 0px 0px 0px); }
+  .main-panel > div:nth-child(2) .content {
+    height: 100%; }
 
 .side-panel {
   grid-area: side-panel;

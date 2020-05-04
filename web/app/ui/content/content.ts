@@ -1,4 +1,4 @@
-import {Editor, IEditor, nullEditor} from "app/ui/main-panel/editor";
+import {Editor, IEditor, nullEditor} from "app/ui/content/editor";
 import {HorizontalSplitter, SplitterCtorArgs} from "app/controls/splitter";
 import {classes, IScriptContent, ItemInfoType, Keys, Languages, fetchScriptContent, ItemContentArgs} from "app/api";
 import Storage from "app/_sys/storage";

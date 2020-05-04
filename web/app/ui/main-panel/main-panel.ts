@@ -3,7 +3,7 @@ import {
     subscribe, publish, SPLITTER_CHANGED, TAB_SELECTED, TAB_UNSELECTED, SCHEMA_CHANGED, SCRIPT_UPDATED 
 } from "app/_sys/pubsub";
 import { createTabElement, updateScriptTabElement } from "app/ui/main-panel/tabs";
-import Content from "app/ui/main-panel/content";
+import Content from "app/ui/content/content";
 import { ItemInfoType, Keys, ISchema, classes, ItemContentArgs } from "app/api";
 import { timeout } from "app/_sys/timeout";
 

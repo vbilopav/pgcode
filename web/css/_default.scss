@@ -30,13 +30,15 @@ body {
 }
 .drop-target {
     background-color: $drop-target-background-color !important;
-  }
+}
 
 @import 'icons.scss';
 @import '../app/index.scss';
 @import '../app/ui/toolbar/style.scss';
 @import '../app/ui/footer/style.scss';
-@import '../app/ui/main-panel/style.scss';
-@import '../app/ui/side-panel/_side-panels.scss';
+@import '../app/ui/main-panel/main-panel.scss';
+@import '../app/ui/main-panel/tabs.scss';
+@import '../app/ui/content/content.scss';
+@import '../app/ui/side-panel/_side-panels.scss'; 
 @import '../app/controls/splitter.scss';
 @import '../app/controls/context-menu.scss';

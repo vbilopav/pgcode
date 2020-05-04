@@ -1,4 +1,4 @@
-define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/ui/main-panel/tabs", "app/ui/main-panel/content", "app/api", "app/_sys/timeout"], function (require, exports, storage_1, pubsub_1, tabs_1, content_1, api_1, timeout_1) {
+define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/ui/main-panel/tabs", "app/ui/content/content", "app/api", "app/_sys/timeout"], function (require, exports, storage_1, pubsub_1, tabs_1, content_1, api_1, timeout_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     const _storage = new storage_1.default({

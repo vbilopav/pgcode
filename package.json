@@ -12,7 +12,7 @@
     "install": "node _tools/install.js",
     "tsc-watch": "tsc -w",
     "css-build-web": "node-sass web/css/theme-dark.scss > web/css/theme-dark.css && node-sass web/css/theme-light.scss > web/css/theme-light.css",
-    "run-dev": "cd app && dotnet run",
+    "run-dev": "cd app && dotnet run -- -o",
     "run-build": "cd app && dotnet run -c release -- -o",
     "build-web": "node .\\_tools\\build.js",
     "build-all": ".\\_tools\\build-exe.bat",

@@ -1,0 +1,13 @@
+.main-panel {
+    grid-area: main-panel;
+
+    height: 100%;
+    display: grid;
+    grid-template-rows: 40px auto;
+    grid-template-areas: 'tabs' 'content';
+
+    & > div {
+        width: 100%;
+        height: 100%;
+    }
+}
