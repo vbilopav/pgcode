@@ -191,8 +191,8 @@ body > div.container {
   background-color: #007ACC;
   user-select: none;
   display: grid;
-  grid-template-columns: 155px       320px 150px  auto 27px;
-  grid-template-areas: 'connections info  schemas gap  feed'; }
+  grid-template-columns: 155px       320px 150px   auto auto 27px;
+  grid-template-areas: 'connections info  schemas gap  user feed'; }
   .footer > div.clickable {
     cursor: pointer; }
   .footer > div.clickable:hover {
@@ -252,6 +252,13 @@ body > div.container {
     opacity: 1; }
   .footer > .footer > span.icon-database {
     margin-right: 3px; }
+  .footer > div.user {
+    grid-area: user;
+    opacity: 0.75;
+    cursor: default; }
+  .footer > div.user > span {
+    padding-left: 10px;
+    padding-right: 10px; }
 
 #feed-footer-menu.footer-menu, #schema-footer-menu {
   background-color: #007ACC; }

@@ -2,7 +2,7 @@ import { ContextMenuCtorArgs, MenuItemType } from "app/controls/context-menu";
 import FooterContextMenu from "app/controls/footer-context-menu";
 import MonacoContextMenu from "app/controls/monaco-context-menu";
 import Storage from "app/_sys/storage";
-import { fetchConnection, fetchSchema, IConnectionInfo, AppStatus } from "app/api";
+import { fetchConnection, fetchSchema, IConnectionInfo, AppStatus, IResponse, IInitialResponse } from "app/api";
 import { publish, subscribe, SET_APP_STATUS, API_INITIAL, SCHEMA_CHANGED } from "app/_sys/pubsub";
 
 interface IStorage {connection: string}
@@ -15,6 +15,7 @@ export default class  {
     private connections: Element;
     private schemas: Element;
     private info: Element;
+    private user: Element;
     private selectedConnection?: IConnectionInfo = null;
     private connectionMenu: FooterContextMenu = null;
     private schemasMenu: FooterContextMenu = null;
@@ -33,6 +34,9 @@ export default class  {
                 <i class="icon-search"></i>
                 <span></span>
             </div>
+            <div class="user clickable">
+                <span></span>
+            </div>
             <div class="feed clickable" title="Send feedback">&#128526;</div>
         `);
 
@@ -44,56 +48,55 @@ export default class  {
     private initConnections(element: Element) {
         this.connections = element.find(".connections");
         this.schemas  = element.find(".schemas");
+        this.user = element.find(".user>span");
 
-        subscribe(API_INITIAL, response => {
+        subscribe(API_INITIAL, (response: IResponse<IInitialResponse>) => {
             if (!response.ok) {
                 this.connections.find("span").html("¯\\_(ツ)_/¯");
-            } else {
-                if (response.data.connections.length === 1) {
-                    
-                    this.selectConnection(response.data.connections[0]);
-                    this.connections.css("cursor", "initial");
-    
-                } else {
-    
-                    const menuItems = new Array<MenuItemType>();
-                    for(let connection of response.data.connections) {
-                        menuItems.push({
-                            id: connection.name, 
-                            text: connection.name, 
-                            data: this.formatTitleFromConn(connection), 
-                            action: () => this.selectConnection(connection)
-                        }); 
-                    }
-                    this.connectionMenu = new FooterContextMenu({
-                        id: "conn-footer-menu", 
-                        event: "click", 
-                        target: this.connections, 
-                        items: menuItems
-                    } as ContextMenuCtorArgs);
+                return;
+            } 
+            this.user.html(response.data.user).attr("title", `signed in as user ${response.data.user}`);
+            if (response.data.connections.length === 1) {
+                this.selectConnection(response.data.connections[0]);
+                this.connections.css("cursor", "initial");
+                return;
+            } 
 
-                    this.schemasMenu = new FooterContextMenu({
-                        id: "schema-footer-menu", 
-                        event: "click", 
-                        target: this.schemas, 
-                        items: []
-                    } as ContextMenuCtorArgs);
-                    
-                    //this.info.on("click", () => this.connections.trigger("click"));
-                    
-                    if (!storage.connection) {
-                        this.selectConnection();
-                    } else {
-                        const name = storage.connection;
-                        const selected = response.data.connections.filter(c => c.name === name);
-                        if (!selected.length) {
-                            storage.connection = name;
-                            this.selectConnection();
-                        } else {
-                            this.selectConnection(selected[0]);
-                        }
-                    }
-    
+            const menuItems = new Array<MenuItemType>();
+            for(let connection of response.data.connections) {
+                menuItems.push({
+                    id: connection.name, 
+                    text: connection.name, 
+                    data: this.formatTitleFromConn(connection), 
+                    action: () => this.selectConnection(connection)
+                }); 
+            }
+            this.connectionMenu = new FooterContextMenu({
+                id: "conn-footer-menu", 
+                event: "click", 
+                target: this.connections, 
+                items: menuItems
+            } as ContextMenuCtorArgs);
+
+            this.schemasMenu = new FooterContextMenu({
+                id: "schema-footer-menu", 
+                event: "click", 
+                target: this.schemas, 
+                items: []
+            } as ContextMenuCtorArgs);
+            
+            //this.info.on("click", () => this.connections.trigger("click"));
+            
+            if (!storage.connection) {
+                this.selectConnection();
+            } else {
+                const name = storage.connection;
+                const selected = response.data.connections.filter(c => c.name === name);
+                if (!selected.length) {
+                    storage.connection = name;
+                    this.selectConnection();
+                } else {
+                    this.selectConnection(selected[0]);
                 }
             }
         });
@@ -232,6 +235,7 @@ export default class  {
         columns[1] = this.info.getBoundingClientRect().width + "px";
         columns[2] = this.schemas.getBoundingClientRect().width + "px";
         columns[3] = "auto";
+        columns[4] = this.user.getBoundingClientRect().width + "px";
         this.footer.css("grid-template-columns", columns.join(" "));
     }
 

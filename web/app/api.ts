@@ -24,10 +24,7 @@ export interface ISidePanel {
     unselectAll() : void
 }
 
-interface IItemContentArgs {content: IScriptContent, sticky: boolean}
-//export const ItemContentArgs: IItemContentArgs = {content: null, sticky: true};
-
-interface IResponse<T> {
+export interface IResponse<T> {
     ok: boolean,
     status: number,
     data?: T
@@ -37,7 +34,7 @@ interface IConnectionResponse extends ISchema {
     schemas: {
         names: Array<string>,
         selected: string
-    },
+    }
 }
 
 interface ISchemaResponse extends ISchema { 
@@ -82,8 +79,9 @@ export interface IScriptContent {
     scrollPosition?: INewScrollPosition
 }
 
-interface IInitialResponse { 
-    connections: Array<IConnectionInfo>
+export interface IInitialResponse { 
+    connections: Array<IConnectionInfo>,
+    user: string
 }
 
 export interface IConnectionInfo {

@@ -20,6 +20,9 @@ define(["require", "exports", "app/controls/footer-context-menu", "app/controls/
                 <i class="icon-search"></i>
                 <span></span>
             </div>
+            <div class="user clickable">
+                <span></span>
+            </div>
             <div class="feed clickable" title="Send feedback">&#128526;</div>
         `);
             this.initConnections(element);
@@ -29,51 +32,51 @@ define(["require", "exports", "app/controls/footer-context-menu", "app/controls/
         initConnections(element) {
             this.connections = element.find(".connections");
             this.schemas = element.find(".schemas");
-            pubsub_1.subscribe(pubsub_1.API_INITIAL, response => {
+            this.user = element.find(".user>span");
+            pubsub_1.subscribe(pubsub_1.API_INITIAL, (response) => {
                 if (!response.ok) {
                     this.connections.find("span").html("¯\\_(ツ)_/¯");
+                    return;
+                }
+                this.user.html(response.data.user).attr("title", `signed in as user ${response.data.user}`);
+                if (response.data.connections.length === 1) {
+                    this.selectConnection(response.data.connections[0]);
+                    this.connections.css("cursor", "initial");
+                    return;
+                }
+                const menuItems = new Array();
+                for (let connection of response.data.connections) {
+                    menuItems.push({
+                        id: connection.name,
+                        text: connection.name,
+                        data: this.formatTitleFromConn(connection),
+                        action: () => this.selectConnection(connection)
+                    });
+                }
+                this.connectionMenu = new footer_context_menu_1.default({
+                    id: "conn-footer-menu",
+                    event: "click",
+                    target: this.connections,
+                    items: menuItems
+                });
+                this.schemasMenu = new footer_context_menu_1.default({
+                    id: "schema-footer-menu",
+                    event: "click",
+                    target: this.schemas,
+                    items: []
+                });
+                if (!storage.connection) {
+                    this.selectConnection();
                 }
                 else {
-                    if (response.data.connections.length === 1) {
-                        this.selectConnection(response.data.connections[0]);
-                        this.connections.css("cursor", "initial");
+                    const name = storage.connection;
+                    const selected = response.data.connections.filter(c => c.name === name);
+                    if (!selected.length) {
+                        storage.connection = name;
+                        this.selectConnection();
                     }
                     else {
-                        const menuItems = new Array();
-                        for (let connection of response.data.connections) {
-                            menuItems.push({
-                                id: connection.name,
-                                text: connection.name,
-                                data: this.formatTitleFromConn(connection),
-                                action: () => this.selectConnection(connection)
-                            });
-                        }
-                        this.connectionMenu = new footer_context_menu_1.default({
-                            id: "conn-footer-menu",
-                            event: "click",
-                            target: this.connections,
-                            items: menuItems
-                        });
-                        this.schemasMenu = new footer_context_menu_1.default({
-                            id: "schema-footer-menu",
-                            event: "click",
-                            target: this.schemas,
-                            items: []
-                        });
-                        if (!storage.connection) {
-                            this.selectConnection();
-                        }
-                        else {
-                            const name = storage.connection;
-                            const selected = response.data.connections.filter(c => c.name === name);
-                            if (!selected.length) {
-                                storage.connection = name;
-                                this.selectConnection();
-                            }
-                            else {
-                                this.selectConnection(selected[0]);
-                            }
-                        }
+                        this.selectConnection(selected[0]);
                     }
                 }
             });
@@ -206,6 +209,7 @@ define(["require", "exports", "app/controls/footer-context-menu", "app/controls/
             columns[1] = this.info.getBoundingClientRect().width + "px";
             columns[2] = this.schemas.getBoundingClientRect().width + "px";
             columns[3] = "auto";
+            columns[4] = this.user.getBoundingClientRect().width + "px";
             this.footer.css("grid-template-columns", columns.join(" "));
         }
         formatTitleFromConn(connection) {

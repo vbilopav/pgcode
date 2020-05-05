@@ -44,7 +44,8 @@ namespace Pgcode.Api
                         Port = c.Connection.Port,
                         Database = c.Connection.Database,
                         User = c.Connection.UserName
-                    })
+                    }),
+                User = UserId
             };
 
         [HttpGet("connection/{connection}")]
