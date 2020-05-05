@@ -3,8 +3,12 @@ import {
     subscribe, publish, SPLITTER_CHANGED, TAB_SELECTED, TAB_UNSELECTED, SCHEMA_CHANGED, SCRIPT_UPDATED 
 } from "app/_sys/pubsub";
 import { createTabElement, updateScriptTabElement } from "app/ui/main-panel/tabs";
+
+import { ContextMenuCtorArgs } from "app/controls/context-menu";
+import MonacoContextMenu from "app/controls/monaco-context-menu";
+
 import Content from "app/ui/content/content";
-import { ItemInfoType, Keys, ISchema, classes, ItemContentArgs } from "app/api";
+import { ItemInfoType, Keys, ISchema, classes, IScriptContent } from "app/api";
 import { timeout } from "app/_sys/timeout";
 
 export interface Item extends IStorageItem {
@@ -24,6 +28,8 @@ interface IStorage {
     items: Array<[string, IStorageItem]>
 }
 
+interface IItemContentArgs {content: IScriptContent, sticky: boolean}
+
 const 
     _storage = new Storage({
             stickyId: null,
@@ -41,9 +47,12 @@ const
             return [v[0], { id: v[1].id, key: v[1].key, timestamp: v[1].timestamp, data: v[1].data } as IStorageItem];
         }));
 
+let contextMenu: MonacoContextMenu;
+
 export class MainPanel {
     private element: Element;
     private readonly tabs: Element;
+    private readonly hiddenCopy: Element;
     private content: Content;
     private headerHeight: number;
     private headerRows: number = 1;
@@ -58,12 +67,42 @@ export class MainPanel {
                 <div></div>
             `);
         this.tabs = element.children[0];
+        
+        contextMenu = new MonacoContextMenu({
+            id: "main-panel-tabs-ctx-menu", 
+            items: [
+                {text: "Close", action: (_, tab: Element) => this.removeByTab(tab)},
+                {text: "Close to the Right", action: (_, tab: Element) => this.removeToTheRightByTab(tab)},
+                {text: "Close to the Left", action: (_, tab: Element) => this.removeToTheLeftByTab(tab)},
+                {splitter: true},
+                {text: "Copy content", action: (_, tab: Element) => this.copyContentByTab(tab)},
+            ], 
+            target: this.tabs,
+            beforeOpen: (menu, event) => {
+                for(let p of event.composedPath() as Array<Element>)
+                {
+                    if (p.hasClass("main-panel")) {
+                        return false;
+                    }
+                    if (p.hasClass("tab")) {
+                        menu.args = p;
+                        return true;
+                    }
+                }
+                return false;
+            }
+        } as ContextMenuCtorArgs);
+        
         this.content = new Content(element.children[1]);
         this.initHeaderAdjustment();
 
         this.restoreItems();
         subscribe(SCHEMA_CHANGED, (data: ISchema, name: string) => this.schemaChanged(name, data.connection));
         subscribe(SCRIPT_UPDATED, data => updateScriptTabElement(this.items, data));
+
+        this.hiddenCopy = (
+            String.html`<textarea id="main-panel-hidden-copy" type="text" class="out-of-viewport"></textarea>` as String).toElement().
+            appendElementTo(document.body) as HTMLElement;
     }
 
     public unstickById(id: string) {
@@ -75,7 +114,7 @@ export class MainPanel {
         }
     }
 
-    public activate(id: string, key: Keys, data: ItemInfoType, contentArgs = ItemContentArgs) {
+    public activate(id: string, key: Keys, data: ItemInfoType, contentArgs: IItemContentArgs) {
         const item = this.items.get(id);
         if (item) {
             // tab already exists
@@ -84,7 +123,7 @@ export class MainPanel {
         } else {
             // create a new tab
             this.content.createOrActivateContent(id, key, data, contentArgs); 
-            const tab = this.createNewTab(id, key, data, contentArgs);
+            const tab = this.createNewTab(id, key, data);
             if (contentArgs.sticky) {
                 if (this.stickyTab) {
                     this.items.delete(this.stickyTab.id);
@@ -186,7 +225,7 @@ export class MainPanel {
         this.activateByTab(newItem.tab, newItem);
     }
 
-    private createNewTab(id: string, key: Keys, data: ItemInfoType, contentArgs = ItemContentArgs) {
+    private createNewTab(id: string, key: Keys, data: ItemInfoType) {
         return createTabElement(id, key, data)
             .on("click", e => this.tabClick(e))
             .on("dblclick", e => this.tabDblClick(e))
@@ -230,6 +269,7 @@ export class MainPanel {
         if (tab.hasClass(classes.sticky)) {
             tab.removeClass(classes.sticky);
             this.stickyTab = null;
+            _storage.stickyId = null;
             this.content.setStickStatus(tab.id, false);
         }
     }
@@ -266,5 +306,35 @@ export class MainPanel {
             this.element.css("grid-template-rows", `${rows * this.headerHeight}px auto`);
             this.headerRows = rows;
         }
+    }
+
+    private removeToTheRightByTab(tab: Element) {
+        this.removeSiblingsByTab(tab, "nextElementSibling");
+    }
+
+    private removeToTheLeftByTab(tab: Element) {
+        this.removeSiblingsByTab(tab, "previousElementSibling");
+    }
+
+    private removeSiblingsByTab(tab: Element, property: string) {
+        const remove = Array<Element>();
+        while(true) {
+            tab = tab[property];
+            if (!tab || !tab.hasClass("tab")) {
+                break;
+            }
+            remove.push(tab);
+        }
+        if (remove.length) {
+            remove.forEach(tab => this.removeByTab(tab));
+            _updateStorageTabItems(this.items);
+        }
+    }
+
+    private copyContentByTab(tab: Element) {
+        this.hiddenCopy.html(this.content.getContent(tab.id));
+        (this.hiddenCopy as HTMLInputElement).select();
+        document.execCommand("copy");
+        this.hiddenCopy.html("");
     }
 }

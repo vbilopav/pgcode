@@ -16,6 +16,7 @@ define(["require", "exports", "app/_sys/pubsub", "app/api", "app/controls/monaco
             this.element.css("top", (target.top + target.height) + "px").css("left", left + "px").css("min-width", target.width + "px").visible(true);
         }
     }
+    const contentArgs = { content: null, sticky: true };
     class Panel {
         constructor(element, key, menuItems = []) {
             this.element = element;
@@ -32,7 +33,7 @@ define(["require", "exports", "app/_sys/pubsub", "app/api", "app/controls/monaco
             this.items.on("click", e => this.itemsClick(e));
             this.items.on("dblclick", e => this.itemsDblClick(e));
             pubsub_1.subscribe(pubsub_1.SCHEMA_CHANGED, (data, name) => this.schemaChanged(data, name));
-            pubsub_1.subscribe(pubsub_1.TAB_SELECTED, (id) => this.selectItemByElement(this.items.find(`#${id}`), false));
+            pubsub_1.subscribe(pubsub_1.TAB_SELECTED, (id) => this.selectItemByElement(this.items.find(`#${id}`), false, contentArgs));
             pubsub_1.subscribe(pubsub_1.TAB_UNSELECTED, (id) => this.unselectItemByElement(this.items.find(`#${id}`), false));
         }
         show(state) {
@@ -61,14 +62,14 @@ define(["require", "exports", "app/_sys/pubsub", "app/api", "app/controls/monaco
         </div>`
                 .toElement();
         }
-        itemSelected(element, contentArgs = api_1.ItemContentArgs) { }
+        itemSelected(element, contentArgs) { }
         ;
         itemUnselected(element) { }
         ;
         publishLength() {
             pubsub_1.publish(pubsub_1.ITEM_COUNT_CHANGED, this.key, this.items.children.length);
         }
-        selectItemByElement(element, emitEvents = true, contentArgs = api_1.ItemContentArgs) {
+        selectItemByElement(element, emitEvents = true, contentArgs) {
             if (element.length === 0) {
                 return;
             }
@@ -96,7 +97,7 @@ define(["require", "exports", "app/_sys/pubsub", "app/api", "app/controls/monaco
                 return;
             }
             this.sidePanel.unselectAll();
-            this.selectItemByElement(element, true);
+            this.selectItemByElement(element, true, contentArgs);
         }
         itemsDblClick(e) {
             const element = e.target.closest("div.panel-item");

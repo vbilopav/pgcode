@@ -1,4 +1,4 @@
-define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/ui/main-panel/tabs", "app/ui/content/content", "app/api", "app/_sys/timeout"], function (require, exports, storage_1, pubsub_1, tabs_1, content_1, api_1, timeout_1) {
+define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/ui/main-panel/tabs", "app/controls/monaco-context-menu", "app/ui/content/content", "app/api", "app/_sys/timeout"], function (require, exports, storage_1, pubsub_1, tabs_1, monaco_context_menu_1, content_1, api_1, timeout_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     const _storage = new storage_1.default({
@@ -9,6 +9,7 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/ui/mai
     const _updateStorageTabItems = items => setTimeout(() => _storage.items = Array.from(items.entries(), (v, k) => {
         return [v[0], { id: v[1].id, key: v[1].key, timestamp: v[1].timestamp, data: v[1].data }];
     }));
+    let contextMenu;
     class MainPanel {
         constructor(element) {
             this.headerRows = 1;
@@ -18,11 +19,36 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/ui/mai
                 <div></div>
             `);
             this.tabs = element.children[0];
+            contextMenu = new monaco_context_menu_1.default({
+                id: "main-panel-tabs-ctx-menu",
+                items: [
+                    { text: "Close", action: (_, tab) => this.removeByTab(tab) },
+                    { text: "Close to the Right", action: (_, tab) => this.removeToTheRightByTab(tab) },
+                    { text: "Close to the Left", action: (_, tab) => this.removeToTheLeftByTab(tab) },
+                    { splitter: true },
+                    { text: "Copy content", action: (_, tab) => this.copyContentByTab(tab) },
+                ],
+                target: this.tabs,
+                beforeOpen: (menu, event) => {
+                    for (let p of event.composedPath()) {
+                        if (p.hasClass("main-panel")) {
+                            return false;
+                        }
+                        if (p.hasClass("tab")) {
+                            menu.args = p;
+                            return true;
+                        }
+                    }
+                    return false;
+                }
+            });
             this.content = new content_1.default(element.children[1]);
             this.initHeaderAdjustment();
             this.restoreItems();
             pubsub_1.subscribe(pubsub_1.SCHEMA_CHANGED, (data, name) => this.schemaChanged(name, data.connection));
             pubsub_1.subscribe(pubsub_1.SCRIPT_UPDATED, data => tabs_1.updateScriptTabElement(this.items, data));
+            this.hiddenCopy = String.html `<textarea id="main-panel-hidden-copy" type="text" class="out-of-viewport"></textarea>`.toElement().
+                appendElementTo(document.body);
         }
         unstickById(id) {
             if (this.stickyTab && this.stickyTab.id == id) {
@@ -32,14 +58,14 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/ui/mai
                 this.content.setStickStatus(id, false);
             }
         }
-        activate(id, key, data, contentArgs = api_1.ItemContentArgs) {
+        activate(id, key, data, contentArgs) {
             const item = this.items.get(id);
             if (item) {
                 this.activateByTab(item.tab);
             }
             else {
                 this.content.createOrActivateContent(id, key, data, contentArgs);
-                const tab = this.createNewTab(id, key, data, contentArgs);
+                const tab = this.createNewTab(id, key, data);
                 if (contentArgs.sticky) {
                     if (this.stickyTab) {
                         this.items.delete(this.stickyTab.id);
@@ -132,7 +158,7 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/ui/mai
             let newItem = this.items.maxBy(v => v.timestamp);
             this.activateByTab(newItem.tab, newItem);
         }
-        createNewTab(id, key, data, contentArgs = api_1.ItemContentArgs) {
+        createNewTab(id, key, data) {
             return tabs_1.createTabElement(id, key, data)
                 .on("click", e => this.tabClick(e))
                 .on("dblclick", e => this.tabDblClick(e))
@@ -173,6 +199,7 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/ui/mai
             if (tab.hasClass(api_1.classes.sticky)) {
                 tab.removeClass(api_1.classes.sticky);
                 this.stickyTab = null;
+                _storage.stickyId = null;
                 this.content.setStickStatus(tab.id, false);
             }
         }
@@ -207,6 +234,32 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/ui/mai
                 this.element.css("grid-template-rows", `${rows * this.headerHeight}px auto`);
                 this.headerRows = rows;
             }
+        }
+        removeToTheRightByTab(tab) {
+            this.removeSiblingsByTab(tab, "nextElementSibling");
+        }
+        removeToTheLeftByTab(tab) {
+            this.removeSiblingsByTab(tab, "previousElementSibling");
+        }
+        removeSiblingsByTab(tab, property) {
+            const remove = Array();
+            while (true) {
+                tab = tab[property];
+                if (!tab || !tab.hasClass("tab")) {
+                    break;
+                }
+                remove.push(tab);
+            }
+            if (remove.length) {
+                remove.forEach(tab => this.removeByTab(tab));
+                _updateStorageTabItems(this.items);
+            }
+        }
+        copyContentByTab(tab) {
+            this.hiddenCopy.html(this.content.getContent(tab.id));
+            this.hiddenCopy.select();
+            document.execCommand("copy");
+            this.hiddenCopy.html("");
         }
     }
     exports.MainPanel = MainPanel;

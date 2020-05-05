@@ -1,4 +1,4 @@
-define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "../../controls/monaco-context-menu", "app/api"], function (require, exports, storage_1, pubsub_1, monaco_context_menu_1, api_1) {
+define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/controls/monaco-context-menu", "app/api"], function (require, exports, storage_1, pubsub_1, monaco_context_menu_1, api_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var ButtonRoles;

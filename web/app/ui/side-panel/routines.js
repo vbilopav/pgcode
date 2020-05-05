@@ -33,9 +33,9 @@ define(["require", "exports", "app/api", "app/ui/side-panel/panel", "app/ui/item
                 .attr("id", api_1.RoutineId(item.id))
                 .appendElementTo(this.items);
         }
-        itemSelected(element, contentArgs = api_1.ItemContentArgs) {
+        itemSelected(element, contentArgs) {
             const item = element.dataAttr("item");
-            this.mainPanel.activate(api_1.RoutineId(item.id), api_1.Keys.ROUTINES, item);
+            this.mainPanel.activate(api_1.RoutineId(item.id), api_1.Keys.ROUTINES, item, contentArgs);
         }
         ;
     }

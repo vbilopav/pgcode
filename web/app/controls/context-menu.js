@@ -26,7 +26,7 @@ define(["require", "exports", "app/_sys/pubsub"], function (require, exports, pu
                 }
             });
             this.target = target.on(event, (e) => {
-                if (!beforeOpen(this)) {
+                if (!beforeOpen(this, e)) {
                     return;
                 }
                 if (Object.keys(this.items).length === 0) {
@@ -122,7 +122,7 @@ define(["require", "exports", "app/_sys/pubsub"], function (require, exports, pu
             }
             else {
                 item.element = this.menuItemElement(menuItem).on("click", () => {
-                    menuItem.action(menuItem.args);
+                    menuItem.action(menuItem.args, this.args);
                 });
             }
         }

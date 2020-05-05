@@ -14,6 +14,7 @@ export interface IEditor {
     initiateLayout(): IEditor;
     focus(): IEditor;
     setContent(value: IScriptContent) : IEditor;
+    getContent() : string;
 }
 
 export const nullEditor = new (class implements IEditor {
@@ -22,6 +23,7 @@ export const nullEditor = new (class implements IEditor {
     layout() {return this}
     focus() {return this}
     setContent(value: IScriptContent) {return this}
+    getContent() : string {return null}
 })();
 
 export class Editor implements IEditor {
@@ -98,6 +100,10 @@ export class Editor implements IEditor {
             this.monaco.setScrollPosition(value.scrollPosition);
         }
         return this;
+    }
+
+    getContent() : string {
+        return this.monaco.getValue();
     }
 
     private initiateSaveContent() {

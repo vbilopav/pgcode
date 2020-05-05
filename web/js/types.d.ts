@@ -66,7 +66,8 @@ interface Element {
     /**
      * Sets innerHTML value of element or elements and returns same instance.
      */
-    html(content?: string): Element
+    html(content: string): Element
+    html(): String
     /**
      * Removes event listeners from element or elements (calls `removeEventListener`) and returns same instance.
      */
@@ -161,7 +162,8 @@ interface NodeList {
     /**
      * Sets innerHTML value of element or elements and returns same instance.
      */
-    html(content?: string): NodeList
+    html(content: string): NodeList
+    html(): String
     /**
      * Removes event listeners from element or elements (calls `removeEventListener`) and returns same instance.
      */
@@ -246,6 +248,7 @@ interface HTMLCollection {
      * Sets innerHTML value of element or elements and returns same instance.
      */
     html(content?: string): HTMLCollection
+    html(): String
     /**
      * Removes event listeners from element or elements (calls `removeEventListener`) and returns same instance.
      */

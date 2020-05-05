@@ -101,7 +101,7 @@ export default class  {
 
     private initInfo(element: Element) {
         this.info = element.find(".info");
-        const hidden = (String.html`<input id="hidden" type="text" class="out-of-viewport" />` as String).
+        const hidden = (String.html`<input id="footer-copy" type="text" class="out-of-viewport" />` as String).
             toElement().
             appendElementTo(document.body) as HTMLInputElement;
         new MonacoContextMenu({
@@ -121,6 +121,7 @@ export default class  {
                         hidden.value = txt;
                         hidden.select();
                         document.execCommand("copy");
+                        hidden.value = "";
                     }
                 });
                 return true;
@@ -176,9 +177,9 @@ export default class  {
             if (this.connectionMenu) {
                 const checked = this.connectionMenu.getCheckedItem();
                 if (checked) {
-                    this.connectionMenu.updateMenuItem(checked.id, {checked: false});
+                    this.connectionMenu.updateMenuItem(checked.id, {checked: false} as MenuItemType);
                 }
-                this.connectionMenu.updateMenuItem(name, {checked: true});
+                this.connectionMenu.updateMenuItem(name, {checked: true} as MenuItemType);
             }
             storage.connection = name;
 
@@ -209,13 +210,13 @@ export default class  {
     private selectSchema(name: string) {
         const checked = this.schemasMenu.getCheckedItem();
         if (checked) {
-            this.schemasMenu.updateMenuItem(checked.id, {checked: false})
+            this.schemasMenu.updateMenuItem(checked.id, {checked: false} as MenuItemType)
         } else {
             if (checked.id === name) {
                 return;
             }
         }
-        this.schemasMenu.updateMenuItem(name, {checked: true});
+        this.schemasMenu.updateMenuItem(name, {checked: true} as MenuItemType);
         this.schemas.showElement().find("span").html(name);
     }
 

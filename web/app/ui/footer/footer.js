@@ -80,7 +80,7 @@ define(["require", "exports", "app/controls/footer-context-menu", "app/controls/
         }
         initInfo(element) {
             this.info = element.find(".info");
-            const hidden = String.html `<input id="hidden" type="text" class="out-of-viewport" />`.
+            const hidden = String.html `<input id="footer-copy" type="text" class="out-of-viewport" />`.
                 toElement().
                 appendElementTo(document.body);
             new monaco_context_menu_1.default({
@@ -100,6 +100,7 @@ define(["require", "exports", "app/controls/footer-context-menu", "app/controls/
                             hidden.value = txt;
                             hidden.select();
                             document.execCommand("copy");
+                            hidden.value = "";
                         }
                     });
                     return true;

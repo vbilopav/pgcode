@@ -1,6 +1,6 @@
 import {Editor, IEditor, nullEditor} from "app/ui/content/editor";
 import {HorizontalSplitter, SplitterCtorArgs} from "app/controls/splitter";
-import {classes, IScriptContent, ItemInfoType, Keys, Languages, fetchScriptContent, ItemContentArgs} from "app/api";
+import {classes, IScriptContent, ItemInfoType, Keys, Languages, fetchScriptContent} from "app/api";
 import Storage from "app/_sys/storage";
 
 interface IStorageSplitterItem { height?: number, docked?: boolean }
@@ -102,6 +102,18 @@ export default class  {
         this.active = e.showElement().addClass(classes.active);
         setTimeout(() => this.editor(e).layout().focus());
         return true;
+    }
+
+    public getContent(id: string) {
+        const e = this.getContentElement(id);
+        if (!e.length) {
+            return null;
+        }
+        const editor = e.dataAttr("editor") as IEditor;
+        if (editor) {
+            return editor.getContent();
+        }
+        return e.html().trim();
     }
 
     public remove(id: string) {

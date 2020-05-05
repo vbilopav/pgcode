@@ -25,7 +25,7 @@ export interface ISidePanel {
 }
 
 interface IItemContentArgs {content: IScriptContent, sticky: boolean}
-export const ItemContentArgs: IItemContentArgs = {content: null, sticky: true};
+//export const ItemContentArgs: IItemContentArgs = {content: null, sticky: true};
 
 interface IResponse<T> {
     ok: boolean,

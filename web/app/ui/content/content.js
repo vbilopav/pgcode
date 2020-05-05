@@ -76,6 +76,17 @@ define(["require", "exports", "app/ui/content/editor", "app/controls/splitter", 
             setTimeout(() => this.editor(e).layout().focus());
             return true;
         }
+        getContent(id) {
+            const e = this.getContentElement(id);
+            if (!e.length) {
+                return null;
+            }
+            const editor = e.dataAttr("editor");
+            if (editor) {
+                return editor.getContent();
+            }
+            return e.html().trim();
+        }
         remove(id) {
             const e = this.container.find("#" + id);
             if (!e.length) {

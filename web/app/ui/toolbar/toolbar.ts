@@ -10,7 +10,7 @@ import {
     TAB_SELECTED
 } from "app/_sys/pubsub";
 import { ContextMenuCtorArgs, MenuItemType } from "app/controls/context-menu";
-import MonacoContextMenu from "../../controls/monaco-context-menu";
+import MonacoContextMenu from "app/controls/monaco-context-menu";
 import { Position, IMain, Keys, getCurrentSchema, getCurrentConnection, classes } from "app/api";
 
 enum ButtonRoles { switch="switch", toggle="toggle" };
@@ -151,7 +151,7 @@ export default class  {
         this.toolbar.addClass(classes.docked);
         for(let btn of this.buttons) {
             if (btn.hasClass(classes.active) && _isSwitch(btn)) {
-                this.menu.updateMenuItem(btn.dataAttr("key"), {checked: false});
+                this.menu.updateMenuItem(btn.dataAttr("key"), {checked: false} as MenuItemType);
             }
         }
     }
@@ -165,7 +165,7 @@ export default class  {
             let btn = this.buttons.namedItem(item.id);
             if (btn.hasClass(classes.active)) {
                 hasActive = true;
-                this.menu.updateMenuItem(btn.dataAttr("key"), {checked: true});
+                this.menu.updateMenuItem(btn.dataAttr("key"), {checked: true} as MenuItemType);
                 break;
             }
         }
@@ -176,7 +176,7 @@ export default class  {
                     btn.addClass(classes.active);
                     _storage[key] = true;
                     publish(STATE_CHANGED + key, key, true);
-                    this.menu.updateMenuItem(key, {checked: true});
+                    this.menu.updateMenuItem(key, {checked: true} as MenuItemType);
                     break;
                 }
             }
@@ -193,7 +193,7 @@ export default class  {
             setTimeout(() => publish(STATE_CHANGED + key, key, true));
         }
         if (_isSwitch(e)) {
-            this.menu.updateMenuItem(key, {checked: state});
+            this.menu.updateMenuItem(key, {checked: state} as MenuItemType);
         }
     }
 
@@ -217,7 +217,7 @@ export default class  {
             _storage[key] = state;
             publish(STATE_CHANGED + key, key, state);
             if (switchRole) {
-                this.menu.updateMenuItem(key, {checked: state});
+                this.menu.updateMenuItem(key, {checked: state} as MenuItemType);
             }
         };
 
@@ -235,7 +235,7 @@ export default class  {
                     if (btn.hasClass(classes.active)) {
                         btn.removeClass("active");
                         publish(STATE_CHANGED + key, key, false);
-                        this.menu.updateMenuItem(key, {checked: false});
+                        this.menu.updateMenuItem(key, {checked: false} as MenuItemType);
                     }
                 }
             }

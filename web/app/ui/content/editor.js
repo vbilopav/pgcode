@@ -7,6 +7,7 @@ define(["require", "exports", "app/api", "app/_sys/pubsub", "app/_sys/timeout", 
         layout() { return this; }
         focus() { return this; }
         setContent(value) { return this; }
+        getContent() { return null; }
     })();
     class Editor {
         constructor(id, container, content, language, scriptContent = null) {
@@ -71,6 +72,9 @@ define(["require", "exports", "app/api", "app/_sys/pubsub", "app/_sys/timeout", 
                 this.monaco.setScrollPosition(value.scrollPosition);
             }
             return this;
+        }
+        getContent() {
+            return this.monaco.getValue();
         }
         initiateSaveContent() {
             timeout_1.timeoutAsync(async () => {

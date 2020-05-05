@@ -12,7 +12,7 @@ interface ContextMenuItem extends ContextMenuBase {
     checked?: boolean, 
     keyBindingsInfo?: string, 
     args?: any, 
-    action?: (args?: any) => any
+    action?: (args1?: any, args2?: any) => any
 }
 
 type MenuItemType = ContextMenuItem | ContextMenuSplitter;
@@ -27,16 +27,17 @@ interface ContextMenuCtorArgs {
     target: Element | ElementResult,
     event: "contextmenu" | "click",
     menuItemsCallback: (items: Array<MenuItemType>) => Array<MenuItemType>,
-    beforeOpen: (menu: ContextMenu) => boolean,
+    beforeOpen: (menu: ContextMenu, e?: MouseEvent) => boolean,
     onOpen: (menu?: ContextMenu) => any,
     onClose: (menu?: ContextMenu) => any;
 }
 
 abstract class ContextMenu {
-
     public readonly element: Element;
     public readonly target: Element;
     public readonly id: string;
+
+    public args?: any;
 
     protected items: {[id: string] : MenuItemType};
     protected actions: Element;
@@ -80,7 +81,7 @@ abstract class ContextMenu {
         });
 
         this.target = target.on(event, (e: MouseEvent) => {
-            if (!beforeOpen(this)) {
+            if (!beforeOpen(this, e)) {
                 return;
             }
             if (Object.keys(this.items).length === 0) {
@@ -131,7 +132,7 @@ abstract class ContextMenu {
         }
     }
 
-    public updateMenuItem(id: string, data: {}) {
+    public updateMenuItem(id: string, data: MenuItemType) {
         const item = this.items[id];
         const newItem = {...(item ? item : {}), ...data} as ContextMenuItem;
         this.updateItemElement(newItem);
@@ -191,7 +192,7 @@ abstract class ContextMenu {
             item.element = this.menuSplitterElement();
         } else {
             item.element = this.menuItemElement(menuItem).on("click", () => {
-                menuItem.action(menuItem.args);
+                menuItem.action(menuItem.args, this.args);
             });
         }
     }

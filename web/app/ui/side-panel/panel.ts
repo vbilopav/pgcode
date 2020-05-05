@@ -1,6 +1,6 @@
 import { subscribe, publish, SCHEMA_CHANGED, ITEM_COUNT_CHANGED, TAB_SELECTED, TAB_UNSELECTED } from "app/_sys/pubsub";
 import { MainPanel } from "app/ui/main-panel/main-panel";
-import { ISchema, ISidePanel, Keys, classes, ItemContentArgs } from "app/api";
+import { ISchema, ISidePanel, Keys, classes } from "app/api";
 import MonacoContextMenu from "app/controls/monaco-context-menu";
 import { ContextMenuCtorArgs, MenuItemType } from "app/controls/context-menu";
 import {timeout} from "app/_sys/timeout";
@@ -19,6 +19,8 @@ class PanelMenu extends MonacoContextMenu {
         this.element.css("top", (target.top + target.height) + "px").css("left", left + "px").css("min-width", target.width + "px").visible(true);
     }
 }
+
+const contentArgs = {content: null, sticky: true};
 
 export default abstract class Panel {
     protected readonly key: Keys;
@@ -44,7 +46,7 @@ export default abstract class Panel {
         this.items.on("dblclick", e => this.itemsDblClick(e));
         
         subscribe(SCHEMA_CHANGED, (data: ISchema, name: string) => this.schemaChanged(data, name));
-        subscribe(TAB_SELECTED, (id: string) => this.selectItemByElement(this.items.find(`#${id}`), false));
+        subscribe(TAB_SELECTED, (id: string) => this.selectItemByElement(this.items.find(`#${id}`), false, contentArgs));
         subscribe(TAB_UNSELECTED, (id: string) => this.unselectItemByElement(this.items.find(`#${id}`), false));
     }
 
@@ -81,7 +83,7 @@ export default abstract class Panel {
 
     protected abstract schemaChanged(data: ISchema, name: string) : void;
 
-    protected itemSelected(element: Element, contentArgs = ItemContentArgs) : void {};
+    protected itemSelected(element: Element, contentArgs) : void {};
 
     protected itemUnselected(element: Element) : void {};
 
@@ -89,7 +91,7 @@ export default abstract class Panel {
         publish(ITEM_COUNT_CHANGED, this.key, this.items.children.length);
     }
 
-    protected selectItemByElement(element: Element, emitEvents = true, contentArgs = ItemContentArgs) {
+    protected selectItemByElement(element: Element, emitEvents = true, contentArgs) {
         if ((element as ElementResult).length === 0) {
             return;
         }
@@ -118,7 +120,7 @@ export default abstract class Panel {
             return
         }
         this.sidePanel.unselectAll();
-        this.selectItemByElement(element, true);
+        this.selectItemByElement(element, true, contentArgs);
     }
 
     private itemsDblClick(e: Event){

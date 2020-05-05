@@ -35,7 +35,6 @@ define(["require", "exports", "app/_sys/pubsub", "vs/editor/editor.main"], funct
     (function (Languages) {
         Languages["PGSQL"] = "pgsql";
     })(Languages = exports.Languages || (exports.Languages = {}));
-    exports.ItemContentArgs = { content: null, sticky: true };
     const _createResponse = (response, data) => Object({ ok: response.ok, status: response.status, data: data });
     const _fetchAndPublishStatus = async (url, init) => {
         pubsub_1.publish(pubsub_1.SET_APP_STATUS, AppStatus.BUSY);
