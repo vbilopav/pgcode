@@ -110,7 +110,7 @@ define(["require", "exports", "app/ui/content/editor", "app/controls/splitter", 
             <div>
                 <div class="editor"></div>
                 <div></div>
-                <div class="grid"></div>
+                <div class="results-pane"></div>
             </div>`
                 .toElement()
                 .addClass("split-content")

@@ -55,7 +55,7 @@ export default class  {
                 this.connections.find("span").html("¯\\_(ツ)_/¯");
                 return;
             } 
-            this.user.html(response.data.user).attr("title", `signed in as user ${response.data.user}`);
+            this.user.html(response.data.user).attr("title", `signed in into pgcode as user ${response.data.user}`);
             if (response.data.connections.length === 1) {
                 this.selectConnection(response.data.connections[0]);
                 this.connections.css("cursor", "initial");

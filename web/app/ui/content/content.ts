@@ -141,7 +141,7 @@ export default class  {
             <div>
                 <div class="editor"></div>
                 <div></div>
-                <div class="grid"></div>
+                <div class="results-pane"></div>
             </div>` as string)
             .toElement()
             .addClass("split-content")
