@@ -33,12 +33,12 @@ export default class extends Panel {
         `)
         .dataAttr("item", item)
         .attr("title", routineTitle(item))
-        .attr("id", RoutineId(item.id))
+        .attr("id", RoutineId(item))
         .appendElementTo(this.items);
     }
 
     protected itemSelected(element: Element, contentArgs) {
         const item = element.dataAttr("item") as IRoutineInfo;
-        this.mainPanel.activate(RoutineId(item.id), Keys.ROUTINES, item, contentArgs);
+        this.mainPanel.activate(RoutineId(item), Keys.ROUTINES, item, contentArgs);
     };
 }

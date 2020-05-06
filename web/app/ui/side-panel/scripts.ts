@@ -15,7 +15,7 @@ export default class extends Panel {
             {text: "Order descending"},
         ]);
         subscribe(SCRIPT_UPDATED, (data: IScriptInfo) => 
-            this.items.find(`#${ScriptId(data.id)}`).find(".item-subtext").html(data.timestamp.formatDateString()));
+            this.items.find(`#${ScriptId(data)}`).find(".item-subtext").html(data.timestamp.formatDateString()));
     }
 
     protected schemaChanged(data: ISchema, schema: string) {
@@ -50,12 +50,12 @@ export default class extends Panel {
         `)
         .dataAttr("item", item)
         .attr("title", scriptTitle(item))
-        .attr("id", ScriptId(item.id))
+        .attr("id", ScriptId(item))
         .appendElementTo(this.items) as Element; 
     }
 
     protected itemSelected(element: Element, contentArgs) {
         const item = element.dataAttr("item") as IScriptInfo;
-        this.mainPanel.activate(ScriptId(item.id), Keys.SCRIPTS, item, contentArgs);
+        this.mainPanel.activate(ScriptId(item), Keys.SCRIPTS, item, contentArgs);
     };
 }

@@ -10,7 +10,7 @@ define(["require", "exports", "app/api", "app/ui/side-panel/panel", "app/ui/item
                 { text: "Order ascending" },
                 { text: "Order descending" },
             ]);
-            pubsub_1.subscribe(pubsub_1.SCRIPT_UPDATED, (data) => this.items.find(`#${api_1.ScriptId(data.id)}`).find(".item-subtext").html(data.timestamp.formatDateString()));
+            pubsub_1.subscribe(pubsub_1.SCRIPT_UPDATED, (data) => this.items.find(`#${api_1.ScriptId(data)}`).find(".item-subtext").html(data.timestamp.formatDateString()));
         }
         schemaChanged(data, schema) {
             this.items.html("");
@@ -41,12 +41,12 @@ define(["require", "exports", "app/api", "app/ui/side-panel/panel", "app/ui/item
         `)
                 .dataAttr("item", item)
                 .attr("title", item_tooltip_1.scriptTitle(item))
-                .attr("id", api_1.ScriptId(item.id))
+                .attr("id", api_1.ScriptId(item))
                 .appendElementTo(this.items);
         }
         itemSelected(element, contentArgs) {
             const item = element.dataAttr("item");
-            this.mainPanel.activate(api_1.ScriptId(item.id), api_1.Keys.SCRIPTS, item, contentArgs);
+            this.mainPanel.activate(api_1.ScriptId(item), api_1.Keys.SCRIPTS, item, contentArgs);
         }
         ;
     }

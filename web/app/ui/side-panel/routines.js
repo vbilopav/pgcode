@@ -30,12 +30,12 @@ define(["require", "exports", "app/api", "app/ui/side-panel/panel", "app/ui/item
         `)
                 .dataAttr("item", item)
                 .attr("title", item_tooltip_1.routineTitle(item))
-                .attr("id", api_1.RoutineId(item.id))
+                .attr("id", api_1.RoutineId(item))
                 .appendElementTo(this.items);
         }
         itemSelected(element, contentArgs) {
             const item = element.dataAttr("item");
-            this.mainPanel.activate(api_1.RoutineId(item.id), api_1.Keys.ROUTINES, item, contentArgs);
+            this.mainPanel.activate(api_1.RoutineId(item), api_1.Keys.ROUTINES, item, contentArgs);
         }
         ;
     }

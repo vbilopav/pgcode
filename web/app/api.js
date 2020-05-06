@@ -1,10 +1,10 @@
 define(["require", "exports", "app/_sys/pubsub", "vs/editor/editor.main"], function (require, exports, pubsub_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.ScriptId = id => `${Keys.SCRIPTS}${id}`;
-    exports.TableId = id => `${Keys.TABLES}${id}`;
-    exports.ViewId = id => `${Keys.VIEWS}${id}`;
-    exports.RoutineId = id => `${Keys.ROUTINES}${id}`;
+    exports.ScriptId = item => `${Keys.SCRIPTS}-${item.connection}-${item.schema}-${item.id}`;
+    exports.TableId = item => `${Keys.TABLES}-${item.connection}-${item.schema}-${item.id}`;
+    exports.ViewId = item => `${Keys.VIEWS}-${item.connection}-${item.schema}-${item.id}`;
+    exports.RoutineId = item => `${Keys.ROUTINES}-${item.connection}-${item.schema}-${item.id}`;
     exports.classes = { active: "active", sticky: "sticky", docked: "docked" };
     var Position;
     (function (Position) {

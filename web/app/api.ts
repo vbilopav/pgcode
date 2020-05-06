@@ -3,10 +3,10 @@ import "vs/editor/editor.main";
 import ICodeEditorViewState = monaco.editor.ICodeEditorViewState;
 import INewScrollPosition = monaco.editor.INewScrollPosition;
 
-export const ScriptId: (id: number) => string = id  => `${Keys.SCRIPTS}${id}`;
-export const TableId: (id: number) => string = id  => `${Keys.TABLES}${id}`;
-export const ViewId: (id: number) => string = id  => `${Keys.VIEWS}${id}`;
-export const RoutineId: (id: number) => string = id  => `${Keys.ROUTINES}${id}`;
+export const ScriptId: (item: IItem) => string = item  => `${Keys.SCRIPTS}-${item.connection}-${item.schema}-${item.id}`;
+export const TableId: (item: IItem) => string = item  => `${Keys.TABLES}-${item.connection}-${item.schema}-${item.id}`;
+export const ViewId: (item: IItem) => string = item  => `${Keys.VIEWS}-${item.connection}-${item.schema}-${item.id}`;
+export const RoutineId: (item: IItem) => string = item  => `${Keys.ROUTINES}-${item.connection}-${item.schema}-${item.id}`;
 
 export const classes = {active: "active", sticky: "sticky", docked: "docked"};
 

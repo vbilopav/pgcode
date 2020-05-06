@@ -16,6 +16,7 @@
             max-width: 400px;
             display: grid;
             grid-template-columns: 20px auto 20px;
+            grid-template-rows: 31px;
             padding-left: 10px;
             padding-right: 10px;
             cursor: pointer;
@@ -25,6 +26,7 @@
 
             & > i, & > span {
                 margin: auto;
+                margin-bottom: 6px;
             }
             // tab text
             & > span.title {
@@ -44,6 +46,11 @@
             }
             & > i.close:hover {
                 visibility: visible;
+            }
+            & > .stripe {
+                grid-column: 1/4;
+                height: 3px;
+                //background-color: #21394e;
             }
         }
         & > div.tab:hover {

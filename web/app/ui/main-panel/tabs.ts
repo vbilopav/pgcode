@@ -9,6 +9,12 @@ import {
 import { scriptTitle, tableTitle, viewTitle, routineTitle } from "app/ui/item-tooltip";
 import { Item } from "app/ui/main-panel/main-panel";
 
+const rgbFromStr = (s: string) => {
+    const i = s.hashCode();
+    var c = (i & 0x00FFFFFF).toString(16).toUpperCase();
+    return "#" + "00000".substring(0, 6 - c.length) + c;
+}
+
 export const createTabElement: (id: string, key: Keys, data: ItemInfoType) => Element = (id, key, data) => {
     let iconClass : string;
     let title = data.name;
@@ -34,6 +40,7 @@ export const createTabElement: (id: string, key: Keys, data: ItemInfoType) => El
             <i class=${iconClass}></i>
             <span class="title">${title}</span>
             <i class="close" title="close">&#10006</i>
+            <div class="stripe" style="background-color: ${rgbFromStr(data.connection)}"></div>
         </div>` as string)
         .toElement()
         .attr("id", id)
@@ -41,7 +48,7 @@ export const createTabElement: (id: string, key: Keys, data: ItemInfoType) => El
 };
 
 export const updateScriptTabElement: (items: Map<string, Item>, data: IScriptInfo) => void = (items, data) => {
-    const item = items.get(ScriptId(data.id))
+    const item = items.get(ScriptId(data))
     if (!item) {
         return
     }

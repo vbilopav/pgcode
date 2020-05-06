@@ -33,13 +33,13 @@ abstract class TablePanel extends Panel {
         `)
         .dataAttr("item", item)
         .attr("title", tableTitle(item))
-        .attr("id", TableId(item.id))
+        .attr("id", TableId(item))
         .appendElementTo(this.items);
     }
     
     protected itemSelected(element: Element, contentArgs) {
         const item = element.dataAttr("item") as ITableInfo;
-        this.mainPanel.activate(TableId(item.id), this.key, item, contentArgs);
+        this.mainPanel.activate(TableId(item), this.key, item, contentArgs);
     };
 }
 
