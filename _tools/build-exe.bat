@@ -16,17 +16,21 @@ call node-sass --output-style compressed web/css/theme-light.scss > _build/css/t
 
 @echo on
 
-REM starting main build...
-REM see more on targets on rid catalog: https://docs.microsoft.com/en-us/dotnet/core/rid-catalog
-REM also, check out wrap global tool: https://github.com/Hubert-Rybak/dotnet-warp
+REM starting main build... see more on targets on rid catalog: https://docs.microsoft.com/en-us/dotnet/core/rid-catalog
 
-dotnet clean app\pgcode.sln -c Release
+REM cleaning solution...
+dotnet clean app\pgcode.csproj --configuration Release --output "__exe\win10-x64"
 
 REM win build...
-dotnet publish -r win10-x64 -c Release /p:PublishSingleFile=true /p:PublishTrimmed=true -o "__exe\win10-x64" --nologo app\pgcode.csproj
+dotnet build -r win10-x64 --force --no-incremental --configuration Release app\pgcode.csproj
+
+REM win publish...
+dotnet publish -r win10-x64 --configuration Release /p:PublishSingleFile=true /p:PublishTrimmed=true --output "__exe\win10-x64" app\pgcode.csproj
+
+@echo off
 
 REM linux build...
-dotnet publish -r linux-x64 -c Release /p:PublishSingleFile=true /p:PublishTrimmed=true -o "__exe\linux-x64" --nologo app\pgcode.csproj
+REM dotnet publish -r linux-x64 -c Release /p:PublishSingleFile=true /p:PublishTrimmed=true -o "__exe\linux-x64" --nologo app\pgcode.csproj
 
 REM osx build...
-dotnet publish -r osx-x64 -c Release /p:PublishSingleFile=true /p:PublishTrimmed=true -o "__exe\osx-x64" --nologo app\pgcode.csproj
+REM dotnet publish -r osx-x64 -c Release /p:PublishSingleFile=true /p:PublishTrimmed=true -o "__exe\osx-x64" --nologo app\pgcode.csproj

@@ -88,9 +88,11 @@ namespace Pgcode.Properties {
         ///  top: -1000px;
         ///  left: -1000px; }
         ///
+        ///.drop-target {
+        ///  background-color: #3b3e41 !important; }
+        ///
         ///@font-face {
-        ///  font-family: &apos;icons&apos;;
-        ///  src: url(&quot;../fonts/icons.woff2?5724 [rest of string was truncated]&quot;;.
+        ///  f [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string _css_theme_dark_css {
             get {
@@ -126,9 +128,11 @@ namespace Pgcode.Properties {
         ///  top: -1000px;
         ///  left: -1000px; }
         ///
+        ///.drop-target {
+        ///  background-color: #3b3e41 !important; }
+        ///
         ///@font-face {
-        ///  font-family: &apos;icons&apos;;
-        ///  src: url(&quot;../fonts/icons.woff2?5724 [rest of string was truncated]&quot;;.
+        ///  f [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string _css_theme_light_css {
             get {
@@ -162,16 +166,16 @@ namespace Pgcode.Properties {
         ///    &lt;meta charset=&quot;utf-8&quot;&gt;
         ///    &lt;title&gt;&lt;/title&gt;
         ///    &lt;base href=&quot;/&quot; /&gt;
-        ///    &lt;link rel=&quot;icon&quot; type=&quot;image/x-icon&quot; href=&quot;favicon.ico?3978&quot; /&gt;
-        ///    &lt;link rel=&quot;stylesheet&quot; id=&quot;theme&quot; type=&quot;text/css&quot; href=&quot;css/theme-dark.css?3978&quot; /&gt;
-        ///    &lt;link rel=&quot;manifest&quot; href=&quot;/manifest.json?3978&quot;&gt;
+        ///    &lt;link rel=&quot;icon&quot; type=&quot;image/x-icon&quot; href=&quot;favicon.ico?95fb&quot; /&gt;
+        ///    &lt;link rel=&quot;stylesheet&quot; id=&quot;theme&quot; type=&quot;text/css&quot; href=&quot;css/theme-dark.css?95fb&quot; /&gt;
+        ///    &lt;!-- &lt;link rel=&quot;manifest&quot; href=&quot;/manifest.json?95fb&quot;&gt; --&gt;
         ///&lt;/head&gt;
         ///&lt;body&gt;
         ///    &lt;div id=&quot;loading&quot;&gt;
         ///        &amp;#8987;
         ///        &lt;script&gt;
-        ///            //navigator.serviceWorker.register(&quot;service-worker.js?3978&quot;);
-        ///            setTimeout(function() { var e = document [rest of string was truncated]&quot;;.
+        ///            //navigator.serviceWorker.register(&quot;service-worker.js?95fb&quot;);
+        ///            setTimeout(function() { var e = [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string _index_html {
             get {
@@ -180,7 +184,7 @@ namespace Pgcode.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to /*build: 2020-02-16 11:45:16:783, version: 3978, copyright VB-Consulting*/
+        ///   Looks up a localized string similar to /*build: 2020-05-06 13:49:35:915, version: 95fb, copyright VB-Consulting*/
         ///(function(){&quot;use strict&quot;;const e=this;&quot;object&quot;==typeof global&amp;&amp;global;var t;!function(t){t.global=e;class i{constructor(){this._detected=!1,this._isWindows=!1,this._isWebWorker=!1}get isWindows(){return this._detect(),this._isWindows}get isWebWorker(){return this._detect(),this._isWebWorker}_detect(){this._detected||(this._detected=!0,this._isWindows=i._isWindows(),this._isWebWorker=&quot;function&quot;==typeof t.global.importScripts)}static _ [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string _js_index_js {
@@ -190,14 +194,27 @@ namespace Pgcode.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to �0GSUB �%z8TOS/2@�N��Vcmap֞L��\glyfqId(p�head�S��6hhea��$hmtx�h��loca�$�fmaxpM� name!�A�ʄ
+        ///postr�̐�����2�)�_&lt;���N���N������2�
+        ///
+        ///�
+        ///0&gt;DFLTlatnliga������1PfEd@�`��Z�������� [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string _libs_monaco_editor_min_vs_base_browser_ui_codiconLabel_codicon_codicon_ttf {
+            get {
+                return ResourceManager.GetString("/libs/monaco-editor/min/vs/base/browser/ui/codiconLabel/codicon/codicon.ttf", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to /*!-----------------------------------------------------------
         /// * Copyright (c) Microsoft Corporation. All rights reserved.
-        /// * Version: 0.18.1(d7a26172c5955d29d2a8cca4377b53b28925c766)
+        /// * Version: 0.20.0(6363745c0a33c27b149b89342a7b96d354fb554c)
         /// * Released under the MIT license
         /// * https://github.com/Microsoft/vscode/blob/master/LICENSE.txt
         /// *-----------------------------------------------------------*/
         ///(function(){
-        ///var e=[&quot;require&quot;,&quot;exports&quot;,&quot;vs/editor/common/core/position&quot;,&quot;vs/base/common/platform&quot;,&quot;vs/editor/common/core/uint&quot;,&quot;vs/base/common/errors&quot;,&quot;vs/editor/com [rest of string was truncated]&quot;;.
+        ///var e,t,n=[&quot;require&quot;,&quot;exports&quot;,&quot;vs/editor/common/core/position&quot;,&quot;vs/base/common/errors&quot;,&quot;vs/base/common/platform&quot;,&quot;vs/editor/common/core/range&quot;,&quot;vs/base/ [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string _libs_monaco_editor_min_vs_base_worker_workerMain_js {
             get {
@@ -208,11 +225,11 @@ namespace Pgcode.Properties {
         /// <summary>
         ///   Looks up a localized string similar to /*!-----------------------------------------------------------------------------
         /// * Copyright (c) Microsoft Corporation. All rights reserved.
-        /// * monaco-languages version: 1.8.0(0ed9a6c3e90a24375fab54f7205fb76ce992f117)
+        /// * monaco-languages version: 1.10.0(1b4729c63bdb0d1e06d4e637e5c3977ddeb714dd)
         /// * Released under the MIT license
         /// * https://github.com/Microsoft/monaco-languages/blob/master/LICENSE.md
         /// *-----------------------------------------------------------------------------*/
-        ///define(&quot;vs/basic-languages/pgsql/pgsql&quot;,[&quot;require&quot;,&quot;exports&quot;],function(_,e){&quot;use strict&quot;;Object.definePro [rest of string was truncated]&quot;;.
+        ///define(&quot;vs/basic-languages/pgsql/pgsql&quot;,[&quot;require&quot;,&quot;exports&quot;],(function(_,e){&quot;use strict&quot;;Object.defineP [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string _libs_monaco_editor_min_vs_basic_languages_pgsql_pgsql_js {
             get {
@@ -223,7 +240,7 @@ namespace Pgcode.Properties {
         /// <summary>
         ///   Looks up a localized string similar to /*!-----------------------------------------------------------
         /// * Copyright (c) Microsoft Corporation. All rights reserved.
-        /// * Version: 0.18.1(d7a26172c5955d29d2a8cca4377b53b28925c766)
+        /// * Version: 0.20.0(6363745c0a33c27b149b89342a7b96d354fb554c)
         /// * Released under the MIT license
         /// * https://github.com/Microsoft/vscode/blob/master/LICENSE.txt
         /// *-----------------------------------------------------------*/.monaco-action-bar{text-align:right;overflow:hidden;white-space:nowrap}.monaco-action-bar .actions-container{display:flex;margin:0 auto;padding:0;width:100%;justify-co [rest of string was truncated]&quot;;.
@@ -237,12 +254,12 @@ namespace Pgcode.Properties {
         /// <summary>
         ///   Looks up a localized string similar to /*!-----------------------------------------------------------
         /// * Copyright (c) Microsoft Corporation. All rights reserved.
-        /// * Version: 0.18.1(d7a26172c5955d29d2a8cca4377b53b28925c766)
+        /// * Version: 0.20.0(6363745c0a33c27b149b89342a7b96d354fb554c)
         /// * Released under the MIT license
         /// * https://github.com/Microsoft/vscode/blob/master/LICENSE.txt
         /// *-----------------------------------------------------------*/
         ///(function(){
-        ///var e,t=[&quot;exports&quot;,&quot;require&quot;,&quot;vs/base/common/lifecycle&quot;,&quot;vs/editor/common/core/range&quot;,&quot;vs/base/common/event&quot;,&quot;vs/base/common/strings&quot;,&quot;vs/nls&quot;,&quot;vs/nls!vs [rest of string was truncated]&quot;;.
+        ///var e,t,n=[&quot;require&quot;,&quot;exports&quot;,&quot;vs/base/common/lifecycle&quot;,&quot;vs/editor/common/core/range&quot;,&quot;vs/base/common/event&quot;,&quot;vs/base/common/strings&quot;,&quot;vs/base/browser/ [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string _libs_monaco_editor_min_vs_editor_editor_main_js {
             get {
@@ -253,7 +270,7 @@ namespace Pgcode.Properties {
         /// <summary>
         ///   Looks up a localized string similar to /*!-----------------------------------------------------------
         /// * Copyright (c) Microsoft Corporation. All rights reserved.
-        /// * Version: 0.18.1(d7a26172c5955d29d2a8cca4377b53b28925c766)
+        /// * Version: 0.20.0(6363745c0a33c27b149b89342a7b96d354fb554c)
         /// * Released under the MIT license
         /// * https://github.com/Microsoft/vscode/blob/master/LICENSE.txt
         /// *-----------------------------------------------------------*/

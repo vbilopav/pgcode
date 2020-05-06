@@ -1,6 +1,6 @@
 import Storage from "app/_sys/storage";
 import { 
-    subscribe, publish, SPLITTER_CHANGED, TAB_SELECTED, TAB_UNSELECTED, SCHEMA_CHANGED, SCRIPT_UPDATED 
+    subscribe, publish, SPLITTER_CHANGED, TAB_SELECTED, TAB_UNSELECTED, SCHEMA_CHANGED, SCRIPT_UPDATED, API_INITIAL
 } from "app/_sys/pubsub";
 import { createTabElement, updateScriptTabElement } from "app/ui/main-panel/tabs";
 
@@ -8,7 +8,9 @@ import { ContextMenuCtorArgs } from "app/controls/context-menu";
 import MonacoContextMenu from "app/controls/monaco-context-menu";
 
 import Content from "app/ui/content/content";
-import { ItemInfoType, Keys, ISchema, classes, IScriptContent } from "app/api";
+import { 
+    ItemInfoType, Keys, ISchema, classes, IScriptContent, connectionIsDefined 
+} from "app/api";
 import { timeout } from "app/_sys/timeout";
 
 export interface Item extends IStorageItem {
@@ -96,9 +98,9 @@ export class MainPanel {
         this.content = new Content(element.children[1]);
         this.initHeaderAdjustment();
 
-        this.restoreItems();
         subscribe(SCHEMA_CHANGED, (data: ISchema, name: string) => this.schemaChanged(name, data.connection));
         subscribe(SCRIPT_UPDATED, data => updateScriptTabElement(this.items, data));
+        subscribe(API_INITIAL, () => this.restoreItems());
 
         this.hiddenCopy = (
             String.html`<textarea id="main-panel-hidden-copy" type="text" class="out-of-viewport"></textarea>` as String).toElement().
@@ -145,6 +147,9 @@ export class MainPanel {
         const stickyId = _storage.stickyId;
         const activeId = _storage.activeId;
         for(let [id, storageItem] of _storage.items) {
+            if (!connectionIsDefined(storageItem.data.connection)) {
+                continue;
+            }
             this.content.createNewContent(id, storageItem.key, storageItem.data); 
             const tab = this.createNewTab(id, storageItem.key, storageItem.data).appendElementTo(this.tabs);
             if (id === stickyId) {

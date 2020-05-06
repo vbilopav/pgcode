@@ -32,17 +32,7 @@ module.exports = {
     rmdirSync: pathName => {
         var 
             fs = fs || require('fs');
-        if (fs.existsSync(pathName)) {
-            fs.readdirSync(pathName).forEach(function (file, index) {
-                var curPath = pathName + path.sep + file;
-                if (fs.lstatSync(curPath).isDirectory()) { // recurse
-                    module.exports.rmdirSync(curPath);
-                } else { // delete file
-                    fs.unlinkSync(curPath);
-                }
-            });
-            fs.rmdirSync(pathName);
-        }
+        fs.rmdirSync(pathName, {recursive: true});
     },
 
     mkDirByPathSync: (targetDir, oncreate) => {

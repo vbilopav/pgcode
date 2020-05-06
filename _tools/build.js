@@ -68,7 +68,8 @@ function copyLibs() {
             obj.file != "editor.main.css" && 
             obj.file != "editor.main.nls.js" &&
             obj.file != "workerMain.js" &&
-            obj.file != "pgsql.js" 
+            obj.file != "pgsql.js" &&
+            obj.file != "codicon.ttf"
         ) {
             continue;
         }
@@ -91,6 +92,7 @@ function copyRootFiles() {
     
     log(`>>> copying ${from} to ${to}`);
     let content = fs.readFileSync(from).toString()
+        .replace("location.hash = '';", "location.hash = '" + config.version + "';")
         .replace(/\.js"/g, ".js" + "?" + config.version + "\"")
         .replace(/\.json"/g, ".json" + "?" + config.version + "\"")
         .replace(/\.css"/g, ".css" + "?" + config.version + "\"")

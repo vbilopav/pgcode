@@ -29,6 +29,7 @@ namespace Pgcode.Middleware
             "/libs/monaco-editor/min/vs/editor/editor.main.nls.js",
             "/libs/monaco-editor/min/vs/basic-languages/pgsql/pgsql.js",
             "/libs/monaco-editor/min/vs/base/worker/workerMain.js",
+            "/libs/monaco-editor/min/vs/base/browser/ui/codiconLabel/codicon/codicon.ttf",
             "/favicon.ico",
             "/fonts/icons.woff2",
             //"/manifest.json",
@@ -52,6 +53,7 @@ namespace Pgcode.Middleware
                     "woff2" => (Strings.Woff2ContentType, true),
                     "json" => (key == "/manifest.json" ? Strings.ManifestContentType : Strings.JsonContentType, false),
                     "png" => (Strings.PngContentType, true),
+                    "ttf" => (Strings.TtfContentType, false),
                     _ => throw new NotSupportedException()
                 };
                 if (isBinary)

@@ -15,7 +15,6 @@
     "run-dev": "cd app && dotnet run -- -o",
     "run-build": "cd app && dotnet run -c release -- -o",
     "build-web": "node .\\_tools\\build.js",
-    "build-all": ".\\_tools\\build-exe.bat",
-    "build-win-exe-only": "dotnet clean app\\pgcode.csproj && dotnet publish -r win10-x64 -c Release /p:PublishSingleFile=true /p:PublishTrimmed=true -o __exe\\win10-x64 --nologo app\\pgcode.csproj"
+    "build-all": ".\\_tools\\build-exe.bat"
   }
 }

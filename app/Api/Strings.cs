@@ -17,5 +17,6 @@
         public const string Woff2ContentType = "font/woff2; charset=UTF-8";
         public const string PngContentType = "image/png; charset=UTF-8";
         public const string ManifestContentType = "application/manifest+json; charset=UTF-8";
+        public const string TtfContentType = "application/x-font-ttf";
     }
 }

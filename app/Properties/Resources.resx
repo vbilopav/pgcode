@@ -145,6 +145,9 @@
   <data name="/libs/monaco-editor/min/vs/basic-languages/pgsql/pgsql.js" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\..\_build\libs\monaco-editor\min\vs\basic-languages\pgsql\pgsql.js;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
+  <data name="/libs/monaco-editor/min/vs/base/browser/ui/codiconLabel/codicon/codicon.ttf" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\..\_build\libs\monaco-editor\min\vs\base\browser\ui\codiconLabel\codicon\codicon.ttf;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
   <data name="/favicon.ico" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\..\_build\favicon.ico;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>

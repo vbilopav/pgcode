@@ -44,9 +44,9 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/ui/mai
             });
             this.content = new content_1.default(element.children[1]);
             this.initHeaderAdjustment();
-            this.restoreItems();
             pubsub_1.subscribe(pubsub_1.SCHEMA_CHANGED, (data, name) => this.schemaChanged(name, data.connection));
             pubsub_1.subscribe(pubsub_1.SCRIPT_UPDATED, data => tabs_1.updateScriptTabElement(this.items, data));
+            pubsub_1.subscribe(pubsub_1.API_INITIAL, () => this.restoreItems());
             this.hiddenCopy = String.html `<textarea id="main-panel-hidden-copy" type="text" class="out-of-viewport"></textarea>`.toElement().
                 appendElementTo(document.body);
         }
@@ -88,6 +88,9 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/ui/mai
             const stickyId = _storage.stickyId;
             const activeId = _storage.activeId;
             for (let [id, storageItem] of _storage.items) {
+                if (!api_1.connectionIsDefined(storageItem.data.connection)) {
+                    continue;
+                }
                 this.content.createNewContent(id, storageItem.key, storageItem.data);
                 const tab = this.createNewTab(id, storageItem.key, storageItem.data).appendElementTo(this.tabs);
                 if (id === stickyId) {

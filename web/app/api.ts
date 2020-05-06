@@ -131,7 +131,21 @@ const getTimezoneHeader: () => RequestInit = () => {
     return {headers: {"timezone": Intl.DateTimeFormat().resolvedOptions().timeZone}}
 };
 
+let initialResponse: IResponse<IInitialResponse>;
+
 const fetchInitial: () => Promise<IResponse<IInitialResponse>> = async () => _fetchAndPublishStatus<IInitialResponse>("api/initial");
+
+export const initializeApi = async () => {
+    initialResponse = await fetchInitial();
+    publish(API_INITIAL, initialResponse);
+};
+
+export const connectionIsDefined: (connection: string) => boolean = connection => {
+    if (!initialResponse || !initialResponse.ok || !initialResponse.data || !initialResponse.data.connections || !initialResponse.data.connections.length) {
+        return false;
+    }
+    return initialResponse.data.connections.find(c => c.name == connection) ? true : false;
+}
 
 export const fetchConnection: (name: string) => Promise<IResponse<IConnectionResponse>> = async name => {
     const result = await _fetchAndPublishStatus<IConnectionResponse>(`api/connection/${name}`, getTimezoneHeader());
@@ -142,11 +156,6 @@ export const fetchConnection: (name: string) => Promise<IResponse<IConnectionRes
     _currentConnection = name;
     result.data.connection = name;
     return result;
-};
-
-export const initializeApi = async () => {
-    const initial = await fetchInitial();
-    publish(API_INITIAL, initial);
 };
 
 export const fetchSchema: (schema: string) => Promise<IResponse<ISchemaResponse>> = async schema => {
