@@ -39,6 +39,12 @@ define(["require", "exports", "app/controls/footer-context-menu", "app/controls/
                     return;
                 }
                 this.user.html(response.data.user).attr("title", `signed in into pgcode as user ${response.data.user}`);
+                this.schemasMenu = new footer_context_menu_1.default({
+                    id: "schema-footer-menu",
+                    event: "click",
+                    target: this.schemas,
+                    items: []
+                });
                 if (response.data.connections.length === 1) {
                     this.selectConnection(response.data.connections[0]);
                     this.connections.css("cursor", "initial");
@@ -58,12 +64,6 @@ define(["require", "exports", "app/controls/footer-context-menu", "app/controls/
                     event: "click",
                     target: this.connections,
                     items: menuItems
-                });
-                this.schemasMenu = new footer_context_menu_1.default({
-                    id: "schema-footer-menu",
-                    event: "click",
-                    target: this.schemas,
-                    items: []
                 });
                 if (!storage.connection) {
                     this.selectConnection();

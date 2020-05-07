@@ -61,38 +61,7 @@ namespace Pgcode.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to html {
-        ///  font-family: &quot;Segoe UI&quot;, sans-serif;
-        ///  font-size: 12px;
-        ///  line-height: 1.15; }
-        ///
-        ///body {
-        ///  margin: 0;
-        ///  color: #C5C5C5;
-        ///  background-color: #1E1E1E; }
-        ///
-        ///#loading {
-        ///  position: absolute;
-        ///  left: 0px;
-        ///  top: 0px;
-        ///  width: 100%;
-        ///  height: 100%;
-        ///  justify-content: center;
-        ///  align-content: center;
-        ///  display: grid;
-        ///  font-size: 10em;
-        ///  text-align: center; }
-        ///
-        ///.out-of-viewport {
-        ///  position: absolute;
-        ///  top: -1000px;
-        ///  left: -1000px; }
-        ///
-        ///.drop-target {
-        ///  background-color: #3b3e41 !important; }
-        ///
-        ///@font-face {
-        ///  f [rest of string was truncated]&quot;;.
+        ///   Looks up a localized string similar to html{font-family:&quot;Segoe UI&quot;, sans-serif;font-size:12px;line-height:1.15}body{margin:0;color:#C5C5C5;background-color:#1E1E1E}#loading{position:absolute;left:0px;top:0px;width:100%;height:100%;justify-content:center;align-content:center;display:grid;font-size:10em;text-align:center}.out-of-viewport{position:absolute;top:-1000px;left:-1000px}.drop-target{background-color:#3b3e41 !important}@font-face{font-family:&apos;icons&apos;;src:url(&quot;../fonts/icons.woff2?57247429&quot;) format(&quot;woff2&quot;);font-weight:normal;font-style:nor [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string _css_theme_dark_css {
             get {
@@ -101,38 +70,7 @@ namespace Pgcode.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to html {
-        ///  font-family: &quot;Segoe UI&quot;, sans-serif;
-        ///  font-size: 12px;
-        ///  line-height: 1.15; }
-        ///
-        ///body {
-        ///  margin: 0;
-        ///  color: #1E1E1E;
-        ///  background-color: #C5C5C5; }
-        ///
-        ///#loading {
-        ///  position: absolute;
-        ///  left: 0px;
-        ///  top: 0px;
-        ///  width: 100%;
-        ///  height: 100%;
-        ///  justify-content: center;
-        ///  align-content: center;
-        ///  display: grid;
-        ///  font-size: 10em;
-        ///  text-align: center; }
-        ///
-        ///.out-of-viewport {
-        ///  position: absolute;
-        ///  top: -1000px;
-        ///  left: -1000px; }
-        ///
-        ///.drop-target {
-        ///  background-color: #3b3e41 !important; }
-        ///
-        ///@font-face {
-        ///  f [rest of string was truncated]&quot;;.
+        ///   Looks up a localized string similar to html{font-family:&quot;Segoe UI&quot;, sans-serif;font-size:12px;line-height:1.15}body{margin:0;color:#1E1E1E;background-color:#C5C5C5}#loading{position:absolute;left:0px;top:0px;width:100%;height:100%;justify-content:center;align-content:center;display:grid;font-size:10em;text-align:center}.out-of-viewport{position:absolute;top:-1000px;left:-1000px}.drop-target{background-color:#3b3e41 !important}@font-face{font-family:&apos;icons&apos;;src:url(&quot;../fonts/icons.woff2?57247429&quot;) format(&quot;woff2&quot;);font-weight:normal;font-style:nor [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string _css_theme_light_css {
             get {
@@ -166,16 +104,17 @@ namespace Pgcode.Properties {
         ///    &lt;meta charset=&quot;utf-8&quot;&gt;
         ///    &lt;title&gt;&lt;/title&gt;
         ///    &lt;base href=&quot;/&quot; /&gt;
-        ///    &lt;link rel=&quot;icon&quot; type=&quot;image/x-icon&quot; href=&quot;favicon.ico?95fb&quot; /&gt;
-        ///    &lt;link rel=&quot;stylesheet&quot; id=&quot;theme&quot; type=&quot;text/css&quot; href=&quot;css/theme-dark.css?95fb&quot; /&gt;
-        ///    &lt;!-- &lt;link rel=&quot;manifest&quot; href=&quot;/manifest.json?95fb&quot;&gt; --&gt;
+        ///    &lt;link rel=&quot;icon&quot; type=&quot;image/x-icon&quot; href=&quot;favicon.ico?7415&quot; /&gt;
+        ///    &lt;link rel=&quot;stylesheet&quot; id=&quot;theme&quot; type=&quot;text/css&quot; href=&quot;css/theme-dark.css?7415&quot; /&gt;
+        ///    &lt;!-- &lt;link rel=&quot;manifest&quot; href=&quot;/manifest.json?7415&quot;&gt; --&gt;
         ///&lt;/head&gt;
         ///&lt;body&gt;
         ///    &lt;div id=&quot;loading&quot;&gt;
         ///        &amp;#8987;
         ///        &lt;script&gt;
-        ///            //navigator.serviceWorker.register(&quot;service-worker.js?95fb&quot;);
-        ///            setTimeout(function() { var e = [rest of string was truncated]&quot;;.
+        ///            //navigator.serviceWorker.register(&quot;service-worker.js?7415&quot;);
+        ///            location.hash = &apos;7415&apos;;
+        ///       [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string _index_html {
             get {
@@ -184,7 +123,7 @@ namespace Pgcode.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to /*build: 2020-05-06 13:49:35:915, version: 95fb, copyright VB-Consulting*/
+        ///   Looks up a localized string similar to /*build: 2020-05-07 13:58:12:491, version: 7415, copyright VB-Consulting*/
         ///(function(){&quot;use strict&quot;;const e=this;&quot;object&quot;==typeof global&amp;&amp;global;var t;!function(t){t.global=e;class i{constructor(){this._detected=!1,this._isWindows=!1,this._isWebWorker=!1}get isWindows(){return this._detect(),this._isWindows}get isWebWorker(){return this._detect(),this._isWebWorker}_detect(){this._detected||(this._detected=!0,this._isWindows=i._isWindows(),this._isWebWorker=&quot;function&quot;==typeof t.global.importScripts)}static _ [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string _js_index_js {
@@ -194,15 +133,12 @@ namespace Pgcode.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to �0GSUB �%z8TOS/2@�N��Vcmap֞L��\glyfqId(p�head�S��6hhea��$hmtx�h��loca�$�fmaxpM� name!�A�ʄ
-        ///postr�̐�����2�)�_&lt;���N���N������2�
-        ///
-        ///�
-        ///0&gt;DFLTlatnliga������1PfEd@�`��Z�������� [rest of string was truncated]&quot;;.
+        ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
-        internal static string _libs_monaco_editor_min_vs_base_browser_ui_codiconLabel_codicon_codicon_ttf {
+        internal static byte[] _libs_monaco_editor_min_vs_base_browser_ui_codiconLabel_codicon_codicon_ttf {
             get {
-                return ResourceManager.GetString("/libs/monaco-editor/min/vs/base/browser/ui/codiconLabel/codicon/codicon.ttf", resourceCulture);
+                object obj = ResourceManager.GetObject("/libs/monaco-editor/min/vs/base/browser/ui/codiconLabel/codicon/codicon.ttf", resourceCulture);
+                return ((byte[])(obj));
             }
         }
         

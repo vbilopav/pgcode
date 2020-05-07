@@ -53,7 +53,7 @@ namespace Pgcode.Middleware
                     "woff2" => (Strings.Woff2ContentType, true),
                     "json" => (key == "/manifest.json" ? Strings.ManifestContentType : Strings.JsonContentType, false),
                     "png" => (Strings.PngContentType, true),
-                    "ttf" => (Strings.TtfContentType, false),
+                    "ttf" => (Strings.TtfContentType, true),
                     _ => throw new NotSupportedException()
                 };
                 if (isBinary)

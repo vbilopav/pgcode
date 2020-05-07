@@ -56,6 +56,14 @@ export default class  {
                 return;
             } 
             this.user.html(response.data.user).attr("title", `signed in into pgcode as user ${response.data.user}`);
+            
+            this.schemasMenu = new FooterContextMenu({
+                id: "schema-footer-menu", 
+                event: "click", 
+                target: this.schemas, 
+                items: []
+            } as ContextMenuCtorArgs);
+            
             if (response.data.connections.length === 1) {
                 this.selectConnection(response.data.connections[0]);
                 this.connections.css("cursor", "initial");
@@ -78,13 +86,6 @@ export default class  {
                 items: menuItems
             } as ContextMenuCtorArgs);
 
-            this.schemasMenu = new FooterContextMenu({
-                id: "schema-footer-menu", 
-                event: "click", 
-                target: this.schemas, 
-                items: []
-            } as ContextMenuCtorArgs);
-            
             //this.info.on("click", () => this.connections.trigger("click"));
             
             if (!storage.connection) {

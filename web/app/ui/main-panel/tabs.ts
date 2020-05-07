@@ -35,7 +35,7 @@ export const createTabElement: (id: string, key: Keys, data: ItemInfoType) => El
         tip = routineTitle(data as IRoutineInfo);
     }
 
-    return (String.html`
+    return (`
         <div class="tab" draggable="true">
             <i class=${iconClass}></i>
             <span class="title">${title}</span>

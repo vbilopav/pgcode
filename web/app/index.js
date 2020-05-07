@@ -100,7 +100,7 @@ define(["require", "exports", "app/_sys/storage", "app/ui/toolbar/toolbar", "./u
         }
         initTheme() {
             this.themeLink = document.getElementById("theme");
-            if (this.themeLink.attr("href") !== `css/theme-${storage.theme}.css`) {
+            if (this.themeLink.attr("href").split("?")[0] !== `css/theme-${storage.theme}.css`) {
                 this.themeLink.attr("href", `css/theme-${storage.theme}.css`);
             }
         }
