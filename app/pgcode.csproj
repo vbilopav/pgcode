@@ -4,9 +4,9 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <RootNamespace>Pgcode</RootNamespace>
     <Win32Resource />
-    <Version>0.0.0.1</Version>
-    <FileVersion>0.0.0.1</FileVersion>
-    <InformationalVersion>0.0.0.1</InformationalVersion>
+    <Version>0.0.0.3</Version>
+    <FileVersion>0.0.0.3</FileVersion>
+    <InformationalVersion>0.0.0.3</InformationalVersion>
   </PropertyGroup>
 
   <ItemGroup>

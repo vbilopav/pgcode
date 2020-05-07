@@ -268,6 +268,18 @@ config.silent = false;
 console.log("");
 log("STARTED");
 config.silent = isSilent;
+
+let content = fs.readFileSync("app/pgcode.csproj").toString();
+let versionStart = content.indexOf("<Version>")  + "<Version>".length
+let versionEnd = content.indexOf("</Version>");
+let versionStr = content.substring(versionStart, versionEnd);
+let versionParts = versionStr.split(".");
+versionParts[versionParts.length - 1] = Number(versionParts[versionParts.length - 1]) + 1;
+let version = versionParts.join(".");
+fs.writeFileSync("app/pgcode.csproj", content.replace(new RegExp(versionStr, 'g'), version), "utf8");
+console.log(content);
+config.version = version;
+
 console.log("configuration:\n", config);
 console.log("");
 
