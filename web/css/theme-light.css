@@ -117,7 +117,7 @@ body > div.container {
     left: 0;
     height: calc(100% + 4px);
     width: 2px;
-    background-color: #252526;
+    /*background-color: $active-color;*/
     display: none;
     /*block;*/
     position: absolute; }

@@ -74,6 +74,8 @@ export class MainPanel {
             id: "main-panel-tabs-ctx-menu", 
             items: [
                 {text: "Close", action: (_, tab: Element) => this.removeByTab(tab)},
+                {splitter: true},
+                {text: "Close Others", action: (_, tab: Element) => this.removeExceptTab(tab)},
                 {text: "Close to the Right", action: (_, tab: Element) => this.removeToTheRightByTab(tab)},
                 {text: "Close to the Left", action: (_, tab: Element) => this.removeToTheLeftByTab(tab)},
                 {splitter: true},
@@ -310,6 +312,19 @@ export class MainPanel {
         if (rows != this.headerRows) {
             this.element.css("grid-template-rows", `${rows * this.headerHeight}px auto`);
             this.headerRows = rows;
+        }
+    }
+
+    private removeExceptTab(tab: Element) {
+        const remove = Array<Element>();
+        for(let toRemove of tab.parentElement.children) {
+            if (toRemove && toRemove.hasClass("tab") && toRemove.id != tab.id) {
+                remove.push(toRemove);
+            }
+        }
+        if (remove.length) {
+            remove.forEach(tab => this.removeByTab(tab));
+            _updateStorageTabItems(this.items);
         }
     }
 

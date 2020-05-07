@@ -7,11 +7,12 @@ import {
     SIDEBAR_DOCKED, 
     SIDEBAR_UNDOCKED, 
     ITEM_COUNT_CHANGED, 
-    TAB_SELECTED
+    TAB_SELECTED,
+    CONNECTION_SET
 } from "app/_sys/pubsub";
 import { ContextMenuCtorArgs, MenuItemType } from "app/controls/context-menu";
 import MonacoContextMenu from "app/controls/monaco-context-menu";
-import { Position, IMain, Keys, getCurrentSchema, getCurrentConnection, classes } from "app/api";
+import { Position, IMain, Keys, getCurrentSchema, getCurrentConnection, classes, getConnectionColor } from "app/api";
 
 enum ButtonRoles { switch="switch", toggle="toggle" };
 const 
@@ -66,12 +67,14 @@ export default class  {
         let html = "";
         let menuItems = new Array<MenuItemType>();
         for(let item of _items) {
-            html = html + String.html`
+            
+            html = html + `
             <div class="${item.icon} ${item.id}" id="${item.id}" data-key="${item.key}" data-role="${item.role}" title="${item.label} (${item.keyBinding})">
                 <div class="marker"></div>
                 <div class="lbl">${item.label}</div>
                 <div class="count" style="display: none"></div>
             </div>`;
+
             if (item.text) {
                 menuItems.push({
                     id: item.key,
@@ -144,6 +147,10 @@ export default class  {
                     }
                 }
             }
+        });
+
+        subscribe(CONNECTION_SET, (name: string) => {
+            this.toolbar.findAll(".marker").css("background-color", getConnectionColor(name))
         });
     }
 

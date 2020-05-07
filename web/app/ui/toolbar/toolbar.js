@@ -34,7 +34,7 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/contro
             let html = "";
             let menuItems = new Array();
             for (let item of _items) {
-                html = html + String.html `
+                html = html + `
             <div class="${item.icon} ${item.id}" id="${item.id}" data-key="${item.key}" data-role="${item.role}" title="${item.label} (${item.keyBinding})">
                 <div class="marker"></div>
                 <div class="lbl">${item.label}</div>
@@ -110,6 +110,9 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/contro
                         }
                     }
                 }
+            });
+            pubsub_1.subscribe(pubsub_1.CONNECTION_SET, (name) => {
+                this.toolbar.findAll(".marker").css("background-color", api_1.getConnectionColor(name));
             });
         }
         sidebarDocked() {

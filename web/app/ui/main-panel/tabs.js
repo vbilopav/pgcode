@@ -1,11 +1,6 @@
 define(["require", "exports", "app/api", "app/ui/item-tooltip"], function (require, exports, api_1, item_tooltip_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    const rgbFromStr = (s) => {
-        const i = s.hashCode();
-        var c = (i & 0x00FFFFFF).toString(16).toUpperCase();
-        return "#" + "00000".substring(0, 6 - c.length) + c;
-    };
     exports.createTabElement = (id, key, data) => {
         let iconClass;
         let title = data.name;
@@ -31,7 +26,7 @@ define(["require", "exports", "app/api", "app/ui/item-tooltip"], function (requi
             <i class=${iconClass}></i>
             <span class="title">${title}</span>
             <i class="close" title="close">&#10006</i>
-            <div class="stripe" style="background-color: ${rgbFromStr(data.connection)}"></div>
+            <div class="stripe" style="background-color: ${api_1.getConnectionColor(data.connection)}"></div>
         </div>`
             .toElement()
             .attr("id", id)

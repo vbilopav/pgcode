@@ -1,4 +1,4 @@
-import {API_INITIAL, publish, SET_APP_STATUS} from "app/_sys/pubsub";
+import {API_INITIAL, publish, SET_APP_STATUS, CONNECTION_SET} from "app/_sys/pubsub";
 import "vs/editor/editor.main";
 import ICodeEditorViewState = monaco.editor.ICodeEditorViewState;
 import INewScrollPosition = monaco.editor.INewScrollPosition;
@@ -121,8 +121,8 @@ const _fetch:<T> (url: string, init?: RequestInit) => Promise<IResponse<T>> = as
     return _createResponse(response, await response.json());
 };
 
-let _currentSchema;
-let _currentConnection;
+let _currentSchema: string;
+let _currentConnection: string;
 
 export const getCurrentSchema = () => _currentSchema;
 export const getCurrentConnection = () => _currentConnection;
@@ -131,20 +131,45 @@ const getTimezoneHeader: () => RequestInit = () => {
     return {headers: {"timezone": Intl.DateTimeFormat().resolvedOptions().timeZone}}
 };
 
-let initialResponse: IResponse<IInitialResponse>;
+let _initialResponse: IResponse<IInitialResponse>;
+let _connectionNames = new Array<string>();
+let _colors = new Array<string>();
+_colors[0] = "rgb(255,255,255)";
+_colors[1] = "rgb(0,182,192)";
+_colors[2] = "rgb(0,255,128)";
+_colors[3] = "rgb(128,0,64)";
+_colors[4] = "rgb(0,128,0)";
+_colors[5] = "rgb(128,128,0)";
+_colors[6] = "rgb(255,128,255)";
+_colors[7] = "rgb(0,64,0)";
+_colors[8] = "rgb(128,128,128)";
+_colors[9] = "rgb(255,128,128)";
+
+export const getConnectionColor = (name: string) => {
+    const index = _connectionNames.indexOf(name);
+    if (index != -1) {
+        return _colors[index];
+    }
+    const i = name.hashCode();
+    const c = (i & 0x00FFFFFF).toString(16).toUpperCase();
+    return "#" + "00000".substring(0, 6 - c.length) + c;
+}
 
 const fetchInitial: () => Promise<IResponse<IInitialResponse>> = async () => _fetchAndPublishStatus<IInitialResponse>("api/initial");
 
 export const initializeApi = async () => {
-    initialResponse = await fetchInitial();
-    publish(API_INITIAL, initialResponse);
+    _initialResponse = await fetchInitial();
+    if (_initialResponse.ok) {
+        _connectionNames = _initialResponse.data.connections.map(c => c.name);
+    }
+    publish(API_INITIAL, _initialResponse);
 };
 
 export const connectionIsDefined: (connection: string) => boolean = connection => {
-    if (!initialResponse || !initialResponse.ok || !initialResponse.data || !initialResponse.data.connections || !initialResponse.data.connections.length) {
+    if (!_initialResponse || !_initialResponse.ok || !_initialResponse.data || !_initialResponse.data.connections || !_initialResponse.data.connections.length) {
         return false;
     }
-    return initialResponse.data.connections.find(c => c.name == connection) ? true : false;
+    return _initialResponse.data.connections.find(c => c.name == connection) ? true : false;
 }
 
 export const fetchConnection: (name: string) => Promise<IResponse<IConnectionResponse>> = async name => {
@@ -155,6 +180,7 @@ export const fetchConnection: (name: string) => Promise<IResponse<IConnectionRes
     _currentSchema = result.data.schemas.selected;
     _currentConnection = name;
     result.data.connection = name;
+    publish(CONNECTION_SET, _currentConnection);
     return result;
 };
 

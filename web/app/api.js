@@ -65,17 +65,41 @@ define(["require", "exports", "app/_sys/pubsub", "vs/editor/editor.main"], funct
     const getTimezoneHeader = () => {
         return { headers: { "timezone": Intl.DateTimeFormat().resolvedOptions().timeZone } };
     };
-    let initialResponse;
+    let _initialResponse;
+    let _connectionNames = new Array();
+    let _colors = new Array();
+    _colors[0] = "rgb(255,255,255)";
+    _colors[1] = "rgb(0,182,192)";
+    _colors[2] = "rgb(0,255,128)";
+    _colors[3] = "rgb(128,0,64)";
+    _colors[4] = "rgb(0,128,0)";
+    _colors[5] = "rgb(128,128,0)";
+    _colors[6] = "rgb(255,128,255)";
+    _colors[7] = "rgb(0,64,0)";
+    _colors[8] = "rgb(128,128,128)";
+    _colors[9] = "rgb(255,128,128)";
+    exports.getConnectionColor = (name) => {
+        const index = _connectionNames.indexOf(name);
+        if (index != -1) {
+            return _colors[index];
+        }
+        const i = name.hashCode();
+        const c = (i & 0x00FFFFFF).toString(16).toUpperCase();
+        return "#" + "00000".substring(0, 6 - c.length) + c;
+    };
     const fetchInitial = async () => _fetchAndPublishStatus("api/initial");
     exports.initializeApi = async () => {
-        initialResponse = await fetchInitial();
-        pubsub_1.publish(pubsub_1.API_INITIAL, initialResponse);
+        _initialResponse = await fetchInitial();
+        if (_initialResponse.ok) {
+            _connectionNames = _initialResponse.data.connections.map(c => c.name);
+        }
+        pubsub_1.publish(pubsub_1.API_INITIAL, _initialResponse);
     };
     exports.connectionIsDefined = connection => {
-        if (!initialResponse || !initialResponse.ok || !initialResponse.data || !initialResponse.data.connections || !initialResponse.data.connections.length) {
+        if (!_initialResponse || !_initialResponse.ok || !_initialResponse.data || !_initialResponse.data.connections || !_initialResponse.data.connections.length) {
             return false;
         }
-        return initialResponse.data.connections.find(c => c.name == connection) ? true : false;
+        return _initialResponse.data.connections.find(c => c.name == connection) ? true : false;
     };
     exports.fetchConnection = async (name) => {
         const result = await _fetchAndPublishStatus(`api/connection/${name}`, getTimezoneHeader());
@@ -85,6 +109,7 @@ define(["require", "exports", "app/_sys/pubsub", "vs/editor/editor.main"], funct
         _currentSchema = result.data.schemas.selected;
         _currentConnection = name;
         result.data.connection = name;
+        pubsub_1.publish(pubsub_1.CONNECTION_SET, _currentConnection);
         return result;
     };
     exports.fetchSchema = async (schema) => {

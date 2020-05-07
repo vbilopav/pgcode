@@ -23,6 +23,8 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/ui/mai
                 id: "main-panel-tabs-ctx-menu",
                 items: [
                     { text: "Close", action: (_, tab) => this.removeByTab(tab) },
+                    { splitter: true },
+                    { text: "Close Others", action: (_, tab) => this.removeExceptTab(tab) },
                     { text: "Close to the Right", action: (_, tab) => this.removeToTheRightByTab(tab) },
                     { text: "Close to the Left", action: (_, tab) => this.removeToTheLeftByTab(tab) },
                     { splitter: true },
@@ -236,6 +238,18 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/ui/mai
             if (rows != this.headerRows) {
                 this.element.css("grid-template-rows", `${rows * this.headerHeight}px auto`);
                 this.headerRows = rows;
+            }
+        }
+        removeExceptTab(tab) {
+            const remove = Array();
+            for (let toRemove of tab.parentElement.children) {
+                if (toRemove && toRemove.hasClass("tab") && toRemove.id != tab.id) {
+                    remove.push(toRemove);
+                }
+            }
+            if (remove.length) {
+                remove.forEach(tab => this.removeByTab(tab));
+                _updateStorageTabItems(this.items);
             }
         }
         removeToTheRightByTab(tab) {
