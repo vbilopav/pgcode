@@ -37,7 +37,11 @@ namespace Pgcode.Api
                 Console.Write($"{section.Key}");
                 Console.ResetColor();
 
-                var connection = CreateConnection(section, passwords);
+                var connection = TryCreateConnection(section, passwords);
+                if (connection == null)
+                {
+                    continue;
+                }
                 var migrations = new MigrationRunner(connection, Program.Settings);
                 try
                 {
@@ -213,7 +217,7 @@ namespace Pgcode.Api
                 {
                     continue;
                 }
-                var connection = CreateConnection(section, passwords);
+                var connection = TryCreateConnection(section, passwords);
                 var migrations = new MigrationRunner(connection, Program.Settings);
                 Console.ResetColor();
                 Console.Write(!routinesOnly ? "Migrating Connection: " : "Updating routines for connection: ");
@@ -256,24 +260,37 @@ namespace Pgcode.Api
             }
         }
 
-        private static NpgsqlConnection CreateConnection(IConfigurationSection section, Dictionary<string, string> passwords)
+        private static NpgsqlConnection TryCreateConnection(IConfigurationSection section, Dictionary<string, string> passwords)
         {
-            var builder = new NpgsqlConnectionStringBuilder(section.Value);
-            if (string.IsNullOrEmpty(builder.Password))
+            NpgsqlConnection connection;
+            try
             {
-                Console.WriteLine();
-                Console.Write("Password for: {0}: ", section.Key);
-                builder.Password = GetPasswordFromConsole();
-            }
-            else
-            {
-                if (passwords.ContainsKey(builder.Password))
+                var builder = new NpgsqlConnectionStringBuilder(section.Value);
+                if (string.IsNullOrEmpty(builder.Password))
                 {
-                    builder.Password = passwords[builder.Password];
+                    Console.WriteLine();
+                    Console.Write("Password for: {0}: ", section.Key);
+                    builder.Password = GetPasswordFromConsole();
                 }
+                else
+                {
+                    if (passwords.ContainsKey(builder.Password))
+                    {
+                        builder.Password = passwords[builder.Password];
+                    }
+                }
+                connection = new NpgsqlConnection(builder.ToString());
             }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
 
-            var connection = new NpgsqlConnection(builder.ToString());
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("Failed initialize connection \"{0}\", it might not be PostgreSQL connection. Skipping...", section.Key);
+                Console.WriteLine("Error: {0}", e.Message);
+                Console.ResetColor();
+                return null;
+            }
             return connection;
         }
 
