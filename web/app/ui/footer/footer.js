@@ -20,6 +20,17 @@ define(["require", "exports", "app/controls/footer-context-menu", "app/controls/
                 <i class="icon-search"></i>
                 <span></span>
             </div>
+            
+            <div class="content clickable">
+                <span></span>
+            </div>
+            <div class="editor clickable">
+                <span></span>
+            </div>
+            <div class="lang clickable">
+                <span></span>
+            </div>
+
             <div class="user clickable">
                 <span></span>
             </div>
@@ -33,6 +44,27 @@ define(["require", "exports", "app/controls/footer-context-menu", "app/controls/
             this.connections = element.find(".connections");
             this.schemas = element.find(".schemas");
             this.user = element.find(".user>span");
+            this.content = element.find(".content>span");
+            this.editor = element.find(".editor>span");
+            this.lang = element.find(".lang>span");
+            pubsub_1.subscribe(pubsub_1.CONTENT_ACTIVATED, name => {
+                if (name) {
+                    this.content.html(name);
+                }
+                else {
+                    this.content.html("");
+                    this.editor.html("");
+                }
+                this.adjustWidths();
+            });
+            pubsub_1.subscribe(pubsub_1.EDITOR_POSITION, (lineNumber, column, selectionLength) => {
+                let selection = "";
+                if (selectionLength) {
+                    selection = `(${selectionLength} selected)`;
+                }
+                this.editor.html(`Ln ${lineNumber}, Col ${column} ${(selection)}`);
+                this.adjustWidths();
+            });
             pubsub_1.subscribe(pubsub_1.API_INITIAL, (response) => {
                 if (!response.ok) {
                     this.connections.find("span").html("¯\\_(ツ)_/¯");
@@ -209,7 +241,10 @@ define(["require", "exports", "app/controls/footer-context-menu", "app/controls/
             columns[1] = this.info.getBoundingClientRect().width + "px";
             columns[2] = this.schemas.getBoundingClientRect().width + "px";
             columns[3] = "auto";
-            columns[4] = this.user.getBoundingClientRect().width + "px";
+            columns[4] = this.content.getBoundingClientRect().width + "px";
+            columns[5] = this.editor.getBoundingClientRect().width + "px";
+            columns[6] = this.lang.getBoundingClientRect().width + "px";
+            columns[7] = this.user.getBoundingClientRect().width + "px";
             this.footer.css("grid-template-columns", columns.join(" "));
         }
         formatTitleFromConn(connection) {

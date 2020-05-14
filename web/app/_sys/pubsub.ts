@@ -59,7 +59,6 @@ export const unsubscribe: (name: string, ref: number) => boolean = (name, ref) =
     return true;
 };
 
-//Keys { SCRIPTS = "scripts", TABLES = "tables", VIEWS = "views", ROUTINES = "routines", SEARCH = "search" };
 export const STATE_CHANGED_ON: string = "state/changed/on/"; // key: string
 export const STATE_CHANGED_OFF: string = "state/changed/off/"; // key: string
 export const STATE_CHANGED: string = "state/changed/"; // helper, key: string, state: bool
@@ -86,3 +85,6 @@ export const TAB_UNSELECTED = `tab/unselected`; //id: string, key: string
 
 export const SCRIPT_UPDATED = `script/updated`; //data: IScriptInfo
 export const CONNECTION_SET = `connection/set`; //name: string
+
+export const CONTENT_ACTIVATED = `content/activated`; //name: string
+export const EDITOR_POSITION = `editor/position`; //line: number, column: number, selectionLength: number

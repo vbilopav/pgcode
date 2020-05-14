@@ -2,6 +2,7 @@ import {Editor, IEditor, nullEditor} from "app/ui/content/editor";
 import {HorizontalSplitter, SplitterCtorArgs} from "app/controls/splitter";
 import {classes, IScriptContent, ItemInfoType, Keys, Languages, fetchScriptContent} from "app/api";
 import Storage from "app/_sys/storage";
+import { publish, CONTENT_ACTIVATED } from "app/_sys/pubsub";
 
 interface IStorageSplitterItem { height?: number, docked?: boolean }
 
@@ -60,7 +61,6 @@ export default class  {
             this.stickyId = id;
         }
         await this.createNewContent(id, key, data, contentArgs);
-        this.activate(id);
     }
 
     public async createNewContent(id: string, key: Keys, data: ItemInfoType, contentArgs = {content: null, sticky: false}) {
@@ -101,6 +101,8 @@ export default class  {
         }
         this.active = e.showElement().addClass(classes.active);
         setTimeout(() => this.editor(e).layout().focus());
+
+        publish(CONTENT_ACTIVATED, (e.dataAttr("data") as ItemInfoType).name);
         return true;
     }
 
@@ -123,6 +125,10 @@ export default class  {
         }
         this.editor(e).dispose();
         e.remove();
+
+        if (this.container.children.length == 0) {
+            publish(CONTENT_ACTIVATED, null);
+        }
     }
     
     public createElement(id: string, key: Keys, content: IScriptContent = null) {
@@ -146,7 +152,7 @@ export default class  {
             .toElement()
             .addClass("split-content")
             .css("grid-template-rows", `auto 5px ${_getSplitterVal(id).height}px`);
-        const editor = new Editor(id, element.children[0], element, lang);
+        const editor = new Editor(id, element.children[0], element, lang, content);
         element.dataAttr("editor", editor);
         
         new HorizontalSplitter({

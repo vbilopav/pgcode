@@ -196,7 +196,9 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/ui/mai
                 _updateStorageTabItems(this.items);
                 return;
             }
-            this.activateByTab(currentTarget);
+            if (!currentTarget.hasClass(api_1.classes.active)) {
+                this.activateByTab(currentTarget);
+            }
             _updateStorageTabItems(this.items);
         }
         tabDblClick(e) {

@@ -3,7 +3,7 @@ import {
     classes, IScriptContent, saveScriptContent, saveScriptScrollPosition, IScriptInfo
 } from "app/api";
 import {
-    SIDEBAR_DOCKED, SIDEBAR_UNDOCKED, SPLITTER_CHANGED, SCRIPT_UPDATED, subscribe, publish
+    SIDEBAR_DOCKED, SIDEBAR_UNDOCKED, SPLITTER_CHANGED, SCRIPT_UPDATED, EDITOR_POSITION, subscribe, publish
 } from "app/_sys/pubsub";
 import IStandaloneCodeEditor = monaco.editor.IStandaloneCodeEditor;
 import {timeout, timeoutAsync} from "app/_sys/timeout";
@@ -34,7 +34,9 @@ export class Editor implements IEditor {
 
     constructor(id: string, container: Element, content: Element, language: string, scriptContent: IScriptContent = null) {
         this.id = id;
+        
         console.log("editor created", this.id);
+
         this.container = container;
         this.content = content;
         const element = String.html`<div style="position: fixed;"></div>`.toElement();
@@ -58,7 +60,9 @@ export class Editor implements IEditor {
 
     dispose() {
         this.monaco.dispose();
+
         console.log("editor disposed", this.id);
+
         return this;
     }
 
@@ -107,6 +111,14 @@ export class Editor implements IEditor {
     }
 
     private initiateSaveContent() {
+        const position = this.monaco.getPosition();
+        const selection = this.monaco.getSelection();
+        let selectionLength = 0;
+        if (selection.startColumn != selection.endColumn || selection.startLineNumber != selection.endLineNumber) {
+            const value = this.monaco.getModel().getValueInRange(selection);
+            selectionLength = value.length;
+        }
+        publish(EDITOR_POSITION, position.lineNumber, position.column, selectionLength);
         timeoutAsync(async () => {
             let content = this.monaco.getValue();
             let viewState = JSON.stringify(this.monaco.saveViewState());

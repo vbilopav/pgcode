@@ -1,4 +1,4 @@
-define(["require", "exports", "app/ui/content/editor", "app/controls/splitter", "app/api", "app/_sys/storage"], function (require, exports, editor_1, splitter_1, api_1, storage_1) {
+define(["require", "exports", "app/ui/content/editor", "app/controls/splitter", "app/api", "app/_sys/storage", "app/_sys/pubsub"], function (require, exports, editor_1, splitter_1, api_1, storage_1, pubsub_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     const _defaultSplitValue = { height: 50, docked: true };
@@ -36,7 +36,6 @@ define(["require", "exports", "app/ui/content/editor", "app/controls/splitter", 
                 this.stickyId = id;
             }
             await this.createNewContent(id, key, data, contentArgs);
-            this.activate(id);
         }
         async createNewContent(id, key, data, contentArgs = { content: null, sticky: false }) {
             if (contentArgs.sticky) {
@@ -74,6 +73,7 @@ define(["require", "exports", "app/ui/content/editor", "app/controls/splitter", 
             }
             this.active = e.showElement().addClass(api_1.classes.active);
             setTimeout(() => this.editor(e).layout().focus());
+            pubsub_1.publish(pubsub_1.CONTENT_ACTIVATED, e.dataAttr("data").name);
             return true;
         }
         getContent(id) {
@@ -94,6 +94,9 @@ define(["require", "exports", "app/ui/content/editor", "app/controls/splitter", 
             }
             this.editor(e).dispose();
             e.remove();
+            if (this.container.children.length == 0) {
+                pubsub_1.publish(pubsub_1.CONTENT_ACTIVATED, null);
+            }
         }
         createElement(id, key, content = null) {
             if (key == api_1.Keys.SCRIPTS) {
@@ -115,7 +118,7 @@ define(["require", "exports", "app/ui/content/editor", "app/controls/splitter", 
                 .toElement()
                 .addClass("split-content")
                 .css("grid-template-rows", `auto 5px ${_getSplitterVal(id).height}px`);
-            const editor = new editor_1.Editor(id, element.children[0], element, lang);
+            const editor = new editor_1.Editor(id, element.children[0], element, lang, content);
             element.dataAttr("editor", editor);
             new splitter_1.HorizontalSplitter({
                 element: element.children[1],

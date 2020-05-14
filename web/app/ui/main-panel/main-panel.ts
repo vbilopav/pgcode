@@ -267,7 +267,9 @@ export class MainPanel {
             _updateStorageTabItems(this.items);
             return;
         }
-        this.activateByTab(currentTarget);
+        if (!currentTarget.hasClass(classes.active)) {
+            this.activateByTab(currentTarget);
+        }
         _updateStorageTabItems(this.items);
     }
 

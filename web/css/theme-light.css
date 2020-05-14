@@ -191,8 +191,8 @@ body > div.container {
   background-color: #007ACC;
   user-select: none;
   display: grid;
-  grid-template-columns: 155px       320px 150px   auto auto 27px;
-  grid-template-areas: 'connections info  schemas gap  user feed'; }
+  grid-template-columns: 155px       320px 150px   auto auto    auto   auto auto 27px;
+  grid-template-areas: 'connections info  schemas gap  content editor lang user feed'; }
   .footer > div.clickable {
     cursor: pointer; }
   .footer > div.clickable:hover {
@@ -252,6 +252,22 @@ body > div.container {
     opacity: 1; }
   .footer > .footer > span.icon-database {
     margin-right: 3px; }
+  .footer > div.content {
+    grid-area: content;
+    opacity: 0.75; }
+  .footer > div.content > span {
+    padding-left: 10px;
+    padding-right: 10px; }
+  .footer > div.editor {
+    grid-area: editor;
+    opacity: 0.75; }
+  .footer > div.editor > span {
+    padding-left: 10px;
+    padding-right: 10px; }
+  .footer > div.lang {
+    grid-area: lang;
+    opacity: 0.75;
+    cursor: default; }
   .footer > div.user {
     grid-area: user;
     opacity: 0.75;

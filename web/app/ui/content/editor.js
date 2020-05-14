@@ -77,6 +77,14 @@ define(["require", "exports", "app/api", "app/_sys/pubsub", "app/_sys/timeout", 
             return this.monaco.getValue();
         }
         initiateSaveContent() {
+            const position = this.monaco.getPosition();
+            const selection = this.monaco.getSelection();
+            let selectionLength = 0;
+            if (selection.startColumn != selection.endColumn || selection.startLineNumber != selection.endLineNumber) {
+                const value = this.monaco.getModel().getValueInRange(selection);
+                selectionLength = value.length;
+            }
+            pubsub_1.publish(pubsub_1.EDITOR_POSITION, position.lineNumber, position.column, selectionLength);
             timeout_1.timeoutAsync(async () => {
                 let content = this.monaco.getValue();
                 let viewState = JSON.stringify(this.monaco.saveViewState());

@@ -3,7 +3,10 @@ import FooterContextMenu from "app/controls/footer-context-menu";
 import MonacoContextMenu from "app/controls/monaco-context-menu";
 import Storage from "app/_sys/storage";
 import { fetchConnection, fetchSchema, IConnectionInfo, AppStatus, IResponse, IInitialResponse } from "app/api";
-import { publish, subscribe, SET_APP_STATUS, API_INITIAL, SCHEMA_CHANGED } from "app/_sys/pubsub";
+import { 
+    publish, subscribe, 
+    SET_APP_STATUS, API_INITIAL, SCHEMA_CHANGED, CONTENT_ACTIVATED, EDITOR_POSITION
+} from "app/_sys/pubsub";
 
 interface IStorage {connection: string}
 
@@ -16,6 +19,9 @@ export default class  {
     private schemas: Element;
     private info: Element;
     private user: Element;
+    private content: Element;
+    private editor: Element;
+    private lang: Element;
     private selectedConnection?: IConnectionInfo = null;
     private connectionMenu: FooterContextMenu = null;
     private schemasMenu: FooterContextMenu = null;
@@ -34,6 +40,17 @@ export default class  {
                 <i class="icon-search"></i>
                 <span></span>
             </div>
+            
+            <div class="content clickable">
+                <span></span>
+            </div>
+            <div class="editor clickable">
+                <span></span>
+            </div>
+            <div class="lang clickable">
+                <span></span>
+            </div>
+
             <div class="user clickable">
                 <span></span>
             </div>
@@ -49,6 +66,28 @@ export default class  {
         this.connections = element.find(".connections");
         this.schemas  = element.find(".schemas");
         this.user = element.find(".user>span");
+        this.content = element.find(".content>span");
+        this.editor = element.find(".editor>span");
+        this.lang = element.find(".lang>span");
+
+        subscribe(CONTENT_ACTIVATED, name => {
+            if (name) {
+                this.content.html(name)
+            } else {
+                this.content.html("");
+                this.editor.html("");
+            }
+            this.adjustWidths();
+        });
+
+        subscribe(EDITOR_POSITION, (lineNumber, column, selectionLength) => {
+            let selection = "";
+            if (selectionLength) {
+                selection = `(${selectionLength} selected)`;
+            }
+            this.editor.html(`Ln ${lineNumber}, Col ${column} ${(selection)}`);
+            this.adjustWidths();
+        });
 
         subscribe(API_INITIAL, (response: IResponse<IInitialResponse>) => {
             if (!response.ok) {
@@ -236,7 +275,10 @@ export default class  {
         columns[1] = this.info.getBoundingClientRect().width + "px";
         columns[2] = this.schemas.getBoundingClientRect().width + "px";
         columns[3] = "auto";
-        columns[4] = this.user.getBoundingClientRect().width + "px";
+        columns[4] = this.content.getBoundingClientRect().width + "px"
+        columns[5] = this.editor.getBoundingClientRect().width + "px"
+        columns[6] = this.lang.getBoundingClientRect().width + "px";
+        columns[7] = this.user.getBoundingClientRect().width + "px";
         this.footer.css("grid-template-columns", columns.join(" "));
     }
 

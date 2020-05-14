@@ -78,5 +78,7 @@ define(["require", "exports"], function (require, exports) {
     exports.TAB_UNSELECTED = `tab/unselected`;
     exports.SCRIPT_UPDATED = `script/updated`;
     exports.CONNECTION_SET = `connection/set`;
+    exports.CONTENT_ACTIVATED = `content/activated`;
+    exports.EDITOR_POSITION = `editor/position`;
 });
 //# sourceMappingURL=pubsub.js.map
