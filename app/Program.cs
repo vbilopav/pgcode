@@ -27,6 +27,8 @@ namespace Pgcode
         
         public static Settings Settings { get; set; }
 
+        public static string Version => typeof(Program).Assembly.GetName().Version.ToString();
+
         public static async Task Main(string[] args)
         {
             if (ArgsInclude(args, "-h", "--help"))

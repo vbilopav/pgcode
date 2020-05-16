@@ -5,8 +5,8 @@
     background-color: $footer-background-color;
     user-select: none;
     display: grid;
-    grid-template-columns: 155px       320px 150px   auto auto    auto   auto auto 27px;
-    grid-template-areas:  'connections info  schemas gap  content editor lang user feed';
+    grid-template-columns: 155px       320px 150px   auto auto    auto   auto auto auto auto    27px;
+    grid-template-areas:  'connections info  schemas gap1 content editor lang gap2 user version feed';
 
     & > div.clickable {
         cursor: pointer;
@@ -42,6 +42,7 @@
         padding-left: 5px;
         padding-right: 5px;
         width: fit-content;
+        width: -moz-fit-content;
         max-width: 340px;
         cursor: initial;
         user-select: text;
@@ -62,6 +63,7 @@
         padding-left: 5px;
         padding-right: 5px;
         width: fit-content;
+        width: -moz-fit-content;
         max-width: 150px;
         transition-duration: 0.4s;
     }
@@ -89,12 +91,14 @@
     & > div.content {
         grid-area: content;
         opacity: 0.75;
-    }
-    & > div.content > span {
+        width: fit-content;
+        width: -moz-fit-content;
         padding-left: 10px;
         padding-right: 10px;
     }
     & > div.editor {
+        width: fit-content;
+        width: -moz-fit-content;
         grid-area: editor;
         opacity: 0.75;
     }
@@ -105,12 +109,31 @@
     & > div.lang {
         grid-area: lang;
         opacity: 0.75;
+        width: fit-content;
+        width: -moz-fit-content;
         cursor: default;
+    }
+    & > div.lang > span {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+    & > div.version {
+        grid-area: version;
+        width: fit-content;
+        width: -moz-fit-content;
+        opacity: 0.75;
+        cursor: default;
+    }
+    & > div.version > span {
+        padding-left: 10px;
+        padding-right: 10px;
     }
 
     & > div.user {
         grid-area: user;
         opacity: 0.75;
+        width: fit-content;
+        width: -moz-fit-content;
         cursor: default;
     }
     & > div.user > span {

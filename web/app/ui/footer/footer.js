@@ -22,6 +22,7 @@ define(["require", "exports", "app/controls/footer-context-menu", "app/controls/
             </div>
             
             <div class="content clickable">
+                <i class="icon-doc-text"></i>
                 <span></span>
             </div>
             <div class="editor clickable">
@@ -34,6 +35,10 @@ define(["require", "exports", "app/controls/footer-context-menu", "app/controls/
             <div class="user clickable">
                 <span></span>
             </div>
+            <div class="version clickable" title="current version">
+                <span></span>
+            </div>
+            
             <div class="feed clickable" title="Send feedback">&#128526;</div>
         `);
             this.initConnections(element);
@@ -44,25 +49,28 @@ define(["require", "exports", "app/controls/footer-context-menu", "app/controls/
             this.connections = element.find(".connections");
             this.schemas = element.find(".schemas");
             this.user = element.find(".user>span");
-            this.content = element.find(".content>span");
+            this.content = element.find(".content");
             this.editor = element.find(".editor>span");
             this.lang = element.find(".lang>span");
+            this.version = element.find(".version>span");
             pubsub_1.subscribe(pubsub_1.CONTENT_ACTIVATED, name => {
                 if (name) {
-                    this.content.html(name);
+                    this.content.showElement().find("span").html(name);
                 }
                 else {
-                    this.content.html("");
+                    this.content.hideElement();
                     this.editor.html("");
+                    this.lang.html("");
                 }
                 this.adjustWidths();
             });
-            pubsub_1.subscribe(pubsub_1.EDITOR_POSITION, (lineNumber, column, selectionLength) => {
+            pubsub_1.subscribe(pubsub_1.EDITOR_POSITION, (language, lineNumber, column, selectionLength) => {
                 let selection = "";
                 if (selectionLength) {
                     selection = `(${selectionLength} selected)`;
                 }
                 this.editor.html(`Ln ${lineNumber}, Col ${column} ${(selection)}`);
+                this.lang.html(language);
                 this.adjustWidths();
             });
             pubsub_1.subscribe(pubsub_1.API_INITIAL, (response) => {
@@ -71,6 +79,7 @@ define(["require", "exports", "app/controls/footer-context-menu", "app/controls/
                     return;
                 }
                 this.user.html(response.data.user).attr("title", `signed in into pgcode as user ${response.data.user}`);
+                this.version.html(response.data.version);
                 this.schemasMenu = new footer_context_menu_1.default({
                     id: "schema-footer-menu",
                     event: "click",
@@ -244,7 +253,9 @@ define(["require", "exports", "app/controls/footer-context-menu", "app/controls/
             columns[4] = this.content.getBoundingClientRect().width + "px";
             columns[5] = this.editor.getBoundingClientRect().width + "px";
             columns[6] = this.lang.getBoundingClientRect().width + "px";
-            columns[7] = this.user.getBoundingClientRect().width + "px";
+            columns[7] = "auto";
+            columns[8] = this.user.getBoundingClientRect().width + "px";
+            columns[9] = this.version.getBoundingClientRect().width + "px";
             this.footer.css("grid-template-columns", columns.join(" "));
         }
         formatTitleFromConn(connection) {

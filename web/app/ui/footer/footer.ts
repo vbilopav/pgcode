@@ -22,6 +22,7 @@ export default class  {
     private content: Element;
     private editor: Element;
     private lang: Element;
+    private version: Element;
     private selectedConnection?: IConnectionInfo = null;
     private connectionMenu: FooterContextMenu = null;
     private schemasMenu: FooterContextMenu = null;
@@ -42,6 +43,7 @@ export default class  {
             </div>
             
             <div class="content clickable">
+                <i class="icon-doc-text"></i>
                 <span></span>
             </div>
             <div class="editor clickable">
@@ -54,6 +56,10 @@ export default class  {
             <div class="user clickable">
                 <span></span>
             </div>
+            <div class="version clickable" title="current version">
+                <span></span>
+            </div>
+            
             <div class="feed clickable" title="Send feedback">&#128526;</div>
         `);
 
@@ -66,26 +72,29 @@ export default class  {
         this.connections = element.find(".connections");
         this.schemas  = element.find(".schemas");
         this.user = element.find(".user>span");
-        this.content = element.find(".content>span");
+        this.content = element.find(".content");
         this.editor = element.find(".editor>span");
         this.lang = element.find(".lang>span");
+        this.version = element.find(".version>span");
 
         subscribe(CONTENT_ACTIVATED, name => {
             if (name) {
-                this.content.html(name)
+                this.content.showElement().find("span").html(name)
             } else {
-                this.content.html("");
+                this.content.hideElement();
                 this.editor.html("");
+                this.lang.html("");
             }
             this.adjustWidths();
         });
 
-        subscribe(EDITOR_POSITION, (lineNumber, column, selectionLength) => {
+        subscribe(EDITOR_POSITION, (language , lineNumber, column, selectionLength) => {
             let selection = "";
             if (selectionLength) {
                 selection = `(${selectionLength} selected)`;
             }
             this.editor.html(`Ln ${lineNumber}, Col ${column} ${(selection)}`);
+            this.lang.html(language);
             this.adjustWidths();
         });
 
@@ -95,7 +104,8 @@ export default class  {
                 return;
             } 
             this.user.html(response.data.user).attr("title", `signed in into pgcode as user ${response.data.user}`);
-            
+            this.version.html(response.data.version);
+
             this.schemasMenu = new FooterContextMenu({
                 id: "schema-footer-menu", 
                 event: "click", 
@@ -270,7 +280,7 @@ export default class  {
     }
 
     private adjustWidths() {
-        const columns = this.footer.css("grid-template-columns").split(" ")
+        const columns = this.footer.css("grid-template-columns").split(" ");
         columns[0] = this.connections.getBoundingClientRect().width + "px";
         columns[1] = this.info.getBoundingClientRect().width + "px";
         columns[2] = this.schemas.getBoundingClientRect().width + "px";
@@ -278,7 +288,10 @@ export default class  {
         columns[4] = this.content.getBoundingClientRect().width + "px"
         columns[5] = this.editor.getBoundingClientRect().width + "px"
         columns[6] = this.lang.getBoundingClientRect().width + "px";
-        columns[7] = this.user.getBoundingClientRect().width + "px";
+        columns[7] = "auto";
+        columns[8] = this.user.getBoundingClientRect().width + "px";
+        columns[9] = this.version.getBoundingClientRect().width + "px";
+        //columns[10] = "27px";
         this.footer.css("grid-template-columns", columns.join(" "));
     }
 

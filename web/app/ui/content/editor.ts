@@ -27,10 +27,11 @@ export const nullEditor = new (class implements IEditor {
 })();
 
 export class Editor implements IEditor {
-    private id: string;
-    private monaco: IStandaloneCodeEditor;
+    private readonly id: string;
+    private readonly monaco: IStandaloneCodeEditor;
     private readonly content: Element;
-    private container: Element;
+    private readonly container: Element;
+    private readonly language;
 
     constructor(id: string, container: Element, content: Element, language: string, scriptContent: IScriptContent = null) {
         this.id = id;
@@ -47,6 +48,7 @@ export class Editor implements IEditor {
             renderWhitespace: "all",
             automaticLayout: false
         });
+        this.language = language;
         if (scriptContent) {
             this.setContent(scriptContent);
         }
@@ -111,14 +113,18 @@ export class Editor implements IEditor {
     }
 
     private initiateSaveContent() {
-        const position = this.monaco.getPosition();
-        const selection = this.monaco.getSelection();
-        let selectionLength = 0;
-        if (selection.startColumn != selection.endColumn || selection.startLineNumber != selection.endLineNumber) {
-            const value = this.monaco.getModel().getValueInRange(selection);
-            selectionLength = value.length;
-        }
-        publish(EDITOR_POSITION, position.lineNumber, position.column, selectionLength);
+        
+        timeout(() => {
+            const position = this.monaco.getPosition();
+            const selection = this.monaco.getSelection();
+            let selectionLength = 0;
+            if (selection.startColumn != selection.endColumn || selection.startLineNumber != selection.endLineNumber) {
+                const value = this.monaco.getModel().getValueInRange(selection);
+                selectionLength = value.length;
+            }
+            publish(EDITOR_POSITION, this.language, position.lineNumber, position.column, selectionLength);
+        }, 50, `${this.id}-editor-position`);
+
         timeoutAsync(async () => {
             let content = this.monaco.getValue();
             let viewState = JSON.stringify(this.monaco.saveViewState());

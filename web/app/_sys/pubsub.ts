@@ -87,4 +87,4 @@ export const SCRIPT_UPDATED = `script/updated`; //data: IScriptInfo
 export const CONNECTION_SET = `connection/set`; //name: string
 
 export const CONTENT_ACTIVATED = `content/activated`; //name: string
-export const EDITOR_POSITION = `editor/position`; //line: number, column: number, selectionLength: number
+export const EDITOR_POSITION = `editor/position`; //language: string, line: number, column: number, selectionLength: number

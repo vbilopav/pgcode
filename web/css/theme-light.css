@@ -191,8 +191,8 @@ body > div.container {
   background-color: #007ACC;
   user-select: none;
   display: grid;
-  grid-template-columns: 155px       320px 150px   auto auto    auto   auto auto 27px;
-  grid-template-areas: 'connections info  schemas gap  content editor lang user feed'; }
+  grid-template-columns: 155px       320px 150px   auto auto    auto   auto auto auto auto    27px;
+  grid-template-areas: 'connections info  schemas gap1 content editor lang gap2 user version feed'; }
   .footer > div.clickable {
     cursor: pointer; }
   .footer > div.clickable:hover {
@@ -220,6 +220,7 @@ body > div.container {
     padding-left: 5px;
     padding-right: 5px;
     width: fit-content;
+    width: -moz-fit-content;
     max-width: 340px;
     cursor: initial;
     user-select: text;
@@ -236,6 +237,7 @@ body > div.container {
     padding-left: 5px;
     padding-right: 5px;
     width: fit-content;
+    width: -moz-fit-content;
     max-width: 150px;
     transition-duration: 0.4s; }
   .footer > div.schemas > i {
@@ -254,11 +256,14 @@ body > div.container {
     margin-right: 3px; }
   .footer > div.content {
     grid-area: content;
-    opacity: 0.75; }
-  .footer > div.content > span {
+    opacity: 0.75;
+    width: fit-content;
+    width: -moz-fit-content;
     padding-left: 10px;
     padding-right: 10px; }
   .footer > div.editor {
+    width: fit-content;
+    width: -moz-fit-content;
     grid-area: editor;
     opacity: 0.75; }
   .footer > div.editor > span {
@@ -267,10 +272,26 @@ body > div.container {
   .footer > div.lang {
     grid-area: lang;
     opacity: 0.75;
+    width: fit-content;
+    width: -moz-fit-content;
     cursor: default; }
+  .footer > div.lang > span {
+    padding-left: 10px;
+    padding-right: 10px; }
+  .footer > div.version {
+    grid-area: version;
+    width: fit-content;
+    width: -moz-fit-content;
+    opacity: 0.75;
+    cursor: default; }
+  .footer > div.version > span {
+    padding-left: 10px;
+    padding-right: 10px; }
   .footer > div.user {
     grid-area: user;
     opacity: 0.75;
+    width: fit-content;
+    width: -moz-fit-content;
     cursor: default; }
   .footer > div.user > span {
     padding-left: 10px;

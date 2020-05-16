@@ -13,20 +13,25 @@ using Pgcode.Migrations._1.Routines;
 namespace Pgcode.Api
 {
 
+    public class InitialResponse
+    {
+        public IEnumerable<ConnectionInfo> Connections { get; set; }
+        public string User { get; set; }
+        public string Version { get; set; }
+    }
+
     [Route("api")]
     public class ApiController : Controller
     {
         private readonly ConnectionManager _connectionManager;
         private readonly Settings _settings;
-        private readonly ILogger<ApiController> _logger;
 
         private string UserId => User.Identity.Name;
 
-        public ApiController(ConnectionManager connectionManager, Settings settings, ILogger<ApiController> logger)
+        public ApiController(ConnectionManager connectionManager, Settings settings)
         {
             _connectionManager = connectionManager;
             _settings = settings;
-            _logger = logger;
         }
 
         [HttpGet("initial")]
@@ -45,7 +50,8 @@ namespace Pgcode.Api
                         Database = c.Connection.Database,
                         User = c.Connection.UserName
                     }),
-                User = UserId
+                User = UserId,
+                Version = Program.Version
             };
 
         [HttpGet("connection/{connection}")]

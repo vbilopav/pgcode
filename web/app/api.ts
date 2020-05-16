@@ -81,7 +81,8 @@ export interface IScriptContent {
 
 export interface IInitialResponse { 
     connections: Array<IConnectionInfo>,
-    user: string
+    user: string,
+    version: string
 }
 
 export interface IConnectionInfo {
