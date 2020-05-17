@@ -51,6 +51,7 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/ui/mai
             pubsub_1.subscribe(pubsub_1.API_INITIAL, () => this.restoreItems());
             this.hiddenCopy = String.html `<textarea id="main-panel-hidden-copy" type="text" class="out-of-viewport"></textarea>`.toElement().
                 appendElementTo(document.body);
+            MainPanel.instance = this;
         }
         unstickById(id) {
             if (this.stickyTab && this.stickyTab.id == id) {
@@ -85,6 +86,9 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/ui/mai
                 this.activateByTab(tab, item);
             }
             _updateStorageTabItems(this.items);
+        }
+        activateById(id) {
+            this.activateByTab(this.tabs.find("#" + id));
         }
         restoreItems() {
             const stickyId = _storage.stickyId;

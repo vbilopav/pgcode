@@ -142,15 +142,17 @@
     }
 }
 
-#feed-footer-menu.footer-menu, #schema-footer-menu {
+#feed-footer-menu.footer-menu, #schema-footer-menu, #content-footer-menu {
     background-color: $footer-background-color;
 }
 
 #conn-footer-menu > .footer-menu-item > span:nth-child(1),
-#schema-footer-menu > .footer-menu-item > span:nth-child(1) {
+#schema-footer-menu > .footer-menu-item > span:nth-child(1),
+#content-footer-menu > .footer-menu-item > span:nth-child(1) {
     position: absolute;
 }
 #conn-footer-menu > .footer-menu-item > span:nth-child(2),
-#schema-footer-menu > .footer-menu-item > span:nth-child(2) {
+#schema-footer-menu > .footer-menu-item > span:nth-child(2),
+#content-footer-menu > .footer-menu-item > span:nth-child(2) {
     margin-left: 18px;
 }

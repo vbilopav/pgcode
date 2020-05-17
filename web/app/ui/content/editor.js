@@ -8,6 +8,7 @@ define(["require", "exports", "app/api", "app/_sys/pubsub", "app/_sys/timeout", 
         focus() { return this; }
         setContent(value) { return this; }
         getContent() { return null; }
+        actionRun(id) { return this; }
     })();
     class Editor {
         constructor(id, container, content, language, scriptContent = null) {
@@ -76,6 +77,10 @@ define(["require", "exports", "app/api", "app/_sys/pubsub", "app/_sys/timeout", 
         }
         getContent() {
             return this.monaco.getValue();
+        }
+        actionRun(id) {
+            this.monaco.getAction(id).run();
+            return this;
         }
         initiateSaveContent() {
             timeout_1.timeout(() => {

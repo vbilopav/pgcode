@@ -1,4 +1,4 @@
-define(["require", "exports", "app/controls/footer-context-menu", "app/controls/monaco-context-menu", "app/_sys/storage", "app/api", "app/_sys/pubsub"], function (require, exports, footer_context_menu_1, monaco_context_menu_1, storage_1, api_1, pubsub_1) {
+define(["require", "exports", "app/controls/footer-context-menu", "app/controls/monaco-context-menu", "app/_sys/storage", "app/api", "app/_sys/pubsub", "app/ui/content/content", "app/ui/main-panel/main-panel"], function (require, exports, footer_context_menu_1, monaco_context_menu_1, storage_1, api_1, pubsub_1, content_1, main_panel_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     const storage = new storage_1.default({ connection: null });
@@ -44,13 +44,9 @@ define(["require", "exports", "app/controls/footer-context-menu", "app/controls/
             this.initConnections(element);
             this.initInfo(element);
             this.initFeedbackMenu(element);
-        }
-        initConnections(element) {
-            this.connections = element.find(".connections");
-            this.schemas = element.find(".schemas");
             this.user = element.find(".user>span");
             this.content = element.find(".content");
-            this.editor = element.find(".editor>span");
+            this.editor = element.find(".editor>span").on("click", () => content_1.default.instance.actionRun("editor.action.gotoLine"));
             this.lang = element.find(".lang>span");
             this.version = element.find(".version>span");
             pubsub_1.subscribe(pubsub_1.CONTENT_ACTIVATED, name => {
@@ -73,6 +69,26 @@ define(["require", "exports", "app/controls/footer-context-menu", "app/controls/
                 this.lang.html(language);
                 this.adjustWidths();
             });
+            new footer_context_menu_1.default({
+                id: "content-footer-menu",
+                event: "click",
+                target: this.content,
+                items: [],
+                beforeOpen: menu => {
+                    for (let content of content_1.default.instance.getAllContent()) {
+                        menu.updateMenuItem(content.id, {
+                            text: content.data.name,
+                            checked: content.active,
+                            action: () => main_panel_1.MainPanel.instance.activateById(content.id)
+                        });
+                    }
+                    return true;
+                }
+            });
+        }
+        initConnections(element) {
+            this.connections = element.find(".connections");
+            this.schemas = element.find(".schemas");
             pubsub_1.subscribe(pubsub_1.API_INITIAL, (response) => {
                 if (!response.ok) {
                     this.connections.find("span").html("¯\\_(ツ)_/¯");

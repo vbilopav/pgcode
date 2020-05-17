@@ -7,6 +7,8 @@ import {
     publish, subscribe, 
     SET_APP_STATUS, API_INITIAL, SCHEMA_CHANGED, CONTENT_ACTIVATED, EDITOR_POSITION
 } from "app/_sys/pubsub";
+import Content from "app/ui/content/content";
+import { MainPanel } from "app/ui/main-panel/main-panel";
 
 interface IStorage {connection: string}
 
@@ -66,14 +68,10 @@ export default class  {
         this.initConnections(element);
         this.initInfo(element);
         this.initFeedbackMenu(element);
-    }
 
-    private initConnections(element: Element) {
-        this.connections = element.find(".connections");
-        this.schemas  = element.find(".schemas");
         this.user = element.find(".user>span");
         this.content = element.find(".content");
-        this.editor = element.find(".editor>span");
+        this.editor = element.find(".editor>span").on("click", () => Content.instance.actionRun("editor.action.gotoLine"));
         this.lang = element.find(".lang>span");
         this.version = element.find(".version>span");
 
@@ -97,6 +95,28 @@ export default class  {
             this.lang.html(language);
             this.adjustWidths();
         });
+
+        new FooterContextMenu({
+            id: "content-footer-menu", 
+            event: "click", 
+            target: this.content, 
+            items: [],
+            beforeOpen: menu => {
+                for(let content of Content.instance.getAllContent()) {
+                    menu.updateMenuItem(content.id, {
+                        text: content.data.name, 
+                        checked: content.active,
+                        action: () => MainPanel.instance.activateById(content.id)
+                    });
+                }
+                return true;
+            }
+        } as ContextMenuCtorArgs);
+    }
+
+    private initConnections(element: Element) {
+        this.connections = element.find(".connections");
+        this.schemas  = element.find(".schemas");
 
         subscribe(API_INITIAL, (response: IResponse<IInitialResponse>) => {
             if (!response.ok) {

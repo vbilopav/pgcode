@@ -62,6 +62,8 @@ export class MainPanel {
     private stickyTab: Element;
     private items: Map<string, Item> = new Map<string, Item>();
 
+    public static instance: MainPanel;
+
     constructor(element: Element){
         this.element = element.addClass("main-panel").html(
             String.html`
@@ -107,6 +109,8 @@ export class MainPanel {
         this.hiddenCopy = (
             String.html`<textarea id="main-panel-hidden-copy" type="text" class="out-of-viewport"></textarea>` as String).toElement().
             appendElementTo(document.body) as HTMLElement;
+
+        MainPanel.instance = this;
     }
 
     public unstickById(id: string) {
@@ -143,6 +147,10 @@ export class MainPanel {
             this.activateByTab(tab, item);
         }
         _updateStorageTabItems(this.items);
+    }
+
+    public activateById(id: string) {
+        this.activateByTab(this.tabs.find("#" + id));
     }
 
     private restoreItems() {

@@ -15,6 +15,7 @@ export interface IEditor {
     focus(): IEditor;
     setContent(value: IScriptContent) : IEditor;
     getContent() : string;
+    actionRun(id: string) : IEditor;
 }
 
 export const nullEditor = new (class implements IEditor {
@@ -24,6 +25,7 @@ export const nullEditor = new (class implements IEditor {
     focus() {return this}
     setContent(value: IScriptContent) {return this}
     getContent() : string {return null}
+    actionRun(id: string) {return this}
 })();
 
 export class Editor implements IEditor {
@@ -52,10 +54,11 @@ export class Editor implements IEditor {
         if (scriptContent) {
             this.setContent(scriptContent);
         }
+
         this.monaco.onDidChangeModelContent(() => this.initiateSaveContent());
         this.monaco.onDidChangeCursorPosition(() => this.initiateSaveContent());
         this.monaco.onDidScrollChange(() => this.initiateSaveScroll());
-        
+
         window.on("resize", () => this.initiateLayout());
         subscribe([SIDEBAR_DOCKED, SPLITTER_CHANGED, SIDEBAR_UNDOCKED], () =>  this.initiateLayout());
     }
@@ -110,6 +113,13 @@ export class Editor implements IEditor {
 
     getContent() : string {
         return this.monaco.getValue();
+    }
+
+    actionRun(id: string) {
+        //list: this.monaco._actions
+        //delete this.monaco._actions["editor.foldLevel7"]
+        this.monaco.getAction(id).run();
+        return this;
     }
 
     private initiateSaveContent() {

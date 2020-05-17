@@ -13,9 +13,10 @@ define(["require", "exports", "app/ui/content/editor", "app/controls/splitter", 
         s[id] = { ...(v ? v : _defaultSplitValue), ...item };
         _storage.splitter = s;
     };
-    class default_1 {
+    class Content {
         constructor(element) {
             this.container = element;
+            Content.instance = this;
         }
         disposeEditor(id) {
             const e = this.getContentElement(id);
@@ -88,7 +89,7 @@ define(["require", "exports", "app/ui/content/editor", "app/controls/splitter", 
             return e.html().trim();
         }
         remove(id) {
-            const e = this.container.find("#" + id);
+            const e = this.getContentElement(id);
             if (!e.length) {
                 return;
             }
@@ -97,6 +98,16 @@ define(["require", "exports", "app/ui/content/editor", "app/controls/splitter", 
             if (this.container.children.length == 0) {
                 pubsub_1.publish(pubsub_1.CONTENT_ACTIVATED, null);
             }
+        }
+        actionRun(id) {
+            this.editor(this.active).actionRun(id);
+        }
+        getAllContent() {
+            const result = new Array();
+            for (let e of this.container.children) {
+                result.push({ id: e.id, key: e.dataAttr("key"), data: e.dataAttr("data"), active: e.hasClass(api_1.classes.active) });
+            }
+            return result;
         }
         createElement(id, key, content = null) {
             if (key == api_1.Keys.SCRIPTS) {
@@ -159,6 +170,6 @@ define(["require", "exports", "app/ui/content/editor", "app/controls/splitter", 
             return this.container.find("#" + id);
         }
     }
-    exports.default = default_1;
+    exports.default = Content;
 });
 //# sourceMappingURL=content.js.map

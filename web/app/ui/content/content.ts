@@ -32,13 +32,17 @@ const
         _storage.splitter = s;
     };
 
-export default class  {
+export default class Content {
+
     private readonly container: Element;
     private active: Element;
     private stickyId: string;
 
+    public static instance: Content;
+
     constructor(element: Element) {
         this.container = element;
+        Content.instance = this;
     }
 
     public disposeEditor(id: string) {
@@ -82,7 +86,6 @@ export default class  {
         }
     }
 
-
     public setStickStatus(id: string, value: boolean) {
         if (value) {
             this.stickyId = id;
@@ -119,7 +122,7 @@ export default class  {
     }
 
     public remove(id: string) {
-        const e = this.container.find("#" + id);
+        const e = this.getContentElement(id);
         if (!e.length) {
             return
         }
@@ -130,8 +133,20 @@ export default class  {
             publish(CONTENT_ACTIVATED, null);
         }
     }
+
+    public actionRun(id: string) {
+        this.editor(this.active).actionRun(id);
+    }
+
+    public getAllContent() : Array<{id: string, key: Keys, data: ItemInfoType, active: boolean}> {
+        const result = new Array<{id: string, key: Keys, data: ItemInfoType, active: boolean}>();
+        for(let e of this.container.children) {
+            result.push({id: e.id, key: e.dataAttr("key"), data: e.dataAttr("data"), active: e.hasClass(classes.active)})
+        }
+        return result;
+    }
     
-    public createElement(id: string, key: Keys, content: IScriptContent = null) {
+    private createElement(id: string, key: Keys, content: IScriptContent = null) {
         if (key == Keys.SCRIPTS) {
             return this.createSplitEditor(id, Languages.PGSQL, content);
         }
