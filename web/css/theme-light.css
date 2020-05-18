@@ -191,8 +191,8 @@ body > div.container {
   background-color: #007ACC;
   user-select: none;
   display: grid;
-  grid-template-columns: 155px       320px 150px   auto auto    auto   auto auto auto auto    27px;
-  grid-template-areas: 'connections info  schemas gap1 content editor lang gap2 user version feed'; }
+  grid-template-columns: 155px       320px 150px   auto    auto auto auto auto   auto auto    27px;
+  grid-template-areas: 'connections info  schemas content lang gap1 msg editor user version feed'; }
   .footer > div.clickable {
     cursor: pointer; }
   .footer > div.clickable:hover {

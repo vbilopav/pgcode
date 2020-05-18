@@ -304,14 +304,15 @@ export default class  {
         columns[0] = this.connections.getBoundingClientRect().width + "px";
         columns[1] = this.info.getBoundingClientRect().width + "px";
         columns[2] = this.schemas.getBoundingClientRect().width + "px";
-        columns[3] = "auto";
-        columns[4] = this.content.getBoundingClientRect().width + "px"
-        columns[5] = this.editor.getBoundingClientRect().width + "px"
-        columns[6] = this.lang.getBoundingClientRect().width + "px";
-        columns[7] = "auto";
-        columns[8] = this.user.getBoundingClientRect().width + "px";
+        columns[3] = this.content.getBoundingClientRect().width + "px"
+        columns[4] = this.lang.getBoundingClientRect().width + "px";
+        columns[5] = "auto";
+        columns[6] = "auto"; // msg
+        columns[7] = this.editor.getBoundingClientRect().width + "px";
+        columns[8] = this.user.getBoundingClientRect().width + "px"
         columns[9] = this.version.getBoundingClientRect().width + "px";
-        //columns[10] = "27px";
+        columns[10] = "27px"; // feed
+
         this.footer.css("grid-template-columns", columns.join(" "));
     }
 

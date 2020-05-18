@@ -1,5 +1,4 @@
-﻿import "vs/editor/editor.main";
-import {
+﻿import {
     classes, IScriptContent, saveScriptContent, saveScriptScrollPosition, IScriptInfo
 } from "app/api";
 import {
@@ -7,6 +6,7 @@ import {
 } from "app/_sys/pubsub";
 import IStandaloneCodeEditor = monaco.editor.IStandaloneCodeEditor;
 import {timeout, timeoutAsync} from "app/_sys/timeout";
+import {createEditor} from "app/ui/content/monaco-config";
 
 export interface IEditor {
     dispose(): IEditor;
@@ -44,12 +44,7 @@ export class Editor implements IEditor {
         this.content = content;
         const element = String.html`<div style="position: fixed;"></div>`.toElement();
         this.container.append(element);
-        this.monaco = monaco.editor.create(element as HTMLElement, {
-            language,
-            theme: "vs-dark",
-            renderWhitespace: "all",
-            automaticLayout: false
-        });
+        this.monaco = createEditor(element, language);
         this.language = language;
         if (scriptContent) {
             this.setContent(scriptContent);
@@ -116,8 +111,6 @@ export class Editor implements IEditor {
     }
 
     actionRun(id: string) {
-        //list: this.monaco._actions
-        //delete this.monaco._actions["editor.foldLevel7"]
         this.monaco.getAction(id).run();
         return this;
     }

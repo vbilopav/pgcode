@@ -1,4 +1,4 @@
-define(["require", "exports", "app/api", "app/_sys/pubsub", "app/_sys/timeout", "vs/editor/editor.main"], function (require, exports, api_1, pubsub_1, timeout_1) {
+define(["require", "exports", "app/api", "app/_sys/pubsub", "app/_sys/timeout", "app/ui/content/monaco-config"], function (require, exports, api_1, pubsub_1, timeout_1, monaco_config_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.nullEditor = new (class {
@@ -18,12 +18,7 @@ define(["require", "exports", "app/api", "app/_sys/pubsub", "app/_sys/timeout", 
             this.content = content;
             const element = String.html `<div style="position: fixed;"></div>`.toElement();
             this.container.append(element);
-            this.monaco = monaco.editor.create(element, {
-                language,
-                theme: "vs-dark",
-                renderWhitespace: "all",
-                automaticLayout: false
-            });
+            this.monaco = monaco_config_1.createEditor(element, language);
             this.language = language;
             if (scriptContent) {
                 this.setContent(scriptContent);
