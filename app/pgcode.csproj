@@ -4,14 +4,15 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <RootNamespace>Pgcode</RootNamespace>
     <Win32Resource />
-    <Version>0.0.0.3</Version>
-    <FileVersion>0.0.0.3</FileVersion>
-    <InformationalVersion>0.0.0.3</InformationalVersion>
+    <Version>0.0.0.5</Version>
+    <FileVersion>0.0.0.5</FileVersion>
+    <InformationalVersion>0.0.0.5</InformationalVersion>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Norm.net" Version="1.3.0" />
+    <PackageReference Include="Norm.net" Version="1.5.2" />
     <PackageReference Include="Npgsql" Version="4.1.3.1" />
+    <PackageReference Include="System.IO.Pipelines" Version="4.7.2" />
   </ItemGroup>
 
   <ItemGroup>

@@ -18,7 +18,7 @@ define(["require", "exports", "app/api", "app/_sys/pubsub", "app/_sys/timeout", 
             this.content = content;
             const element = String.html `<div style="position: fixed;"></div>`.toElement();
             this.container.append(element);
-            this.monaco = monaco_config_1.createEditor(element, language);
+            this.monaco = monaco_config_1.createEditor(element, language, () => this.execute());
             this.language = language;
             if (scriptContent) {
                 this.setContent(scriptContent);
@@ -26,8 +26,21 @@ define(["require", "exports", "app/api", "app/_sys/pubsub", "app/_sys/timeout", 
             this.monaco.onDidChangeModelContent(() => this.initiateSaveContent());
             this.monaco.onDidChangeCursorPosition(() => this.initiateSaveContent());
             this.monaco.onDidScrollChange(() => this.initiateSaveScroll());
+            this.monaco.onContextMenu(() => {
+                console.log("ctx-menu");
+            });
             window.on("resize", () => this.initiateLayout());
             pubsub_1.subscribe([pubsub_1.SIDEBAR_DOCKED, pubsub_1.SPLITTER_CHANGED, pubsub_1.SIDEBAR_UNDOCKED], () => this.initiateLayout());
+        }
+        execute() {
+            const selection = this.monaco.getSelection();
+            if (!selection.isEmpty()) {
+                const value = this.monaco.getModel().getValueInRange(selection);
+                console.log("Execute:", value);
+            }
+            else {
+                this.actionRun(monaco_config_1.commandIds.selectAll);
+            }
         }
         dispose() {
             this.monaco.dispose();
@@ -82,7 +95,7 @@ define(["require", "exports", "app/api", "app/_sys/pubsub", "app/_sys/timeout", 
                 const position = this.monaco.getPosition();
                 const selection = this.monaco.getSelection();
                 let selectionLength = 0;
-                if (selection.startColumn != selection.endColumn || selection.startLineNumber != selection.endLineNumber) {
+                if (!selection.isEmpty()) {
                     const value = this.monaco.getModel().getValueInRange(selection);
                     selectionLength = value.length;
                 }

@@ -55,14 +55,47 @@ define(["require", "exports", "vs/editor/editor.main"], function (require, expor
         delete editor._actions["editor.unfoldAllMarkerRegions"];
         delete editor._actions["editor.unfoldRecursively"];
     };
-    exports.createEditor = (element, language) => {
-        const editor = monaco.editor.create(element, {
+    exports.commandIds = {
+        selectAll: "pgcode.selectAll",
+        execute: "pgcode.execute"
+    };
+    exports.createEditor = (element, language, execute) => {
+        let editor = monaco.editor.create(element, {
             language,
             theme: "vs-dark",
             renderWhitespace: "all",
-            automaticLayout: false
+            automaticLayout: false,
+            selectOnLineNumbers: true,
+            glyphMargin: true,
+            smoothScrolling: true
         });
         deleteExcessActions(editor);
+        editor.addAction({
+            id: exports.commandIds.execute,
+            label: "Execute",
+            keybindings: [
+                monaco.KeyCode.F5
+            ],
+            precondition: null,
+            keybindingContext: null,
+            contextMenuGroupId: "execution",
+            contextMenuOrder: 1.5,
+            run: execute
+        });
+        editor.addAction({
+            id: exports.commandIds.selectAll,
+            label: "Select All",
+            keybindings: [
+                monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_A,
+            ],
+            precondition: null,
+            keybindingContext: null,
+            contextMenuGroupId: "9_cutcopypaste",
+            contextMenuOrder: 2,
+            run: (editor) => {
+                editor.trigger("pgcode-editor", "selectAll", null);
+            }
+        });
         return editor;
     };
 });

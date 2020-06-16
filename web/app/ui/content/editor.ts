@@ -6,7 +6,7 @@ import {
 } from "app/_sys/pubsub";
 import IStandaloneCodeEditor = monaco.editor.IStandaloneCodeEditor;
 import {timeout, timeoutAsync} from "app/_sys/timeout";
-import {createEditor} from "app/ui/content/monaco-config";
+import {createEditor, commandIds} from "app/ui/content/monaco-config";
 
 export interface IEditor {
     dispose(): IEditor;
@@ -44,7 +44,7 @@ export class Editor implements IEditor {
         this.content = content;
         const element = String.html`<div style="position: fixed;"></div>`.toElement();
         this.container.append(element);
-        this.monaco = createEditor(element, language);
+        this.monaco = createEditor(element, language, () => this.execute());
         this.language = language;
         if (scriptContent) {
             this.setContent(scriptContent);
@@ -54,8 +54,23 @@ export class Editor implements IEditor {
         this.monaco.onDidChangeCursorPosition(() => this.initiateSaveContent());
         this.monaco.onDidScrollChange(() => this.initiateSaveScroll());
 
+        this.monaco.onContextMenu(() => {
+            console.log("ctx-menu");
+        })
+
         window.on("resize", () => this.initiateLayout());
         subscribe([SIDEBAR_DOCKED, SPLITTER_CHANGED, SIDEBAR_UNDOCKED], () =>  this.initiateLayout());
+    }
+
+    execute() {
+        const selection = this.monaco.getSelection();
+        if (!selection.isEmpty()) {
+            const value = this.monaco.getModel().getValueInRange(selection);
+            console.log("Execute:", value);
+        } else {
+            // get the view state and restore if execute is canceled 
+            this.actionRun(commandIds.selectAll);
+        }
     }
 
     dispose() {
@@ -121,7 +136,7 @@ export class Editor implements IEditor {
             const position = this.monaco.getPosition();
             const selection = this.monaco.getSelection();
             let selectionLength = 0;
-            if (selection.startColumn != selection.endColumn || selection.startLineNumber != selection.endLineNumber) {
+            if (!selection.isEmpty()) {
                 const value = this.monaco.getModel().getValueInRange(selection);
                 selectionLength = value.length;
             }

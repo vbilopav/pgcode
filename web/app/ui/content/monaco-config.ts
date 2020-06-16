@@ -1,4 +1,5 @@
 ﻿import "vs/editor/editor.main";
+import ICodeEditor = monaco.editor.ICodeEditor;
 
 const deleteExcessActions = editor => {
     delete editor._actions["editor.action.insertCursorAbove"];
@@ -55,15 +56,54 @@ const deleteExcessActions = editor => {
     delete editor._actions["editor.unfoldRecursively"];
 };
 
-export const createEditor = (element: Element, language: string) => {
+
+export const commandIds = {
+    selectAll: "pgcode.selectAll",
+    execute: "pgcode.execute"
+}
+
+export const createEditor = (element: Element, language: string, execute: (editor: ICodeEditor, ...args: any[]) => void | Promise<void>) => {
     
-    const editor = monaco.editor.create(element as HTMLElement, {
+    let editor = monaco.editor.create(element as HTMLElement, {
         language,
         theme: "vs-dark",
         renderWhitespace: "all",
-        automaticLayout: false
+        automaticLayout: false,
+        selectOnLineNumbers: true,
+        glyphMargin: true,
+        smoothScrolling: true
     });
     deleteExcessActions(editor);
+
+    editor.addAction({
+        id: commandIds.execute,
+        label: "Execute",
+        keybindings: [
+            monaco.KeyCode.F5
+        ],
+        precondition: null,
+        keybindingContext: null,
+        contextMenuGroupId: "execution",
+        contextMenuOrder: 1.5,
+
+        run: execute
+    });
+
+    editor.addAction({
+        id: commandIds.selectAll,
+        label: "Select All",
+        keybindings: [
+            monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_A,
+        ],
+        precondition: null,
+        keybindingContext: null,
+        contextMenuGroupId: "9_cutcopypaste",
+        contextMenuOrder: 2,
+        run: (editor: ICodeEditor) => {
+            editor.trigger("pgcode-editor", "selectAll", null);
+        }
+    });
+
     return editor;
 }
 
