@@ -75,9 +75,10 @@ define(["require", "exports", "app/controls/footer-context-menu", "app/controls/
                 target: this.content,
                 items: [],
                 beforeOpen: menu => {
+                    menu.clearItems();
                     for (let content of content_1.default.instance.getAllContent()) {
                         menu.updateMenuItem(content.id, {
-                            text: content.data.name,
+                            text: `${content.data.name} @ ${content.data.connection} / ${content.data.schema}`,
                             checked: content.active,
                             action: () => main_panel_1.MainPanel.instance.activateById(content.id)
                         });
@@ -120,7 +121,15 @@ define(["require", "exports", "app/controls/footer-context-menu", "app/controls/
                     id: "conn-footer-menu",
                     event: "click",
                     target: this.connections,
-                    items: menuItems
+                    items: menuItems,
+                    menuItemsCallback: items => {
+                        for (let item of items) {
+                            item.element.find("span:nth-child(2)")
+                                .css("border-left", `2px solid ${api_1.getConnectionColor(item.text)}`)
+                                .css("padding-left", "5px");
+                        }
+                        return items;
+                    }
                 });
                 if (!storage.connection) {
                     this.selectConnection();
@@ -254,6 +263,7 @@ define(["require", "exports", "app/controls/footer-context-menu", "app/controls/
             }
             this.schemasMenu.updateMenuItem(name, { checked: true });
             this.schemas.showElement().find("span").html(name);
+            this.adjustWidths();
         }
         async fetchSchema(name) {
             const response = await api_1.fetchSchema(name);

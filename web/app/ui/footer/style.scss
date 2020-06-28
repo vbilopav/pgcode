@@ -6,7 +6,7 @@
     user-select: none;
     display: grid;
     grid-template-columns: 155px       320px 150px   auto    auto auto auto auto   auto auto    27px;
-    grid-template-areas:  'connections info  schemas content lang gap1 msg editor user version feed';
+    grid-template-areas:  'connections info  schemas content lang gap1 msg  editor user version feed';
 
     & > div.clickable {
         cursor: pointer;

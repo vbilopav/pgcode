@@ -73,6 +73,9 @@ define(["require", "exports", "app/_sys/pubsub"], function (require, exports, pu
                 item.action(args);
             }
         }
+        clearItems() {
+            this.items = {};
+        }
         updateMenuItem(id, data) {
             const item = this.items[id];
             const newItem = { ...(item ? item : {}), ...data };
@@ -84,7 +87,7 @@ define(["require", "exports", "app/_sys/pubsub"], function (require, exports, pu
             return this;
         }
         setMenuItems(items) {
-            this.items = {};
+            this.clearItems();
             let count = 0;
             for (let item of items) {
                 item.order = count++;

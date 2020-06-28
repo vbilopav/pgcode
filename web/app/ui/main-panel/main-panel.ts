@@ -135,6 +135,7 @@ export class MainPanel {
             if (contentArgs.sticky) {
                 if (this.stickyTab) {
                     this.items.delete(this.stickyTab.id);
+                    this.content.remove(this.stickyTab.id);
                     _storage.stickyId = null;
                     this.stickyTab.replaceWith(this.makeStickyTab(tab));
                 } else {

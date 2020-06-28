@@ -67,7 +67,7 @@ define(["require", "exports", "vs/editor/editor.main"], function (require, expor
             automaticLayout: false,
             selectOnLineNumbers: true,
             glyphMargin: true,
-            smoothScrolling: true
+            smoothScrolling: true,
         });
         deleteExcessActions(editor);
         editor.addAction({

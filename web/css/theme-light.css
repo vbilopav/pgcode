@@ -192,7 +192,7 @@ body > div.container {
   user-select: none;
   display: grid;
   grid-template-columns: 155px       320px 150px   auto    auto auto auto auto   auto auto    27px;
-  grid-template-areas: 'connections info  schemas content lang gap1 msg editor user version feed'; }
+  grid-template-areas: 'connections info  schemas content lang gap1 msg  editor user version feed'; }
   .footer > div.clickable {
     cursor: pointer; }
   .footer > div.clickable:hover {
@@ -536,7 +536,7 @@ body > div.container {
   position: fixed;
   background-color: #16825d;
   display: grid;
-  max-width: 155px;
+  max-width: fit-content;
   width: fit-content;
   width: -moz-fit-content;
   box-shadow: 0 2px 8px #000;

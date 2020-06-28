@@ -72,6 +72,7 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/ui/mai
                 if (contentArgs.sticky) {
                     if (this.stickyTab) {
                         this.items.delete(this.stickyTab.id);
+                        this.content.remove(this.stickyTab.id);
                         _storage.stickyId = null;
                         this.stickyTab.replaceWith(this.makeStickyTab(tab));
                     }

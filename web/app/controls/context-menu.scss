@@ -35,7 +35,7 @@
     position: fixed;
     background-color: $connections-selector-background-color;
     display: grid;
-    max-width: 155px;
+    max-width: fit-content;
     width: fit-content;
     width: -moz-fit-content;
     box-shadow: 0 2px 8px #000;

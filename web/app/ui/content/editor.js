@@ -26,9 +26,6 @@ define(["require", "exports", "app/api", "app/_sys/pubsub", "app/_sys/timeout", 
             this.monaco.onDidChangeModelContent(() => this.initiateSaveContent());
             this.monaco.onDidChangeCursorPosition(() => this.initiateSaveContent());
             this.monaco.onDidScrollChange(() => this.initiateSaveScroll());
-            this.monaco.onContextMenu(() => {
-                console.log("ctx-menu");
-            });
             window.on("resize", () => this.initiateLayout());
             pubsub_1.subscribe([pubsub_1.SIDEBAR_DOCKED, pubsub_1.SPLITTER_CHANGED, pubsub_1.SIDEBAR_UNDOCKED], () => this.initiateLayout());
         }

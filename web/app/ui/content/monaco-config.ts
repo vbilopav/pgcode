@@ -71,7 +71,8 @@ export const createEditor = (element: Element, language: string, execute: (edito
         automaticLayout: false,
         selectOnLineNumbers: true,
         glyphMargin: true,
-        smoothScrolling: true
+        smoothScrolling: true,
+        //contextmenu: false //todo: disable default contextmenu and implement a better one
     });
     deleteExcessActions(editor);
 

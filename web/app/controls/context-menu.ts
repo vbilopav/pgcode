@@ -132,6 +132,10 @@ abstract class ContextMenu {
         }
     }
 
+    public clearItems() {
+        this.items = {};
+    }
+
     public updateMenuItem(id: string, data: MenuItemType) {
         const item = this.items[id];
         const newItem = {...(item ? item : {}), ...data} as ContextMenuItem;
@@ -144,7 +148,7 @@ abstract class ContextMenu {
     }
 
     public setMenuItems(items: Array<MenuItemType>) {
-        this.items = {};
+        this.clearItems();
         let count = 0;
         for(let item of items) {
             item.order = count++;

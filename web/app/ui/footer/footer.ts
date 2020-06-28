@@ -1,8 +1,10 @@
-import { ContextMenuCtorArgs, MenuItemType } from "app/controls/context-menu";
+import { ContextMenuCtorArgs, MenuItemType, ContextMenuItem } from "app/controls/context-menu";
 import FooterContextMenu from "app/controls/footer-context-menu";
 import MonacoContextMenu from "app/controls/monaco-context-menu";
 import Storage from "app/_sys/storage";
-import { fetchConnection, fetchSchema, IConnectionInfo, AppStatus, IResponse, IInitialResponse } from "app/api";
+import { 
+    fetchConnection, fetchSchema, IConnectionInfo, AppStatus, IResponse, IInitialResponse, getConnectionColor 
+} from "app/api";
 import { 
     publish, subscribe, 
     SET_APP_STATUS, API_INITIAL, SCHEMA_CHANGED, CONTENT_ACTIVATED, EDITOR_POSITION
@@ -102,9 +104,10 @@ export default class  {
             target: this.content, 
             items: [],
             beforeOpen: menu => {
+                menu.clearItems();
                 for(let content of Content.instance.getAllContent()) {
                     menu.updateMenuItem(content.id, {
-                        text: content.data.name, 
+                        text: `${content.data.name} @ ${content.data.connection} / ${content.data.schema}`, 
                         checked: content.active,
                         action: () => MainPanel.instance.activateById(content.id)
                     });
@@ -152,7 +155,15 @@ export default class  {
                 id: "conn-footer-menu", 
                 event: "click", 
                 target: this.connections, 
-                items: menuItems
+                items: menuItems,
+                menuItemsCallback: items => {
+                    for(let item of items as ContextMenuItem[]) {
+                        item.element.find("span:nth-child(2)")
+                        .css("border-left", `2px solid ${getConnectionColor(item.text)}`)
+                        .css("padding-left", "5px");
+                    }
+                    return items;
+                }
             } as ContextMenuCtorArgs);
 
             //this.info.on("click", () => this.connections.trigger("click"));
@@ -291,6 +302,7 @@ export default class  {
         }
         this.schemasMenu.updateMenuItem(name, {checked: true} as MenuItemType);
         this.schemas.showElement().find("span").html(name);
+        this.adjustWidths();
     }
 
     private async fetchSchema(name: string) {

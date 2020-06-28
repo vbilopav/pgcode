@@ -54,10 +54,6 @@ export class Editor implements IEditor {
         this.monaco.onDidChangeCursorPosition(() => this.initiateSaveContent());
         this.monaco.onDidScrollChange(() => this.initiateSaveScroll());
 
-        this.monaco.onContextMenu(() => {
-            console.log("ctx-menu");
-        })
-
         window.on("resize", () => this.initiateLayout());
         subscribe([SIDEBAR_DOCKED, SPLITTER_CHANGED, SIDEBAR_UNDOCKED], () =>  this.initiateLayout());
     }
