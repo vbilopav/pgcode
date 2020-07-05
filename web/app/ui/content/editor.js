@@ -19,13 +19,35 @@ define(["require", "exports", "app/api", "app/_sys/pubsub", "app/_sys/timeout", 
             const element = String.html `<div style="position: fixed;"></div>`.toElement();
             this.container.append(element);
             this.monaco = monaco_config_1.createEditor(element, language, () => this.execute());
+            this.selectionDecorations = [];
             this.language = language;
             if (scriptContent) {
                 this.setContent(scriptContent);
             }
             this.monaco.onDidChangeModelContent(() => this.initiateSaveContent());
             this.monaco.onDidChangeCursorPosition(() => this.initiateSaveContent());
-            this.monaco.onDidScrollChange(() => this.initiateSaveScroll());
+            this.monaco.onDidScrollChange(() => {
+                this.renumberSelection();
+                this.initiateSaveScroll();
+            });
+            this.monaco.onDidChangeCursorSelection(e => {
+                if (e.selection.isEmpty()) {
+                    this.selectionDecorations = this.monaco.deltaDecorations(this.selectionDecorations, [{
+                            range: e.selection,
+                            options: { isWholeLine: true, glyphMarginClassName: "current-line-decoration" }
+                        }]);
+                }
+                else {
+                    this.selectionDecorations = this.monaco.deltaDecorations(this.selectionDecorations, [{
+                            range: e.selection,
+                            options: { isWholeLine: true, glyphMarginClassName: "selection-decoration" }
+                        }]);
+                }
+                this.renumberSelection();
+            });
+            this.monaco.onKeyDown(() => {
+                pubsub_1.publish(pubsub_1.DISMISS_FOOTER_MESSAGE);
+            });
             window.on("resize", () => this.initiateLayout());
             pubsub_1.subscribe([pubsub_1.SIDEBAR_DOCKED, pubsub_1.SPLITTER_CHANGED, pubsub_1.SIDEBAR_UNDOCKED], () => this.initiateLayout());
         }
@@ -36,6 +58,7 @@ define(["require", "exports", "app/api", "app/_sys/pubsub", "app/_sys/timeout", 
                 console.log("Execute:", value);
             }
             else {
+                pubsub_1.publish(pubsub_1.FOOTER_MESSAGE, "Selected all! Hit F5 again to execute or any other key to continue...");
                 this.actionRun(monaco_config_1.commandIds.selectAll);
             }
         }
@@ -55,7 +78,7 @@ define(["require", "exports", "app/api", "app/_sys/pubsub", "app/_sys/timeout", 
             return this;
         }
         initiateLayout() {
-            timeout_1.timeout(() => this.layout(), 50, `${this.id}-editor-layout`);
+            timeout_1.timeout(() => this.layout(), 25, `${this.id}-editor-layout`);
             return this;
         }
         focus() {
@@ -78,6 +101,7 @@ define(["require", "exports", "app/api", "app/_sys/pubsub", "app/_sys/timeout", 
                 this.content.dataAttr("scrollLeft", value.scrollPosition.scrollLeft);
                 this.monaco.setScrollPosition(value.scrollPosition);
             }
+            setTimeout(() => { this.renumberSelection(); }, 225);
             return this;
         }
         getContent() {
@@ -86,6 +110,31 @@ define(["require", "exports", "app/api", "app/_sys/pubsub", "app/_sys/timeout", 
         actionRun(id) {
             this.monaco.getAction(id).run();
             return this;
+        }
+        renumberSelection() {
+            timeout_1.timeout(() => {
+                const selection = this.monaco.getSelection();
+                if (selection.isEmpty()) {
+                    return;
+                }
+                for (let m of this.container.querySelectorAll(".selection-decoration")) {
+                    let e = this.nextUntilHasClass(m, "line-numbers");
+                    let ln = e.html();
+                    if (isNaN(ln)) {
+                        continue;
+                    }
+                    m.html(`${ln - selection.startLineNumber + 1}`);
+                }
+            }, 25, `${this.id}-renumber-selection`);
+        }
+        nextUntilHasClass(e, className) {
+            e = e.nextElementSibling;
+            if (e.hasClass(className)) {
+                return e;
+            }
+            else {
+                return this.nextUntilHasClass(e, className);
+            }
         }
         initiateSaveContent() {
             timeout_1.timeout(() => {

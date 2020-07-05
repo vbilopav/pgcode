@@ -3,6 +3,7 @@ import {HorizontalSplitter, SplitterCtorArgs} from "app/controls/splitter";
 import {classes, IScriptContent, ItemInfoType, Keys, Languages, fetchScriptContent} from "app/api";
 import Storage from "app/_sys/storage";
 import { publish, CONTENT_ACTIVATED } from "app/_sys/pubsub";
+import ResultsPane from "app/ui/results-pane/results-pane"
 
 interface IStorageSplitterItem { height?: number, docked?: boolean }
 
@@ -167,9 +168,13 @@ export default class Content {
             .toElement()
             .addClass("split-content")
             .css("grid-template-rows", `auto 5px ${_getSplitterVal(id).height}px`);
+        
         const editor = new Editor(id, element.children[0], element, lang, content);
         element.dataAttr("editor", editor);
-        
+
+        const results = new ResultsPane(id, element.children[2]);
+        element.dataAttr("results", results);
+
         new HorizontalSplitter({
             element: element.children[1],
             container: element,

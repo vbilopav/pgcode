@@ -2,7 +2,14 @@
     classes, IScriptContent, saveScriptContent, saveScriptScrollPosition, IScriptInfo
 } from "app/api";
 import {
-    SIDEBAR_DOCKED, SIDEBAR_UNDOCKED, SPLITTER_CHANGED, SCRIPT_UPDATED, EDITOR_POSITION, subscribe, publish
+    SIDEBAR_DOCKED, 
+    SIDEBAR_UNDOCKED, 
+    SPLITTER_CHANGED, 
+    SCRIPT_UPDATED, 
+    EDITOR_POSITION, 
+    FOOTER_MESSAGE, 
+    DISMISS_FOOTER_MESSAGE,
+    subscribe, publish
 } from "app/_sys/pubsub";
 import IStandaloneCodeEditor = monaco.editor.IStandaloneCodeEditor;
 import {timeout, timeoutAsync} from "app/_sys/timeout";
@@ -34,6 +41,7 @@ export class Editor implements IEditor {
     private readonly content: Element;
     private readonly container: Element;
     private readonly language;
+    private selectionDecorations: string[];
 
     constructor(id: string, container: Element, content: Element, language: string, scriptContent: IScriptContent = null) {
         this.id = id;
@@ -45,6 +53,7 @@ export class Editor implements IEditor {
         const element = String.html`<div style="position: fixed;"></div>`.toElement();
         this.container.append(element);
         this.monaco = createEditor(element, language, () => this.execute());
+        this.selectionDecorations = [];
         this.language = language;
         if (scriptContent) {
             this.setContent(scriptContent);
@@ -52,7 +61,29 @@ export class Editor implements IEditor {
 
         this.monaco.onDidChangeModelContent(() => this.initiateSaveContent());
         this.monaco.onDidChangeCursorPosition(() => this.initiateSaveContent());
-        this.monaco.onDidScrollChange(() => this.initiateSaveScroll());
+        this.monaco.onDidScrollChange(() => {
+            this.renumberSelection();
+            this.initiateSaveScroll();
+        });
+
+        this.monaco.onDidChangeCursorSelection(e => {
+            if (e.selection.isEmpty()) {
+                this.selectionDecorations = this.monaco.deltaDecorations(this.selectionDecorations, [{
+                    range: e.selection,
+                    options: {isWholeLine: true, glyphMarginClassName: "current-line-decoration"}
+                }]);
+            } else {
+                this.selectionDecorations = this.monaco.deltaDecorations(this.selectionDecorations, [{
+                    range: e.selection,
+                    options: {isWholeLine: true, glyphMarginClassName: "selection-decoration"}
+                }]);
+            }
+            this.renumberSelection();
+        });
+
+        this.monaco.onKeyDown(() => {
+            publish(DISMISS_FOOTER_MESSAGE);
+        });
 
         window.on("resize", () => this.initiateLayout());
         subscribe([SIDEBAR_DOCKED, SPLITTER_CHANGED, SIDEBAR_UNDOCKED], () =>  this.initiateLayout());
@@ -65,15 +96,14 @@ export class Editor implements IEditor {
             console.log("Execute:", value);
         } else {
             // get the view state and restore if execute is canceled 
+            publish(FOOTER_MESSAGE, "Selected all! Hit F5 again to execute or any other key to continue...");
             this.actionRun(commandIds.selectAll);
         }
     }
 
     dispose() {
         this.monaco.dispose();
-
         console.log("editor disposed", this.id);
-
         return this;
     }
 
@@ -89,7 +119,7 @@ export class Editor implements IEditor {
     }
 
     initiateLayout() {
-        timeout(() => this.layout(), 50, `${this.id}-editor-layout`);
+        timeout(() => this.layout(), 25, `${this.id}-editor-layout`);
         return this;
     }
 
@@ -114,6 +144,8 @@ export class Editor implements IEditor {
             this.content.dataAttr("scrollLeft", value.scrollPosition.scrollLeft);
             this.monaco.setScrollPosition(value.scrollPosition);
         }
+        setTimeout(() => {this.renumberSelection()}, 225);
+
         return this;
     }
 
@@ -124,6 +156,32 @@ export class Editor implements IEditor {
     actionRun(id: string) {
         this.monaco.getAction(id).run();
         return this;
+    }
+
+    private renumberSelection() {
+        timeout(() => {
+            const selection = this.monaco.getSelection();
+            if (selection.isEmpty()) {
+                return;
+            }
+            for(let m of this.container.querySelectorAll(".selection-decoration")) {
+                let e = this.nextUntilHasClass(m, "line-numbers"); 
+                let ln = e.html() as any as number;
+                if (isNaN(ln)) {
+                    continue;
+                }
+                (m as HTMLElement).html(`${ln - selection.startLineNumber + 1}`);
+            }
+        }, 25, `${this.id}-renumber-selection`);
+    }
+
+    private nextUntilHasClass(e: Element, className: string) {
+        e = e.nextElementSibling;
+        if (e.hasClass(className)) {
+            return e;
+        } else {
+            return this.nextUntilHasClass(e, className);
+        }
     }
 
     private initiateSaveContent() {

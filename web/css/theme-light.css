@@ -261,6 +261,11 @@ body > div.container {
     width: -moz-fit-content;
     padding-left: 10px;
     padding-right: 10px; }
+  .footer > div.msg {
+    width: fit-content;
+    width: -moz-fit-content;
+    grid-area: msg;
+    margin: auto; }
   .footer > div.editor {
     width: fit-content;
     width: -moz-fit-content;
@@ -395,6 +400,12 @@ body > div.container {
       clip-path: inset(-4px 0px 0px 0px); }
   .main-panel > div:nth-child(2) .content {
     height: 100%; }
+
+.current-line-decoration::before {
+  content: "\26A1"; }
+
+.selection-decoration {
+  color: #252526; }
 
 .side-panel {
   grid-area: side-panel;

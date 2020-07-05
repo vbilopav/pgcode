@@ -80,5 +80,7 @@ define(["require", "exports"], function (require, exports) {
     exports.CONNECTION_SET = `connection/set`;
     exports.CONTENT_ACTIVATED = `content/activated`;
     exports.EDITOR_POSITION = `editor/position`;
+    exports.FOOTER_MESSAGE = `footer/message`;
+    exports.DISMISS_FOOTER_MESSAGE = `footer/message/dismiss`;
 });
 //# sourceMappingURL=pubsub.js.map

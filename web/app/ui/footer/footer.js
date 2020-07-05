@@ -7,13 +7,14 @@ define(["require", "exports", "app/controls/footer-context-menu", "app/controls/
             this.selectedConnection = null;
             this.connectionMenu = null;
             this.schemasMenu = null;
+            this.msgMode = false;
             this.footer = element.addClass("footer").html(String.html `
             <div class="connections">
                 <i class="icon-database"></i>
                 <span></span>
             </div>
             <div class="info clickable">
-                <img src="favicon.ico" />
+                <i>&#128024;</i>
                 <span></span>
             </div>
             <div class="schemas clickable">
@@ -25,13 +26,15 @@ define(["require", "exports", "app/controls/footer-context-menu", "app/controls/
                 <i class="icon-doc-text"></i>
                 <span></span>
             </div>
+            <div class="lang clickable">
+                <span>
+                </span>
+            </div>
+            <div class="msg">
+            </div>
             <div class="editor clickable">
                 <span></span>
             </div>
-            <div class="lang clickable">
-                <span></span>
-            </div>
-
             <div class="user clickable">
                 <span></span>
             </div>
@@ -48,7 +51,47 @@ define(["require", "exports", "app/controls/footer-context-menu", "app/controls/
             this.content = element.find(".content");
             this.editor = element.find(".editor>span").on("click", () => content_1.default.instance.actionRun("editor.action.gotoLine"));
             this.lang = element.find(".lang>span");
+            this.msg = element.find(".msg");
             this.version = element.find(".version>span");
+            this.subscribeContentActivated();
+            this.subscribeEditorPosition();
+            this.initFooterContextMenu();
+            this.subscribeFooterMessage();
+        }
+        subscribeFooterMessage() {
+            const cancelHandler = () => {
+                if (!this.msgMode) {
+                    return;
+                }
+                this.msgMode = false;
+                this.msg.html("");
+                this.footer.findAll("div:not(.connections):not(.msg):not(.feed)").css("display", "");
+                this.adjustWidths();
+            };
+            pubsub_1.subscribe(pubsub_1.DISMISS_FOOTER_MESSAGE, () => cancelHandler());
+            pubsub_1.subscribe(pubsub_1.FOOTER_MESSAGE, msg => {
+                this.msg.html(msg);
+                this.msgMode = true;
+                const columns = this.footer.css("grid-template-columns").split(" ");
+                columns[0] = this.connections.getBoundingClientRect().width + "px";
+                columns[1] = "0px";
+                columns[2] = "0px";
+                columns[3] = "0px";
+                columns[4] = "0px";
+                columns[5] = "0px";
+                columns[6] = "auto";
+                columns[7] = "0px";
+                columns[8] = "0px";
+                columns[9] = "0px";
+                columns[10] = "27px";
+                this.footer
+                    .css("grid-template-columns", columns.join(" "))
+                    .findAll("div:not(.connections):not(.msg):not(.feed)")
+                    .css("display", "none");
+            });
+            window.on("click keydown", () => cancelHandler());
+        }
+        subscribeContentActivated() {
             pubsub_1.subscribe(pubsub_1.CONTENT_ACTIVATED, name => {
                 if (name) {
                     this.content.showElement().find("span").html(name);
@@ -60,6 +103,8 @@ define(["require", "exports", "app/controls/footer-context-menu", "app/controls/
                 }
                 this.adjustWidths();
             });
+        }
+        subscribeEditorPosition() {
             pubsub_1.subscribe(pubsub_1.EDITOR_POSITION, (language, lineNumber, column, selectionLength) => {
                 let selection = "";
                 if (selectionLength) {
@@ -69,6 +114,8 @@ define(["require", "exports", "app/controls/footer-context-menu", "app/controls/
                 this.lang.html(language);
                 this.adjustWidths();
             });
+        }
+        initFooterContextMenu() {
             new footer_context_menu_1.default({
                 id: "content-footer-menu",
                 event: "click",
@@ -271,6 +318,9 @@ define(["require", "exports", "app/controls/footer-context-menu", "app/controls/
             pubsub_1.publish(pubsub_1.SET_APP_STATUS, api_1.AppStatus.READY);
         }
         adjustWidths() {
+            if (this.msgMode == true) {
+                return;
+            }
             const columns = this.footer.css("grid-template-columns").split(" ");
             columns[0] = this.connections.getBoundingClientRect().width + "px";
             columns[1] = this.info.getBoundingClientRect().width + "px";
@@ -278,7 +328,7 @@ define(["require", "exports", "app/controls/footer-context-menu", "app/controls/
             columns[3] = this.content.getBoundingClientRect().width + "px";
             columns[4] = this.lang.getBoundingClientRect().width + "px";
             columns[5] = "auto";
-            columns[6] = "auto";
+            columns[6] = this.msg.getBoundingClientRect().width + "px";
             columns[7] = this.editor.getBoundingClientRect().width + "px";
             columns[8] = this.user.getBoundingClientRect().width + "px";
             columns[9] = this.version.getBoundingClientRect().width + "px";

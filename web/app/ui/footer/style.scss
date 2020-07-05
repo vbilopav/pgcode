@@ -96,6 +96,12 @@
         padding-left: 10px;
         padding-right: 10px;
     }
+    & > div.msg {
+        width: fit-content;
+        width: -moz-fit-content;
+        grid-area: msg;
+        margin: auto;
+    }
     & > div.editor {
         width: fit-content;
         width: -moz-fit-content;

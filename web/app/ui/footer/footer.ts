@@ -7,7 +7,7 @@ import {
 } from "app/api";
 import { 
     publish, subscribe, 
-    SET_APP_STATUS, API_INITIAL, SCHEMA_CHANGED, CONTENT_ACTIVATED, EDITOR_POSITION
+    SET_APP_STATUS, API_INITIAL, SCHEMA_CHANGED, CONTENT_ACTIVATED, EDITOR_POSITION, FOOTER_MESSAGE, DISMISS_FOOTER_MESSAGE
 } from "app/_sys/pubsub";
 import Content from "app/ui/content/content";
 import { MainPanel } from "app/ui/main-panel/main-panel";
@@ -26,10 +26,12 @@ export default class  {
     private content: Element;
     private editor: Element;
     private lang: Element;
+    private msg: Element;
     private version: Element;
     private selectedConnection?: IConnectionInfo = null;
     private connectionMenu: FooterContextMenu = null;
     private schemasMenu: FooterContextMenu = null;
+    private msgMode = false;
 
     constructor(element: Element) {
         this.footer = element.addClass("footer").html(String.html`
@@ -38,7 +40,7 @@ export default class  {
                 <span></span>
             </div>
             <div class="info clickable">
-                <img src="favicon.ico" />
+                <i>&#128024;</i>
                 <span></span>
             </div>
             <div class="schemas clickable">
@@ -50,13 +52,15 @@ export default class  {
                 <i class="icon-doc-text"></i>
                 <span></span>
             </div>
+            <div class="lang clickable">
+                <span>
+                </span>
+            </div>
+            <div class="msg">
+            </div>
             <div class="editor clickable">
                 <span></span>
             </div>
-            <div class="lang clickable">
-                <span></span>
-            </div>
-
             <div class="user clickable">
                 <span></span>
             </div>
@@ -75,8 +79,50 @@ export default class  {
         this.content = element.find(".content");
         this.editor = element.find(".editor>span").on("click", () => Content.instance.actionRun("editor.action.gotoLine"));
         this.lang = element.find(".lang>span");
+        this.msg = element.find(".msg");
         this.version = element.find(".version>span");
 
+        this.subscribeContentActivated();
+        this.subscribeEditorPosition();
+        this.initFooterContextMenu();
+        this.subscribeFooterMessage();
+    }
+
+    private subscribeFooterMessage() {
+        const cancelHandler = () => {
+            if (!this.msgMode) {
+                return;
+            }
+            this.msgMode = false;
+            this.msg.html("");
+            this.footer.findAll("div:not(.connections):not(.msg):not(.feed)").css("display", "");
+            this.adjustWidths();
+        };
+        subscribe(DISMISS_FOOTER_MESSAGE, () => cancelHandler());
+        subscribe(FOOTER_MESSAGE, msg => {
+            this.msg.html(msg);
+            this.msgMode = true;
+            const columns = this.footer.css("grid-template-columns").split(" ");
+            columns[0] = this.connections.getBoundingClientRect().width + "px";
+            columns[1] = "0px";
+            columns[2] = "0px";
+            columns[3] = "0px";
+            columns[4] = "0px";
+            columns[5] = "0px";
+            columns[6] = "auto";
+            columns[7] = "0px";
+            columns[8] = "0px";
+            columns[9] = "0px";
+            columns[10] = "27px";
+            this.footer
+                .css("grid-template-columns", columns.join(" "))
+                .findAll("div:not(.connections):not(.msg):not(.feed)")
+                .css("display", "none");
+        });
+        window.on("click keydown", () => cancelHandler());
+    }
+
+    private subscribeContentActivated() {
         subscribe(CONTENT_ACTIVATED, name => {
             if (name) {
                 this.content.showElement().find("span").html(name)
@@ -87,7 +133,9 @@ export default class  {
             }
             this.adjustWidths();
         });
+    }
 
+    private subscribeEditorPosition() {
         subscribe(EDITOR_POSITION, (language , lineNumber, column, selectionLength) => {
             let selection = "";
             if (selectionLength) {
@@ -98,6 +146,9 @@ export default class  {
             this.adjustWidths();
         });
 
+    }
+
+    private initFooterContextMenu() {
         new FooterContextMenu({
             id: "content-footer-menu", 
             event: "click", 
@@ -312,6 +363,9 @@ export default class  {
     }
 
     private adjustWidths() {
+        if (this.msgMode == true) {
+            return;
+        }
         const columns = this.footer.css("grid-template-columns").split(" ");
         columns[0] = this.connections.getBoundingClientRect().width + "px";
         columns[1] = this.info.getBoundingClientRect().width + "px";
@@ -319,9 +373,9 @@ export default class  {
         columns[3] = this.content.getBoundingClientRect().width + "px"
         columns[4] = this.lang.getBoundingClientRect().width + "px";
         columns[5] = "auto";
-        columns[6] = "auto"; // msg
+        columns[6] = this.msg.getBoundingClientRect().width + "px";
         columns[7] = this.editor.getBoundingClientRect().width + "px";
-        columns[8] = this.user.getBoundingClientRect().width + "px"
+        columns[8] = this.user.getBoundingClientRect().width + "px";
         columns[9] = this.version.getBoundingClientRect().width + "px";
         columns[10] = "27px"; // feed
 

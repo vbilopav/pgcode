@@ -1,4 +1,4 @@
-define(["require", "exports", "app/ui/content/editor", "app/controls/splitter", "app/api", "app/_sys/storage", "app/_sys/pubsub"], function (require, exports, editor_1, splitter_1, api_1, storage_1, pubsub_1) {
+define(["require", "exports", "app/ui/content/editor", "app/controls/splitter", "app/api", "app/_sys/storage", "app/_sys/pubsub", "app/ui/results-pane/results-pane"], function (require, exports, editor_1, splitter_1, api_1, storage_1, pubsub_1, results_pane_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     const _defaultSplitValue = { height: 50, docked: true };
@@ -131,6 +131,8 @@ define(["require", "exports", "app/ui/content/editor", "app/controls/splitter", 
                 .css("grid-template-rows", `auto 5px ${_getSplitterVal(id).height}px`);
             const editor = new editor_1.Editor(id, element.children[0], element, lang, content);
             element.dataAttr("editor", editor);
+            const results = new results_pane_1.default(id, element.children[2]);
+            element.dataAttr("results", results);
             new splitter_1.HorizontalSplitter({
                 element: element.children[1],
                 container: element,

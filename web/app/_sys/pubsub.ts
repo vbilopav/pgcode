@@ -88,3 +88,6 @@ export const CONNECTION_SET = `connection/set`; //name: string
 
 export const CONTENT_ACTIVATED = `content/activated`; //name: string
 export const EDITOR_POSITION = `editor/position`; //language: string, line: number, column: number, selectionLength: number
+
+export const FOOTER_MESSAGE = `footer/message`; //message: string
+export const DISMISS_FOOTER_MESSAGE = `footer/message/dismiss`; //void

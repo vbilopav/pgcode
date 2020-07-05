@@ -27,3 +27,12 @@
         */
     }
 }
+
+.current-line-decoration::before {
+    content: "\26A1";
+    //content: "\1F418";
+}
+.selection-decoration {
+    color: $active-color;
+}
+
