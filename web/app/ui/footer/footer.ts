@@ -119,7 +119,7 @@ export default class  {
                 .findAll("div:not(.connections):not(.msg):not(.feed)")
                 .css("display", "none");
         });
-        window.on("click keydown", () => cancelHandler());
+        window.on("click keydown contextmenu", () => cancelHandler());
     }
 
     private subscribeContentActivated() {

@@ -89,7 +89,7 @@ define(["require", "exports", "app/controls/footer-context-menu", "app/controls/
                     .findAll("div:not(.connections):not(.msg):not(.feed)")
                     .css("display", "none");
             });
-            window.on("click keydown", () => cancelHandler());
+            window.on("click keydown contextmenu", () => cancelHandler());
         }
         subscribeContentActivated() {
             pubsub_1.subscribe(pubsub_1.CONTENT_ACTIVATED, name => {
