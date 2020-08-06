@@ -42,7 +42,7 @@ define(["require", "exports", "app/ui/content/editor", "app/controls/splitter", 
             if (contentArgs.sticky) {
                 this.stickyId = id;
             }
-            const newElement = this.createElement(id, key, contentArgs.content)
+            const newElement = this.createElement(id, key, contentArgs.content, data)
                 .hideElement()
                 .attr("id", id)
                 .dataAttr("key", key)
@@ -109,9 +109,9 @@ define(["require", "exports", "app/ui/content/editor", "app/controls/splitter", 
             }
             return result;
         }
-        createElement(id, key, content = null) {
+        createElement(id, key, content, data) {
             if (key == api_1.Keys.SCRIPTS) {
-                return this.createSplitEditor(id, api_1.Languages.PGSQL, content);
+                return this.createSplitEditor(id, api_1.Languages.PGSQL, content, data);
             }
             return String.html `
             <div>
@@ -119,7 +119,7 @@ define(["require", "exports", "app/ui/content/editor", "app/controls/splitter", 
             </div>`
                 .toElement();
         }
-        createSplitEditor(id, lang, content = null) {
+        createSplitEditor(id, lang, content, data) {
             const element = String.html `
             <div>
                 <div class="editor"></div>
@@ -131,7 +131,7 @@ define(["require", "exports", "app/ui/content/editor", "app/controls/splitter", 
                 .css("grid-template-rows", `auto 5px ${_getSplitterVal(id).height}px`);
             const editor = new editor_1.Editor(id, element.children[0], element, lang, content);
             element.dataAttr("editor", editor);
-            const results = new results_pane_1.default(id, element.children[2]);
+            const results = new results_pane_1.default(id, element.children[2], data);
             element.dataAttr("results", results);
             new splitter_1.HorizontalSplitter({
                 element: element.children[1],

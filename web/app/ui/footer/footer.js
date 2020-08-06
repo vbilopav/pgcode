@@ -14,7 +14,6 @@ define(["require", "exports", "app/controls/footer-context-menu", "app/controls/
                 <span></span>
             </div>
             <div class="info clickable">
-                <i>&#128024;</i>
                 <span></span>
             </div>
             <div class="schemas clickable">

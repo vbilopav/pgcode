@@ -72,7 +72,7 @@ export default class Content {
         if (contentArgs.sticky) {
             this.stickyId = id;
         }
-        const newElement = this.createElement(id, key, contentArgs.content)
+        const newElement = this.createElement(id, key, contentArgs.content, data)
             .hideElement()
             .attr("id", id)
             .dataAttr("key", key)
@@ -147,9 +147,9 @@ export default class Content {
         return result;
     }
     
-    private createElement(id: string, key: Keys, content: IScriptContent = null) {
+    private createElement(id: string, key: Keys, content: IScriptContent, data: ItemInfoType) {
         if (key == Keys.SCRIPTS) {
-            return this.createSplitEditor(id, Languages.PGSQL, content);
+            return this.createSplitEditor(id, Languages.PGSQL, content, data);
         }
         return (String.html`
             <div>
@@ -158,7 +158,7 @@ export default class Content {
                 .toElement()
     }
 
-    private createSplitEditor(id: string, lang: Languages, content: IScriptContent = null) {
+    private createSplitEditor(id: string, lang: Languages, content: IScriptContent, data: ItemInfoType) {
         const element = (String.html`
             <div>
                 <div class="editor"></div>
@@ -172,7 +172,7 @@ export default class Content {
         const editor = new Editor(id, element.children[0], element, lang, content);
         element.dataAttr("editor", editor);
 
-        const results = new ResultsPane(id, element.children[2]);
+        const results = new ResultsPane(id, element.children[2], data);
         element.dataAttr("results", results);
 
         new HorizontalSplitter({

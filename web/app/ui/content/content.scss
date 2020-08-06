@@ -28,12 +28,7 @@
     }
 }
 
-.current-line-decoration {
-    color: $clickable-footer-background-color;
-}
-
-.current-line-decoration::before {
-    //content: "\26A1";
+.focused .current-line-decoration::before {
     content: "\1F418";
     transform: scale(-1, 1);
     text-shadow: 0 0 9px $clickable-footer-background-color;

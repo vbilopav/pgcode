@@ -40,7 +40,6 @@ export default class  {
                 <span></span>
             </div>
             <div class="info clickable">
-                <i>&#128024;</i>
                 <span></span>
             </div>
             <div class="schemas clickable">

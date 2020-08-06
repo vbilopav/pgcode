@@ -1,5 +1,14 @@
-.main-panel {
-    // tabs
+.results-pane {
+    height: 100%;
+    display: grid;
+    grid-template-rows: 40px auto;
+    grid-template-areas: 'tabs' 'content';
+    margin-top: -4px;
+    & > div {
+        width: 100%;
+        height: 100%;
+    }
+
     & > div:nth-child(1) {
         grid-area: tabs;
         user-select: none;
@@ -11,7 +20,6 @@
 
         // tab
         & > div.tab {
-            transition-duration: 0.2s;
             min-width: 100px;
             max-width: 400px;
             display: grid;
@@ -37,24 +45,9 @@
                 max-width: 360px;
                 padding-bottom: 1px;
             }
-
-            & > i.close {
-                align-self: end;
-                font: inherit;
-                visibility: hidden;
-                font-size: 14px;
-            }
-            & > i.close:hover {
-                visibility: visible;
-            }
             & > .stripe {
                 grid-column: 1/4;
                 height: 3px;
-            }
-        }
-        & > div.tab:hover {
-            & > i.close {
-                visibility: visible;
             }
         }
         & > div.tab.active:nth-child(1) {
@@ -71,13 +64,6 @@
         }
         & > div.tab:not(.active) > .stripe {
             display: none;
-        }
-        & > div.tab.sticky {
-            & > span.title,
-            & > i::before {
-                font-style: italic;
-                width: 100%;
-            }
         }
         & > div.tab.active.upper-row {
             clip-path: inset(-5px -5px -5px -5px);
