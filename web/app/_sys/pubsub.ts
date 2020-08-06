@@ -91,3 +91,4 @@ export const EDITOR_POSITION = `editor/position`; //language: string, line: numb
 
 export const FOOTER_MESSAGE = `footer/message`; //message: string
 export const DISMISS_FOOTER_MESSAGE = `footer/message/dismiss`; //void
+export const FOOTER_MESSAGE_DISMISSED = `footer/message/dismissed`; //void

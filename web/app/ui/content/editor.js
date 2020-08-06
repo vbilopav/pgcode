@@ -12,6 +12,7 @@ define(["require", "exports", "app/api", "app/_sys/pubsub", "app/_sys/timeout", 
     })();
     class Editor {
         constructor(id, container, content, language, scriptContent = null) {
+            this.tempViewState = null;
             this.id = id;
             console.log("editor created", this.id);
             this.container = container;
@@ -46,10 +47,18 @@ define(["require", "exports", "app/api", "app/_sys/pubsub", "app/_sys/timeout", 
                 this.renumberSelection();
             });
             this.monaco.onKeyDown(() => {
-                pubsub_1.publish(pubsub_1.DISMISS_FOOTER_MESSAGE);
+                if (this.tempViewState) {
+                    pubsub_1.publish(pubsub_1.DISMISS_FOOTER_MESSAGE);
+                }
             });
             window.on("resize", () => this.initiateLayout());
             pubsub_1.subscribe([pubsub_1.SIDEBAR_DOCKED, pubsub_1.SPLITTER_CHANGED, pubsub_1.SIDEBAR_UNDOCKED], () => this.initiateLayout());
+            pubsub_1.subscribe(pubsub_1.FOOTER_MESSAGE_DISMISSED, () => {
+                if (this.tempViewState) {
+                    this.monaco.restoreViewState(this.tempViewState);
+                    this.tempViewState = null;
+                }
+            });
         }
         execute() {
             const selection = this.monaco.getSelection();
@@ -58,7 +67,8 @@ define(["require", "exports", "app/api", "app/_sys/pubsub", "app/_sys/timeout", 
                 console.log("Execute:", value);
             }
             else {
-                pubsub_1.publish(pubsub_1.FOOTER_MESSAGE, "Selected all! Hit F5 again to execute or any other key to continue...");
+                this.tempViewState = this.monaco.saveViewState();
+                pubsub_1.publish(pubsub_1.FOOTER_MESSAGE, "Hit F5 again to execute or any other key to continue...");
                 this.actionRun(monaco_config_1.commandIds.selectAll);
             }
         }
@@ -148,6 +158,9 @@ define(["require", "exports", "app/api", "app/_sys/pubsub", "app/_sys/timeout", 
                 pubsub_1.publish(pubsub_1.EDITOR_POSITION, this.language, position.lineNumber, position.column, selectionLength);
             }, 50, `${this.id}-editor-position`);
             timeout_1.timeoutAsync(async () => {
+                if (this.tempViewState) {
+                    return;
+                }
                 let content = this.monaco.getValue();
                 let viewState = JSON.stringify(this.monaco.saveViewState());
                 const contentHash = content.hashCode();

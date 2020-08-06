@@ -401,8 +401,13 @@ body > div.container {
   .main-panel > div:nth-child(2) .content {
     height: 100%; }
 
+.current-line-decoration {
+  color: #1f8ad2; }
+
 .current-line-decoration::before {
-  content: "\26A1"; }
+  content: "\1F418";
+  transform: scale(-1, 1);
+  text-shadow: 0 0 9px #1f8ad2; }
 
 .selection-decoration {
   color: #ffffff; }

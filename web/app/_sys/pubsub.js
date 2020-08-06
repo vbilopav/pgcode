@@ -82,5 +82,6 @@ define(["require", "exports"], function (require, exports) {
     exports.EDITOR_POSITION = `editor/position`;
     exports.FOOTER_MESSAGE = `footer/message`;
     exports.DISMISS_FOOTER_MESSAGE = `footer/message/dismiss`;
+    exports.FOOTER_MESSAGE_DISMISSED = `footer/message/dismissed`;
 });
 //# sourceMappingURL=pubsub.js.map

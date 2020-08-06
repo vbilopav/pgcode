@@ -9,6 +9,7 @@ import {
     EDITOR_POSITION, 
     FOOTER_MESSAGE, 
     DISMISS_FOOTER_MESSAGE,
+    FOOTER_MESSAGE_DISMISSED,
     subscribe, publish
 } from "app/_sys/pubsub";
 import IStandaloneCodeEditor = monaco.editor.IStandaloneCodeEditor;
@@ -42,6 +43,7 @@ export class Editor implements IEditor {
     private readonly container: Element;
     private readonly language;
     private selectionDecorations: string[];
+    private tempViewState: monaco.editor.ICodeEditorViewState = null;
 
     constructor(id: string, container: Element, content: Element, language: string, scriptContent: IScriptContent = null) {
         this.id = id;
@@ -82,11 +84,19 @@ export class Editor implements IEditor {
         });
 
         this.monaco.onKeyDown(() => {
-            publish(DISMISS_FOOTER_MESSAGE);
+            if (this.tempViewState) {
+                publish(DISMISS_FOOTER_MESSAGE);
+            }
         });
 
         window.on("resize", () => this.initiateLayout());
         subscribe([SIDEBAR_DOCKED, SPLITTER_CHANGED, SIDEBAR_UNDOCKED], () =>  this.initiateLayout());
+        subscribe(FOOTER_MESSAGE_DISMISSED, () => {
+            if (this.tempViewState) {
+                this.monaco.restoreViewState(this.tempViewState);
+                this.tempViewState = null;
+            }
+        });
     }
 
     execute() {
@@ -95,8 +105,8 @@ export class Editor implements IEditor {
             const value = this.monaco.getModel().getValueInRange(selection);
             console.log("Execute:", value);
         } else {
-            // get the view state and restore if execute is canceled 
-            publish(FOOTER_MESSAGE, "Selected all! Hit F5 again to execute or any other key to continue...");
+            this.tempViewState = this.monaco.saveViewState();
+            publish(FOOTER_MESSAGE, "Hit F5 again to execute or any other key to continue...");
             this.actionRun(commandIds.selectAll);
         }
     }
@@ -198,6 +208,9 @@ export class Editor implements IEditor {
         }, 50, `${this.id}-editor-position`);
 
         timeoutAsync(async () => {
+            if (this.tempViewState) {
+                return;
+            }
             let content = this.monaco.getValue();
             let viewState = JSON.stringify(this.monaco.saveViewState());
             const contentHash = content.hashCode();

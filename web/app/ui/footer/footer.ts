@@ -7,7 +7,7 @@ import {
 } from "app/api";
 import { 
     publish, subscribe, 
-    SET_APP_STATUS, API_INITIAL, SCHEMA_CHANGED, CONTENT_ACTIVATED, EDITOR_POSITION, FOOTER_MESSAGE, DISMISS_FOOTER_MESSAGE
+    SET_APP_STATUS, API_INITIAL, SCHEMA_CHANGED, CONTENT_ACTIVATED, EDITOR_POSITION, FOOTER_MESSAGE, DISMISS_FOOTER_MESSAGE, FOOTER_MESSAGE_DISMISSED
 } from "app/_sys/pubsub";
 import Content from "app/ui/content/content";
 import { MainPanel } from "app/ui/main-panel/main-panel";
@@ -97,6 +97,7 @@ export default class  {
             this.msg.html("");
             this.footer.findAll("div:not(.connections):not(.msg):not(.feed)").css("display", "");
             this.adjustWidths();
+            publish(FOOTER_MESSAGE_DISMISSED);
         };
         subscribe(DISMISS_FOOTER_MESSAGE, () => cancelHandler());
         subscribe(FOOTER_MESSAGE, msg => {

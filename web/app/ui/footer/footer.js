@@ -67,6 +67,7 @@ define(["require", "exports", "app/controls/footer-context-menu", "app/controls/
                 this.msg.html("");
                 this.footer.findAll("div:not(.connections):not(.msg):not(.feed)").css("display", "");
                 this.adjustWidths();
+                pubsub_1.publish(pubsub_1.FOOTER_MESSAGE_DISMISSED);
             };
             pubsub_1.subscribe(pubsub_1.DISMISS_FOOTER_MESSAGE, () => cancelHandler());
             pubsub_1.subscribe(pubsub_1.FOOTER_MESSAGE, msg => {
