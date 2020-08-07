@@ -24,7 +24,7 @@ define(["require", "exports", "app/api", "app/ui/results-pane/results", "app/ui/
             this.tabs = this.element.children[0].children.on("click", e => this.activateByTab(e.currentTarget));
             this.panes = this.element.children[1].children;
             new results_1.default(id, this.panes[0], data);
-            new messages_1.default(id, this.panes[0], data);
+            new messages_1.default(id, this.panes[1], data);
             this.activateByTab(this.tabs[0]);
         }
         activateByTab(tab) {

@@ -69,7 +69,9 @@ function copyLibs() {
             obj.file != "editor.main.nls.js" &&
             obj.file != "workerMain.js" &&
             obj.file != "pgsql.js" &&
-            obj.file != "codicon.ttf"
+            obj.file != "codicon.ttf" &&
+            obj.full.indexOf("google-protobuf") != -1 &&
+            obj.full.indexOf("grpc-web") != -1
         ) {
             continue;
         }

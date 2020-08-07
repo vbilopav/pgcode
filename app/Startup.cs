@@ -12,7 +12,8 @@ namespace Pgcode
     {
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers(options => options.Filters.Add<ApiControllerFilter>());
+            services.AddControllers(options => options.Filters.Add<ApiControllerFilter>());// todo replace with grpc
+            services.AddGrpc();
 
             services.AddSingleton<ConnectionManager, ConnectionManager>();
             services.AddSingleton(Program.Settings);
@@ -21,7 +22,12 @@ namespace Pgcode
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
         {
             app.UseRouting();
-            app.UseEndpoints(endpoints => endpoints.MapControllers());
+            app.UseGrpcWeb();
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+                endpoints.MapGrpcService<TestService>().EnableGrpcWeb();
+            });
 
             IMiddleware cookieMiddleware = new CookieMiddleware();
             IMiddleware loggingMiddleware = new LoggingMiddleware(loggerFactory);

@@ -18,7 +18,7 @@
     loaderFile: "${this.frameworkDir}/loader/loader.js",
     frameworkModulePrefix: "js",
     
-    bundleComment: 'build: ${this.timestamp}, version: ${this.version}, copyright VB-Consulting',
+    bundleComment: 'build: ${this.timestamp}, hash: ${this.version}, copyright VB-Consulting',
     
     appDir: "${this.sourceDir}/app",
     appModulePrefix: "app",

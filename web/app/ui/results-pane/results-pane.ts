@@ -30,7 +30,7 @@ export default class  {
         this.panes = this.element.children[1].children;
         
         new Results(id, this.panes[0], data);
-        new Messages(id, this.panes[0], data);
+        new Messages(id, this.panes[1], data);
 
         this.activateByTab(this.tabs[0]);
     }
