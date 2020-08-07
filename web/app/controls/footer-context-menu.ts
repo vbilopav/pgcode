@@ -1,4 +1,4 @@
-import { ContextMenu, ContextMenuItem } from "./context-menu";
+import { ContextMenu, ContextMenuItem } from "app/controls/context-menu";
 
 export default class extends ContextMenu {
     protected adjust() {

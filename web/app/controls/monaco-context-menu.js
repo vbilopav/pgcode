@@ -1,4 +1,4 @@
-define(["require", "exports", "./context-menu"], function (require, exports, context_menu_1) {
+define(["require", "exports", "app/controls/context-menu"], function (require, exports, context_menu_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class default_1 extends context_menu_1.ContextMenu {

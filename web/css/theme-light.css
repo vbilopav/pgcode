@@ -409,7 +409,8 @@ body > div.container {
   text-shadow: 0 0 9px #1f8ad2; }
 
 .selection-decoration {
-  color: #252526; }
+  color: #252526;
+  text-shadow: 0 0 9px #1f8ad2; }
 
 .side-panel {
   grid-area: side-panel;

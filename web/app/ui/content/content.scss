@@ -36,5 +36,6 @@
 
 .selection-decoration {
     color: $active-color;
+    text-shadow: 0 0 9px $clickable-footer-background-color;
 }
 

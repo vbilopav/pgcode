@@ -1,9 +1,8 @@
-define(["require", "exports", "app/api"], function (require, exports, api_1) {
+define(["require", "exports", "app/api", "app/ui/results-pane/results", "app/ui/results-pane/messages"], function (require, exports, api_1, results_1, messages_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class default_1 {
         constructor(id, element, data) {
-            this.id = id;
             this.element = element.html(String.html `
             <div>
                 <div class="tab" id="results" title="results">
@@ -18,12 +17,14 @@ define(["require", "exports", "app/api"], function (require, exports, api_1) {
                 </div>
             </div>
             <div>
-                <div id="results">results</div>
-                <div id="messages">messages</div>
+                <div id="results"></div>
+                <div id="messages"></div>
             </div>
         `);
             this.tabs = this.element.children[0].children.on("click", e => this.activateByTab(e.currentTarget));
             this.panes = this.element.children[1].children;
+            new results_1.default(id, this.panes[0], data);
+            new messages_1.default(id, this.panes[0], data);
             this.activateByTab(this.tabs[0]);
         }
         activateByTab(tab) {
