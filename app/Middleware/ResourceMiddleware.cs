@@ -43,17 +43,17 @@ namespace Pgcode.Middleware
         {
             foreach (var key in EndpointKeys)
             {
-                var resourceId = key == "/" ? $"/{Strings.DefaultFile}" : key;
+                var resourceId = key == "/" ? $"/{Program.DefaultFile}" : key;
                 var (mimeType, isBinary) = resourceId.Split('.').Last() switch
                 {
-                    "html" => (Strings.HtmlContentType, false),
-                    "css" => (Strings.CssContentType, false),
-                    "js" => (Strings.JsContentType, false),
-                    "ico" => (Strings.IcoContentType, true),
-                    "woff2" => (Strings.Woff2ContentType, true),
-                    "json" => (key == "/manifest.json" ? Strings.ManifestContentType : Strings.JsonContentType, false),
-                    "png" => (Strings.PngContentType, true),
-                    "ttf" => (Strings.TtfContentType, true),
+                    "html" => (Program.HtmlContentType, false),
+                    "css" => (Program.CssContentType, false),
+                    "js" => (Program.JsContentType, false),
+                    "ico" => (Program.IcoContentType, true),
+                    "woff2" => (Program.Woff2ContentType, true),
+                    "json" => (key == "/manifest.json" ? Program.ManifestContentType : Program.JsonContentType, false),
+                    "png" => (Program.PngContentType, true),
+                    "ttf" => (Program.TtfContentType, true),
                     _ => throw new NotSupportedException()
                 };
                 if (isBinary)

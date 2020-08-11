@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using Pgcode.ApiModels;
+using Pgcode.Middleware;
 
-namespace Pgcode.Api
+namespace Pgcode.Connection
 {
     public sealed partial class ConnectionManager : IDisposable
     {

@@ -108,6 +108,8 @@ function copyRootFiles() {
     log(`>>> copying ${from} to ${to}`);
     fs.copyFileSync(from, to);
 /*
+    progressive web support ...
+    
     //manifest.json
     var from = cleanPath(config.sourceDir + "/" + "manifest.json");
     var to = (config.targetDir + "/" + "manifest.json");

@@ -49,3 +49,13 @@ mkDirByPathSync("web/libs/grpc-web");
 var from = "node_modules/grpc-web/index.js";
 var to = "web/libs/grpc-web/index.js";
 copyToAmdFormat(from, to);
+
+
+rmdirSync("web/libs/signalr");
+mkDirByPathSync("web/libs/signalr");
+
+var from = "node_modules/@microsoft/signalr/dist/browser/signalr.min.js";
+var to = "web/libs/signalr/signalr.min.js";
+console.log(`install >>> copying ${from} to ${to}`);
+fs.copyFileSync(from, to);
+

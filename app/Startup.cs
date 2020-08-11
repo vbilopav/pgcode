@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Pgcode.Api;
+using Pgcode.Connection;
 using Pgcode.Middleware;
 
 namespace Pgcode
@@ -12,21 +13,22 @@ namespace Pgcode
     {
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers(options => options.Filters.Add<ApiControllerFilter>());// todo replace with grpc
-            services.AddGrpc();
-
+            //services.AddGrpc();
+            services.AddSignalR();
             services.AddSingleton<ConnectionManager, ConnectionManager>();
             services.AddSingleton(Program.Settings);
+            services.AddSingleton<CookieMiddleware, CookieMiddleware>();
+            //services.AddSingleton<GrpcWebServiceFilter, GrpcWebServiceFilter>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
         {
             app.UseRouting();
-            app.UseGrpcWeb();
+            //app.UseGrpcWeb();
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapControllers();
-                endpoints.MapGrpcService<TestService>().EnableGrpcWeb();
+                //endpoints.MapGrpcService<ConnectionService>().EnableGrpcWeb();
+                endpoints.MapHub<ConnectionsHub>("/connectionsHub");
             });
 
             IMiddleware cookieMiddleware = new CookieMiddleware();

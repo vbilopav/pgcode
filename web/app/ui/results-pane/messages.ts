@@ -1,18 +1,81 @@
 import { ItemInfoType } from "app/api";
-import { GrpcService, GrpcType } from "app/_sys/grpc-service";
 
+/*
+import * as signalR from "libs/signalr/signalr.min.js";
 
+(async () => {
+    const connectionsHub = new signalR.HubConnectionBuilder().withUrl("/connectionsHub").build();
+    if (connectionsHub.state != signalR.HubConnectionState.Connected) {
+        await connectionsHub.start();
+    }
+    try{ 
+        //const result1 = JSON.parse(await connectionsHub.invoke("GetConnection", "Denther", "Europe/Zagreb"));
+        //console.log(result1);
+        const result2 = await connectionsHub.invoke("GetInitial");
+        console.log(result2);
+    } catch (error) {
+        console.log(error);
+    }
+})();
+*/
+/*
+import { GrpcService, GrpcType, GrpcError } from "app/_sys/grpc-service";
+
+(async () => {
+
+    interface IInitialResponse { 
+        connections: Array<IConnectionInfo>,
+        user: string,
+        version: string
+    }
+    
+    interface IConnectionInfo {
+        name: string, 
+        version: string,
+        host: string, 
+        port: number, 
+        database: string,
+        user: string 
+    }
+    
     const service = new GrpcService();
 
-    const promise = service.unaryCall({
-        service: "/test.TestService/HelloWorld",
-        request: [GrpcType.String],
+
+    try {
+        const result = await service.unaryCall({
+            service: "/api.ConnectionService/GetInitial",
+            request: [],
+            reply: [
+                {connections: [
+                    {name: GrpcType.String}, 
+                    {version: GrpcType.String},
+                    {host: GrpcType.String},
+                    {port: GrpcType.Int32},
+                    {database: GrpcType.String},
+                    {user: GrpcType.String}
+                ]}, 
+                {user: GrpcType.String}, 
+                {version: GrpcType.String}
+            ]
+        }) as IInitialResponse;
+        console.log(result);
+
+    } catch (e) {
+        let error = e as GrpcError;
+        console.log(error.code);
+    }
+    
+
+    const result = await service.unaryCall({
+        service: "/api.ConnectionService/GetConnection",
+        request: [GrpcType.String, GrpcType.String],
         reply: [GrpcType.String]
-    }, "test");
+    }, "Denther", "Europe/Zagreb");
 
-    promise.then(r => console.log(r)).catch(e => console.log(e));
+    console.log(result);
 
-
+})();
+*/
 
 export default class  {
     private readonly id: string;

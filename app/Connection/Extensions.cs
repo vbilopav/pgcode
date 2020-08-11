@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text.Json;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -8,13 +9,23 @@ using Microsoft.Extensions.Primitives;
 using Norm.Extensions;
 using Npgsql;
 using NpgsqlTypes;
-using Pgcode.ApiModels;
+using Pgcode.Api;
 
-namespace Pgcode.Api
+namespace Pgcode.Connection
 {
     public static class Extensions
     {
-        public static string GetString<T>(this ConnectionData data, string name, T parameters)
+        public static async ValueTask<string> GetStringFromCloneAsync<T>(this ConnectionData data, string name, T parameters)
+        {
+            var (command, dataParam) = GetCommand(data, name, parameters);
+            await using var connection = data.Connection.CloneWith(data.ConnectionString);
+            return await data.Connection
+                .Prepared()
+                .AsProcedure()
+                .SingleAsync<string>(command, GetParam(dataParam));
+        }
+
+        public static string LockAndGetString<T>(this ConnectionData data, string name, T parameters)
         {
             var (command, dataParam) = GetCommand(data, name, parameters);
             lock (data.Connection)
@@ -30,8 +41,8 @@ namespace Pgcode.Api
             new ContentResult
             {
                 StatusCode = 200,
-                Content = data.GetString(name, parameters),
-                ContentType = Strings.JsonContentType
+                Content = data.LockAndGetString(name, parameters),
+                ContentType = Program.JsonContentType
             };
 
         public static bool ContainsHeader(this HttpRequest request, string name) => 
@@ -40,7 +51,7 @@ namespace Pgcode.Api
         private static (string command, string dataParam) GetCommand<T>(ConnectionData data, string name, T parameters)
         {
             var command = $"{Program.Settings.PgCodeSchema}.{name}";
-            var dataParam = JsonSerializer.Serialize(parameters);
+            var dataParam = typeof(T) == typeof(string) ? parameters as string : JsonSerializer.Serialize(parameters);
 
             if (data.Logger != null && Program.Settings.LogPgCodeDbCommands)
             {
@@ -51,6 +62,6 @@ namespace Pgcode.Api
         }
 
         private static NpgsqlParameter GetParam(string value) => 
-            new NpgsqlParameter(Strings.Param, NpgsqlDbType.Json) { Value = value };
+            new NpgsqlParameter(Program.Param, NpgsqlDbType.Json) { Value = value };
     }
 }

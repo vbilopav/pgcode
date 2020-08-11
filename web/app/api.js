@@ -1,4 +1,4 @@
-define(["require", "exports", "app/_sys/pubsub", "vs/editor/editor.main"], function (require, exports, pubsub_1) {
+define(["require", "exports", "app/_sys/pubsub", "libs/signalr/signalr.min.js", "vs/editor/editor.main"], function (require, exports, pubsub_1, signalR) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.ScriptId = item => `${Keys.SCRIPTS}-${item.connection}-${item.schema}-${item.id}`;
@@ -35,36 +35,37 @@ define(["require", "exports", "app/_sys/pubsub", "vs/editor/editor.main"], funct
     (function (Languages) {
         Languages["PGSQL"] = "pgsql";
     })(Languages = exports.Languages || (exports.Languages = {}));
-    const _createResponse = (response, data) => Object({ ok: response.ok, status: response.status, data: data });
-    const _fetchAndPublishStatus = async (url, init) => {
+    const _connectionsHub = new signalR.HubConnectionBuilder().withUrl("/connectionsHub").build();
+    const _runConnectionsHubAndPublishStatus = async (factory) => {
+        if (_connectionsHub.state != signalR.HubConnectionState.Connected) {
+            await _connectionsHub.start();
+        }
         pubsub_1.publish(pubsub_1.SET_APP_STATUS, AppStatus.BUSY);
         try {
-            const response = await fetch(url, init);
-            if (!response.ok) {
-                pubsub_1.publish(pubsub_1.SET_APP_STATUS, AppStatus.ERROR, response.status);
-                return _createResponse(response);
-            }
-            return _createResponse(response, await response.json());
+            return { ok: true, status: 200, data: await factory(_connectionsHub) };
         }
         catch (error) {
             pubsub_1.publish(pubsub_1.SET_APP_STATUS, AppStatus.ERROR, error.message);
-            throw error;
+            console.error(error);
+            return { ok: false, status: 500, data: null };
         }
     };
-    const _fetch = async (url, init) => {
-        const response = await fetch(url, init);
-        if (!response.ok) {
-            return _createResponse(response);
+    const _runConnectionsHub = async (factory) => {
+        if (_connectionsHub.state != signalR.HubConnectionState.Connected) {
+            await _connectionsHub.start();
         }
-        return _createResponse(response, await response.json());
+        try {
+            return { ok: true, status: 200, data: await factory(_connectionsHub) };
+        }
+        catch (error) {
+            console.error(error);
+            return { ok: false, status: 500, data: null };
+        }
     };
     let _currentSchema;
     let _currentConnection;
     exports.getCurrentSchema = () => _currentSchema;
     exports.getCurrentConnection = () => _currentConnection;
-    const getTimezoneHeader = () => {
-        return { headers: { "timezone": Intl.DateTimeFormat().resolvedOptions().timeZone } };
-    };
     let _initialResponse;
     let _connectionNames = new Array();
     let _colors = new Array();
@@ -87,7 +88,7 @@ define(["require", "exports", "app/_sys/pubsub", "vs/editor/editor.main"], funct
         const c = (i & 0x00FFFFFF).toString(16).toUpperCase();
         return "#" + "00000".substring(0, 6 - c.length) + c;
     };
-    const fetchInitial = async () => _fetchAndPublishStatus("api/initial");
+    const fetchInitial = () => _runConnectionsHubAndPublishStatus(hub => hub.invoke("GetInitial"));
     exports.initializeApi = async () => {
         _initialResponse = await fetchInitial();
         if (_initialResponse.ok) {
@@ -102,7 +103,7 @@ define(["require", "exports", "app/_sys/pubsub", "vs/editor/editor.main"], funct
         return _initialResponse.data.connections.find(c => c.name == connection) ? true : false;
     };
     exports.fetchConnection = async (name) => {
-        const result = await _fetchAndPublishStatus(`api/connection/${name}`, getTimezoneHeader());
+        const result = await _runConnectionsHubAndPublishStatus(async (hub) => JSON.parse(await hub.invoke("GetConnection", name, Intl.DateTimeFormat().resolvedOptions().timeZone)));
         if (!result.data) {
             return result;
         }
@@ -113,7 +114,8 @@ define(["require", "exports", "app/_sys/pubsub", "vs/editor/editor.main"], funct
         return result;
     };
     exports.fetchSchema = async (schema) => {
-        const result = await _fetchAndPublishStatus(`api/schema/${exports.getCurrentConnection()}/${schema}`);
+        let connection = exports.getCurrentConnection();
+        const result = await _runConnectionsHubAndPublishStatus(async (hub) => JSON.parse(await hub.invoke("GetSchema", connection, schema)));
         if (!result.data) {
             return null;
         }
@@ -122,34 +124,24 @@ define(["require", "exports", "app/_sys/pubsub", "vs/editor/editor.main"], funct
         return result;
     };
     exports.createScript = async () => {
-        const result = await _fetch(`api/script-create/${exports.getCurrentConnection()}/${exports.getCurrentSchema()}`);
+        let connection = exports.getCurrentConnection();
+        let schema = exports.getCurrentConnection();
+        const result = await _runConnectionsHub(async (hub) => JSON.parse(await hub.invoke("CreateScript", connection, schema)));
         if (!result.data) {
             return null;
         }
-        result.data.connection = exports.getCurrentConnection();
-        result.data.schema = exports.getCurrentSchema();
+        result.data.connection = connection;
+        result.data.schema = schema;
         return result;
     };
-    exports.fetchScriptContent = (connection, id) => _fetch(`api/script-content/${connection}/${id}`);
-    exports.saveScriptContent = async (connection, id, content, viewState) => await _fetch(`api/script-content/${connection}/${id}/${encodeURIComponent(viewState)}`, {
-        method: 'POST',
-        headers: {
-            "Accept": "text/plain",
-            "Content-Type": "text/plain",
-            "_null-content": content === null ? "1" : "",
-            "_null-view-state": viewState === null ? "1" : ""
-        },
-        body: content
-    });
-    exports.saveScriptScrollPosition = async (connection, id, scrollTop, scrollLeft) => {
-        return await _fetch(`api/script-scroll-position/${connection}`, {
-            method: 'POST',
-            headers: {
-                "Accept": "application/json; charset=UTF-8",
-                "Content-Type": "application/json; charset=UTF-8",
-            },
-            body: JSON.stringify({ id, scrollTop, scrollLeft })
-        });
+    exports.fetchScriptContent = (connection, id) => {
+        return _runConnectionsHub(async (hub) => JSON.parse(await hub.invoke("GetScriptContent", connection, Number(id))));
+    };
+    exports.saveScriptContent = (connection, id, content, viewState) => {
+        return _runConnectionsHub(async (hub) => JSON.parse(await hub.invoke("SaveScriptContent", connection, Number(id), content, viewState)));
+    };
+    exports.saveScriptScrollPosition = (connection, id, scrollTop, scrollLeft) => {
+        return _runConnectionsHub(async (hub) => JSON.parse(await hub.invoke("SaveScriptScrollPosition", connection, JSON.stringify({ id: Number(id), scrollTop, scrollLeft }))));
     };
 });
 //# sourceMappingURL=api.js.map

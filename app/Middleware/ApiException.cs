@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Pgcode.ApiModels
+namespace Pgcode.Middleware
 {
     public class ApiException : Exception
     {

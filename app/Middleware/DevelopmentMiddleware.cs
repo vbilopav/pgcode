@@ -4,7 +4,6 @@ using System.Linq;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.FileProviders;
-using Pgcode.Api;
 
 namespace Pgcode.Middleware
 {
@@ -15,8 +14,8 @@ namespace Pgcode.Middleware
             get
             {
                 var parts = Directory.GetCurrentDirectory().Split(Path.DirectorySeparatorChar);
-                var idx = Array.LastIndexOf(parts, Strings.AppDir);
-                parts[idx] = Strings.WebDir;
+                var idx = Array.LastIndexOf(parts, Program.AppDir);
+                parts[idx] = Program.WebDir;
                 return string.Join(Path.DirectorySeparatorChar.ToString(), parts.Take(idx + 1).ToArray());
             }
         }
@@ -27,7 +26,7 @@ namespace Pgcode.Middleware
             var options = new DefaultFilesOptions();
             options.DefaultFileNames.Clear();
             options.FileProvider = fileProvider;
-            options.DefaultFileNames.Add(Strings.DefaultFile);
+            options.DefaultFileNames.Add(Program.DefaultFile);
             app.UseDefaultFiles(options);
             
             app.UseStaticFiles(new StaticFileOptions

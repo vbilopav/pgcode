@@ -28,9 +28,9 @@ namespace Pgcode.Middleware
             Expires = DateTime.UtcNow.AddYears(1)
         };
 
-        public void ProcessCookieAndAddIdentity(HttpContext context)
+        public CookieUserProfileModel ProcessCookie(HttpContext context)
         {
-            var cookieModel = context.Request.Cookies.TryGetValue(Strings.CookieName, out var value)
+            var cookieModel = context.Request.Cookies.TryGetValue(Program.CookieName, out var value)
                 ? JsonSerializer.Deserialize<CookieUserProfileModel>(value, JsonOptions)
                 : new CookieUserProfileModel();
 
@@ -44,9 +44,21 @@ namespace Pgcode.Middleware
                 cookieModel.User = $"{Guid.NewGuid().ToString().Substring(0, 8)}";
             }
 
+            return cookieModel;
+        }
+
+        public ClaimsIdentity ProcessCookieAndGetIdentity(HttpContext context)
+        {
+            var cookieModel = ProcessCookie(context);
+            return new GenericIdentity(cookieModel.User);
+        }
+
+        public void ProcessCookieAndAddIdentity(HttpContext context)
+        {
+            var cookieModel = ProcessCookie(context);
             context.User = new ClaimsPrincipal();
             context.User.AddIdentity(new GenericIdentity(cookieModel.User));
-            context.Response.Cookies.Append(Strings.CookieName, JsonSerializer.Serialize(cookieModel, JsonOptions), CookieOptions);
+            context.Response.Cookies.Append(Program.CookieName, JsonSerializer.Serialize(cookieModel, JsonOptions), CookieOptions);
         }
 
         public void ProcessHttpContext(HttpContext context)

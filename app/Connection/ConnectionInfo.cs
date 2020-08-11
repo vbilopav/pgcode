@@ -1,4 +1,4 @@
-﻿namespace Pgcode.ApiModels
+﻿namespace Pgcode.Connection
 {
     public class ConnectionInfo
     {

@@ -3,14 +3,12 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Data;
 using System.Linq;
-using System.Threading;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Npgsql;
-using Pgcode.ApiModels;
 using Pgcode.Migrations;
 
-namespace Pgcode.Api
+namespace Pgcode.Connection
 {
     public sealed partial class ConnectionManager
     {
@@ -37,7 +35,7 @@ namespace Pgcode.Api
                 Console.Write($"{section.Key}");
                 Console.ResetColor();
 
-                var connection = TryCreateConnection(section, passwords);
+                var (connection, connectionString) = TryCreateConnection(section, passwords);
                 if (connection == null)
                 {
                     continue;
@@ -108,6 +106,7 @@ namespace Pgcode.Api
                     connections.Add(section.Key, new ConnectionData
                     {
                         Connection = connection,
+                        ConnectionString = connectionString,
                         Name = section.Key,
                         SchemaVersion = schemaVersion,
                         ServerVersion = serverVersion
@@ -217,7 +216,7 @@ namespace Pgcode.Api
                 {
                     continue;
                 }
-                var connection = TryCreateConnection(section, passwords);
+                var (connection, _) = TryCreateConnection(section, passwords);
                 var migrations = new MigrationRunner(connection, Program.Settings);
                 Console.ResetColor();
                 Console.Write(!routinesOnly ? "Migrating Connection: " : "Updating routines for connection: ");
@@ -260,12 +259,14 @@ namespace Pgcode.Api
             }
         }
 
-        private static NpgsqlConnection TryCreateConnection(IConfigurationSection section, Dictionary<string, string> passwords)
+        private static (NpgsqlConnection, string) TryCreateConnection(IConfigurationSection section, Dictionary<string, string> passwords)
         {
             NpgsqlConnection connection;
+            string connectionString;
             try
             {
-                var builder = new NpgsqlConnectionStringBuilder(section.Value);
+                connectionString = section.Value;
+                var builder = new NpgsqlConnectionStringBuilder(connectionString);
                 if (string.IsNullOrEmpty(builder.Password))
                 {
                     Console.WriteLine();
@@ -279,7 +280,8 @@ namespace Pgcode.Api
                         builder.Password = passwords[builder.Password];
                     }
                 }
-                connection = new NpgsqlConnection(builder.ToString());
+                connectionString = builder.ToString();
+                connection = new NpgsqlConnection(connectionString);
             }
             catch (Exception e)
             {
@@ -289,9 +291,9 @@ namespace Pgcode.Api
                 Console.WriteLine("Failed initialize connection \"{0}\", it might not be PostgreSQL connection. Skipping...", section.Key);
                 Console.WriteLine("Error: {0}", e.Message);
                 Console.ResetColor();
-                return null;
+                return (null, null);
             }
-            return connection;
+            return (connection, connectionString);
         }
 
         private static Dictionary<string, string> GetPasswordDict(IConfiguration configuration)

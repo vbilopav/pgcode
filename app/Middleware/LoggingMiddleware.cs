@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Npgsql;
 using Pgcode.Api;
-using Pgcode.ApiModels;
 
 namespace Pgcode.Middleware
 {
@@ -31,7 +30,7 @@ namespace Pgcode.Middleware
         {
             var userInfo = context.User.Identity.Name == null ? "" : $"{NL}User: {context.User.Identity.Name}";
             var (statusCode, error, logLevel) = GetStatusCodeErrorAndLogLevel(context, exception);
-            var msg = $"{context.Request.Path}{context.Request.QueryString.ToString()} {statusCode}{userInfo}{error}";
+            var msg = $"{context.Request.Path}{context.Request.QueryString} {statusCode}{userInfo}{error}";
 
             switch (context.Request.Method)
             {
