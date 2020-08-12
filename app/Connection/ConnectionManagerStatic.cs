@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Data;
@@ -13,6 +14,8 @@ namespace Pgcode.Connection
     public sealed partial class ConnectionManager
     {
         private static ImmutableDictionary<string, ConnectionData> _connections;
+        private static readonly ConcurrentDictionary<string, WorkspaceConnection> WorkspaceConnections = new ConcurrentDictionary<string, WorkspaceConnection>();
+
         private static readonly IEnumerable<string> InfoLevels = new[] { "INFO", "NOTICE", "LOG" };
         private static readonly IEnumerable<string> ErrorLevels = new[] { "ERROR", "PANIC" };
 
@@ -346,6 +349,14 @@ namespace Pgcode.Connection
         private static void ReleaseUnmanagedResources()
         {
             foreach (var (_, data) in _connections)
+            {
+                if (data.Connection.State != ConnectionState.Closed)
+                {
+                    data.Connection.Close();
+                }
+                data.Connection.Dispose();
+            }
+            foreach (var (_, data) in WorkspaceConnections)
             {
                 if (data.Connection.State != ConnectionState.Closed)
                 {

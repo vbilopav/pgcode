@@ -1,13 +1,17 @@
-import { ItemInfoType, getConnectionColor } from "app/api";
+import { ItemInfoType, getConnectionColor, execute, IExecutionStream } from "app/api";
 import Results from "app/ui/results-pane/results";
 import Messages from "app/ui/results-pane/messages";
 
 export default class  {
+    private readonly id: string;
+    private readonly data: ItemInfoType;
     private readonly element: Element;
     private readonly tabs: HTMLCollection;
     private readonly panes: HTMLCollection;
 
     constructor(id: string, element: Element, data: ItemInfoType) {
+        this.id = id;
+        this.data = data;
         this.element = element.html(String.html`
             <div>
                 <div class="tab" id="results" title="results">
@@ -33,6 +37,21 @@ export default class  {
         new Messages(id, this.panes[1], data);
 
         this.activateByTab(this.tabs[0]);
+    }
+
+    public runExecution(content: string) {
+        const stream = {
+            error: e => {
+                console.log(e);
+            },
+            data: e => {
+                console.log(e);
+            },
+            end: () => {
+                console.log("end");
+            }
+        } as IExecutionStream;
+        execute(this.data.connection, this.data.schema, this.id, content, stream);
     }
 
     private activateByTab(tab: Element) {

@@ -171,11 +171,11 @@ export default class Content {
             .css("grid-template-rows", `auto 5px ${_getSplitterVal(id).height}px`)
             .dataAttr("data", data);
         
-        const editor = new Editor(id, element.children[0], element, lang, content);
-        element.dataAttr("editor", editor);
-
         const results = new ResultsPane(id, element.children[2], data);
         element.dataAttr("results", results);
+
+        const editor = new Editor(id, element.children[0], element, lang, content, results);
+        element.dataAttr("editor", editor);
 
         new HorizontalSplitter({
             element: element.children[1],

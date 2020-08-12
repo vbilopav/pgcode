@@ -1,6 +1,6 @@
 import {API_INITIAL, publish, SET_APP_STATUS, CONNECTION_SET} from "app/_sys/pubsub";
 import * as signalR from "libs/signalr/signalr.min.js";
-
+import { GrpcService, GrpcType, GrpcErrorCode, GrpcStatus } from "app/_sys/grpc-service";
 import "vs/editor/editor.main";
 import ICodeEditorViewState = monaco.editor.ICodeEditorViewState;
 import INewScrollPosition = monaco.editor.INewScrollPosition;
@@ -101,8 +101,10 @@ export type ItemInfoType = IRoutineInfo | IScriptInfo | ITableInfo;
 const _connectionsHub = new signalR
     .HubConnectionBuilder()
     .withUrl("/connectionsHub")
-    .withAutomaticReconnect([0, 500, 1000, 1500, 2000, 2500, 3000])
+    .withAutomaticReconnect({nextRetryDelayInMilliseconds: () => 500})
     .build();
+
+const grpc = new GrpcService();
 
 const _runConnectionsHubAndPublishStatus:<T> (factory: (hub: any) => Promise<T>) => Promise<IResponse<T>> = async factory => {
     if (_connectionsHub.state != signalR.HubConnectionState.Connected) {
@@ -230,4 +232,44 @@ export const saveScriptScrollPosition = (connection: string, id: number, scrollT
 
 export const checkItemExists = (connection: string, schema: string, key: string, id: string) => {
     return _runConnectionsHub<boolean>(hub => hub.invoke("CheckItemExists", connection, schema, key, id));
+}
+
+export const initConnection = (connection: string, schema: string, id: string) => {
+    return _runConnectionsHub<void>(hub => hub.invoke("InitConnection", connection, schema, id));
+}
+
+export const disposeConnection = (id: string) => {
+    return _runConnectionsHub<void>(hub => hub.invoke("DisposeConnection", id));
+}
+
+export interface IExecutionStream {
+    error: (e: GrpcStatus) => void
+    status: (e: GrpcStatus) => void
+    data: (e: Array<string>) => void
+    end: () => void
+}
+
+export const execute = (connection: string, schema: string, id: string, content: string, stream: IExecutionStream) => {
+    const grpcStream = grpc.serverStreaming({
+        service: "/api.ExecuteService/Execute",
+        request: [GrpcType.String, GrpcType.String, GrpcType.String, GrpcType.String],
+        reply: [[GrpcType.String]]
+    }, connection, schema, id, content);
+    _connectionsHub.on("Message", msg => {
+        console.log(msg);
+    })
+    grpcStream
+        .on("error", e => {
+            if (stream["error"]) stream.error(e);
+        })
+        .on("status", e => {
+            if (stream["status"]) stream.status(e);
+        })
+        .on("data", e => {
+            if (stream["data"]) stream.data(e);
+        })
+        .on("end", () => {
+            if (stream["end"]) stream.end();
+            _connectionsHub.off("Message");
+        });
 }

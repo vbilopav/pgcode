@@ -3,6 +3,8 @@ define(["require", "exports", "app/api", "app/ui/results-pane/results", "app/ui/
     Object.defineProperty(exports, "__esModule", { value: true });
     class default_1 {
         constructor(id, element, data) {
+            this.id = id;
+            this.data = data;
             this.element = element.html(String.html `
             <div>
                 <div class="tab" id="results" title="results">
@@ -26,6 +28,20 @@ define(["require", "exports", "app/api", "app/ui/results-pane/results", "app/ui/
             new results_1.default(id, this.panes[0], data);
             new messages_1.default(id, this.panes[1], data);
             this.activateByTab(this.tabs[0]);
+        }
+        runExecution(content) {
+            const stream = {
+                error: e => {
+                    console.log(e);
+                },
+                data: e => {
+                    console.log(e);
+                },
+                end: () => {
+                    console.log("end");
+                }
+            };
+            api_1.execute(this.data.connection, this.data.schema, this.id, content, stream);
         }
         activateByTab(tab) {
             for (let current of this.tabs) {

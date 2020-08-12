@@ -109,17 +109,19 @@ namespace Pgcode.Api
             var connectionData = _connectionManager.GetConnectionDataByName(connection);
             return await connectionData.GetSingleItemFromCloneAsync<bool>(ApiCheckItemExists.Name, new {key, id, userId = user.Name, schema});
         }
-        /*
-        public async ValueTask<bool> InitConnection(string connection)
+        
+        public async ValueTask InitConnection(string connection, string schema, string id)
         {
-
+            var user = GetIdentityAndLogRequest();
+            await _connectionManager.AddWorkspaceConnectionAsync(user.Name, id, connection, schema, Clients.Caller);
         }
 
-        public async ValueTask<bool> DisposeConnection(string connection)
+        public async ValueTask DisposeConnection(string id)
         {
-
+            var user = GetIdentityAndLogRequest();
+            await _connectionManager.RemoveWorkspaceConnectionAsync(user.Name, id);
         }
-        */
+        
         private IIdentity GetIdentityAndLogRequest()
         {
             var ctx = this.Context.GetHttpContext();

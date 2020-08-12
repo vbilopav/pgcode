@@ -1,4 +1,4 @@
-define(["require", "exports", "app/_sys/pubsub", "libs/signalr/signalr.min.js", "vs/editor/editor.main"], function (require, exports, pubsub_1, signalR) {
+define(["require", "exports", "app/_sys/pubsub", "libs/signalr/signalr.min.js", "app/_sys/grpc-service", "vs/editor/editor.main"], function (require, exports, pubsub_1, signalR, grpc_service_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.ScriptId = item => `${Keys.SCRIPTS}-${item.connection}-${item.schema}-${item.id}`;
@@ -38,8 +38,9 @@ define(["require", "exports", "app/_sys/pubsub", "libs/signalr/signalr.min.js", 
     const _connectionsHub = new signalR
         .HubConnectionBuilder()
         .withUrl("/connectionsHub")
-        .withAutomaticReconnect([0, 500, 1000, 1500, 2000, 2500, 3000])
+        .withAutomaticReconnect({ nextRetryDelayInMilliseconds: () => 500 })
         .build();
+    const grpc = new grpc_service_1.GrpcService();
     const _runConnectionsHubAndPublishStatus = async (factory) => {
         if (_connectionsHub.state != signalR.HubConnectionState.Connected) {
             await _connectionsHub.start();
@@ -149,6 +150,40 @@ define(["require", "exports", "app/_sys/pubsub", "libs/signalr/signalr.min.js", 
     };
     exports.checkItemExists = (connection, schema, key, id) => {
         return _runConnectionsHub(hub => hub.invoke("CheckItemExists", connection, schema, key, id));
+    };
+    exports.initConnection = (connection, schema, id) => {
+        return _runConnectionsHub(hub => hub.invoke("InitConnection", connection, schema, id));
+    };
+    exports.disposeConnection = (id) => {
+        return _runConnectionsHub(hub => hub.invoke("DisposeConnection", id));
+    };
+    exports.execute = (connection, schema, id, content, stream) => {
+        const grpcStream = grpc.serverStreaming({
+            service: "/api.ExecuteService/Execute",
+            request: [grpc_service_1.GrpcType.String, grpc_service_1.GrpcType.String, grpc_service_1.GrpcType.String, grpc_service_1.GrpcType.String],
+            reply: [[grpc_service_1.GrpcType.String]]
+        }, connection, schema, id, content);
+        _connectionsHub.on("Message", msg => {
+            console.log(msg);
+        });
+        grpcStream
+            .on("error", e => {
+            if (stream["error"])
+                stream.error(e);
+        })
+            .on("status", e => {
+            if (stream["status"])
+                stream.status(e);
+        })
+            .on("data", e => {
+            if (stream["data"])
+                stream.data(e);
+        })
+            .on("end", () => {
+            if (stream["end"])
+                stream.end();
+            _connectionsHub.off("Message");
+        });
     };
 });
 //# sourceMappingURL=api.js.map

@@ -13,21 +13,20 @@ namespace Pgcode
     {
         public void ConfigureServices(IServiceCollection services)
         {
-            //services.AddGrpc();
+            services.AddGrpc();
             services.AddSignalR();
             services.AddSingleton<ConnectionManager, ConnectionManager>();
             services.AddSingleton(Program.Settings);
             services.AddSingleton<CookieMiddleware, CookieMiddleware>();
-            //services.AddSingleton<GrpcWebServiceFilter, GrpcWebServiceFilter>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
         {
             app.UseRouting();
-            //app.UseGrpcWeb();
+            app.UseGrpcWeb();
             app.UseEndpoints(endpoints =>
             {
-                //endpoints.MapGrpcService<ConnectionService>().EnableGrpcWeb();
+                endpoints.MapGrpcService<ExecuteService>().EnableGrpcWeb();
                 endpoints.MapHub<ConnectionsHub>("/connectionsHub");
             });
 

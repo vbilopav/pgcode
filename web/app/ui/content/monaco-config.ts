@@ -1,5 +1,4 @@
 ﻿import "vs/editor/editor.main";
-import ICodeEditor = monaco.editor.ICodeEditor;
 
 const deleteExcessActions = editor => {
     delete editor._actions["editor.action.insertCursorAbove"];
@@ -62,7 +61,7 @@ export const commandIds = {
     execute: "pgcode.execute"
 }
 
-export const createEditor = (element: Element, language: string, execute: (editor: ICodeEditor, ...args: any[]) => void | Promise<void>) => {
+export const createEditor = (element: Element, language: string) => {
     
     let editor = monaco.editor.create(element as HTMLElement, {
         language,
@@ -75,36 +74,6 @@ export const createEditor = (element: Element, language: string, execute: (edito
         //contextmenu: false //todo: disable default contextmenu and implement a better one
     });
     deleteExcessActions(editor);
-
-    editor.addAction({
-        id: commandIds.execute,
-        label: "Execute",
-        keybindings: [
-            monaco.KeyCode.F5
-        ],
-        precondition: null,
-        keybindingContext: null,
-        contextMenuGroupId: "execution",
-        contextMenuOrder: 1.5,
-
-        run: execute
-    });
-
-    editor.addAction({
-        id: commandIds.selectAll,
-        label: "Select All",
-        keybindings: [
-            monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_A,
-        ],
-        precondition: null,
-        keybindingContext: null,
-        contextMenuGroupId: "9_cutcopypaste",
-        contextMenuOrder: 2,
-        run: (editor: ICodeEditor) => {
-            editor.trigger("pgcode-editor", "selectAll", null);
-        }
-    });
-
     return editor;
 }
 

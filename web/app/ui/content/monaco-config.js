@@ -59,7 +59,7 @@ define(["require", "exports", "vs/editor/editor.main"], function (require, expor
         selectAll: "pgcode.selectAll",
         execute: "pgcode.execute"
     };
-    exports.createEditor = (element, language, execute) => {
+    exports.createEditor = (element, language) => {
         let editor = monaco.editor.create(element, {
             language,
             theme: "vs-dark",
@@ -70,32 +70,6 @@ define(["require", "exports", "vs/editor/editor.main"], function (require, expor
             smoothScrolling: true,
         });
         deleteExcessActions(editor);
-        editor.addAction({
-            id: exports.commandIds.execute,
-            label: "Execute",
-            keybindings: [
-                monaco.KeyCode.F5
-            ],
-            precondition: null,
-            keybindingContext: null,
-            contextMenuGroupId: "execution",
-            contextMenuOrder: 1.5,
-            run: execute
-        });
-        editor.addAction({
-            id: exports.commandIds.selectAll,
-            label: "Select All",
-            keybindings: [
-                monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_A,
-            ],
-            precondition: null,
-            keybindingContext: null,
-            contextMenuGroupId: "9_cutcopypaste",
-            contextMenuOrder: 2,
-            run: (editor) => {
-                editor.trigger("pgcode-editor", "selectAll", null);
-            }
-        });
         return editor;
     };
 });

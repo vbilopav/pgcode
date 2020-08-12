@@ -194,8 +194,19 @@ define(["require", "exports", "libs/grpc-web/index.js", "libs/google-protobuf/go
                     result[name] = reader["read" + type]();
                 }
                 else {
-                    const message = {};
-                    reader.readMessage(message, (msg, reader) => this.deserializeMessage(msg, reader, replyType));
+                    let message = {};
+                    if (replyType.length) {
+                        if (replyType[0] instanceof Object) {
+                            reader.readMessage(message, (msg, reader) => this.deserializeMessage(msg, reader, replyType));
+                        }
+                        else {
+                            let type = GrpcType[replyType[0]];
+                            message = reader["read" + type]();
+                        }
+                    }
+                    else {
+                        continue;
+                    }
                     let value = result[name];
                     if (value) {
                         value.push(message);

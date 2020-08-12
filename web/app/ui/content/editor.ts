@@ -3,7 +3,9 @@
     IScriptContent, 
     saveScriptContent, 
     saveScriptScrollPosition, 
-    IScriptInfo
+    IScriptInfo,
+    initConnection,
+    disposeConnection
 } from "app/api";
 import {
     SIDEBAR_DOCKED, 
@@ -17,8 +19,10 @@ import {
     subscribe, publish
 } from "app/_sys/pubsub";
 import IStandaloneCodeEditor = monaco.editor.IStandaloneCodeEditor;
+import ICodeEditor = monaco.editor.ICodeEditor;
 import {timeout, timeoutAsync} from "app/_sys/timeout";
 import {createEditor, commandIds} from "app/ui/content/monaco-config";
+import ResultsPane from "app/ui/results-pane/results-pane"
 
 export interface IEditor {
     dispose(): IEditor;
@@ -47,32 +51,60 @@ export class Editor implements IEditor {
     private readonly content: Element;
     private readonly container: Element;
     private readonly language;
+    private readonly results: ResultsPane
     private selectionDecorations: string[];
     private tempViewState: monaco.editor.ICodeEditorViewState = null;
+    
 
-    constructor(id: string, container: Element, content: Element, language: string, scriptContent: IScriptContent = null) {
+    constructor(id: string, container: Element, content: Element, language: string, scriptContent: IScriptContent, results: ResultsPane) {
         this.id = id;
+        this.results = results;
         this.data = content.dataAttr("data") as IScriptInfo;
-        console.log("editor created", this.data.connection, this.data.id);
-
         this.container = container;
         this.content = content;
         const element = String.html`<div style="position: fixed;"></div>`.toElement();
         this.container.append(element);
-        this.monaco = createEditor(element, language, () => this.execute());
+        this.monaco = createEditor(element, language);
+
+        let executeAction = this.monaco.addAction({
+            id: commandIds.execute,
+            label: "Execute",
+            keybindings: [
+                monaco.KeyCode.F5
+            ],
+            precondition: null,
+            keybindingContext: null,
+            contextMenuGroupId: "execution",
+            contextMenuOrder: 1.5,
+    
+            run: () => this.execute()
+        });
+        this.monaco.addAction({
+            id: commandIds.selectAll,
+            label: "Select All",
+            keybindings: [
+                monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_A,
+            ],
+            precondition: null,
+            keybindingContext: null,
+            contextMenuGroupId: "9_cutcopypaste",
+            contextMenuOrder: 2,
+            run: (editor: ICodeEditor) => {
+                editor.trigger("pgcode-editor", "selectAll", null);
+            }
+        });
+
         this.selectionDecorations = [];
         this.language = language;
         if (scriptContent) {
             this.setContent(scriptContent);
         }
-
         this.monaco.onDidChangeModelContent(() => this.initiateSaveContent());
         this.monaco.onDidChangeCursorPosition(() => this.initiateSaveContent());
         this.monaco.onDidScrollChange(() => {
             this.renumberSelection();
             this.initiateSaveScroll();
         });
-
         this.monaco.onDidChangeCursorSelection(e => {
             if (e.selection.isEmpty()) {
                 this.selectionDecorations = this.monaco.deltaDecorations(this.selectionDecorations, [{
@@ -87,13 +119,11 @@ export class Editor implements IEditor {
             }
             this.renumberSelection();
         });
-
         this.monaco.onKeyDown(() => {
             if (this.tempViewState) {
                 publish(DISMISS_FOOTER_MESSAGE);
             }
         });
-
         window.on("resize", () => this.initiateLayout());
         subscribe([SIDEBAR_DOCKED, SPLITTER_CHANGED, SIDEBAR_UNDOCKED], () =>  this.initiateLayout());
         subscribe(FOOTER_MESSAGE_DISMISSED, () => {
@@ -102,13 +132,20 @@ export class Editor implements IEditor {
                 this.tempViewState = null;
             }
         });
+        initConnection(this.data.connection,  this.data.schema, this.id).then(resp => {
+            if (!resp.ok) {
+                executeAction.dispose();
+            }
+        }).catch(() => {
+            executeAction.dispose();
+        });
     }
 
     execute() {
         const selection = this.monaco.getSelection();
         if (!selection.isEmpty()) {
             const value = this.monaco.getModel().getValueInRange(selection);
-            console.log("Execute:", value);
+            this.results.runExecution(value);
         } else {
             this.tempViewState = this.monaco.saveViewState();
             publish(FOOTER_MESSAGE, "Hit F5 again to execute or any other key to continue...");
@@ -118,7 +155,7 @@ export class Editor implements IEditor {
 
     dispose() {
         this.monaco.dispose();
-        console.log("editor disposed", this.data.connection, this.data.id);
+        disposeConnection(this.id);
         return this;
     }
 

@@ -182,7 +182,7 @@ export enum GrpcErrorCode {
         Unauthenticated = 1
 }
 
-export type GrpcError = {
+export type GrpcStatus = {
     code: GrpcErrorCode;
     message: string;
     metadata: Record<string, string>;
@@ -191,7 +191,7 @@ export type GrpcError = {
 type RequestType = Array<GrpcType>;
 type ReplyType = Array<GrpcType | Array<GrpcType>> | Array<Record<string, GrpcType | Array< Record<string, GrpcType>>>>
 
-type ResultType = Record<number | string, any> | GrpcError;
+type ResultType = Record<number | string, any> | GrpcStatus;
 
 export type RpcCallArgs = {
     service?: string;
@@ -310,8 +310,17 @@ export class GrpcService {
                 let type = GrpcType[replyType];
                 result[name] = reader["read" + type]();
             } else {
-                const message: ResultType = {};
-                reader.readMessage(message, (msg, reader) => this.deserializeMessage(msg, reader, replyType));
+                let message: ResultType = {};
+                if (replyType.length) {
+                    if (replyType[0] instanceof Object) {
+                        reader.readMessage(message, (msg, reader) => this.deserializeMessage(msg, reader, replyType));
+                    } else {
+                        let type = GrpcType[replyType[0]];
+                        message = reader["read" + type]();
+                    }
+                } else {
+                    continue;
+                }
                 let value = result[name];
                 if (value) {
                     value.push(message);

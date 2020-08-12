@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+option csharp_namespace = "Pgcode.Protos";
+
+package api;
+
+service ExecuteService {
+	rpc Execute (ExecuteRequest) returns (stream ExecuteReply);
+}
+
+message ExecuteRequest { 
+	string Connection = 1;
+	string Schema = 2;
+	string Id = 3;
+	string Content = 4;
+}
+
+message ExecuteReply { 
+	repeated string Data = 1;
+}

@@ -10,7 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Protobuf Include="Api\connections.proto" GrpcServices="Server" />
+    <Protobuf Include="Api\execution.proto" GrpcServices="Server" />
   </ItemGroup>
 
   <ItemGroup>

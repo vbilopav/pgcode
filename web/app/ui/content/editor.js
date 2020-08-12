@@ -11,16 +11,42 @@ define(["require", "exports", "app/api", "app/_sys/pubsub", "app/_sys/timeout", 
         actionRun(id) { return this; }
     })();
     class Editor {
-        constructor(id, container, content, language, scriptContent = null) {
+        constructor(id, container, content, language, scriptContent, results) {
             this.tempViewState = null;
             this.id = id;
+            this.results = results;
             this.data = content.dataAttr("data");
-            console.log("editor created", this.data.connection, this.data.id);
             this.container = container;
             this.content = content;
             const element = String.html `<div style="position: fixed;"></div>`.toElement();
             this.container.append(element);
-            this.monaco = monaco_config_1.createEditor(element, language, () => this.execute());
+            this.monaco = monaco_config_1.createEditor(element, language);
+            let executeAction = this.monaco.addAction({
+                id: monaco_config_1.commandIds.execute,
+                label: "Execute",
+                keybindings: [
+                    monaco.KeyCode.F5
+                ],
+                precondition: null,
+                keybindingContext: null,
+                contextMenuGroupId: "execution",
+                contextMenuOrder: 1.5,
+                run: () => this.execute()
+            });
+            this.monaco.addAction({
+                id: monaco_config_1.commandIds.selectAll,
+                label: "Select All",
+                keybindings: [
+                    monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_A,
+                ],
+                precondition: null,
+                keybindingContext: null,
+                contextMenuGroupId: "9_cutcopypaste",
+                contextMenuOrder: 2,
+                run: (editor) => {
+                    editor.trigger("pgcode-editor", "selectAll", null);
+                }
+            });
             this.selectionDecorations = [];
             this.language = language;
             if (scriptContent) {
@@ -60,12 +86,19 @@ define(["require", "exports", "app/api", "app/_sys/pubsub", "app/_sys/timeout", 
                     this.tempViewState = null;
                 }
             });
+            api_1.initConnection(this.data.connection, this.data.schema, this.id).then(resp => {
+                if (!resp.ok) {
+                    executeAction.dispose();
+                }
+            }).catch(() => {
+                executeAction.dispose();
+            });
         }
         execute() {
             const selection = this.monaco.getSelection();
             if (!selection.isEmpty()) {
                 const value = this.monaco.getModel().getValueInRange(selection);
-                console.log("Execute:", value);
+                this.results.runExecution(value);
             }
             else {
                 this.tempViewState = this.monaco.saveViewState();
@@ -75,7 +108,7 @@ define(["require", "exports", "app/api", "app/_sys/pubsub", "app/_sys/timeout", 
         }
         dispose() {
             this.monaco.dispose();
-            console.log("editor disposed", this.data.connection, this.data.id);
+            api_1.disposeConnection(this.id);
             return this;
         }
         layout() {
