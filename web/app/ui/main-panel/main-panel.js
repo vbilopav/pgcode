@@ -47,7 +47,13 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/ui/mai
             this.content = new content_1.default(element.children[1]);
             this.initHeaderAdjustment();
             pubsub_1.subscribe(pubsub_1.SCHEMA_CHANGED, (data, name) => this.schemaChanged(name, data.connection));
-            pubsub_1.subscribe(pubsub_1.SCRIPT_UPDATED, data => tabs_1.updateScriptTabElement(this.items, data));
+            pubsub_1.subscribe(pubsub_1.SCRIPT_UPDATED, data => {
+                if (data.timestamp == null) {
+                    this.removeByDataItem(data);
+                    return;
+                }
+                tabs_1.updateScriptTabElement(this.items, data);
+            });
             pubsub_1.subscribe(pubsub_1.API_INITIAL, () => this.restoreItems());
             this.hiddenCopy = String.html `<textarea id="main-panel-hidden-copy" type="text" class="out-of-viewport"></textarea>`.toElement().
                 appendElementTo(document.body);
@@ -91,11 +97,15 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/ui/mai
         activateById(id) {
             this.activateByTab(this.tabs.find("#" + id));
         }
-        restoreItems() {
+        async restoreItems() {
             const stickyId = _storage.stickyId;
             const activeId = _storage.activeId;
             for (let [id, storageItem] of _storage.items) {
                 if (!api_1.connectionIsDefined(storageItem.data.connection)) {
+                    continue;
+                }
+                const existResponse = await api_1.checkItemExists(storageItem.data.connection, storageItem.data.schema, storageItem.key, String(storageItem.data.id));
+                if (!existResponse.ok || (existResponse.ok && existResponse.data == false)) {
                     continue;
                 }
                 this.content.createNewContent(id, storageItem.key, storageItem.data);
@@ -167,6 +177,12 @@ define(["require", "exports", "app/_sys/storage", "app/_sys/pubsub", "app/ui/mai
             }
             let newItem = this.items.maxBy(v => v.timestamp);
             this.activateByTab(newItem.tab, newItem);
+        }
+        removeByDataItem(data) {
+            const item = this.items.where(i => i.data.id == data.id).next().value;
+            if (item) {
+                this.removeByTab(item.tab);
+            }
         }
         createNewTab(id, key, data) {
             return tabs_1.createTabElement(id, key, data)

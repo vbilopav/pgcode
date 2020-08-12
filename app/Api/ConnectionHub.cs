@@ -59,7 +59,7 @@ namespace Pgcode.Api
         {
             var user = GetIdentityAndLogRequest();
             var data = _connectionManager.GetConnectionDataByName(connection);
-            return await data.GetStringFromCloneAsync(ApiGetConnection.Name, new
+            return await data.GetSingleItemFromCloneAsync<string>(ApiGetConnection.Name, new
             {
                 userId = user.Name,
                 defaultSchema = _settings.DefaultSchema,
@@ -72,37 +72,54 @@ namespace Pgcode.Api
         {
             var user = GetIdentityAndLogRequest();
             var data = _connectionManager.GetConnectionDataByName(connection);
-            return await data.GetStringFromCloneAsync(ApiGetSchema.Name, new { userId = user.Name, schema });
+            return await data.GetSingleItemFromCloneAsync<string>(ApiGetSchema.Name, new { userId = user.Name, schema });
         }
 
         public async ValueTask<string> CreateScript(string connection, string schema)
         {
             var user = GetIdentityAndLogRequest();
             var data = _connectionManager.GetConnectionDataByName(connection);
-            return await data.GetStringFromCloneAsync(ApiCreateScript.Name, new { userId = user.Name, schema });
+            return await data.GetSingleItemFromCloneAsync<string>(ApiCreateScript.Name, new { userId = user.Name, schema });
         }
 
         public async ValueTask<string> GetScriptContent(string connection, int id)
         {
             LogRequest();
             var data = _connectionManager.GetConnectionDataByName(connection);
-            return await data.GetStringFromCloneAsync(ApiGetScriptContent.Name, new { id });
+            return await data.GetSingleItemFromCloneAsync<string>(ApiGetScriptContent.Name, new { id });
         }
 
         public async ValueTask<string> SaveScriptContent(string connection, int id, string content, string viewState)
         {
             LogRequest();
             var data = _connectionManager.GetConnectionDataByName(connection);
-            return await data.GetStringFromCloneAsync(ApiSaveScript.Name, new { id, content, viewState });
+            return await data.GetSingleItemFromCloneAsync<string>(ApiSaveScript.Name, new { id, content, viewState });
         }
 
         public async ValueTask<string> SaveScriptScrollPosition(string connection, string data)
         {
             LogRequest();
             var connectionData = _connectionManager.GetConnectionDataByName(connection);
-            return await connectionData.GetStringFromCloneAsync(ApiSaveScriptScrollPosition.Name, data);
+            return await connectionData.GetSingleItemFromCloneAsync<string>(ApiSaveScriptScrollPosition.Name, data);
         }
 
+        public async ValueTask<bool> CheckItemExists(string connection, string schema, string key, string id)
+        {
+            var user = GetIdentityAndLogRequest();
+            var connectionData = _connectionManager.GetConnectionDataByName(connection);
+            return await connectionData.GetSingleItemFromCloneAsync<bool>(ApiCheckItemExists.Name, new {key, id, userId = user.Name, schema});
+        }
+        /*
+        public async ValueTask<bool> InitConnection(string connection)
+        {
+
+        }
+
+        public async ValueTask<bool> DisposeConnection(string connection)
+        {
+
+        }
+        */
         private IIdentity GetIdentityAndLogRequest()
         {
             var ctx = this.Context.GetHttpContext();

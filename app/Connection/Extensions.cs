@@ -1,30 +1,25 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Primitives;
 using Norm.Extensions;
 using Npgsql;
 using NpgsqlTypes;
-using Pgcode.Api;
 
 namespace Pgcode.Connection
 {
     public static class Extensions
     {
-        public static async ValueTask<string> GetStringFromCloneAsync<T>(this ConnectionData data, string name, T parameters)
+        public static async ValueTask<T> GetSingleItemFromCloneAsync<T>(this ConnectionData data, string name, object parameters)
         {
             var (command, dataParam) = GetCommand(data, name, parameters);
             await using var connection = data.Connection.CloneWith(data.ConnectionString);
             return await data.Connection
                 .Prepared()
                 .AsProcedure()
-                .SingleAsync<string>(command, GetParam(dataParam));
+                .SingleAsync<T>(command, GetParam(dataParam));
         }
-
+/*
         public static string LockAndGetString<T>(this ConnectionData data, string name, T parameters)
         {
             var (command, dataParam) = GetCommand(data, name, parameters);
@@ -36,28 +31,18 @@ namespace Pgcode.Connection
                     .Single<string>(command, GetParam(dataParam));
             }
         }
-
-        public static ContentResult GetContentResult<T>(this ConnectionData data, string name, T parameters) =>
-            new ContentResult
-            {
-                StatusCode = 200,
-                Content = data.LockAndGetString(name, parameters),
-                ContentType = Program.JsonContentType
-            };
-
-        public static bool ContainsHeader(this HttpRequest request, string name) => 
-            request.Headers.Contains(new KeyValuePair<string, StringValues>(name, "1"));
-
-        private static (string command, string dataParam) GetCommand<T>(ConnectionData data, string name, T parameters)
+*/
+        private static (string command, string dataParam) GetCommand(ConnectionData data, string name, object parameters)
         {
             var command = $"{Program.Settings.PgCodeSchema}.{name}";
-            var dataParam = typeof(T) == typeof(string) ? parameters as string : JsonSerializer.Serialize(parameters);
+            var dataParam = parameters is string str ? str : JsonSerializer.Serialize(parameters);
 
-            if (data.Logger != null && Program.Settings.LogPgCodeDbCommands)
+            if (data.Logger == null || !Program.Settings.LogPgCodeDbCommands)
             {
-                var msg = $"select {command}('{dataParam}'::json){Environment.NewLine}";
-                data.Logger.LogInformation(msg);
+                return (command, dataParam);
             }
+            var msg = $"select {command}('{dataParam}'::json){Environment.NewLine}";
+            data.Logger.LogInformation(msg);
             return (command, dataParam);
         }
 

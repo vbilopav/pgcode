@@ -14,7 +14,8 @@ define(["require", "exports", "app/api", "app/_sys/pubsub", "app/_sys/timeout", 
         constructor(id, container, content, language, scriptContent = null) {
             this.tempViewState = null;
             this.id = id;
-            console.log("editor created", this.id);
+            this.data = content.dataAttr("data");
+            console.log("editor created", this.data.connection, this.data.id);
             this.container = container;
             this.content = content;
             const element = String.html `<div style="position: fixed;"></div>`.toElement();
@@ -74,7 +75,7 @@ define(["require", "exports", "app/api", "app/_sys/pubsub", "app/_sys/timeout", 
         }
         dispose() {
             this.monaco.dispose();
-            console.log("editor disposed", this.id);
+            console.log("editor disposed", this.data.connection, this.data.id);
             return this;
         }
         layout() {
@@ -165,7 +166,6 @@ define(["require", "exports", "app/api", "app/_sys/pubsub", "app/_sys/timeout", 
                 let viewState = JSON.stringify(this.monaco.saveViewState());
                 const contentHash = content.hashCode();
                 const viewStateHash = viewState.hashCode();
-                const data = this.content.dataAttr("data");
                 if (contentHash === this.content.dataAttr("contentHash")) {
                     content = null;
                 }
@@ -173,10 +173,10 @@ define(["require", "exports", "app/api", "app/_sys/pubsub", "app/_sys/timeout", 
                     viewState = null;
                 }
                 if (content !== null || viewState != null) {
-                    let response = await api_1.saveScriptContent(data.connection, data.id, content, viewState);
+                    let response = await api_1.saveScriptContent(this.data.connection, this.data.id, content, viewState);
                     if (response.ok) {
-                        data.timestamp = response.data;
-                        pubsub_1.publish(pubsub_1.SCRIPT_UPDATED, data);
+                        this.data.timestamp = response.data;
+                        pubsub_1.publish(pubsub_1.SCRIPT_UPDATED, this.data);
                     }
                 }
                 if (content != null) {
@@ -185,7 +185,7 @@ define(["require", "exports", "app/api", "app/_sys/pubsub", "app/_sys/timeout", 
                 if (viewState != null) {
                     this.content.dataAttr("viewStateHash", viewStateHash);
                 }
-            }, 500, `${this.id}-editor-save`);
+            }, 250, `${this.id}-editor-save`);
         }
         initiateSaveScroll() {
             timeout_1.timeoutAsync(async () => {
@@ -193,10 +193,9 @@ define(["require", "exports", "app/api", "app/_sys/pubsub", "app/_sys/timeout", 
                 let left = this.monaco.getScrollLeft();
                 if (top != this.content.dataAttr("scrollTop") || left != this.content.dataAttr("scrollLeft")) {
                     this.content.dataAttr("scrollTop", top).dataAttr("scrollLeft", left);
-                    const data = this.content.dataAttr("data");
-                    await api_1.saveScriptScrollPosition(data.connection, data.id, top, left);
+                    await api_1.saveScriptScrollPosition(this.data.connection, this.data.id, top, left);
                 }
-            }, 1000, `${this.id}-editor-scroll`);
+            }, 250, `${this.id}-editor-scroll`);
         }
     }
     exports.Editor = Editor;

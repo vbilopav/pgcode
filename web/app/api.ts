@@ -98,7 +98,11 @@ export interface IConnectionInfo {
 
 export type ItemInfoType = IRoutineInfo | IScriptInfo | ITableInfo;
 
-const _connectionsHub = new signalR.HubConnectionBuilder().withUrl("/connectionsHub").build();
+const _connectionsHub = new signalR
+    .HubConnectionBuilder()
+    .withUrl("/connectionsHub")
+    .withAutomaticReconnect([0, 500, 1000, 1500, 2000, 2500, 3000])
+    .build();
 
 const _runConnectionsHubAndPublishStatus:<T> (factory: (hub: any) => Promise<T>) => Promise<IResponse<T>> = async factory => {
     if (_connectionsHub.state != signalR.HubConnectionState.Connected) {
@@ -201,7 +205,7 @@ export const fetchSchema: (schema: string) => Promise<IResponse<ISchemaResponse>
 
 export const createScript: () => Promise<IResponse<IScript>> = async () => {
     let connection = getCurrentConnection();
-    let schema = getCurrentConnection();
+    let schema = getCurrentSchema();
     const result = await _runConnectionsHub<IScript>(async hub => 
         JSON.parse(await hub.invoke("CreateScript", connection, schema)));
     if (!result.data) {
@@ -213,13 +217,17 @@ export const createScript: () => Promise<IResponse<IScript>> = async () => {
 };
 
 export const fetchScriptContent = (connection: string, id: number) => {
-    return _runConnectionsHub(async hub => JSON.parse(await hub.invoke("GetScriptContent", connection, Number(id))));
+    return _runConnectionsHub<IScriptContent>(async hub => JSON.parse(await hub.invoke("GetScriptContent", connection, Number(id))));
 }
 
 export const saveScriptContent = (connection: string, id: number, content: string, viewState: string) => {
-    return _runConnectionsHub(async hub => JSON.parse(await hub.invoke("SaveScriptContent", connection, Number(id), content, viewState)));
+    return _runConnectionsHub<string>(async hub => JSON.parse(await hub.invoke("SaveScriptContent", connection, Number(id), content, viewState)));
 }
 
-export const saveScriptScrollPosition =(connection: string, id: number, scrollTop?: number, scrollLeft?: number) => {
-    return _runConnectionsHub(async hub => JSON.parse(await hub.invoke("SaveScriptScrollPosition", connection, JSON.stringify({id: Number(id), scrollTop, scrollLeft}))));
+export const saveScriptScrollPosition = (connection: string, id: number, scrollTop?: number, scrollLeft?: number) => {
+    return _runConnectionsHub<string>(async hub => JSON.parse(await hub.invoke("SaveScriptScrollPosition", connection, JSON.stringify({id: Number(id), scrollTop, scrollLeft}))));
+}
+
+export const checkItemExists = (connection: string, schema: string, key: string, id: string) => {
+    return _runConnectionsHub<boolean>(hub => hub.invoke("CheckItemExists", connection, schema, key, id));
 }

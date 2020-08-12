@@ -9,7 +9,7 @@ import MonacoContextMenu from "app/controls/monaco-context-menu";
 
 import Content from "app/ui/content/content";
 import { 
-    ItemInfoType, Keys, ISchema, classes, IScriptContent, connectionIsDefined 
+    ItemInfoType, Keys, ISchema, classes, IScriptContent, connectionIsDefined, checkItemExists
 } from "app/api";
 import { timeout } from "app/_sys/timeout";
 
@@ -103,7 +103,13 @@ export class MainPanel {
         this.initHeaderAdjustment();
 
         subscribe(SCHEMA_CHANGED, (data: ISchema, name: string) => this.schemaChanged(name, data.connection));
-        subscribe(SCRIPT_UPDATED, data => updateScriptTabElement(this.items, data));
+        subscribe(SCRIPT_UPDATED, data => {
+            if (data.timestamp == null) {
+                this.removeByDataItem(data);
+                return;
+            }
+            updateScriptTabElement(this.items, data);
+        });
         subscribe(API_INITIAL, () => this.restoreItems());
 
         this.hiddenCopy = (
@@ -154,11 +160,15 @@ export class MainPanel {
         this.activateByTab(this.tabs.find("#" + id));
     }
 
-    private restoreItems() {
+    private async restoreItems() {
         const stickyId = _storage.stickyId;
         const activeId = _storage.activeId;
         for(let [id, storageItem] of _storage.items) {
             if (!connectionIsDefined(storageItem.data.connection)) {
+                continue;
+            }
+            const existResponse = await checkItemExists(storageItem.data.connection, storageItem.data.schema, storageItem.key, String(storageItem.data.id));
+            if (!existResponse.ok || (existResponse.ok && existResponse.data == false)) {
                 continue;
             }
             this.content.createNewContent(id, storageItem.key, storageItem.data); 
@@ -239,6 +249,13 @@ export class MainPanel {
         }
         let newItem = this.items.maxBy(v => v.timestamp);
         this.activateByTab(newItem.tab, newItem);
+    }
+
+    private removeByDataItem(data: ItemInfoType) {
+        const item = this.items.where(i => i.data.id == data.id).next().value as Item;
+        if (item) {
+            this.removeByTab(item.tab);
+        }
     }
 
     private createNewTab(id: string, key: Keys, data: ItemInfoType) {

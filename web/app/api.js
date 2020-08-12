@@ -35,7 +35,11 @@ define(["require", "exports", "app/_sys/pubsub", "libs/signalr/signalr.min.js", 
     (function (Languages) {
         Languages["PGSQL"] = "pgsql";
     })(Languages = exports.Languages || (exports.Languages = {}));
-    const _connectionsHub = new signalR.HubConnectionBuilder().withUrl("/connectionsHub").build();
+    const _connectionsHub = new signalR
+        .HubConnectionBuilder()
+        .withUrl("/connectionsHub")
+        .withAutomaticReconnect([0, 500, 1000, 1500, 2000, 2500, 3000])
+        .build();
     const _runConnectionsHubAndPublishStatus = async (factory) => {
         if (_connectionsHub.state != signalR.HubConnectionState.Connected) {
             await _connectionsHub.start();
@@ -125,7 +129,7 @@ define(["require", "exports", "app/_sys/pubsub", "libs/signalr/signalr.min.js", 
     };
     exports.createScript = async () => {
         let connection = exports.getCurrentConnection();
-        let schema = exports.getCurrentConnection();
+        let schema = exports.getCurrentSchema();
         const result = await _runConnectionsHub(async (hub) => JSON.parse(await hub.invoke("CreateScript", connection, schema)));
         if (!result.data) {
             return null;
@@ -142,6 +146,9 @@ define(["require", "exports", "app/_sys/pubsub", "libs/signalr/signalr.min.js", 
     };
     exports.saveScriptScrollPosition = (connection, id, scrollTop, scrollLeft) => {
         return _runConnectionsHub(async (hub) => JSON.parse(await hub.invoke("SaveScriptScrollPosition", connection, JSON.stringify({ id: Number(id), scrollTop, scrollLeft }))));
+    };
+    exports.checkItemExists = (connection, schema, key, id) => {
+        return _runConnectionsHub(hub => hub.invoke("CheckItemExists", connection, schema, key, id));
     };
 });
 //# sourceMappingURL=api.js.map

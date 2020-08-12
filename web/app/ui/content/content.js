@@ -46,7 +46,6 @@ define(["require", "exports", "app/ui/content/editor", "app/controls/splitter", 
                 .hideElement()
                 .attr("id", id)
                 .dataAttr("key", key)
-                .dataAttr("data", data)
                 .addClass("content")
                 .appendElementTo(this.container);
             if (!contentArgs.content && key === api_1.Keys.SCRIPTS) {
@@ -115,9 +114,10 @@ define(["require", "exports", "app/ui/content/editor", "app/controls/splitter", 
             }
             return String.html `
             <div>
-                ${key.toString()}:  ${id}
+                ${key.toString()}:  ${data.id}
             </div>`
-                .toElement();
+                .toElement()
+                .dataAttr("data", data);
         }
         createSplitEditor(id, lang, content, data) {
             const element = String.html `
@@ -128,7 +128,8 @@ define(["require", "exports", "app/ui/content/editor", "app/controls/splitter", 
             </div>`
                 .toElement()
                 .addClass("split-content")
-                .css("grid-template-rows", `auto 5px ${_getSplitterVal(id).height}px`);
+                .css("grid-template-rows", `auto 5px ${_getSplitterVal(id).height}px`)
+                .dataAttr("data", data);
             const editor = new editor_1.Editor(id, element.children[0], element, lang, content);
             element.dataAttr("editor", editor);
             const results = new results_pane_1.default(id, element.children[2], data);

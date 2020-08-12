@@ -30,8 +30,6 @@ namespace Pgcode
 
         public static string Version => typeof(Program).Assembly.GetName().Version.ToString();
 
-        public const string ContentIsNull = "_null-content";
-        public const string ViewStateIsNull = "_null-view-state";
         public const string Param = "_data";
         public const string CookieName = "pgcode";
         public const string AppDir = "app";

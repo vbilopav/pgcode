@@ -382,7 +382,7 @@ interface String {
 
 interface Map<K, V> {
     first(): V
-    where(predicate: (v: V) => boolean): V
+    where(predicate: (v: V) => boolean): IterableIterator<V>
     maxBy(predicate: (v: V) => any): V
     switchByKeys(key1: string, key2: string): Map<K, V>
 }

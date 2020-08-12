@@ -56,7 +56,7 @@ namespace Pgcode.Migrations._1.Routines
                     _id, _user_id, _title, _data->>'schema'
                 )
                 returning 
-                    id::text, 
+                    id, 
                     title as name, {settings.PgCodeSchema}.{MaxStr.Name}(comment) as comment, 
                     schema, 
                     content, 

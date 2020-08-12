@@ -1,5 +1,9 @@
 ﻿import {
-    classes, IScriptContent, saveScriptContent, saveScriptScrollPosition, IScriptInfo
+    classes, 
+    IScriptContent, 
+    saveScriptContent, 
+    saveScriptScrollPosition, 
+    IScriptInfo
 } from "app/api";
 import {
     SIDEBAR_DOCKED, 
@@ -38,6 +42,7 @@ export const nullEditor = new (class implements IEditor {
 
 export class Editor implements IEditor {
     private readonly id: string;
+    private readonly data: IScriptInfo;
     private readonly monaco: IStandaloneCodeEditor;
     private readonly content: Element;
     private readonly container: Element;
@@ -47,8 +52,8 @@ export class Editor implements IEditor {
 
     constructor(id: string, container: Element, content: Element, language: string, scriptContent: IScriptContent = null) {
         this.id = id;
-        
-        console.log("editor created", this.id);
+        this.data = content.dataAttr("data") as IScriptInfo;
+        console.log("editor created", this.data.connection, this.data.id);
 
         this.container = container;
         this.content = content;
@@ -113,7 +118,7 @@ export class Editor implements IEditor {
 
     dispose() {
         this.monaco.dispose();
-        console.log("editor disposed", this.id);
+        console.log("editor disposed", this.data.connection, this.data.id);
         return this;
     }
 
@@ -215,7 +220,6 @@ export class Editor implements IEditor {
             let viewState = JSON.stringify(this.monaco.saveViewState());
             const contentHash = content.hashCode();
             const viewStateHash = viewState.hashCode();
-            const data = this.content.dataAttr("data") as IScriptInfo;
             if (contentHash === this.content.dataAttr("contentHash")) {
                 content = null;
             }
@@ -223,10 +227,10 @@ export class Editor implements IEditor {
                 viewState = null;
             }
             if (content !== null || viewState != null) {
-                let response = await saveScriptContent(data.connection, data.id, content, viewState);
+                let response = await saveScriptContent(this.data.connection, this.data.id, content, viewState);
                 if (response.ok) {
-                    data.timestamp = response.data;
-                    publish(SCRIPT_UPDATED, data);
+                    this.data.timestamp = response.data;
+                    publish(SCRIPT_UPDATED, this.data);
                 }
             }
             if (content != null) {
@@ -235,7 +239,7 @@ export class Editor implements IEditor {
             if (viewState != null) {
                 this.content.dataAttr("viewStateHash", viewStateHash);
             }
-        }, 500, `${this.id}-editor-save`);
+        }, 250, `${this.id}-editor-save`);
     }
 
     private initiateSaveScroll() {
@@ -244,9 +248,8 @@ export class Editor implements IEditor {
             let left = this.monaco.getScrollLeft();
             if (top != this.content.dataAttr("scrollTop") || left != this.content.dataAttr("scrollLeft"))  {
                 this.content.dataAttr("scrollTop", top).dataAttr("scrollLeft", left);
-                const data = this.content.dataAttr("data") as IScriptInfo;
-                await saveScriptScrollPosition(data.connection, data.id, top, left);
+                await saveScriptScrollPosition(this.data.connection, this.data.id, top, left);
             }
-        }, 1000, `${this.id}-editor-scroll`);
+        }, 250, `${this.id}-editor-scroll`);
     }
 }

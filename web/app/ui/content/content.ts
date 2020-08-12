@@ -76,7 +76,7 @@ export default class Content {
             .hideElement()
             .attr("id", id)
             .dataAttr("key", key)
-            .dataAttr("data", data)
+            //.dataAttr("data", data)
             .addClass("content")
             .appendElementTo(this.container);
         if (!contentArgs.content && key === Keys.SCRIPTS) {
@@ -153,9 +153,10 @@ export default class Content {
         }
         return (String.html`
             <div>
-                ${key.toString()}:  ${id}
+                ${key.toString()}:  ${data.id}
             </div>` as string)
                 .toElement()
+                .dataAttr("data", data)
     }
 
     private createSplitEditor(id: string, lang: Languages, content: IScriptContent, data: ItemInfoType) {
@@ -167,7 +168,8 @@ export default class Content {
             </div>` as string)
             .toElement()
             .addClass("split-content")
-            .css("grid-template-rows", `auto 5px ${_getSplitterVal(id).height}px`);
+            .css("grid-template-rows", `auto 5px ${_getSplitterVal(id).height}px`)
+            .dataAttr("data", data);
         
         const editor = new Editor(id, element.children[0], element, lang, content);
         element.dataAttr("editor", editor);
