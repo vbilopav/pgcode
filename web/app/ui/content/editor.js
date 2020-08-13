@@ -40,7 +40,6 @@ define(["require", "exports", "app/api", "app/_sys/pubsub", "app/_sys/timeout", 
                 else {
                     this.executionDisabled = false;
                 }
-                this.executionDisabled = true;
             }).catch(() => {
                 this.executionDisabled = true;
             });

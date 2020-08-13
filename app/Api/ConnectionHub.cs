@@ -113,15 +113,25 @@ namespace Pgcode.Api
         public async ValueTask InitConnection(string connection, string schema, string id)
         {
             var user = GetIdentityAndLogRequest();
-            await _connectionManager.AddWorkspaceConnectionAsync(user.Name, id, connection, schema, Clients.Caller);
+            await _connectionManager.AddWorkspaceConnectionAsync(new WorkspaceKey
+            {
+                Id = id,
+                UserName = user.Name,
+                ConnectionId = this.Context.ConnectionId,
+            }, connection, schema, Clients.Caller);
         }
 
         public async ValueTask DisposeConnection(string id)
         {
             var user = GetIdentityAndLogRequest();
-            await _connectionManager.RemoveWorkspaceConnectionAsync(user.Name, id);
+            await _connectionManager.RemoveWorkspaceConnectionAsync(new WorkspaceKey
+            {
+                Id = id,
+                UserName = user.Name,
+                ConnectionId = this.Context.ConnectionId,
+            });
         }
-        
+
         private IIdentity GetIdentityAndLogRequest()
         {
             var ctx = this.Context.GetHttpContext();

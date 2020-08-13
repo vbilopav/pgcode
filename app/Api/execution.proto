@@ -13,8 +13,10 @@ message ExecuteRequest {
 	string Schema = 2;
 	string Id = 3;
 	string Content = 4;
+	string ConnectionId = 5;
 }
 
 message ExecuteReply { 
 	repeated string Data = 1;
+	repeated uint32 NullIndexes = 2 [packed=true];
 }

@@ -101,7 +101,7 @@ export type ItemInfoType = IRoutineInfo | IScriptInfo | ITableInfo;
 const _connectionsHub = new signalR
     .HubConnectionBuilder()
     .withUrl("/connectionsHub")
-    .withAutomaticReconnect({nextRetryDelayInMilliseconds: () => 500})
+    .withAutomaticReconnect({nextRetryDelayInMilliseconds: () => 250})
     .build();
 
 const grpc = new GrpcService();
@@ -242,34 +242,96 @@ export const disposeConnection = (id: string) => {
     return _runConnectionsHub<void>(hub => hub.invoke("DisposeConnection", id));
 }
 
+interface IRow {
+    data: Array<string>;
+    nullIndexes: Array<number>;
+};
+
+interface IHeader {
+    name: string;
+    type: string;
+};
+
+interface INotice {
+    constraintName: string;
+    dataTypeName: string;
+    columnName: string;
+    tableName: string;
+    schemaName: string;
+    where: string;
+    internalQuery: string;
+    position: number;
+    line: string;
+    hint: string;
+    detail: string;
+    messageText: string;
+    sqlState: string;
+    severity: string;
+    internalPosition: number;
+    routine: string;
+}
+
 export interface IExecutionStream {
-    error: (e: GrpcStatus) => void
-    status: (e: GrpcStatus) => void
-    data: (e: Array<string>) => void
-    end: () => void
+    error: (e: GrpcStatus) => void;
+    status: (e: GrpcStatus) => void;
+    message: (e: INotice) => void;
+    header: (e: Array<IHeader>) => void;
+    data: (e: IRow) => void;
+    end: () => void;
 }
 
 export const execute = (connection: string, schema: string, id: string, content: string, stream: IExecutionStream) => {
+    if (_connectionsHub.state != signalR.HubConnectionState.Connected || _connectionsHub.connectionId == undefined) {
+        if (stream["error"]) {
+            stream.error({code: GrpcErrorCode.NotFound, message: "", metadata: {}});
+        }
+        return;
+    }
     const grpcStream = grpc.serverStreaming({
         service: "/api.ExecuteService/Execute",
         request: [GrpcType.String, GrpcType.String, GrpcType.String, GrpcType.String],
-        reply: [[GrpcType.String]]
-    }, connection, schema, id, content);
-    _connectionsHub.on("Message", msg => {
-        console.log(msg);
-    })
+        reply: [{data: [GrpcType.String]}, {nullIndexes: [GrpcType.PackedUint32]}]
+    }, connection, schema, id, content, _connectionsHub.connection.connectionId);
+
+    _connectionsHub.off(`Message-${id}`);
+    _connectionsHub.on(`Message-${id}`, (msg: INotice) => {
+        if (stream["message"]) {
+            stream.message(msg);
+        }
+    });
+
+    let header = false;
     grpcStream
         .on("error", e => {
-            if (stream["error"]) stream.error(e);
+            if (stream["error"]) {
+                stream.error(e);
+            }
         })
         .on("status", e => {
-            if (stream["status"]) stream.status(e);
+            if (stream["status"]) {
+                stream.status(e);
+            }
         })
         .on("data", e => {
-            if (stream["data"]) stream.data(e);
+            if (!header) {
+                if (stream["header"]) {
+                    const headerResult = new Array<IHeader>();
+                    for(let item of (e as IRow).data){
+                        headerResult.push(JSON.parse(item));
+                    };
+                    stream.header(headerResult);
+                }
+                header = true;
+                return;
+            }
+            if (stream["data"]) {
+                stream.data(e);
+            }
         })
         .on("end", () => {
-            if (stream["end"]) stream.end();
-            _connectionsHub.off("Message");
+            _connectionsHub.off(`Message-${id}`);
+            if (stream["end"]) {
+                stream.end();
+            }
         });
 }

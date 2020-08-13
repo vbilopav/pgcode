@@ -1,6 +1,7 @@
 import { ItemInfoType, getConnectionColor, execute, IExecutionStream } from "app/api";
 import Results from "app/ui/results-pane/results";
 import Messages from "app/ui/results-pane/messages";
+import { GrpcErrorCode } from "../../_sys/grpc-service";
 
 export default class  {
     private readonly id: string;
@@ -42,6 +43,15 @@ export default class  {
     public runExecution(content: string) {
         const stream = {
             error: e => {
+                console.log(e);
+                if (e.code == GrpcErrorCode.NotFound) {
+                    // need to reconnect
+                }
+            },
+            message: e => {
+                console.log(e);
+            },
+            header: e => {
                 console.log(e);
             },
             data: e => {

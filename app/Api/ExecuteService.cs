@@ -1,8 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Grpc.Core;
 using Microsoft.AspNetCore.SignalR;
+using Npgsql;
 using Pgcode.Connection;
 using Pgcode.Middleware;
 using Pgcode.Protos;
@@ -25,22 +25,39 @@ namespace Pgcode.Api
             var ctx = context.GetHttpContext();
             _cookieMiddleware.ProcessCookieAndAddIdentity(ctx);
 
-            var ws = _connectionManager.GetWorkspaceConnection(ctx.User.Identity.Name, request.Id);
+            var ws = _connectionManager.GetWorkspaceConnection(
+                new WorkspaceKey
+                {
+                    Id = request.Id,
+                    UserName = ctx.User.Identity.Name,
+                    ConnectionId = request.ConnectionId
+                });
+
             if (ws == null)
             {
                 context.Status = new Status(StatusCode.NotFound, "connection not initialized");
+                return;
             }
-            else
-            {
-                var reply1 = new ExecuteReply();
-                reply1.Data.Add(new List<string> { "a1", "b1", "c1" });
-                var reply2 = new ExecuteReply();
-                reply2.Data.Add(new List<string> { "a2", "b2", "c2" });
-                await responseStream.WriteAsync(reply1);
-                await responseStream.WriteAsync(reply2);
 
-                await ws.Proxy.SendAsync("Message", "Hello world");
+            void NoticeHandler(object sender, NpgsqlNoticeEventArgs e)
+            {
+                ws.Proxy?.SendAsync($"Message-{request.Id}", new Message(e.Notice), cancellationToken: context.CancellationToken);
             }
+            ws.Connection.Notice += NoticeHandler;
+
+            try
+            {
+                await foreach (var reply in ws.ExecuteAsync(request, context.CancellationToken))
+                {
+                    await responseStream.WriteAsync(reply);
+                }
+            }
+            catch (PostgresException e)
+            {
+                ws?.Proxy?.SendAsync($"Message-{request.Id}", new Message(e), cancellationToken: context.CancellationToken);
+            }
+
+            ws.Connection.Notice -= NoticeHandler;
         }
     }
 }

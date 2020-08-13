@@ -6,6 +6,16 @@ using Pgcode.Middleware;
 
 namespace Pgcode.Connection
 {
+
+    public class WorkspaceKey
+    {
+        public string ConnectionId { get; set; }
+        public string UserName { get; set; }
+        public string Id { get; set; }
+
+        public string Key => $"{this.ConnectionId}-{this.UserName}-{this.Id}";
+    }
+
     public sealed partial class ConnectionManager : IDisposable
     {
         public IEnumerable<ConnectionData> GetConnectionsData() => _connections.Values;
@@ -19,34 +29,35 @@ namespace Pgcode.Connection
             throw new ApiException($"Unknown connection name {connectionName}", 404);
         }
 
-        public async ValueTask AddWorkspaceConnectionAsync(string username, string id, string connectionName, string schema, IClientProxy proxy)
+        public async ValueTask AddWorkspaceConnectionAsync(WorkspaceKey key, string connectionName, string schema, IClientProxy proxy)
         {
-            var key = $"{username}__{id}";
-            if (!WorkspaceConnections.ContainsKey(key))
+            if (!WorkspaceConnections.ContainsKey(key.Key))
             {
                 var data = GetConnectionDataByName(connectionName);
                 var connection = data.Connection.CloneWith(data.ConnectionString);
                 await connection.OpenAsync();
-                WorkspaceConnections.TryAdd(key, new WorkspaceConnection
+                WorkspaceConnections.TryAdd(key.Key, new WorkspaceConnection
                 {
                     Connection = connection,
-                    Proxy = proxy,
                     Name = connectionName,
-                    Schema = schema
+                    Schema = schema,
+                    Proxy = proxy
                 });
+            }
+            else
+            {
+                WorkspaceConnections[key.Key].Proxy = proxy;
             }
         }
 
-        public WorkspaceConnection GetWorkspaceConnection(string username, string id)
+        public WorkspaceConnection GetWorkspaceConnection(WorkspaceKey key)
         {
-            var key = $"{username}__{id}";
-            return WorkspaceConnections.TryGetValue(key, out var ws) ? ws : null;
+            return WorkspaceConnections.TryGetValue(key.Key, out var ws) ? ws : null;
         }
 
-        public async ValueTask RemoveWorkspaceConnectionAsync(string username, string id)
+        public async ValueTask RemoveWorkspaceConnectionAsync(WorkspaceKey key)
         {
-            var key = $"{username}__{id}";
-            if (WorkspaceConnections.TryRemove(key, out var ws))
+            if (WorkspaceConnections.TryRemove(key.Key, out var ws))
             {
                 await ws.Connection.CloseAsync();
                 ws.Connection.Dispose();

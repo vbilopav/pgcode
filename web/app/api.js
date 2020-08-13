@@ -38,7 +38,7 @@ define(["require", "exports", "app/_sys/pubsub", "libs/signalr/signalr.min.js", 
     const _connectionsHub = new signalR
         .HubConnectionBuilder()
         .withUrl("/connectionsHub")
-        .withAutomaticReconnect({ nextRetryDelayInMilliseconds: () => 500 })
+        .withAutomaticReconnect({ nextRetryDelayInMilliseconds: () => 250 })
         .build();
     const grpc = new grpc_service_1.GrpcService();
     const _runConnectionsHubAndPublishStatus = async (factory) => {
@@ -157,32 +157,60 @@ define(["require", "exports", "app/_sys/pubsub", "libs/signalr/signalr.min.js", 
     exports.disposeConnection = (id) => {
         return _runConnectionsHub(hub => hub.invoke("DisposeConnection", id));
     };
+    ;
+    ;
     exports.execute = (connection, schema, id, content, stream) => {
+        if (_connectionsHub.state != signalR.HubConnectionState.Connected || _connectionsHub.connectionId == undefined) {
+            if (stream["error"]) {
+                stream.error({ code: grpc_service_1.GrpcErrorCode.NotFound, message: "", metadata: {} });
+            }
+            return;
+        }
         const grpcStream = grpc.serverStreaming({
             service: "/api.ExecuteService/Execute",
             request: [grpc_service_1.GrpcType.String, grpc_service_1.GrpcType.String, grpc_service_1.GrpcType.String, grpc_service_1.GrpcType.String],
-            reply: [[grpc_service_1.GrpcType.String]]
-        }, connection, schema, id, content);
-        _connectionsHub.on("Message", msg => {
-            console.log(msg);
+            reply: [{ data: [grpc_service_1.GrpcType.String] }, { nullIndexes: [grpc_service_1.GrpcType.PackedUint32] }]
+        }, connection, schema, id, content, _connectionsHub.connection.connectionId);
+        _connectionsHub.off(`Message-${id}`);
+        _connectionsHub.on(`Message-${id}`, (msg) => {
+            if (stream["message"]) {
+                stream.message(msg);
+            }
         });
+        let header = false;
         grpcStream
             .on("error", e => {
-            if (stream["error"])
+            if (stream["error"]) {
                 stream.error(e);
+            }
         })
             .on("status", e => {
-            if (stream["status"])
+            if (stream["status"]) {
                 stream.status(e);
+            }
         })
             .on("data", e => {
-            if (stream["data"])
+            if (!header) {
+                if (stream["header"]) {
+                    const headerResult = new Array();
+                    for (let item of e.data) {
+                        headerResult.push(JSON.parse(item));
+                    }
+                    ;
+                    stream.header(headerResult);
+                }
+                header = true;
+                return;
+            }
+            if (stream["data"]) {
                 stream.data(e);
+            }
         })
             .on("end", () => {
-            if (stream["end"])
+            _connectionsHub.off(`Message-${id}`);
+            if (stream["end"]) {
                 stream.end();
-            _connectionsHub.off("Message");
+            }
         });
     };
 });

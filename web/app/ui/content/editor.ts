@@ -27,7 +27,6 @@ import ResultsPane from "app/ui/results-pane/results-pane"
 export interface IEditor {
     dispose(): IEditor;
     layout(): IEditor;
-    //initiateLayout(): IEditor;
     focus(): IEditor;
     setContent(value: IScriptContent) : IEditor;
     getContent() : string;
@@ -36,7 +35,6 @@ export interface IEditor {
 
 export const nullEditor = new (class implements IEditor {
     dispose() {return this}
-    //initiateLayout() {return this}
     layout() {return this}
     focus() {return this}
     setContent(value: IScriptContent) {return this}
@@ -83,7 +81,6 @@ export class Editor implements IEditor {
             } else {
                 this.executionDisabled = false;
             }
-            this.executionDisabled = true;
         }).catch(() => {
             this.executionDisabled = true;
         });

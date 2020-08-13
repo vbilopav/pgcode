@@ -1,4 +1,4 @@
-define(["require", "exports", "app/api", "app/ui/results-pane/results", "app/ui/results-pane/messages"], function (require, exports, api_1, results_1, messages_1) {
+define(["require", "exports", "app/api", "app/ui/results-pane/results", "app/ui/results-pane/messages", "../../_sys/grpc-service"], function (require, exports, api_1, results_1, messages_1, grpc_service_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class default_1 {
@@ -32,6 +32,14 @@ define(["require", "exports", "app/api", "app/ui/results-pane/results", "app/ui/
         runExecution(content) {
             const stream = {
                 error: e => {
+                    console.log(e);
+                    if (e.code == grpc_service_1.GrpcErrorCode.NotFound) {
+                    }
+                },
+                message: e => {
+                    console.log(e);
+                },
+                header: e => {
                     console.log(e);
                 },
                 data: e => {

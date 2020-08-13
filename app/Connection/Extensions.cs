@@ -19,19 +19,7 @@ namespace Pgcode.Connection
                 .AsProcedure()
                 .SingleAsync<T>(command, GetParam(dataParam));
         }
-/*
-        public static string LockAndGetString<T>(this ConnectionData data, string name, T parameters)
-        {
-            var (command, dataParam) = GetCommand(data, name, parameters);
-            lock (data.Connection)
-            {
-                return data.Connection
-                    .Prepared()
-                    .AsProcedure()
-                    .Single<string>(command, GetParam(dataParam));
-            }
-        }
-*/
+
         private static (string command, string dataParam) GetCommand(ConnectionData data, string name, object parameters)
         {
             var command = $"{Program.Settings.PgCodeSchema}.{name}";
