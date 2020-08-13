@@ -117,6 +117,8 @@ interface Element {
     clone(deep?: boolean): Element;
 
     switchPlaces(target: Element): Element;
+
+    nextElementSiblingWithClass(className: string): Element;
 }
 /**
  * Set of JQuery-like extensions on NodeList prototype.

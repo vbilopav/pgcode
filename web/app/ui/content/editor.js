@@ -3,16 +3,20 @@ define(["require", "exports", "app/api", "app/_sys/pubsub", "app/_sys/timeout", 
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.nullEditor = new (class {
         dispose() { return this; }
-        initiateLayout() { return this; }
         layout() { return this; }
         focus() { return this; }
         setContent(value) { return this; }
         getContent() { return null; }
         actionRun(id) { return this; }
     })();
+    var FooterMsgTypes;
+    (function (FooterMsgTypes) {
+        FooterMsgTypes[FooterMsgTypes["Exe"] = 0] = "Exe";
+    })(FooterMsgTypes || (FooterMsgTypes = {}));
     class Editor {
         constructor(id, container, content, language, scriptContent, results) {
             this.tempViewState = null;
+            this.executionDisabled = false;
             this.id = id;
             this.results = results;
             this.data = content.dataAttr("data");
@@ -21,90 +25,25 @@ define(["require", "exports", "app/api", "app/_sys/pubsub", "app/_sys/timeout", 
             const element = String.html `<div style="position: fixed;"></div>`.toElement();
             this.container.append(element);
             this.monaco = monaco_config_1.createEditor(element, language);
-            let executeAction = this.monaco.addAction({
-                id: monaco_config_1.commandIds.execute,
-                label: "Execute",
-                keybindings: [
-                    monaco.KeyCode.F5
-                ],
-                precondition: null,
-                keybindingContext: null,
-                contextMenuGroupId: "execution",
-                contextMenuOrder: 1.5,
-                run: () => this.execute()
-            });
-            this.monaco.addAction({
-                id: monaco_config_1.commandIds.selectAll,
-                label: "Select All",
-                keybindings: [
-                    monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_A,
-                ],
-                precondition: null,
-                keybindingContext: null,
-                contextMenuGroupId: "9_cutcopypaste",
-                contextMenuOrder: 2,
-                run: (editor) => {
-                    editor.trigger("pgcode-editor", "selectAll", null);
-                }
-            });
-            this.selectionDecorations = [];
             this.language = language;
             if (scriptContent) {
                 this.setContent(scriptContent);
             }
-            this.monaco.onDidChangeModelContent(() => this.initiateSaveContent());
-            this.monaco.onDidChangeCursorPosition(() => this.initiateSaveContent());
-            this.monaco.onDidScrollChange(() => {
-                this.renumberSelection();
-                this.initiateSaveScroll();
-            });
-            this.monaco.onDidChangeCursorSelection(e => {
-                if (e.selection.isEmpty()) {
-                    this.selectionDecorations = this.monaco.deltaDecorations(this.selectionDecorations, [{
-                            range: e.selection,
-                            options: { isWholeLine: true, glyphMarginClassName: "current-line-decoration" }
-                        }]);
-                }
-                else {
-                    this.selectionDecorations = this.monaco.deltaDecorations(this.selectionDecorations, [{
-                            range: e.selection,
-                            options: { isWholeLine: true, glyphMarginClassName: "selection-decoration" }
-                        }]);
-                }
-                this.renumberSelection();
-            });
-            this.monaco.onKeyDown(() => {
-                if (this.tempViewState) {
-                    pubsub_1.publish(pubsub_1.DISMISS_FOOTER_MESSAGE);
-                }
-            });
-            window.on("resize", () => this.initiateLayout());
-            pubsub_1.subscribe([pubsub_1.SIDEBAR_DOCKED, pubsub_1.SPLITTER_CHANGED, pubsub_1.SIDEBAR_UNDOCKED], () => this.initiateLayout());
-            pubsub_1.subscribe(pubsub_1.FOOTER_MESSAGE_DISMISSED, () => {
-                if (this.tempViewState) {
-                    this.monaco.restoreViewState(this.tempViewState);
-                    this.tempViewState = null;
-                }
-            });
+            this.selectionDecorations = [];
+            this.initActions();
+            this.initMonacoEvents();
+            this.subscribeToEvents();
             api_1.initConnection(this.data.connection, this.data.schema, this.id).then(resp => {
                 if (!resp.ok) {
-                    executeAction.dispose();
+                    this.executionDisabled = true;
                 }
+                else {
+                    this.executionDisabled = false;
+                }
+                this.executionDisabled = true;
             }).catch(() => {
-                executeAction.dispose();
+                this.executionDisabled = true;
             });
-        }
-        execute() {
-            const selection = this.monaco.getSelection();
-            if (!selection.isEmpty()) {
-                const value = this.monaco.getModel().getValueInRange(selection);
-                this.results.runExecution(value);
-            }
-            else {
-                this.tempViewState = this.monaco.saveViewState();
-                pubsub_1.publish(pubsub_1.FOOTER_MESSAGE, "Hit F5 again to execute or any other key to continue...");
-                this.actionRun(monaco_config_1.commandIds.selectAll);
-            }
         }
         dispose() {
             this.monaco.dispose();
@@ -119,10 +58,6 @@ define(["require", "exports", "app/api", "app/_sys/pubsub", "app/_sys/timeout", 
                 height: this.container.clientHeight,
                 width: this.container.clientWidth
             });
-            return this;
-        }
-        initiateLayout() {
-            timeout_1.timeout(() => this.layout(), 25, `${this.id}-editor-layout`);
             return this;
         }
         focus() {
@@ -155,6 +90,89 @@ define(["require", "exports", "app/api", "app/_sys/pubsub", "app/_sys/timeout", 
             this.monaco.getAction(id).run();
             return this;
         }
+        subscribeToEvents() {
+            window.on("resize", () => this.initiateLayout());
+            pubsub_1.subscribe([pubsub_1.SIDEBAR_DOCKED, pubsub_1.SPLITTER_CHANGED, pubsub_1.SIDEBAR_UNDOCKED], () => this.initiateLayout());
+            pubsub_1.subscribe(pubsub_1.FOOTER_MESSAGE_DISMISSED, type => {
+                if (this.tempViewState && type == FooterMsgTypes.Exe) {
+                    this.monaco.restoreViewState(this.tempViewState);
+                    this.tempViewState = null;
+                }
+            });
+        }
+        initActions() {
+            this.monaco.addAction({
+                id: monaco_config_1.commandIds.execute,
+                label: "Execute",
+                keybindings: [
+                    monaco.KeyCode.F5
+                ],
+                precondition: null,
+                keybindingContext: null,
+                contextMenuGroupId: "execution",
+                contextMenuOrder: 1.5,
+                run: () => this.execute()
+            });
+            this.monaco.addAction({
+                id: monaco_config_1.commandIds.selectAll,
+                label: "Select All",
+                keybindings: [
+                    monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_A,
+                ],
+                precondition: null,
+                keybindingContext: null,
+                contextMenuGroupId: "9_cutcopypaste",
+                contextMenuOrder: 2,
+                run: (editor) => {
+                    editor.trigger("pgcode-editor", "selectAll", null);
+                }
+            });
+        }
+        initMonacoEvents() {
+            this.monaco.onDidChangeModelContent(() => this.initiateSaveContent());
+            this.monaco.onDidChangeCursorPosition(() => this.initiateSaveContent());
+            this.monaco.onDidScrollChange(() => {
+                this.renumberSelection();
+                this.initiateSaveScroll();
+            });
+            this.monaco.onDidChangeCursorSelection(e => {
+                if (e.selection.isEmpty()) {
+                    this.selectionDecorations = this.monaco.deltaDecorations(this.selectionDecorations, [{
+                            range: e.selection,
+                            options: { isWholeLine: true, glyphMarginClassName: "current-line-decoration" }
+                        }]);
+                }
+                else {
+                    this.selectionDecorations = this.monaco.deltaDecorations(this.selectionDecorations, [{
+                            range: e.selection,
+                            options: { isWholeLine: true, glyphMarginClassName: "selection-decoration" }
+                        }]);
+                }
+                this.renumberSelection();
+            });
+            this.monaco.onKeyDown(() => pubsub_1.publish(pubsub_1.DISMISS_FOOTER_MESSAGE));
+        }
+        execute() {
+            if (this.executionDisabled) {
+                pubsub_1.publish(pubsub_1.FOOTER_MESSAGE, "execution is disabled (connection may be broken)");
+            }
+            else {
+                const selection = this.monaco.getSelection();
+                if (!selection.isEmpty()) {
+                    const value = this.monaco.getModel().getValueInRange(selection);
+                    this.results.runExecution(value);
+                }
+                else {
+                    this.tempViewState = this.monaco.saveViewState();
+                    pubsub_1.publish(pubsub_1.FOOTER_MESSAGE, "Hit F5 again to execute or any other key to continue...", FooterMsgTypes.Exe);
+                    this.actionRun(monaco_config_1.commandIds.selectAll);
+                }
+            }
+        }
+        initiateLayout() {
+            timeout_1.timeout(() => this.layout(), 25, `${this.id}-editor-layout`);
+            return this;
+        }
         renumberSelection() {
             timeout_1.timeout(() => {
                 const selection = this.monaco.getSelection();
@@ -162,7 +180,7 @@ define(["require", "exports", "app/api", "app/_sys/pubsub", "app/_sys/timeout", 
                     return;
                 }
                 for (let m of this.container.querySelectorAll(".selection-decoration")) {
-                    let e = this.nextUntilHasClass(m, "line-numbers");
+                    let e = m.nextElementSiblingWithClass("line-numbers");
                     let ln = e.html();
                     if (isNaN(ln)) {
                         continue;
@@ -170,15 +188,6 @@ define(["require", "exports", "app/api", "app/_sys/pubsub", "app/_sys/timeout", 
                     m.html(`${ln - selection.startLineNumber + 1}`);
                 }
             }, 25, `${this.id}-renumber-selection`);
-        }
-        nextUntilHasClass(e, className) {
-            e = e.nextElementSibling;
-            if (e.hasClass(className)) {
-                return e;
-            }
-            else {
-                return this.nextUntilHasClass(e, className);
-            }
         }
         initiateSaveContent() {
             timeout_1.timeout(() => {

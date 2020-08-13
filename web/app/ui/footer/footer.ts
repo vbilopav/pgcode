@@ -32,6 +32,7 @@ export default class  {
     private connectionMenu: FooterContextMenu = null;
     private schemasMenu: FooterContextMenu = null;
     private msgMode = false;
+    private msgArgs: any[] = null;
 
     constructor(element: Element) {
         this.footer = element.addClass("footer").html(String.html`
@@ -46,7 +47,6 @@ export default class  {
                 <i class="icon-search"></i>
                 <span></span>
             </div>
-            
             <div class="content clickable">
                 <i class="icon-doc-text"></i>
                 <span></span>
@@ -66,7 +66,6 @@ export default class  {
             <div class="version clickable" title="current version">
                 <span></span>
             </div>
-            
             <div class="feed clickable" title="Send feedback">&#128526;</div>
         `);
 
@@ -96,12 +95,14 @@ export default class  {
             this.msg.html("");
             this.footer.findAll("div:not(.connections):not(.msg):not(.feed)").css("display", "");
             this.adjustWidths();
-            publish(FOOTER_MESSAGE_DISMISSED);
+            publish(FOOTER_MESSAGE_DISMISSED, ...this.msgArgs);
+            this.msgArgs = null;
         };
         subscribe(DISMISS_FOOTER_MESSAGE, () => cancelHandler());
-        subscribe(FOOTER_MESSAGE, msg => {
+        subscribe(FOOTER_MESSAGE, (msg, ...args: any[]) => {
             this.msg.html(msg);
             this.msgMode = true;
+            this.msgArgs = args;
             const columns = this.footer.css("grid-template-columns").split(" ");
             columns[0] = this.connections.getBoundingClientRect().width + "px";
             columns[1] = "0px";

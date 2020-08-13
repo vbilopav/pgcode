@@ -8,6 +8,7 @@ define(["require", "exports", "app/controls/footer-context-menu", "app/controls/
             this.connectionMenu = null;
             this.schemasMenu = null;
             this.msgMode = false;
+            this.msgArgs = null;
             this.footer = element.addClass("footer").html(String.html `
             <div class="connections">
                 <i class="icon-database"></i>
@@ -20,7 +21,6 @@ define(["require", "exports", "app/controls/footer-context-menu", "app/controls/
                 <i class="icon-search"></i>
                 <span></span>
             </div>
-            
             <div class="content clickable">
                 <i class="icon-doc-text"></i>
                 <span></span>
@@ -40,7 +40,6 @@ define(["require", "exports", "app/controls/footer-context-menu", "app/controls/
             <div class="version clickable" title="current version">
                 <span></span>
             </div>
-            
             <div class="feed clickable" title="Send feedback">&#128526;</div>
         `);
             this.initConnections(element);
@@ -66,12 +65,14 @@ define(["require", "exports", "app/controls/footer-context-menu", "app/controls/
                 this.msg.html("");
                 this.footer.findAll("div:not(.connections):not(.msg):not(.feed)").css("display", "");
                 this.adjustWidths();
-                pubsub_1.publish(pubsub_1.FOOTER_MESSAGE_DISMISSED);
+                pubsub_1.publish(pubsub_1.FOOTER_MESSAGE_DISMISSED, ...this.msgArgs);
+                this.msgArgs = null;
             };
             pubsub_1.subscribe(pubsub_1.DISMISS_FOOTER_MESSAGE, () => cancelHandler());
-            pubsub_1.subscribe(pubsub_1.FOOTER_MESSAGE, msg => {
+            pubsub_1.subscribe(pubsub_1.FOOTER_MESSAGE, (msg, ...args) => {
                 this.msg.html(msg);
                 this.msgMode = true;
+                this.msgArgs = args;
                 const columns = this.footer.css("grid-template-columns").split(" ");
                 columns[0] = this.connections.getBoundingClientRect().width + "px";
                 columns[1] = "0px";
