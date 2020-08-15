@@ -1,5 +1,5 @@
 import {Editor, IEditor, nullEditor} from "app/ui/content/editor";
-import {HorizontalSplitter, SplitterCtorArgs} from "app/controls/splitter";
+import {Splitter, HorizontalSplitter, SplitterCtorArgs} from "app/controls/splitter";
 import {classes, IScriptContent, ItemInfoType, Keys, Languages, fetchScriptContent} from "app/api";
 import Storage from "app/_sys/storage";
 import { publish, CONTENT_ACTIVATED } from "app/_sys/pubsub";
@@ -12,7 +12,7 @@ interface IStorage {
 }
 
 const 
-    _defaultSplitValue: IStorageSplitterItem = {height: 50, docked: true};
+    _defaultSplitValue: IStorageSplitterItem = {height: 250, docked: true};
 const
     _storage = new Storage(
         {splitter: {}}, 
@@ -76,7 +76,6 @@ export default class Content {
             .hideElement()
             .attr("id", id)
             .dataAttr("key", key)
-            //.dataAttr("data", data)
             .addClass("content")
             .appendElementTo(this.container);
         if (!contentArgs.content && key === Keys.SCRIPTS) {
@@ -170,14 +169,16 @@ export default class Content {
             .addClass("split-content")
             .css("grid-template-rows", `auto 5px ${_getSplitterVal(id).height}px`)
             .dataAttr("data", data);
-        
-        const results = new ResultsPane(id, element.children[2], data);
+            
+        let splitter: Splitter;
+
+        const results = new ResultsPane(id, element.children[2], data, ()=>splitter.undock());
         element.dataAttr("results", results);
 
         const editor = new Editor(id, element.children[0], element, lang, content, results);
         element.dataAttr("editor", editor);
 
-        new HorizontalSplitter({
+        splitter = new HorizontalSplitter({
             element: element.children[1],
             container: element,
             resizeIndex: 2,

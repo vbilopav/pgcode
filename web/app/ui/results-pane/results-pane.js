@@ -1,10 +1,16 @@
-define(["require", "exports", "app/api", "app/ui/results-pane/results", "app/ui/results-pane/messages", "../../_sys/grpc-service"], function (require, exports, api_1, results_1, messages_1, grpc_service_1) {
+define(["require", "exports", "app/api", "app/ui/results-pane/results", "app/ui/results-pane/messages"], function (require, exports, api_1, results_1, messages_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    var Status;
+    (function (Status) {
+        Status[Status["Ready"] = 0] = "Ready";
+        Status[Status["Disconnected"] = 1] = "Disconnected";
+        Status[Status["Running"] = 2] = "Running";
+        Status[Status["Complete"] = 3] = "Complete";
+    })(Status || (Status = {}));
     class default_1 {
-        constructor(id, element, data) {
-            this.id = id;
-            this.data = data;
+        constructor(id, element, data, undock) {
+            this.undock = undock;
             this.element = element.html(String.html `
             <div>
                 <div class="tab" id="results" title="results">
@@ -22,34 +28,87 @@ define(["require", "exports", "app/api", "app/ui/results-pane/results", "app/ui/
                 <div id="results"></div>
                 <div id="messages"></div>
             </div>
+            <div>
+                <div>
+                    <div></div>
+                </div>
+                <div>
+                    <div></div>
+                </div>
+                <div>
+                    <div>-</div>
+                </div>
+            </div>
         `);
             this.tabs = this.element.children[0].children.on("click", e => this.activateByTab(e.currentTarget));
             this.panes = this.element.children[1].children;
+            this.footerMsg = this.element.children[2].children[0].children[0];
+            this.footerTime = this.element.children[2].children[1].children[0];
+            this.footerRows = this.element.children[2].children[2].children[0];
             new results_1.default(id, this.panes[0], data);
             new messages_1.default(id, this.panes[1], data);
             this.activateByTab(this.tabs[0]);
+            this.status = Status.Disconnected;
         }
-        runExecution(content) {
-            const stream = {
-                error: e => {
-                    console.log(e);
-                    if (e.code == grpc_service_1.GrpcErrorCode.NotFound) {
-                    }
-                },
-                message: e => {
-                    console.log(e);
-                },
-                header: e => {
-                    console.log(e);
-                },
-                data: e => {
-                    console.log(e);
-                },
-                end: () => {
-                    console.log("end");
-                }
-            };
-            api_1.execute(this.data.connection, this.data.schema, this.id, content, stream);
+        setReady() {
+            this.footerMsg.html("🔗 Connected.");
+            this.footerTime.html("🕛 --:--:--").css("title", "");
+            this.footerRows.html("0 rows").css("title", "");
+            ;
+            this.status = Status.Ready;
+        }
+        setDisconnected() {
+            this.footerMsg.html("⛔ Disconnected.");
+            this.footerTime.html("🕛 --:--:--").attr("title", "");
+            this.footerRows.html("0 rows").attr("title", "");
+            ;
+            this.status = Status.Disconnected;
+        }
+        setReconnected() {
+        }
+        start() {
+            this.undock();
+            if (this.status == Status.Disconnected) {
+                return;
+            }
+            this.status = Status.Running;
+            this.footerMsg.html("Running...");
+            this.error = null;
+            this.readStatsVal = null;
+            this.exeStatsVal = null;
+        }
+        readStats(e) {
+            console.log(e);
+            this.readStatsVal = e;
+        }
+        executeStats(e) {
+            console.log(e);
+            this.exeStatsVal = e;
+        }
+        message(e) {
+            console.log(e);
+            if (e.severity == "ERROR") {
+                this.error = e;
+            }
+        }
+        header(e) {
+        }
+        row(e) {
+            console.log(e);
+        }
+        end() {
+            if (this.error) {
+                this.footerMsg.html(`⚠️ ${this.error.messageText}`);
+            }
+            else {
+                this.footerMsg.html("✔️ Query executed successfully.");
+            }
+            if (this.readStatsVal) {
+                this.footerTime.html(`🕛 ${this.readStatsVal.total}`).attr("title", `execution time: ${this.readStatsVal.execution}\nreading time: ${this.readStatsVal.read}\ntotal time: ${this.readStatsVal.total}`);
+            }
+            else if (this.error) {
+                this.footerTime.html(`🕛 ${this.error.time}`).attr("title", `execution time: ${this.error.time}`);
+            }
         }
         activateByTab(tab) {
             for (let current of this.tabs) {

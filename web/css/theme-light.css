@@ -578,8 +578,8 @@ body > div.container {
 .results-pane {
   height: 100%;
   display: grid;
-  grid-template-rows: 40px auto;
-  grid-template-areas: 'tabs' 'content';
+  grid-template-rows: 40px auto 20px;
+  grid-template-areas: 'tabs' 'content' 'results-footer';
   margin-top: -4px; }
   .results-pane > div {
     width: 100%;
@@ -630,3 +630,37 @@ body > div.container {
       display: none; }
     .results-pane > div:nth-child(1) > div.tab.active.upper-row {
       clip-path: inset(-5px -5px -5px -5px); }
+  .results-pane > div:nth-child(3) {
+    grid-area: results-footer;
+    background-color: #007ACC;
+    opacity: 0.7;
+    color: #ffffff;
+    padding-left: 4px;
+    padding-bottom: 4px;
+    margin-left: -4px;
+    user-select: none;
+    display: grid;
+    grid-template-columns: minmax(max-content, auto) min-content min-content;
+    grid-template-areas: 'result-info result-time result-rows'; }
+  .results-pane > div:nth-child(3) > div:nth-child(1),
+  .results-pane > div:nth-child(3) > div:nth-child(2),
+  .results-pane > div:nth-child(3) > div:nth-child(3) {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    height: 100%;
+    padding-bottom: 3px; }
+    .results-pane > div:nth-child(3) > div:nth-child(1) > div,
+    .results-pane > div:nth-child(3) > div:nth-child(2) > div,
+    .results-pane > div:nth-child(3) > div:nth-child(3) > div {
+      line-height: 20px;
+      padding-left: 10px;
+      padding-right: 10px; }
+  .results-pane > div:nth-child(3) > div:nth-child(1) {
+    margin-left: -3px; }
+    .results-pane > div:nth-child(3) > div:nth-child(1) > div {
+      width: fit-content; }
+  .results-pane > div:nth-child(3) > div:nth-child(2) > div,
+  .results-pane > div:nth-child(3) > div:nth-child(3) > div {
+    text-align: end;
+    margin-top: 1px; }

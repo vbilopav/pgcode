@@ -161,27 +161,48 @@ define(["require", "exports", "app/_sys/pubsub", "libs/signalr/signalr.min.js", 
     ;
     exports.execute = (connection, schema, id, content, stream) => {
         if (_connectionsHub.state != signalR.HubConnectionState.Connected || _connectionsHub.connectionId == undefined) {
-            if (stream["error"]) {
-                stream.error({ code: grpc_service_1.GrpcErrorCode.NotFound, message: "", metadata: {} });
+            if (stream["reconnect"]) {
+                stream.reconnect();
             }
             return;
         }
+        const messageName = `message-${id}`;
+        const statsExecute = `stats-execute-${id}`;
+        const statsRead = `stats-read-${id}`;
         const grpcStream = grpc.serverStreaming({
             service: "/api.ExecuteService/Execute",
             request: [grpc_service_1.GrpcType.String, grpc_service_1.GrpcType.String, grpc_service_1.GrpcType.String, grpc_service_1.GrpcType.String],
             reply: [{ data: [grpc_service_1.GrpcType.String] }, { nullIndexes: [grpc_service_1.GrpcType.PackedUint32] }]
         }, connection, schema, id, content, _connectionsHub.connection.connectionId);
-        _connectionsHub.off(`Message-${id}`);
-        _connectionsHub.on(`Message-${id}`, (msg) => {
+        _connectionsHub.off(messageName);
+        _connectionsHub.off(statsExecute);
+        _connectionsHub.off(statsRead);
+        _connectionsHub.on(messageName, (msg) => {
             if (stream["message"]) {
                 stream.message(msg);
+            }
+        });
+        _connectionsHub.on(statsExecute, (msg) => {
+            if (stream["executeStats"]) {
+                stream.executeStats(msg);
+            }
+        });
+        _connectionsHub.on(statsRead, (msg) => {
+            if (stream["readStats"]) {
+                stream.readStats(msg);
             }
         });
         let header = false;
         grpcStream
             .on("error", e => {
-            if (stream["error"]) {
-                stream.error(e);
+            if (e.code == grpc_service_1.GrpcErrorCode.NotFound && e.message == "connection not initialized" && stream["reconnect"]) {
+                stream.reconnect();
+            }
+            else {
+                if (stream["error"]) {
+                    stream.error(e);
+                }
+                pubsub_1.publish(pubsub_1.SET_APP_STATUS, AppStatus.ERROR, e.message);
             }
         })
             .on("status", e => {
@@ -202,15 +223,26 @@ define(["require", "exports", "app/_sys/pubsub", "libs/signalr/signalr.min.js", 
                 header = true;
                 return;
             }
-            if (stream["data"]) {
-                stream.data(e);
+            if (stream["row"]) {
+                let row = e;
+                if (row.nullIndexes && row.nullIndexes.length) {
+                    for (let idx of row.nullIndexes) {
+                        row.data[idx] = null;
+                    }
+                    ;
+                }
+                stream.row(row.data);
             }
         })
             .on("end", () => {
-            _connectionsHub.off(`Message-${id}`);
-            if (stream["end"]) {
-                stream.end();
-            }
+            setTimeout(() => {
+                _connectionsHub.off(messageName);
+                _connectionsHub.off(statsRead);
+                _connectionsHub.off(statsExecute);
+                if (stream["end"]) {
+                    stream.end();
+                }
+            }, 0);
         });
     };
 });

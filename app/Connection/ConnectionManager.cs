@@ -6,16 +6,6 @@ using Pgcode.Middleware;
 
 namespace Pgcode.Connection
 {
-
-    public class WorkspaceKey
-    {
-        public string ConnectionId { get; set; }
-        public string UserName { get; set; }
-        public string Id { get; set; }
-
-        public string Key => $"{this.ConnectionId}-{this.UserName}-{this.Id}";
-    }
-
     public sealed partial class ConnectionManager : IDisposable
     {
         public IEnumerable<ConnectionData> GetConnectionsData() => _connections.Values;
@@ -29,14 +19,15 @@ namespace Pgcode.Connection
             throw new ApiException($"Unknown connection name {connectionName}", 404);
         }
 
-        public async ValueTask AddWorkspaceConnectionAsync(WorkspaceKey key, string connectionName, string schema, IClientProxy proxy)
+        public async ValueTask AddWorkspaceConnectionAsync(WorkspaceKey wsKey, string connectionName, string schema, IClientProxy proxy)
         {
-            if (!WorkspaceConnections.ContainsKey(key.Key))
+            var key = wsKey.GetKey();
+            if (!WorkspaceConnections.ContainsKey(key))
             {
                 var data = GetConnectionDataByName(connectionName);
                 var connection = data.Connection.CloneWith(data.ConnectionString);
                 await connection.OpenAsync();
-                WorkspaceConnections.TryAdd(key.Key, new WorkspaceConnection
+                WorkspaceConnections.TryAdd(key, new WorkspaceConnection
                 {
                     Connection = connection,
                     Name = connectionName,
@@ -46,18 +37,18 @@ namespace Pgcode.Connection
             }
             else
             {
-                WorkspaceConnections[key.Key].Proxy = proxy;
+                WorkspaceConnections[key].Proxy = proxy;
             }
         }
 
-        public WorkspaceConnection GetWorkspaceConnection(WorkspaceKey key)
+        public WorkspaceConnection GetWorkspaceConnection(WorkspaceKey wsKey)
         {
-            return WorkspaceConnections.TryGetValue(key.Key, out var ws) ? ws : null;
+            return WorkspaceConnections.TryGetValue(wsKey.GetKey(), out var ws) ? ws : null;
         }
 
-        public async ValueTask RemoveWorkspaceConnectionAsync(WorkspaceKey key)
+        public async ValueTask RemoveWorkspaceConnectionAsync(WorkspaceKey wsKey)
         {
-            if (WorkspaceConnections.TryRemove(key.Key, out var ws))
+            if (WorkspaceConnections.TryRemove(wsKey.GetKey(), out var ws))
             {
                 await ws.Connection.CloseAsync();
                 ws.Connection.Dispose();

@@ -20,6 +20,8 @@ namespace Pgcode.Connection
                 .SingleAsync<T>(command, GetParam(dataParam));
         }
 
+        public static string Format(this TimeSpan ts) => ts.ToString("hh':'mm':'ss'.'fff");
+
         private static (string command, string dataParam) GetCommand(ConnectionData data, string name, object parameters)
         {
             var command = $"{Program.Settings.PgCodeSchema}.{name}";

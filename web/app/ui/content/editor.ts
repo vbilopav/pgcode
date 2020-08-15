@@ -5,7 +5,9 @@
     saveScriptScrollPosition, 
     IScriptInfo,
     initConnection,
-    disposeConnection
+    disposeConnection,
+    execute, 
+    IExecutionStream
 } from "app/api";
 import {
     SIDEBAR_DOCKED, 
@@ -74,16 +76,7 @@ export class Editor implements IEditor {
         this.initActions();
         this.initMonacoEvents();
         this.subscribeToEvents();
-
-        initConnection(this.data.connection,  this.data.schema, this.id).then(resp => {
-            if (!resp.ok) {
-                this.executionDisabled = true;
-            } else {
-                this.executionDisabled = false;
-            }
-        }).catch(() => {
-            this.executionDisabled = true;
-        });
+        this.initConnection();
     }
 
     public dispose() {
@@ -142,10 +135,12 @@ export class Editor implements IEditor {
         window.on("resize", () => this.initiateLayout());
         subscribe([SIDEBAR_DOCKED, SPLITTER_CHANGED, SIDEBAR_UNDOCKED], () =>  this.initiateLayout());
         subscribe(FOOTER_MESSAGE_DISMISSED, type => {
-            if (this.tempViewState && type == FooterMsgTypes.Exe) {
-                this.monaco.restoreViewState(this.tempViewState);
-                this.tempViewState = null;
-            }
+            setTimeout(() => {
+                if (this.tempViewState && type == FooterMsgTypes.Exe) {
+                    this.monaco.restoreViewState(this.tempViewState);
+                    this.tempViewState = null;
+                }
+            })
         });
     }
 
@@ -203,14 +198,52 @@ export class Editor implements IEditor {
         this.monaco.onKeyDown(() => publish(DISMISS_FOOTER_MESSAGE));
     }
 
+    private async initConnection() {
+        try {
+            const response = await initConnection(this.data.connection,  this.data.schema, this.id);
+            if (!response.ok) {
+                this.executionDisabled = true;
+            } else {
+                this.executionDisabled = false;
+            }
+        } catch (error) {
+            this.executionDisabled = true;
+        }
+        if (this.executionDisabled) {
+            this.results.setDisconnected();
+        } else {
+            this.results.setReady();
+        }
+        return !this.executionDisabled;
+    }
+
     private execute() {
         if (this.executionDisabled) {
-            publish(FOOTER_MESSAGE, "execution is disabled (connection may be broken)");
+            publish(FOOTER_MESSAGE, "execution has been disabled, your connection may be broken, try restarting application");
         } else {
             const selection = this.monaco.getSelection();
             if (!selection.isEmpty()) {
                 const value = this.monaco.getModel().getValueInRange(selection);
-                this.results.runExecution(value);
+                this.results.start();
+                execute(this.data.connection, this.data.schema, this.id, value, {
+                    reconnect: () => {
+                        this.initConnection().then(result => {
+                            if (result) {
+                                publish(FOOTER_MESSAGE, "connection reconnected, temporary data and transactions may be lost...");
+                                this.results.setReconnected();
+                            }
+                            this.execute();
+                            setTimeout(() => publish(DISMISS_FOOTER_MESSAGE), 5000);
+                        });
+                    },
+                    readStats: e => this.results.readStats(e),
+                    executeStats: e => this.results.executeStats(e),
+                    message: e => this.results.message(e),
+                    header: e => this.results.header(e),
+                    row: e => this.results.row(e),
+                    end: () => this.results.end()
+                } as IExecutionStream);
+
             } else {
                 this.tempViewState = this.monaco.saveViewState();
                 publish(FOOTER_MESSAGE, "Hit F5 again to execute or any other key to continue...", FooterMsgTypes.Exe);

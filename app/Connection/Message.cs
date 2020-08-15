@@ -1,4 +1,5 @@
-﻿using Npgsql;
+﻿using System;
+using Npgsql;
 
 namespace Pgcode.Connection
 {
@@ -20,11 +21,10 @@ namespace Pgcode.Connection
             MessageText = e.MessageText;
             SqlState = e.SqlState;
             Severity = e.Severity;
-            InternalPosition = e.InternalPosition;
             Routine = e.Routine;
         }
 
-        public Message(PostgresException e)
+        public Message(PostgresException e, TimeSpan time)
         {
             ConstraintName = e.ConstraintName;
             DataTypeName = e.DataTypeName;
@@ -40,8 +40,8 @@ namespace Pgcode.Connection
             MessageText = e.MessageText;
             SqlState = e.SqlState;
             Severity = e.Severity;
-            InternalPosition = e.InternalPosition;
             Routine = e.Routine;
+            Time = time.Format();
         }
 
         public string ConstraintName { get; }
@@ -58,7 +58,7 @@ namespace Pgcode.Connection
         public string MessageText { get; }
         public string SqlState { get; }
         public string Severity { get; }
-        public int InternalPosition { get; }
         public string Routine { get; }
+        public string Time { get; }
     }
 }

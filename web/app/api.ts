@@ -247,12 +247,12 @@ interface IRow {
     nullIndexes: Array<number>;
 };
 
-interface IHeader {
+export interface IHeader {
     name: string;
     type: string;
 };
 
-interface INotice {
+export interface INotice {
     constraintName: string;
     dataTypeName: string;
     columnName: string;
@@ -269,42 +269,77 @@ interface INotice {
     severity: string;
     internalPosition: number;
     routine: string;
+    time: string;
+}
+
+export interface IReadStats {
+    read: string;
+    execution: string;
+    total: string;
+}
+
+export interface IExecuteStats {
+    time: string;
+    rows: number;
 }
 
 export interface IExecutionStream {
+    reconnect: () => void;
+    readStats: (e: IReadStats) => void;
+    executeStats: (e: IExecuteStats) => void;
     error: (e: GrpcStatus) => void;
     status: (e: GrpcStatus) => void;
     message: (e: INotice) => void;
     header: (e: Array<IHeader>) => void;
-    data: (e: IRow) => void;
+    row: (e: Array<string>) => void;
     end: () => void;
 }
 
 export const execute = (connection: string, schema: string, id: string, content: string, stream: IExecutionStream) => {
     if (_connectionsHub.state != signalR.HubConnectionState.Connected || _connectionsHub.connectionId == undefined) {
-        if (stream["error"]) {
-            stream.error({code: GrpcErrorCode.NotFound, message: "", metadata: {}});
+        if (stream["reconnect"]) {
+            stream.reconnect();
         }
         return;
     }
+    const messageName = `message-${id}`;
+    const statsExecute = `stats-execute-${id}`;
+    const statsRead = `stats-read-${id}`;
     const grpcStream = grpc.serverStreaming({
         service: "/api.ExecuteService/Execute",
         request: [GrpcType.String, GrpcType.String, GrpcType.String, GrpcType.String],
         reply: [{data: [GrpcType.String]}, {nullIndexes: [GrpcType.PackedUint32]}]
     }, connection, schema, id, content, _connectionsHub.connection.connectionId);
 
-    _connectionsHub.off(`Message-${id}`);
-    _connectionsHub.on(`Message-${id}`, (msg: INotice) => {
+    _connectionsHub.off(messageName);
+    _connectionsHub.off(statsExecute);
+    _connectionsHub.off(statsRead);
+    _connectionsHub.on(messageName, (msg: INotice) => {
         if (stream["message"]) {
             stream.message(msg);
+        }
+    });
+    _connectionsHub.on(statsExecute, (msg: IExecuteStats) => {
+        if (stream["executeStats"]) {
+            stream.executeStats(msg);
+        }
+    });
+    _connectionsHub.on(statsRead, (msg: IReadStats) => {
+        if (stream["readStats"]) {
+            stream.readStats(msg);
         }
     });
 
     let header = false;
     grpcStream
         .on("error", e => {
-            if (stream["error"]) {
-                stream.error(e);
+            if ((e as GrpcStatus).code == GrpcErrorCode.NotFound && (e as GrpcStatus).message == "connection not initialized" && stream["reconnect"]) {
+                stream.reconnect();
+            } else {
+                if (stream["error"]) {
+                    stream.error(e);
+                }
+                publish(SET_APP_STATUS, AppStatus.ERROR, (e as GrpcStatus).message);
             }
         })
         .on("status", e => {
@@ -324,14 +359,24 @@ export const execute = (connection: string, schema: string, id: string, content:
                 header = true;
                 return;
             }
-            if (stream["data"]) {
-                stream.data(e);
+            if (stream["row"]) {
+                let row = e as IRow;
+                if (row.nullIndexes && row.nullIndexes.length) {
+                    for(let idx of row.nullIndexes){
+                        row.data[idx] = null;
+                    };
+                }
+                stream.row(row.data);
             }
         })
         .on("end", () => {
-            _connectionsHub.off(`Message-${id}`);
-            if (stream["end"]) {
-                stream.end();
-            }
+            setTimeout(() => {
+                _connectionsHub.off(messageName);
+                _connectionsHub.off(statsRead);
+                _connectionsHub.off(statsExecute);
+                if (stream["end"]) {
+                    stream.end();
+                }
+            }, 0);
         });
 }

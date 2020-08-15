@@ -14,7 +14,7 @@ namespace Pgcode.Connection
     public sealed partial class ConnectionManager
     {
         private static ImmutableDictionary<string, ConnectionData> _connections;
-        private static readonly ConcurrentDictionary<string, WorkspaceConnection> WorkspaceConnections = new ConcurrentDictionary<string, WorkspaceConnection>();
+        private static readonly ConcurrentDictionary<int, WorkspaceConnection> WorkspaceConnections = new ConcurrentDictionary<int, WorkspaceConnection>();
 
         private static readonly IEnumerable<string> InfoLevels = new[] { "INFO", "NOTICE", "LOG" };
         private static readonly IEnumerable<string> ErrorLevels = new[] { "ERROR", "PANIC" };

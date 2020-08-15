@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Grpc.Core;
 using Microsoft.AspNetCore.SignalR;
@@ -39,12 +40,15 @@ namespace Pgcode.Api
                 return;
             }
 
+            var messageName = $"message-{request.Id}";
             void NoticeHandler(object sender, NpgsqlNoticeEventArgs e)
             {
-                ws.Proxy?.SendAsync($"Message-{request.Id}", new Message(e.Notice), cancellationToken: context.CancellationToken);
+                ws.Proxy?.SendAsync(messageName, new Message(e.Notice), cancellationToken: context.CancellationToken);
             }
             ws.Connection.Notice += NoticeHandler;
-
+            
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
             try
             {
                 await foreach (var reply in ws.ExecuteAsync(request, context.CancellationToken))
@@ -54,9 +58,10 @@ namespace Pgcode.Api
             }
             catch (PostgresException e)
             {
-                ws?.Proxy?.SendAsync($"Message-{request.Id}", new Message(e), cancellationToken: context.CancellationToken);
+                stopwatch.Stop();
+                ws?.Proxy?.SendAsync(messageName, new Message(e, stopwatch.Elapsed), cancellationToken: context.CancellationToken);
             }
-
+            stopwatch.Stop();
             ws.Connection.Notice -= NoticeHandler;
         }
     }

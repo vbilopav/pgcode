@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using Microsoft.AspNetCore.SignalR;
 using Pgcode.Protos;
 
 namespace Pgcode.Connection
@@ -17,8 +19,18 @@ namespace Pgcode.Connection
             cmd.CommandText = request.Content;
 #pragma warning restore CA2100
 
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
             await using var reader = await cmd.ExecuteReaderAsync(cancellationToken);
+            stopwatch.Stop();
+            var executionTime = stopwatch.Elapsed;
+            ws?.Proxy?.SendAsync($"stats-execute-{request.Id}", new
+            {
+                time = executionTime.ToString("hh':'mm':'ss':'fff"), 
+                rows = reader.RecordsAffected
+            }, cancellationToken);
             var headerRow = false;
+            stopwatch.Start();
             while (await reader.ReadAsync(cancellationToken))
             {
                 var count = reader.FieldCount;
@@ -47,7 +59,14 @@ namespace Pgcode.Connection
                 }
                 yield return reply;
             }
-
+            
+            stopwatch.Stop();
+            await ws.Proxy.SendAsync($"stats-read-{request.Id}", new
+            {
+                read = stopwatch.Elapsed.Format(),
+                execution = executionTime.Format(),
+                total = (executionTime + stopwatch.Elapsed).Format()
+            }, cancellationToken);
             await reader.CloseAsync();
         }
     }

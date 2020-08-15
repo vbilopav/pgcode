@@ -33,16 +33,7 @@ define(["require", "exports", "app/api", "app/_sys/pubsub", "app/_sys/timeout", 
             this.initActions();
             this.initMonacoEvents();
             this.subscribeToEvents();
-            api_1.initConnection(this.data.connection, this.data.schema, this.id).then(resp => {
-                if (!resp.ok) {
-                    this.executionDisabled = true;
-                }
-                else {
-                    this.executionDisabled = false;
-                }
-            }).catch(() => {
-                this.executionDisabled = true;
-            });
+            this.initConnection();
         }
         dispose() {
             this.monaco.dispose();
@@ -93,10 +84,12 @@ define(["require", "exports", "app/api", "app/_sys/pubsub", "app/_sys/timeout", 
             window.on("resize", () => this.initiateLayout());
             pubsub_1.subscribe([pubsub_1.SIDEBAR_DOCKED, pubsub_1.SPLITTER_CHANGED, pubsub_1.SIDEBAR_UNDOCKED], () => this.initiateLayout());
             pubsub_1.subscribe(pubsub_1.FOOTER_MESSAGE_DISMISSED, type => {
-                if (this.tempViewState && type == FooterMsgTypes.Exe) {
-                    this.monaco.restoreViewState(this.tempViewState);
-                    this.tempViewState = null;
-                }
+                setTimeout(() => {
+                    if (this.tempViewState && type == FooterMsgTypes.Exe) {
+                        this.monaco.restoreViewState(this.tempViewState);
+                        this.tempViewState = null;
+                    }
+                });
             });
         }
         initActions() {
@@ -151,15 +144,54 @@ define(["require", "exports", "app/api", "app/_sys/pubsub", "app/_sys/timeout", 
             });
             this.monaco.onKeyDown(() => pubsub_1.publish(pubsub_1.DISMISS_FOOTER_MESSAGE));
         }
+        async initConnection() {
+            try {
+                const response = await api_1.initConnection(this.data.connection, this.data.schema, this.id);
+                if (!response.ok) {
+                    this.executionDisabled = true;
+                }
+                else {
+                    this.executionDisabled = false;
+                }
+            }
+            catch (error) {
+                this.executionDisabled = true;
+            }
+            if (this.executionDisabled) {
+                this.results.setDisconnected();
+            }
+            else {
+                this.results.setReady();
+            }
+            return !this.executionDisabled;
+        }
         execute() {
             if (this.executionDisabled) {
-                pubsub_1.publish(pubsub_1.FOOTER_MESSAGE, "execution is disabled (connection may be broken)");
+                pubsub_1.publish(pubsub_1.FOOTER_MESSAGE, "execution has been disabled, your connection may be broken, try restarting application");
             }
             else {
                 const selection = this.monaco.getSelection();
                 if (!selection.isEmpty()) {
                     const value = this.monaco.getModel().getValueInRange(selection);
-                    this.results.runExecution(value);
+                    this.results.start();
+                    api_1.execute(this.data.connection, this.data.schema, this.id, value, {
+                        reconnect: () => {
+                            this.initConnection().then(result => {
+                                if (result) {
+                                    pubsub_1.publish(pubsub_1.FOOTER_MESSAGE, "connection reconnected, temporary data and transactions may be lost...");
+                                    this.results.setReconnected();
+                                }
+                                this.execute();
+                                setTimeout(() => pubsub_1.publish(pubsub_1.DISMISS_FOOTER_MESSAGE), 5000);
+                            });
+                        },
+                        readStats: e => this.results.readStats(e),
+                        executeStats: e => this.results.executeStats(e),
+                        message: e => this.results.message(e),
+                        header: e => this.results.header(e),
+                        row: e => this.results.row(e),
+                        end: () => this.results.end()
+                    });
                 }
                 else {
                     this.tempViewState = this.monaco.saveViewState();

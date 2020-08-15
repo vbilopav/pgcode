@@ -1,7 +1,7 @@
 define(["require", "exports", "app/ui/content/editor", "app/controls/splitter", "app/api", "app/_sys/storage", "app/_sys/pubsub", "app/ui/results-pane/results-pane"], function (require, exports, editor_1, splitter_1, api_1, storage_1, pubsub_1, results_pane_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    const _defaultSplitValue = { height: 50, docked: true };
+    const _defaultSplitValue = { height: 250, docked: true };
     const _storage = new storage_1.default({ splitter: {} }, "content", (name, value) => JSON.parse(value), (name, value) => JSON.stringify(value)), _getSplitterVal = id => {
         const s = _storage.splitter, v = s[id];
         if (!v) {
@@ -130,11 +130,12 @@ define(["require", "exports", "app/ui/content/editor", "app/controls/splitter", 
                 .addClass("split-content")
                 .css("grid-template-rows", `auto 5px ${_getSplitterVal(id).height}px`)
                 .dataAttr("data", data);
-            const results = new results_pane_1.default(id, element.children[2], data);
+            let splitter;
+            const results = new results_pane_1.default(id, element.children[2], data, () => splitter.undock());
             element.dataAttr("results", results);
             const editor = new editor_1.Editor(id, element.children[0], element, lang, content, results);
             element.dataAttr("editor", editor);
-            new splitter_1.HorizontalSplitter({
+            splitter = new splitter_1.HorizontalSplitter({
                 element: element.children[1],
                 container: element,
                 resizeIndex: 2,
