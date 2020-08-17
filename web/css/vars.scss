@@ -225,3 +225,21 @@ $drop-target-background-color: default;
 @if $theme == "light" {
     $drop-target-background-color: #3b3e41;
 }
+
+
+$results-footer-background-color: default;
+@if $theme == "dark" {
+    $results-footer-background-color: #095e97;
+} 
+@if $theme == "light" {
+    $results-footer-background-color: #095e97;
+}
+
+
+$grid-headers-background-color: default;
+@if $theme == "dark" {
+    $grid-headers-background-color: #333333;
+} 
+@if $theme == "light" {
+    $grid-headers-background-color: #333333;
+}

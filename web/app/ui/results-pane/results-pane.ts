@@ -14,10 +14,12 @@ export default class  {
     private readonly footerTime: Element;
     private readonly footerRows: Element;
     private readonly undock: ()=>void;
+    private readonly results: Results;
     private status: Status;
     private error: INotice;
     private readStatsVal: IReadStats
     private exeStatsVal: IExecuteStats;
+    private rowNumber: number;
 
     constructor(id: string, element: Element, data: ItemInfoType, undock: ()=>void) {
         //this.id = id;
@@ -37,8 +39,8 @@ export default class  {
                 </div>
             </div>
             <div>
-                <div id="results"></div>
-                <div id="messages"></div>
+                <div id="results" class="pane"></div>
+                <div id="messages" class="pane"></div>
             </div>
             <div>
                 <div>
@@ -60,8 +62,8 @@ export default class  {
         this.footerTime = this.element.children[2].children[1].children[0];
         this.footerRows = this.element.children[2].children[2].children[0];
 
-        new Results(id, this.panes[0], data);
-        new Messages(id, this.panes[1], data);
+        this.results = new Results(this.panes[0]);
+        new Messages(this.panes[1]);
 
         this.activateByTab(this.tabs[0]);
         this.status = Status.Disconnected;
@@ -95,6 +97,8 @@ export default class  {
         this.error = null;
         this.readStatsVal = null;
         this.exeStatsVal = null;
+        this.rowNumber = 0;
+        this.results.initGrid();
     }
 
     readStats(e: IReadStats) {
@@ -118,11 +122,12 @@ export default class  {
     }
 
     header(e: IHeader[]) {
-
+        this.results.addHeader(e);
     }
 
     row(e: Array<string>) {
-        console.log(e);
+        this.results.addRow(++this.rowNumber,  e);
+        this.footerRows.html(`${this.rowNumber} rows`);
     }
 
     end () {
@@ -136,6 +141,10 @@ export default class  {
         } else if (this.error) {
             this.footerTime.html(`🕛 ${this.error.time}`).attr("title", `execution time: ${this.error.time}`);
         }
+    }
+
+    adjustGridHeight() {
+        this.results.adjustGridHeight();
     }
 
     private activateByTab(tab: Element) {

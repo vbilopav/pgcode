@@ -8,6 +8,19 @@ using Pgcode.Protos;
 
 namespace Pgcode.Connection
 {
+    /*
+    declare _my_cursor scroll cursor with hold for select * from rental;
+
+    move forward all in _my_cursor; -- rowcount
+
+    move absolute 0 in _my_cursor;
+
+    fetch 10 in _my_cursor;
+    fetch 10 in _my_cursor;
+
+    close _my_cursor;
+    */
+
     public static class ExecuteExtension
     {
         public static async IAsyncEnumerable<ExecuteReply> ExecuteAsync(this WorkspaceConnection ws, 
@@ -26,7 +39,7 @@ namespace Pgcode.Connection
             var executionTime = stopwatch.Elapsed;
             ws?.Proxy?.SendAsync($"stats-execute-{request.Id}", new
             {
-                time = executionTime.ToString("hh':'mm':'ss':'fff"), 
+                time = executionTime.Format(), 
                 rows = reader.RecordsAffected
             }, cancellationToken);
             var headerRow = false;

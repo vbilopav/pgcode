@@ -142,9 +142,18 @@ define(["require", "exports", "app/ui/content/editor", "app/controls/splitter", 
                 maxDelta: 100,
                 min: 25,
                 events: {
-                    docked: () => { editor.layout(); },
-                    undocked: () => { editor.layout(); },
-                    changed: () => { editor.layout(); }
+                    docked: () => {
+                        editor.layout();
+                        results.adjustGridHeight();
+                    },
+                    undocked: () => {
+                        editor.layout();
+                        results.adjustGridHeight();
+                    },
+                    changed: () => {
+                        editor.layout();
+                        results.adjustGridHeight();
+                    }
                 },
                 storage: {
                     get position() {

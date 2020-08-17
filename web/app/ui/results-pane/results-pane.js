@@ -25,8 +25,8 @@ define(["require", "exports", "app/api", "app/ui/results-pane/results", "app/ui/
                 </div>
             </div>
             <div>
-                <div id="results"></div>
-                <div id="messages"></div>
+                <div id="results" class="pane"></div>
+                <div id="messages" class="pane"></div>
             </div>
             <div>
                 <div>
@@ -45,8 +45,8 @@ define(["require", "exports", "app/api", "app/ui/results-pane/results", "app/ui/
             this.footerMsg = this.element.children[2].children[0].children[0];
             this.footerTime = this.element.children[2].children[1].children[0];
             this.footerRows = this.element.children[2].children[2].children[0];
-            new results_1.default(id, this.panes[0], data);
-            new messages_1.default(id, this.panes[1], data);
+            this.results = new results_1.default(this.panes[0]);
+            new messages_1.default(this.panes[1]);
             this.activateByTab(this.tabs[0]);
             this.status = Status.Disconnected;
         }
@@ -76,6 +76,8 @@ define(["require", "exports", "app/api", "app/ui/results-pane/results", "app/ui/
             this.error = null;
             this.readStatsVal = null;
             this.exeStatsVal = null;
+            this.rowNumber = 0;
+            this.results.initGrid();
         }
         readStats(e) {
             console.log(e);
@@ -92,9 +94,11 @@ define(["require", "exports", "app/api", "app/ui/results-pane/results", "app/ui/
             }
         }
         header(e) {
+            this.results.addHeader(e);
         }
         row(e) {
-            console.log(e);
+            this.results.addRow(++this.rowNumber, e);
+            this.footerRows.html(`${this.rowNumber} rows`);
         }
         end() {
             if (this.error) {
@@ -109,6 +113,9 @@ define(["require", "exports", "app/api", "app/ui/results-pane/results", "app/ui/
             else if (this.error) {
                 this.footerTime.html(`🕛 ${this.error.time}`).attr("title", `execution time: ${this.error.time}`);
             }
+        }
+        adjustGridHeight() {
+            this.results.adjustGridHeight();
         }
         activateByTab(tab) {
             for (let current of this.tabs) {
