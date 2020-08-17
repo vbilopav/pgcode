@@ -144,15 +144,15 @@ define(["require", "exports", "app/ui/content/editor", "app/controls/splitter", 
                 events: {
                     docked: () => {
                         editor.layout();
-                        results.adjustGridHeight();
+                        results.adjustGrid();
                     },
                     undocked: () => {
                         editor.layout();
-                        results.adjustGridHeight();
+                        results.adjustGrid();
                     },
                     changed: () => {
                         editor.layout();
-                        results.adjustGridHeight();
+                        results.adjustGrid();
                     }
                 },
                 storage: {

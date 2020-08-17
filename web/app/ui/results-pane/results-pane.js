@@ -114,8 +114,8 @@ define(["require", "exports", "app/api", "app/ui/results-pane/results", "app/ui/
                 this.footerTime.html(`🕛 ${this.error.time}`).attr("title", `execution time: ${this.error.time}`);
             }
         }
-        adjustGridHeight() {
-            this.results.adjustGridHeight();
+        adjustGrid() {
+            this.results.adjustGrid();
         }
         activateByTab(tab) {
             for (let current of this.tabs) {

@@ -243,3 +243,11 @@ $grid-headers-background-color: default;
 @if $theme == "light" {
     $grid-headers-background-color: #333333;
 }
+
+$grid-mark-color: default;
+@if $theme == "dark" {
+    $grid-mark-color: #f7dcb8;
+} 
+@if $theme == "light" {
+    $grid-mark-color: #f7dcb8;
+}

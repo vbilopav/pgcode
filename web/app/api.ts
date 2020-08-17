@@ -308,7 +308,7 @@ export const execute = (connection: string, schema: string, id: string, content:
     const grpcStream = grpc.serverStreaming({
         service: "/api.ExecuteService/Execute",
         request: [GrpcType.String, GrpcType.String, GrpcType.String, GrpcType.String],
-        reply: [{data: [GrpcType.String]}, {nullIndexes: [GrpcType.PackedUint32]}]
+        reply: [{data: [GrpcType.String]}, {nullIndexes: GrpcType.PackedUint32}]
     }, connection, schema, id, content, _connectionsHub.connection.connectionId);
 
     _connectionsHub.off(messageName);

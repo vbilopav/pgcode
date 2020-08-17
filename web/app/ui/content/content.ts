@@ -187,15 +187,15 @@ export default class Content {
             events: {
                 docked: () => {
                     editor.layout();
-                    results.adjustGridHeight();
+                    results.adjustGrid();
                 },
                 undocked: () => {
                     editor.layout();
-                    results.adjustGridHeight();
+                    results.adjustGrid();
                 },
                 changed: () => {
                     editor.layout();
-                    results.adjustGridHeight();
+                    results.adjustGrid();
                 }
             },
             storage: {

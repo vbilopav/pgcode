@@ -666,25 +666,39 @@ body > div.container {
 
 #results.pane {
   height: 100%; }
-  #results.pane > div.table {
-    overflow-y: scroll; }
-    #results.pane > div.table > div.th {
-      display: table-row; }
-    #results.pane > div.table > div.tr {
-      display: table-row; }
-    #results.pane > div.table > div.th > div.td {
-      display: table-cell;
-      background-color: #333333;
-      padding: 3px;
-      border: 2px #8e8e8e outset;
-      position: sticky;
-      top: 0; }
-    #results.pane > div.table > div.tr > div.td {
-      display: table-cell;
-      padding: 3px;
-      border: 2px #8e8e8e outset; }
-    #results.pane > div.table > div.tr > div.td.th {
-      background-color: #333333; }
+  #results.pane > div.table > div.th {
+    display: table-row; }
+  #results.pane > div.table > div.tr {
+    display: table-row; }
+  #results.pane > div.table > div.th > div.td {
+    background-color: #333333;
+    position: sticky;
+    top: 0; }
+    #results.pane > div.table > div.th > div.td > div:first-child {
+      font-weight: bold; }
+    #results.pane > div.table > div.th > div.td > div:last-child {
+      font-size: 0.9em; }
+  #results.pane > div.table > div.th > div.td,
+  #results.pane > div.table > div.tr > div.td {
+    display: table-cell;
+    padding: 5px;
+    border: 1px #8e8e8e outset;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    max-width: 350px;
+    user-select: none; }
+  #results.pane > div.table > div.th > div.td:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 1; }
+  #results.pane > div.table > div.tr > div.td.null {
+    color: #f7dcb8; }
+  #results.pane > div.table > div.tr > div.td.th {
+    background-color: #333333;
+    position: sticky;
+    left: 0;
+    font-weight: bold; }
   #results.pane > div.table::-webkit-scrollbar {
     width: 16px; }
   #results.pane > div.table::-webkit-scrollbar-track {
@@ -693,3 +707,7 @@ body > div.container {
   #results.pane > div.table::-webkit-scrollbar-thumb {
     box-shadow: inset 0 0 5px #7a7a7a;
     border-radius: 2px; }
+  #results.pane > div.table::-webkit-scrollbar-button {
+    display: none; }
+  #results.pane > div.table::-webkit-scrollbar-corner {
+    display: none; }

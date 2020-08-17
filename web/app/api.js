@@ -172,7 +172,7 @@ define(["require", "exports", "app/_sys/pubsub", "libs/signalr/signalr.min.js", 
         const grpcStream = grpc.serverStreaming({
             service: "/api.ExecuteService/Execute",
             request: [grpc_service_1.GrpcType.String, grpc_service_1.GrpcType.String, grpc_service_1.GrpcType.String, grpc_service_1.GrpcType.String],
-            reply: [{ data: [grpc_service_1.GrpcType.String] }, { nullIndexes: [grpc_service_1.GrpcType.PackedUint32] }]
+            reply: [{ data: [grpc_service_1.GrpcType.String] }, { nullIndexes: grpc_service_1.GrpcType.PackedUint32 }]
         }, connection, schema, id, content, _connectionsHub.connection.connectionId);
         _connectionsHub.off(messageName);
         _connectionsHub.off(statsExecute);

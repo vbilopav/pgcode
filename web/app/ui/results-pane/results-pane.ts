@@ -143,8 +143,8 @@ export default class  {
         }
     }
 
-    adjustGridHeight() {
-        this.results.adjustGridHeight();
+    adjustGrid() {
+        this.results.adjustGrid();
     }
 
     private activateByTab(tab: Element) {

@@ -193,7 +193,7 @@ type ReplyType =
     Array<GrpcType | 
     Array<GrpcType>> | 
     Array<Record<string, GrpcType | Array<Record<string, GrpcType>>>> |
-    Array<Record<string, Array<GrpcType>>>;
+    Array<Record<string, Array<GrpcType> | GrpcType>>;
 
 type ResultType = Record<number | string, any> | GrpcStatus;
 
