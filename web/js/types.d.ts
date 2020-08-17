@@ -149,7 +149,8 @@ interface NodeList {
      * - If `property` is only parameter, returns value of instance css property (does not apply to `NodeList` and `HTMLModelArray`).
      * - If `value` is present, sets instance css property to that value and returns same instance.
      */
-    css(property: string, value?: string): String | NodeList
+    css(property: string): String
+    css(property: string, value?: string): NodeList
     /**
      * - If `key` is only parameter, returns value of instance of data attribute (does not apply to `NodeList` and `HTMLModelArray`).
      * - If `value` is present, sets instance css property to that value and returns same instance.

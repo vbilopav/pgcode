@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Server.IIS.Core;
 using Microsoft.AspNetCore.SignalR;
 using Pgcode.Middleware;
 
@@ -19,7 +20,7 @@ namespace Pgcode.Connection
             throw new ApiException($"Unknown connection name {connectionName}", 404);
         }
 
-        public async ValueTask AddWorkspaceConnectionAsync(WorkspaceKey wsKey, string connectionName, string schema, IClientProxy proxy)
+        public async ValueTask AddWsConnectionAsync(WorkspaceKey wsKey, string connectionName, string schema, IClientProxy proxy)
         {
             var key = wsKey.GetKey();
             if (!WorkspaceConnections.ContainsKey(key))
@@ -29,6 +30,8 @@ namespace Pgcode.Connection
                 await connection.OpenAsync();
                 WorkspaceConnections.TryAdd(key, new WorkspaceConnection
                 {
+                    Id = wsKey.Id,
+                    ConnectionId = wsKey.ConnectionId,
                     Connection = connection,
                     Name = connectionName,
                     Schema = schema,
@@ -41,17 +44,31 @@ namespace Pgcode.Connection
             }
         }
 
-        public WorkspaceConnection GetWorkspaceConnection(WorkspaceKey wsKey)
+        public WorkspaceConnection GetWsConnection(WorkspaceKey wsKey)
         {
             return WorkspaceConnections.TryGetValue(wsKey.GetKey(), out var ws) ? ws : null;
         }
 
-        public async ValueTask RemoveWorkspaceConnectionAsync(WorkspaceKey wsKey)
+        public async ValueTask RemoveWsConnectionAsync(WorkspaceKey wsKey)
         {
             if (WorkspaceConnections.TryRemove(wsKey.GetKey(), out var ws))
             {
                 await ws.Connection.CloseAsync();
                 ws.Connection.Dispose();
+            }
+        }
+
+        public async ValueTask RemoveWsByConnectionIdAsync(string connectionId)
+        {
+            foreach (var (key, ws) in WorkspaceConnections)
+            {
+                if (ws.ConnectionId == connectionId)
+                {
+                    await ws.Connection.CloseAsync();
+                    ws.Connection.Dispose();
+                    WorkspaceConnections.Remove(key, out var deleted);
+                    return;
+                }
             }
         }
 

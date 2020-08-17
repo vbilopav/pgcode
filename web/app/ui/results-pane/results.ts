@@ -7,6 +7,9 @@ export default class  {
     private last: Element;
     private first: Element;
 
+    private toMove: Element;
+    private moving = false;
+
     constructor(element: Element) {
         this.element = element;
         this.table = null;
@@ -17,18 +20,24 @@ export default class  {
         this.table = document.createElement("div").appendElementTo(this.element).addClass("table");
         this.last = null;
         this.first = null;
+        window
+            .on("mousedown", (e:MouseEvent)=>this.mousedown(e))
+            .on("mouseup", (e:MouseEvent)=>this.mouseup(e))
+            .on("mousemove", (e:MouseEvent)=>this.mousemove(e));
     }
 
     addHeader(header: IHeader[]) {
         const th = document.createElement("div").appendElementTo(this.table).addClass("th");
         document.createElement("div").appendElementTo(th).addClass("td");
+        let i = 1;
         for(let item of header) {
             document
                 .createElement("div")
                 .html(`<div>${item.name}</div><div>${item.type}</div>`)
                 .appendElementTo(th)
                 .addClass("td")
-                .on("mousemove", (e: MouseEvent)=>this.cellHover(e));
+                .dataAttr("i", i++)
+                .on("mousemove", (e: MouseEvent)=>this.cellMousemove(e));
         }
     }
 
@@ -38,13 +47,15 @@ export default class  {
             this.first = tr;
         }
         this.last = tr;
-        document.createElement("div").html(`${rn}`).appendElementTo(tr).addClass("td").addClass("th");;
+        document.createElement("div").html(`${rn}`).appendElementTo(tr).addClass("td").addClass("th");
+        let i = 1;
         for(let item of row) {
             let td = document
                 .createElement("div")
                 .html(`${(item == null? "NULL" : item)}`)
                 .appendElementTo(tr)
-                .addClass("td");
+                .addClass("td")
+                .addClass(`td${i++}`);
             if (item == null) {
                 td.addClass("null");
             }
@@ -72,15 +83,44 @@ export default class  {
         }
     }
 
-    private cellHover(e: any) {
-        const cell = e.currentTarget;
+    private cellMousemove(e: MouseEvent) {
+        if (this.moving) {
+            return;
+        }
+        const cell = e.currentTarget as Element;
         const rect = cell.getBoundingClientRect();
-        if (e.offsetX < 4) {
-            cell.css("cursor", "col-resize");
-        } else if (e.offsetX > rect.width - 4) {
-            cell.css("cursor", "col-resize");
+
+        if (e.offsetX < 3) {
+            document.body.css("cursor", "col-resize");
+            this.toMove = cell.previousElementSibling;
+        } else if (e.offsetX > rect.width - 3) {
+            document.body.css("cursor", "col-resize");
+            this.toMove = cell;
         } else {
-            cell.css("cursor", "default");
+            document.body.css("cursor", "default");
+            this.toMove = null;
         }
     }
+
+    private mousedown(e: MouseEvent) {
+        if (this.toMove) {
+            this.moving = true;
+        }
+    }
+
+    private mouseup(e: MouseEvent) {
+        this.moving = false;
+        document.body.css("cursor", "default");
+    }
+
+    private mousemove(e: MouseEvent) {
+        if (!this.moving) {
+            return;
+        }
+        const rect = this.toMove.getBoundingClientRect() as DOMRect;
+        const w = (e.clientX - rect.x) + "px";
+        this.toMove.css("min-width", w).css("max-width", w);
+        this.table.findAll(`div.tr>div.td${this.toMove.dataAttr("i")}`).css("min-width", w).css("max-width", w);
+    }
+
 }

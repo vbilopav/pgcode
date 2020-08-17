@@ -26,7 +26,7 @@ namespace Pgcode.Api
             var ctx = context.GetHttpContext();
             _cookieMiddleware.ProcessCookieAndAddIdentity(ctx);
 
-            var ws = _connectionManager.GetWorkspaceConnection(
+            var ws = _connectionManager.GetWsConnection(
                 new WorkspaceKey
                 {
                     Id = request.Id,

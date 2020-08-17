@@ -673,7 +673,8 @@ body > div.container {
   #results.pane > div.table > div.th > div.td {
     background-color: #333333;
     position: sticky;
-    top: 0; }
+    top: 0;
+    /*max-width: 350px;*/ }
     #results.pane > div.table > div.th > div.td > div:first-child {
       font-weight: bold; }
     #results.pane > div.table > div.th > div.td > div:last-child {
@@ -686,7 +687,8 @@ body > div.container {
     text-overflow: ellipsis;
     white-space: nowrap;
     overflow: hidden;
-    max-width: 350px;
+    /*max-width: 350px;*/
+    min-width: 10px;
     user-select: none; }
   #results.pane > div.table > div.th > div.td:first-child {
     position: sticky;

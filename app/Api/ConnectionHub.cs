@@ -113,7 +113,7 @@ namespace Pgcode.Api
         public async ValueTask InitConnection(string connection, string schema, string id)
         {
             var user = GetIdentityAndLogRequest();
-            await _connectionManager.AddWorkspaceConnectionAsync(new WorkspaceKey
+            await _connectionManager.AddWsConnectionAsync(new WorkspaceKey
             {
                 Id = id,
                 UserName = user.Name,
@@ -124,12 +124,18 @@ namespace Pgcode.Api
         public async ValueTask DisposeConnection(string id)
         {
             var user = GetIdentityAndLogRequest();
-            await _connectionManager.RemoveWorkspaceConnectionAsync(new WorkspaceKey
+            await _connectionManager.RemoveWsConnectionAsync(new WorkspaceKey
             {
                 Id = id,
                 UserName = user.Name,
                 ConnectionId = this.Context.ConnectionId,
             });
+        }
+
+        public override async Task OnDisconnectedAsync(Exception exception)
+        {
+            await _connectionManager.RemoveWsByConnectionIdAsync(this.Context.ConnectionId);
+            await base.OnDisconnectedAsync(exception);
         }
 
         private IIdentity GetIdentityAndLogRequest()
