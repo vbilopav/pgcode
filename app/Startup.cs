@@ -28,6 +28,7 @@ namespace Pgcode
             {
                 endpoints.MapGrpcService<ExecuteService>().EnableGrpcWeb();
                 endpoints.MapHub<ConnectionsHub>("/connectionsHub");
+                endpoints.MapHub<ExecuteHub>("/executeHub");
             });
 
             IMiddleware cookieMiddleware = new CookieMiddleware();

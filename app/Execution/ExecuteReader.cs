@@ -1,49 +1,55 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using Microsoft.AspNetCore.SignalR;
+using Norm.Extensions;
+using Npgsql;
+using Pgcode.Connection;
 using Pgcode.Protos;
 
-namespace Pgcode.Connection
+namespace Pgcode.Execution
 {
-    /*
-    declare _my_cursor scroll cursor with hold for select * from rental;
-
-    move forward all in _my_cursor; -- rowcount
-
-    move absolute 0 in _my_cursor;
-
-    fetch 10 in _my_cursor;
-    fetch 10 in _my_cursor;
-
-    close _my_cursor;
-    */
-
-    public static class ExecuteExtension
+    public static partial class ExecuteExtension
     {
-        public static async IAsyncEnumerable<ExecuteReply> ExecuteAsync(this WorkspaceConnection ws, 
-            ExecuteRequest request, 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Security", "CA2100:Review SQL queries for security vulnerabilities", Justification = "<Pending>")]
+        public static async IAsyncEnumerable<ExecuteReply> ExecuteReaderAsync(
+            this WorkspaceConnection ws, 
+            ExecuteRequest request,
+            string content,
             [EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
             await using var cmd = ws.Connection.CreateCommand();
-#pragma warning disable CA2100
-            cmd.CommandText = request.Content;
-#pragma warning restore CA2100
+            if (ws.Cursor != null)
+            {
+                cmd.CommandText = $"close \"{ws.Cursor}\"";
+                await cmd.ExecuteNonQueryAsync(cancellationToken);
+            }
 
+            var cursor = ws.SetCursorName();
+      
             var stopwatch = new Stopwatch();
             stopwatch.Start();
-            await using var reader = await cmd.ExecuteReaderAsync(cancellationToken);
+            cmd.CommandText = $"declare \"{cursor}\" scroll cursor with hold for {content}";
+            await cmd.ExecuteNonQueryAsync(cancellationToken);
+            cmd.CommandText = $"move forward all in \"{cursor}\"";
+            var rowsAffected = await cmd.ExecuteNonQueryAsync(cancellationToken);
             stopwatch.Stop();
+
             var executionTime = stopwatch.Elapsed;
-            ws?.Proxy?.SendAsync($"stats-execute-{request.Id}", new
-            {
-                time = executionTime.Format(), 
-                rows = reader.RecordsAffected
-            }, cancellationToken);
+            ws?.Proxy?.SendExecStats(request.Id, executionTime, rowsAffected, cancellationToken);
             var headerRow = false;
+
             stopwatch.Start();
+
+            cmd.CommandText = $"move absolute 0 in \"{cursor}\"";
+            await cmd.ExecuteNonQueryAsync(cancellationToken);
+            cmd.CommandText = $"fetch {Program.Settings.InitialReadSize} in \"{cursor}\"";
+
+            await using var reader = await cmd.ExecuteReaderAsync(cancellationToken);
+
             while (await reader.ReadAsync(cancellationToken))
             {
                 var count = reader.FieldCount;
@@ -72,14 +78,9 @@ namespace Pgcode.Connection
                 }
                 yield return reply;
             }
-            
             stopwatch.Stop();
-            await ws.Proxy.SendAsync($"stats-read-{request.Id}", new
-            {
-                read = stopwatch.Elapsed.Format(),
-                execution = executionTime.Format(),
-                total = (executionTime + stopwatch.Elapsed).Format()
-            }, cancellationToken);
+
+            ws?.Proxy?.SendReadStats(request.Id, stopwatch.Elapsed, executionTime, cancellationToken);
             await reader.CloseAsync();
         }
     }

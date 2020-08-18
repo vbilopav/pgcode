@@ -127,7 +127,7 @@ export default class  {
 
     row(e: Array<string>) {
         this.results.addRow(++this.rowNumber,  e);
-        this.footerRows.html(`${this.rowNumber} rows`);
+        //this.footerRows.html(`${this.rowNumber} rows`);
     }
 
     end () {
@@ -141,6 +141,14 @@ export default class  {
         } else if (this.error) {
             this.footerTime.html(`🕛 ${this.error.time}`).attr("title", `execution time: ${this.error.time}`);
         }
+        if (this.exeStatsVal) {
+            if (this.exeStatsVal.rows == -1) {
+                this.footerRows.html(` - `);
+            } else {
+                this.footerRows.html(`${this.exeStatsVal.rows} rows`);
+            }
+        }
+        this.adjustGrid();
     }
 
     adjustGrid() {

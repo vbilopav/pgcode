@@ -20,18 +20,17 @@ namespace Pgcode.Connection
             throw new ApiException($"Unknown connection name {connectionName}", 404);
         }
 
-        public async ValueTask AddWsConnectionAsync(WorkspaceKey wsKey, string connectionName, string schema, IClientProxy proxy)
+        public async ValueTask AddWsConnectionAsync(WorkspaceKey key, string connectionName, string schema, IClientProxy proxy)
         {
-            var key = wsKey.GetKey();
-            if (!WorkspaceConnections.ContainsKey(key))
+            if (!WorkspaceConnections.ContainsKey(key.ConnectionId))
             {
                 var data = GetConnectionDataByName(connectionName);
                 var connection = data.Connection.CloneWith(data.ConnectionString);
                 await connection.OpenAsync();
-                WorkspaceConnections.TryAdd(key, new WorkspaceConnection
+                WorkspaceConnections.TryAdd(key.ConnectionId, new WorkspaceConnection
                 {
-                    Id = wsKey.Id,
-                    ConnectionId = wsKey.ConnectionId,
+                    Id = key.Id,
+                    ConnectionId = key.ConnectionId,
                     Connection = connection,
                     Name = connectionName,
                     Schema = schema,
@@ -40,34 +39,28 @@ namespace Pgcode.Connection
             }
             else
             {
-                WorkspaceConnections[key].Proxy = proxy;
+                WorkspaceConnections[key.ConnectionId].Proxy = proxy;
             }
         }
 
-        public WorkspaceConnection GetWsConnection(WorkspaceKey wsKey)
+        public WorkspaceConnection GetWsConnection(WorkspaceKey key)
         {
-            return WorkspaceConnections.TryGetValue(wsKey.GetKey(), out var ws) ? ws : null;
+            return WorkspaceConnections.TryGetValue(key.ConnectionId, out var ws) ? ws : null;
         }
 
-        public async ValueTask RemoveWsConnectionAsync(WorkspaceKey wsKey)
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Security", "CA2100:Review SQL queries for security vulnerabilities", Justification = "<Pending>")]
+        public async ValueTask RemoveWsConnectionAsync(string connectionId)
         {
-            if (WorkspaceConnections.TryRemove(wsKey.GetKey(), out var ws))
+            if (WorkspaceConnections.TryRemove(connectionId, out var ws))
             {
-                await ws.Connection.CloseAsync();
-                ws.Connection.Dispose();
-            }
-        }
-
-        public async ValueTask RemoveWsByConnectionIdAsync(string connectionId)
-        {
-            foreach (var (key, ws) in WorkspaceConnections)
-            {
-                if (ws.ConnectionId == connectionId)
+                try
+                {
+                    await ws.CloseCursorIfExists();
+                }
+                finally
                 {
                     await ws.Connection.CloseAsync();
                     ws.Connection.Dispose();
-                    WorkspaceConnections.Remove(key, out var deleted);
-                    return;
                 }
             }
         }

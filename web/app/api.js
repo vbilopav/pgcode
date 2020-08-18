@@ -151,19 +151,59 @@ define(["require", "exports", "app/_sys/pubsub", "libs/signalr/signalr.min.js", 
     exports.checkItemExists = (connection, schema, key, id) => {
         return _runConnectionsHub(hub => hub.invoke("CheckItemExists", connection, schema, key, id));
     };
-    exports.initConnection = (connection, schema, id) => {
-        return _runConnectionsHub(hub => hub.invoke("InitConnection", connection, schema, id));
-    };
-    exports.disposeConnection = (id) => {
-        return _runConnectionsHub(hub => hub.invoke("DisposeConnection", id));
-    };
-    ;
-    ;
-    exports.execute = (connection, schema, id, content, stream) => {
-        if (_connectionsHub.state != signalR.HubConnectionState.Connected || _connectionsHub.connectionId == undefined) {
-            if (stream["reconnect"]) {
-                stream.reconnect();
+    const _createExecuteHub = () => new signalR
+        .HubConnectionBuilder()
+        .withUrl("/executeHub")
+        .withAutomaticReconnect({ nextRetryDelayInMilliseconds: () => 250 })
+        .build();
+    const _executeHubs = {};
+    const _getExecuteHub = async (id, start = false) => {
+        let hub = _executeHubs[id];
+        if (!hub) {
+            hub = _createExecuteHub();
+            _executeHubs[id] = hub;
+        }
+        if (start) {
+            if (hub.state != signalR.HubConnectionState.Connected) {
+                await hub.start();
             }
+        }
+        return hub;
+    };
+    exports.initConnection = async (connection, schema, id) => {
+        const hub = await _getExecuteHub(id, true);
+        try {
+            return { ok: true, status: 200, data: hub.invoke("InitConnection", connection, schema, id) };
+        }
+        catch (error) {
+            console.error(error);
+            return { ok: false, status: 500, data: null };
+        }
+    };
+    exports.disposeConnection = async (id) => {
+        const hub = await _getExecuteHub(id, true);
+        try {
+            const result = { ok: true, status: 200, data: hub.invoke("DisposeConnection") };
+            await hub.stop();
+            delete _executeHubs[id];
+            return result;
+        }
+        catch (error) {
+            console.error(error);
+            return { ok: false, status: 500, data: null };
+        }
+    };
+    ;
+    ;
+    exports.execute = async (connection, schema, id, content, stream) => {
+        const hub = await _getExecuteHub(id, false);
+        const callStreamMethod = (method, ...args) => {
+            if (stream[method]) {
+                stream[method](...args);
+            }
+        };
+        if (hub.state != signalR.HubConnectionState.Connected || hub.connectionId == undefined) {
+            callStreamMethod("reconnect");
             return;
         }
         const messageName = `message-${id}`;
@@ -173,25 +213,13 @@ define(["require", "exports", "app/_sys/pubsub", "libs/signalr/signalr.min.js", 
             service: "/api.ExecuteService/Execute",
             request: [grpc_service_1.GrpcType.String, grpc_service_1.GrpcType.String, grpc_service_1.GrpcType.String, grpc_service_1.GrpcType.String],
             reply: [{ data: [grpc_service_1.GrpcType.String] }, { nullIndexes: grpc_service_1.GrpcType.PackedUint32 }]
-        }, connection, schema, id, content, _connectionsHub.connection.connectionId);
-        _connectionsHub.off(messageName);
-        _connectionsHub.off(statsExecute);
-        _connectionsHub.off(statsRead);
-        _connectionsHub.on(messageName, (msg) => {
-            if (stream["message"]) {
-                stream.message(msg);
-            }
-        });
-        _connectionsHub.on(statsExecute, (msg) => {
-            if (stream["executeStats"]) {
-                stream.executeStats(msg);
-            }
-        });
-        _connectionsHub.on(statsRead, (msg) => {
-            if (stream["readStats"]) {
-                stream.readStats(msg);
-            }
-        });
+        }, connection, schema, id, content, hub.connection.connectionId);
+        hub.off(messageName);
+        hub.off(statsExecute);
+        hub.off(statsRead);
+        hub.on(messageName, (msg) => callStreamMethod("message", msg));
+        hub.on(statsExecute, (msg) => callStreamMethod("executeStats", msg));
+        hub.on(statsRead, (msg) => callStreamMethod("readStats", msg));
         let header = false;
         grpcStream
             .on("error", e => {
@@ -199,17 +227,11 @@ define(["require", "exports", "app/_sys/pubsub", "libs/signalr/signalr.min.js", 
                 stream.reconnect();
             }
             else {
-                if (stream["error"]) {
-                    stream.error(e);
-                }
+                callStreamMethod("error", e);
                 pubsub_1.publish(pubsub_1.SET_APP_STATUS, AppStatus.ERROR, e.message);
             }
         })
-            .on("status", e => {
-            if (stream["status"]) {
-                stream.status(e);
-            }
-        })
+            .on("status", e => callStreamMethod("status", e))
             .on("data", e => {
             if (!header) {
                 if (stream["header"]) {
@@ -234,16 +256,7 @@ define(["require", "exports", "app/_sys/pubsub", "libs/signalr/signalr.min.js", 
                 stream.row(row.data);
             }
         })
-            .on("end", () => {
-            setTimeout(() => {
-                _connectionsHub.off(messageName);
-                _connectionsHub.off(statsRead);
-                _connectionsHub.off(statsExecute);
-                if (stream["end"]) {
-                    stream.end();
-                }
-            }, 0);
-        });
+            .on("end", () => callStreamMethod("end"));
     };
 });
 //# sourceMappingURL=api.js.map

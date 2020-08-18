@@ -5,6 +5,7 @@ using Grpc.Core;
 using Microsoft.AspNetCore.SignalR;
 using Npgsql;
 using Pgcode.Connection;
+using Pgcode.Execution;
 using Pgcode.Middleware;
 using Pgcode.Protos;
 
@@ -43,7 +44,7 @@ namespace Pgcode.Api
             var messageName = $"message-{request.Id}";
             void NoticeHandler(object sender, NpgsqlNoticeEventArgs e)
             {
-                ws.Proxy?.SendAsync(messageName, new Message(e.Notice), cancellationToken: context.CancellationToken);
+                ws.Proxy?.SendAsync(messageName, new Message(e.Notice), context.CancellationToken);
             }
             ws.Connection.Notice += NoticeHandler;
             
@@ -51,15 +52,23 @@ namespace Pgcode.Api
             stopwatch.Start();
             try
             {
-                await foreach (var reply in ws.ExecuteAsync(request, context.CancellationToken))
+                var handler = new ExecuteHandler(ws, request);
+                if (handler.HasExecute)
                 {
-                    await responseStream.WriteAsync(reply);
+                    await handler.ExecuteAsync(context.CancellationToken);
+                }
+                if (handler.HasReads)
+                {
+                    await foreach (var reply in handler.ReadAsync(context.CancellationToken))
+                    {
+                        await responseStream.WriteAsync(reply);
+                    }
                 }
             }
             catch (PostgresException e)
             {
                 stopwatch.Stop();
-                ws?.Proxy?.SendAsync(messageName, new Message(e, stopwatch.Elapsed), cancellationToken: context.CancellationToken);
+                ws?.Proxy?.SendAsync(messageName, new Message(e, stopwatch.Elapsed), context.CancellationToken);
             }
             stopwatch.Stop();
             ws.Connection.Notice -= NoticeHandler;

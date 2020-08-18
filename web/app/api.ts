@@ -234,12 +234,51 @@ export const checkItemExists = (connection: string, schema: string, key: string,
     return _runConnectionsHub<boolean>(hub => hub.invoke("CheckItemExists", connection, schema, key, id));
 }
 
-export const initConnection = (connection: string, schema: string, id: string) => {
-    return _runConnectionsHub<void>(hub => hub.invoke("InitConnection", connection, schema, id));
+
+
+const _createExecuteHub = () => new signalR
+    .HubConnectionBuilder()
+    .withUrl("/executeHub")
+    .withAutomaticReconnect({nextRetryDelayInMilliseconds: () => 250})
+    .build();
+
+const _executeHubs: Record<string, any> = {};
+
+const _getExecuteHub = async (id: string, start = false) => {
+    let hub = _executeHubs[id];
+    if (!hub) {
+        hub = _createExecuteHub();
+        _executeHubs[id] = hub;
+    }
+    if (start) {
+        if (hub.state != signalR.HubConnectionState.Connected) {
+            await hub.start();
+        }
+    }
+    return hub;
 }
 
-export const disposeConnection = (id: string) => {
-    return _runConnectionsHub<void>(hub => hub.invoke("DisposeConnection", id));
+export const initConnection = async (connection: string, schema: string, id: string) => {
+    const hub = await _getExecuteHub(id, true);
+    try {
+        return {ok: true, status: 200, data: hub.invoke("InitConnection", connection, schema, id)} 
+    } catch (error) {
+        console.error(error);
+        return {ok: false, status: 500, data: null}
+    }
+}
+
+export const disposeConnection = async (id: string) => {
+    const hub = await _getExecuteHub(id, true);
+    try {
+        const result = {ok: true, status: 200, data: hub.invoke("DisposeConnection")};
+        await hub.stop();
+        delete _executeHubs[id];
+        return result;
+    } catch (error) {
+        console.error(error);
+        return {ok: false, status: 500, data: null}
+    }
 }
 
 interface IRow {
@@ -295,11 +334,16 @@ export interface IExecutionStream {
     end: () => void;
 }
 
-export const execute = (connection: string, schema: string, id: string, content: string, stream: IExecutionStream) => {
-    if (_connectionsHub.state != signalR.HubConnectionState.Connected || _connectionsHub.connectionId == undefined) {
-        if (stream["reconnect"]) {
-            stream.reconnect();
+export const execute = async (connection: string, schema: string, id: string, content: string, stream: IExecutionStream) => {
+    const hub = await _getExecuteHub(id, false);
+    const callStreamMethod = (method: string, ...args: any[]) => {
+        if (stream[method]) {
+            stream[method](...args);
         }
+    };
+
+    if (hub.state != signalR.HubConnectionState.Connected || hub.connectionId == undefined) {
+        callStreamMethod("reconnect");
         return;
     }
     const messageName = `message-${id}`;
@@ -309,26 +353,15 @@ export const execute = (connection: string, schema: string, id: string, content:
         service: "/api.ExecuteService/Execute",
         request: [GrpcType.String, GrpcType.String, GrpcType.String, GrpcType.String],
         reply: [{data: [GrpcType.String]}, {nullIndexes: GrpcType.PackedUint32}]
-    }, connection, schema, id, content, _connectionsHub.connection.connectionId);
+    }, connection, schema, id, content, hub.connection.connectionId);
 
-    _connectionsHub.off(messageName);
-    _connectionsHub.off(statsExecute);
-    _connectionsHub.off(statsRead);
-    _connectionsHub.on(messageName, (msg: INotice) => {
-        if (stream["message"]) {
-            stream.message(msg);
-        }
-    });
-    _connectionsHub.on(statsExecute, (msg: IExecuteStats) => {
-        if (stream["executeStats"]) {
-            stream.executeStats(msg);
-        }
-    });
-    _connectionsHub.on(statsRead, (msg: IReadStats) => {
-        if (stream["readStats"]) {
-            stream.readStats(msg);
-        }
-    });
+    hub.off(messageName);
+    hub.off(statsExecute);
+    hub.off(statsRead);
+
+    hub.on(messageName, (msg: INotice) => callStreamMethod("message", msg));
+    hub.on(statsExecute, (msg: IExecuteStats) => callStreamMethod("executeStats", msg));
+    hub.on(statsRead, (msg: IReadStats) => callStreamMethod("readStats", msg)); 
 
     let header = false;
     grpcStream
@@ -336,17 +369,11 @@ export const execute = (connection: string, schema: string, id: string, content:
             if ((e as GrpcStatus).code == GrpcErrorCode.NotFound && (e as GrpcStatus).message == "connection not initialized" && stream["reconnect"]) {
                 stream.reconnect();
             } else {
-                if (stream["error"]) {
-                    stream.error(e);
-                }
+                callStreamMethod("error", e);
                 publish(SET_APP_STATUS, AppStatus.ERROR, (e as GrpcStatus).message);
             }
         })
-        .on("status", e => {
-            if (stream["status"]) {
-                stream.status(e);
-            }
-        })
+        .on("status", e => callStreamMethod("status", e))
         .on("data", e => {
             if (!header) {
                 if (stream["header"]) {
@@ -369,14 +396,5 @@ export const execute = (connection: string, schema: string, id: string, content:
                 stream.row(row.data);
             }
         })
-        .on("end", () => {
-            setTimeout(() => {
-                _connectionsHub.off(messageName);
-                _connectionsHub.off(statsRead);
-                _connectionsHub.off(statsExecute);
-                if (stream["end"]) {
-                    stream.end();
-                }
-            }, 0);
-        });
+        .on("end", () => callStreamMethod("end"));
 }

@@ -51,7 +51,6 @@ define(["require", "exports"], function (require, exports) {
                     td.addClass("null");
                 }
             }
-            this.adjustGrid();
         }
         adjustGrid() {
             if (!this.table) {
@@ -98,7 +97,9 @@ define(["require", "exports"], function (require, exports) {
                 this.moving = true;
                 document.body.css("cursor", "col-resize");
                 this.toMove.css("border-right-style", "dotted");
-                this.toMove.nextElementSibling.css("border-left-style", "dotted");
+                if (this.toMove.nextElementSibling) {
+                    this.toMove.nextElementSibling.css("border-left-style", "dotted");
+                }
                 this.table.findAll(`div.tr > div.td${this.toMove.dataAttr("i")}`).css("border-right-style", "dotted");
                 this.table.findAll(`div.tr > div.td${this.toMove.dataAttr("i") + 1}`).css("border-left-style", "dotted");
             }
@@ -110,9 +111,12 @@ define(["require", "exports"], function (require, exports) {
                 return;
             }
             this.toMove.css("border-right-style", "");
-            this.toMove.nextElementSibling.css("border-left-style", "");
+            if (this.toMove.nextElementSibling) {
+                this.toMove.nextElementSibling.css("border-left-style", "");
+            }
             this.table.findAll(`div.tr > div.td${this.toMove.dataAttr("i")}`).css("border-right-style", "");
             this.table.findAll(`div.tr > div.td${this.toMove.dataAttr("i") + 1}`).css("border-left-style", "");
+            this.toMove = null;
         }
         mousemove(e) {
             if (!this.moving) {

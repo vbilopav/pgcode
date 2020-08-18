@@ -61,7 +61,6 @@ export default class  {
                 td.addClass("null");
             }
         }
-        this.adjustGrid();
     }
 
     adjustGrid() {
@@ -109,7 +108,9 @@ export default class  {
             document.body.css("cursor", "col-resize");
 
             this.toMove.css("border-right-style", "dotted");
-            this.toMove.nextElementSibling.css("border-left-style", "dotted");
+            if (this.toMove.nextElementSibling) {
+                this.toMove.nextElementSibling.css("border-left-style", "dotted");
+            }
             this.table.findAll(`div.tr > div.td${this.toMove.dataAttr("i")}`).css("border-right-style", "dotted");
             this.table.findAll(`div.tr > div.td${this.toMove.dataAttr("i")+1}`).css("border-left-style", "dotted");
         }
@@ -122,9 +123,12 @@ export default class  {
             return;
         }
         this.toMove.css("border-right-style", "");
-        this.toMove.nextElementSibling.css("border-left-style", "");
+        if (this.toMove.nextElementSibling) {
+            this.toMove.nextElementSibling.css("border-left-style", "");
+        }
         this.table.findAll(`div.tr > div.td${this.toMove.dataAttr("i")}`).css("border-right-style", "");
         this.table.findAll(`div.tr > div.td${this.toMove.dataAttr("i")+1}`).css("border-left-style", "");
+        this.toMove = null;
     }
 
     private mousemove(e: MouseEvent) {

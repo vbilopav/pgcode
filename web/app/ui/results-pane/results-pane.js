@@ -98,7 +98,6 @@ define(["require", "exports", "app/api", "app/ui/results-pane/results", "app/ui/
         }
         row(e) {
             this.results.addRow(++this.rowNumber, e);
-            this.footerRows.html(`${this.rowNumber} rows`);
         }
         end() {
             if (this.error) {
@@ -113,6 +112,15 @@ define(["require", "exports", "app/api", "app/ui/results-pane/results", "app/ui/
             else if (this.error) {
                 this.footerTime.html(`🕛 ${this.error.time}`).attr("title", `execution time: ${this.error.time}`);
             }
+            if (this.exeStatsVal) {
+                if (this.exeStatsVal.rows == -1) {
+                    this.footerRows.html(` - `);
+                }
+                else {
+                    this.footerRows.html(`${this.exeStatsVal.rows} rows`);
+                }
+            }
+            this.adjustGrid();
         }
         adjustGrid() {
             this.results.adjustGrid();

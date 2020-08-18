@@ -14,7 +14,7 @@ namespace Pgcode.Connection
     public sealed partial class ConnectionManager
     {
         private static ImmutableDictionary<string, ConnectionData> _connections;
-        private static readonly ConcurrentDictionary<int, WorkspaceConnection> WorkspaceConnections = new ConcurrentDictionary<int, WorkspaceConnection>();
+        private static readonly ConcurrentDictionary<string, WorkspaceConnection> WorkspaceConnections = new ConcurrentDictionary<string, WorkspaceConnection>();
 
         private static readonly IEnumerable<string> InfoLevels = new[] { "INFO", "NOTICE", "LOG" };
         private static readonly IEnumerable<string> ErrorLevels = new[] { "ERROR", "PANIC" };
@@ -350,7 +350,7 @@ namespace Pgcode.Connection
         {
             foreach (var (_, data) in _connections)
             {
-                if (data.Connection.State != ConnectionState.Closed)
+                if (data.Connection.State == ConnectionState.Open)
                 {
                     data.Connection.Close();
                 }
@@ -358,9 +358,16 @@ namespace Pgcode.Connection
             }
             foreach (var (_, data) in WorkspaceConnections)
             {
-                if (data.Connection.State != ConnectionState.Closed)
+                if (data.Connection.State == ConnectionState.Open)
                 {
-                    data.Connection.Close();
+                    try
+                    {
+                        data.CloseCursorIfExists().GetAwaiter().GetResult();
+                    }
+                    finally
+                    {
+                        data.Connection.Close();
+                    }
                 }
                 data.Connection.Dispose();
             }

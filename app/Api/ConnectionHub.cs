@@ -18,19 +18,18 @@ namespace Pgcode.Api
         public string Version { get; set; }
     }
 
-    public class ConnectionsHub : Hub
+    public class ConnectionsHub : BaseHub
     {
         private readonly ConnectionManager _connectionManager;
-        private readonly Settings _settings;
-        private readonly CookieMiddleware _cookieMiddleware;
-        private readonly ILoggerFactory _loggerFactory;
 
-        public ConnectionsHub(ConnectionManager connectionManager, Settings settings, CookieMiddleware cookieMiddleware, ILoggerFactory loggerFactory)
+
+        public ConnectionsHub(
+            ConnectionManager connectionManager, 
+            Settings settings, 
+            CookieMiddleware cookieMiddleware, 
+            ILoggerFactory loggerFactory) : base(settings, cookieMiddleware, loggerFactory)
         {
-            _connectionManager = connectionManager;
-            _settings = settings;
-            _cookieMiddleware = cookieMiddleware;
-            _loggerFactory = loggerFactory;
+            _connectionManager = connectionManager; ;
         }
 
         public InitialResponse GetInitial()
@@ -62,9 +61,9 @@ namespace Pgcode.Api
             return await data.GetSingleItemFromCloneAsync<string>(ApiGetConnection.Name, new
             {
                 userId = user.Name,
-                defaultSchema = _settings.DefaultSchema,
+                defaultSchema = Settings.DefaultSchema,
                 timezone,
-                skipSchemaPattern = _settings.SkipSchemaPattern
+                skipSchemaPattern = Settings.SkipSchemaPattern
             });
         }
 
@@ -108,56 +107,6 @@ namespace Pgcode.Api
             var user = GetIdentityAndLogRequest();
             var connectionData = _connectionManager.GetConnectionDataByName(connection);
             return await connectionData.GetSingleItemFromCloneAsync<bool>(ApiCheckItemExists.Name, new {key, id, userId = user.Name, schema});
-        }
-        
-        public async ValueTask InitConnection(string connection, string schema, string id)
-        {
-            var user = GetIdentityAndLogRequest();
-            await _connectionManager.AddWsConnectionAsync(new WorkspaceKey
-            {
-                Id = id,
-                UserName = user.Name,
-                ConnectionId = this.Context.ConnectionId,
-            }, connection, schema, Clients.Caller);
-        }
-
-        public async ValueTask DisposeConnection(string id)
-        {
-            var user = GetIdentityAndLogRequest();
-            await _connectionManager.RemoveWsConnectionAsync(new WorkspaceKey
-            {
-                Id = id,
-                UserName = user.Name,
-                ConnectionId = this.Context.ConnectionId,
-            });
-        }
-
-        public override async Task OnDisconnectedAsync(Exception exception)
-        {
-            await _connectionManager.RemoveWsByConnectionIdAsync(this.Context.ConnectionId);
-            await base.OnDisconnectedAsync(exception);
-        }
-
-        private IIdentity GetIdentityAndLogRequest()
-        {
-            var ctx = this.Context.GetHttpContext();
-            var identity = _cookieMiddleware.ProcessCookieAndGetIdentity(ctx);
-            if (_settings.LogRequests)
-            {
-                new LoggingMiddleware(_loggerFactory).LogMessage(ctx);
-            }
-
-            return identity;
-        }
-
-        private void LogRequest()
-        {
-            if (!_settings.LogRequests)
-            {
-                return;
-            }
-            var ctx = this.Context.GetHttpContext();
-            new LoggingMiddleware(_loggerFactory).LogMessage(ctx);
         }
     }
 }
