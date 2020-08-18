@@ -14,6 +14,12 @@
             background-color: $grid-headers-background-color;
             position: sticky;
             top: 0;
+            max-width: 350px;
+            & > div {
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                overflow: hidden;
+            }
             & > div:first-child {
                 font-weight: bold;
             }
@@ -59,7 +65,7 @@
         background: transparent;
     }
     & > div.table::-webkit-scrollbar-thumb {
-        box-shadow: inset 0 0 5px $scroll-color;
+        box-shadow: inset 0 0 5px $grid-scroll-color;
         border-radius: 2px;
     } 
     & > div.table::-webkit-scrollbar-button {

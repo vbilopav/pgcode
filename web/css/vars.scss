@@ -251,3 +251,11 @@ $grid-mark-color: default;
 @if $theme == "light" {
     $grid-mark-color: #f7dcb8;
 }
+
+$grid-scroll-color: default;
+@if $theme == "dark" {
+    $grid-scroll-color: #ffffff;
+} 
+@if $theme == "light" {
+    $grid-scroll-color: #ffffff;
+}

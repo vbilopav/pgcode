@@ -2,8 +2,9 @@ define(["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class default_1 {
-        constructor(element) {
+        constructor(id, element) {
             this.moving = false;
+            this.id = id;
             this.element = element;
             this.table = null;
         }
@@ -79,11 +80,11 @@ define(["require", "exports"], function (require, exports) {
             }
             const cell = e.currentTarget;
             const rect = cell.getBoundingClientRect();
-            if (e.offsetX < 3) {
+            if (e.offsetX < 4) {
                 document.body.css("cursor", "col-resize");
                 this.toMove = cell.previousElementSibling;
             }
-            else if (e.offsetX > rect.width - 3) {
+            else if (e.offsetX > rect.width - 4) {
                 document.body.css("cursor", "col-resize");
                 this.toMove = cell;
             }
@@ -95,20 +96,32 @@ define(["require", "exports"], function (require, exports) {
         mousedown(e) {
             if (this.toMove) {
                 this.moving = true;
+                document.body.css("cursor", "col-resize");
+                this.toMove.css("border-right-style", "dotted");
+                this.toMove.nextElementSibling.css("border-left-style", "dotted");
+                this.table.findAll(`div.tr > div.td${this.toMove.dataAttr("i")}`).css("border-right-style", "dotted");
+                this.table.findAll(`div.tr > div.td${this.toMove.dataAttr("i") + 1}`).css("border-left-style", "dotted");
             }
         }
         mouseup(e) {
             this.moving = false;
             document.body.css("cursor", "default");
+            if (!this.toMove) {
+                return;
+            }
+            this.toMove.css("border-right-style", "");
+            this.toMove.nextElementSibling.css("border-left-style", "");
+            this.table.findAll(`div.tr > div.td${this.toMove.dataAttr("i")}`).css("border-right-style", "");
+            this.table.findAll(`div.tr > div.td${this.toMove.dataAttr("i") + 1}`).css("border-left-style", "");
         }
         mousemove(e) {
             if (!this.moving) {
                 return;
             }
             const rect = this.toMove.getBoundingClientRect();
-            const w = (e.clientX - rect.x) + "px";
+            const w = (e.clientX - rect.x - 11) + "px";
             this.toMove.css("min-width", w).css("max-width", w);
-            this.table.findAll(`div.tr>div.td${this.toMove.dataAttr("i")}`).css("min-width", w).css("max-width", w);
+            this.table.findAll(`div.tr > div.td${this.toMove.dataAttr("i")}`).css("min-width", w).css("max-width", w);
         }
     }
     exports.default = default_1;

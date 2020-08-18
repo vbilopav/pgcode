@@ -45,7 +45,7 @@ define(["require", "exports", "app/api", "app/ui/results-pane/results", "app/ui/
             this.footerMsg = this.element.children[2].children[0].children[0];
             this.footerTime = this.element.children[2].children[1].children[0];
             this.footerRows = this.element.children[2].children[2].children[0];
-            this.results = new results_1.default(this.panes[0]);
+            this.results = new results_1.default(id, this.panes[0]);
             new messages_1.default(this.panes[1]);
             this.activateByTab(this.tabs[0]);
             this.status = Status.Disconnected;

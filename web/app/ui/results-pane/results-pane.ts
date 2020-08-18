@@ -62,7 +62,7 @@ export default class  {
         this.footerTime = this.element.children[2].children[1].children[0];
         this.footerRows = this.element.children[2].children[2].children[0];
 
-        this.results = new Results(this.panes[0]);
+        this.results = new Results(id, this.panes[0]);
         new Messages(this.panes[1]);
 
         this.activateByTab(this.tabs[0]);

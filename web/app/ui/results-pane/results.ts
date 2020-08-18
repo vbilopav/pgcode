@@ -1,8 +1,8 @@
-import { timeout } from "app/_sys/timeout";
 import { IHeader } from "app/api";
 
 export default class  {
     private readonly element: Element;
+    private readonly id: string;
     private table: Element;
     private last: Element;
     private first: Element;
@@ -10,7 +10,8 @@ export default class  {
     private toMove: Element;
     private moving = false;
 
-    constructor(element: Element) {
+    constructor(id: string, element: Element) {
+        this.id = id;
         this.element = element;
         this.table = null;
     }
@@ -90,10 +91,10 @@ export default class  {
         const cell = e.currentTarget as Element;
         const rect = cell.getBoundingClientRect();
 
-        if (e.offsetX < 3) {
+        if (e.offsetX < 4) {
             document.body.css("cursor", "col-resize");
             this.toMove = cell.previousElementSibling;
-        } else if (e.offsetX > rect.width - 3) {
+        } else if (e.offsetX > rect.width - 4) {
             document.body.css("cursor", "col-resize");
             this.toMove = cell;
         } else {
@@ -105,12 +106,25 @@ export default class  {
     private mousedown(e: MouseEvent) {
         if (this.toMove) {
             this.moving = true;
+            document.body.css("cursor", "col-resize");
+
+            this.toMove.css("border-right-style", "dotted");
+            this.toMove.nextElementSibling.css("border-left-style", "dotted");
+            this.table.findAll(`div.tr > div.td${this.toMove.dataAttr("i")}`).css("border-right-style", "dotted");
+            this.table.findAll(`div.tr > div.td${this.toMove.dataAttr("i")+1}`).css("border-left-style", "dotted");
         }
     }
 
     private mouseup(e: MouseEvent) {
         this.moving = false;
         document.body.css("cursor", "default");
+        if (!this.toMove) {
+            return;
+        }
+        this.toMove.css("border-right-style", "");
+        this.toMove.nextElementSibling.css("border-left-style", "");
+        this.table.findAll(`div.tr > div.td${this.toMove.dataAttr("i")}`).css("border-right-style", "");
+        this.table.findAll(`div.tr > div.td${this.toMove.dataAttr("i")+1}`).css("border-left-style", "");
     }
 
     private mousemove(e: MouseEvent) {
@@ -118,9 +132,9 @@ export default class  {
             return;
         }
         const rect = this.toMove.getBoundingClientRect() as DOMRect;
-        const w = (e.clientX - rect.x) + "px";
+        const w = (e.clientX - rect.x - 11) + "px";
         this.toMove.css("min-width", w).css("max-width", w);
-        this.table.findAll(`div.tr>div.td${this.toMove.dataAttr("i")}`).css("min-width", w).css("max-width", w);
+        this.table.findAll(`div.tr > div.td${this.toMove.dataAttr("i")}`).css("min-width", w).css("max-width", w)
     }
 
 }
