@@ -282,6 +282,7 @@ export const disposeConnection = async (id: string) => {
 }
 
 interface IRow {
+    rn: number;
     data: Array<string>;
     nullIndexes: Array<number>;
 };
@@ -311,26 +312,22 @@ export interface INotice {
     time: string;
 }
 
-export interface IReadStats {
+export interface IStats {
     read: string;
     execution: string;
     total: string;
-}
-
-export interface IExecuteStats {
-    time: string;
     rows: number;
+    message: string;
 }
 
 export interface IExecutionStream {
     reconnect: () => void;
-    readStats: (e: IReadStats) => void;
-    executeStats: (e: IExecuteStats) => void;
+    stats: (e: IStats) => void;
     error: (e: GrpcStatus) => void;
     status: (e: GrpcStatus) => void;
     message: (e: INotice) => void;
     header: (e: Array<IHeader>) => void;
-    row: (e: Array<string>) => void;
+    row: (rn: number, e: Array<string>) => void;
     end: () => void;
 }
 
@@ -347,21 +344,19 @@ export const execute = async (connection: string, schema: string, id: string, co
         return;
     }
     const messageName = `message-${id}`;
-    const statsExecute = `stats-execute-${id}`;
-    const statsRead = `stats-read-${id}`;
+    const statsName = `stats-${id}`;
+
     const grpcStream = grpc.serverStreaming({
         service: "/api.ExecuteService/Execute",
         request: [GrpcType.String, GrpcType.String, GrpcType.String, GrpcType.String],
-        reply: [{data: [GrpcType.String]}, {nullIndexes: GrpcType.PackedUint32}]
+        reply: [{rn: GrpcType.Uint32}, {data: [GrpcType.String]}, {nullIndexes: GrpcType.PackedUint32}]
     }, connection, schema, id, content, hub.connection.connectionId);
 
     hub.off(messageName);
-    hub.off(statsExecute);
-    hub.off(statsRead);
+    hub.off(statsName);
 
     hub.on(messageName, (msg: INotice) => callStreamMethod("message", msg));
-    hub.on(statsExecute, (msg: IExecuteStats) => callStreamMethod("executeStats", msg));
-    hub.on(statsRead, (msg: IReadStats) => callStreamMethod("readStats", msg)); 
+    hub.on(statsName, (msg: IStats) => callStreamMethod("stats", msg));
 
     let header = false;
     grpcStream
@@ -393,7 +388,7 @@ export const execute = async (connection: string, schema: string, id: string, co
                         row.data[idx] = null;
                     };
                 }
-                stream.row(row.data);
+                stream.row(row.rn, row.data);
             }
         })
         .on("end", () => callStreamMethod("end"));

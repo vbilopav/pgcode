@@ -17,6 +17,7 @@ message ExecuteRequest {
 }
 
 message ExecuteReply { 
-	repeated string Data = 1;
-	repeated uint32 NullIndexes = 2 [packed=true];
+	uint32 RowNumber = 1;
+	repeated string Data = 2;
+	repeated uint32 NullIndexes = 3 [packed=true];
 }

@@ -236,11 +236,10 @@ export class Editor implements IEditor {
                             setTimeout(() => publish(DISMISS_FOOTER_MESSAGE), 5000);
                         });
                     },
-                    readStats: e => this.results.readStats(e),
-                    executeStats: e => this.results.executeStats(e),
+                    stats: e => this.results.stats(e),
                     message: e => this.results.message(e),
                     header: e => this.results.header(e),
-                    row: e => this.results.row(e),
+                    row: (rn, e) => this.results.row(rn, e),
                     end: () => this.results.end()
                 } as IExecutionStream);
 

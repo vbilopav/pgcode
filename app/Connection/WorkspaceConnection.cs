@@ -21,22 +21,6 @@ namespace Pgcode.Connection
 
         public string Cursor { get; set; } = null;
 
-        public string SetCursorName()
-        {
-            Cursor = $"cursor-{Id}";
-            return Cursor;
-        }
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Security", "CA2100:Review SQL queries for security vulnerabilities", Justification = "<Pending>")]
-        public async Task CloseCursorIfExists()
-        {
-            if (Cursor == null)
-            {
-                return;
-            }
-            await using var cmd = Connection.CreateCommand();
-            cmd.CommandText = $"close \"{Cursor}\"";
-            await cmd.ExecuteNonQueryAsync();
-        }
+        public int? ErrorOffset { get; set; } = null;
     }
 }

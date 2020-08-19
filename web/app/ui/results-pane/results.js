@@ -16,10 +16,11 @@ define(["require", "exports"], function (require, exports) {
             window
                 .on("mousedown", (e) => this.mousedown(e))
                 .on("mouseup", (e) => this.mouseup(e))
-                .on("mousemove", (e) => this.mousemove(e));
+                .on("mousemove", (e) => this.mousemove(e))
+                .on("resize", () => this.adjustGrid());
         }
         addHeader(header) {
-            const th = document.createElement("div").appendElementTo(this.table).addClass("th");
+            const th = document.createElement("div").appendElementTo(this.table).addClass("th").dataAttr("rn", 0);
             document.createElement("div").appendElementTo(th).addClass("td");
             let i = 1;
             for (let item of header) {
@@ -33,7 +34,7 @@ define(["require", "exports"], function (require, exports) {
             }
         }
         addRow(rn, row) {
-            const tr = document.createElement("div").appendElementTo(this.table).addClass("tr");
+            const tr = document.createElement("div").appendElementTo(this.table).addClass("tr").dataAttr("rn", rn);
             if (!this.first) {
                 this.first = tr;
             }
@@ -58,8 +59,11 @@ define(["require", "exports"], function (require, exports) {
             }
             const rect = this.element.parentElement.getBoundingClientRect();
             this.table.css("height", rect.height + "px");
+            if (this.last == null || this.first == null) {
+                return;
+            }
             const last = this.last.getBoundingClientRect();
-            const first = this.last.getBoundingClientRect();
+            const first = this.first.getBoundingClientRect();
             if (first.y < rect.y || last.y > (rect.y + rect.height)) {
                 this.table.css("overflow-y", "scroll");
             }
@@ -79,7 +83,7 @@ define(["require", "exports"], function (require, exports) {
             }
             const cell = e.currentTarget;
             const rect = cell.getBoundingClientRect();
-            if (e.offsetX < 4) {
+            if (e.offsetX < 2) {
                 document.body.css("cursor", "col-resize");
                 this.toMove = cell.previousElementSibling;
             }
@@ -120,6 +124,9 @@ define(["require", "exports"], function (require, exports) {
         }
         mousemove(e) {
             if (!this.moving) {
+                if (!e.target.hasClass("th") && !e.target.parentElement.hasClass("th") && !e.target.parentElement.parentElement.hasClass("th")) {
+                    document.body.css("cursor", "default");
+                }
                 return;
             }
             const rect = this.toMove.getBoundingClientRect();

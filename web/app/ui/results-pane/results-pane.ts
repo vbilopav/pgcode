@@ -1,4 +1,4 @@
-import { ItemInfoType, getConnectionColor, IReadStats, IExecuteStats, INotice, IHeader } from "app/api";
+import { ItemInfoType, getConnectionColor, IStats, INotice, IHeader } from "app/api";
 import Results from "app/ui/results-pane/results";
 import Messages from "app/ui/results-pane/messages";
 
@@ -17,9 +17,7 @@ export default class  {
     private readonly results: Results;
     private status: Status;
     private error: INotice;
-    private readStatsVal: IReadStats
-    private exeStatsVal: IExecuteStats;
-    private rowNumber: number;
+    private statsValue: IStats;
 
     constructor(id: string, element: Element, data: ItemInfoType, undock: ()=>void) {
         //this.id = id;
@@ -95,21 +93,13 @@ export default class  {
         this.status = Status.Running;
         this.footerMsg.html("Running...");
         this.error = null;
-        this.readStatsVal = null;
-        this.exeStatsVal = null;
-        this.rowNumber = 0;
+        this.statsValue = null;
         this.results.initGrid();
     }
 
-    readStats(e: IReadStats) {
+    stats(e: IStats) {
         console.log(e);
-        this.readStatsVal = e;
-        // add message e
-    }
-
-    executeStats(e: IExecuteStats) {
-        console.log(e);
-        this.exeStatsVal = e;
+        this.statsValue = e;
         // add message e
     }
 
@@ -125,9 +115,8 @@ export default class  {
         this.results.addHeader(e);
     }
 
-    row(e: Array<string>) {
-        this.results.addRow(++this.rowNumber,  e);
-        //this.footerRows.html(`${this.rowNumber} rows`);
+    row(rn: number, e: Array<string>) {
+        this.results.addRow(rn,  e);
     }
 
     end () {
@@ -136,17 +125,13 @@ export default class  {
         } else {
             this.footerMsg.html("✔️ Query executed successfully.");
         }
-        if (this.readStatsVal) {
-            this.footerTime.html(`🕛 ${this.readStatsVal.total}`).attr("title", `execution time: ${this.readStatsVal.execution}\nreading time: ${this.readStatsVal.read}\ntotal time: ${this.readStatsVal.total}`);
+        
+        if (this.statsValue) {
+            this.footerTime.html(`🕛 ${this.statsValue.total}`).attr("title", `execution time: ${this.statsValue.execution}\nreading time: ${this.statsValue.read}\ntotal time: ${this.statsValue.total}`);
+            this.footerRows.html(`${this.statsValue.rows} rows`);
         } else if (this.error) {
             this.footerTime.html(`🕛 ${this.error.time}`).attr("title", `execution time: ${this.error.time}`);
-        }
-        if (this.exeStatsVal) {
-            if (this.exeStatsVal.rows == -1) {
-                this.footerRows.html(` - `);
-            } else {
-                this.footerRows.html(`${this.exeStatsVal.rows} rows`);
-            }
+            this.footerRows.html(` - `);
         }
         this.adjustGrid();
     }

@@ -74,18 +74,12 @@ define(["require", "exports", "app/api", "app/ui/results-pane/results", "app/ui/
             this.status = Status.Running;
             this.footerMsg.html("Running...");
             this.error = null;
-            this.readStatsVal = null;
-            this.exeStatsVal = null;
-            this.rowNumber = 0;
+            this.statsValue = null;
             this.results.initGrid();
         }
-        readStats(e) {
+        stats(e) {
             console.log(e);
-            this.readStatsVal = e;
-        }
-        executeStats(e) {
-            console.log(e);
-            this.exeStatsVal = e;
+            this.statsValue = e;
         }
         message(e) {
             console.log(e);
@@ -96,8 +90,8 @@ define(["require", "exports", "app/api", "app/ui/results-pane/results", "app/ui/
         header(e) {
             this.results.addHeader(e);
         }
-        row(e) {
-            this.results.addRow(++this.rowNumber, e);
+        row(rn, e) {
+            this.results.addRow(rn, e);
         }
         end() {
             if (this.error) {
@@ -106,19 +100,13 @@ define(["require", "exports", "app/api", "app/ui/results-pane/results", "app/ui/
             else {
                 this.footerMsg.html("✔️ Query executed successfully.");
             }
-            if (this.readStatsVal) {
-                this.footerTime.html(`🕛 ${this.readStatsVal.total}`).attr("title", `execution time: ${this.readStatsVal.execution}\nreading time: ${this.readStatsVal.read}\ntotal time: ${this.readStatsVal.total}`);
+            if (this.statsValue) {
+                this.footerTime.html(`🕛 ${this.statsValue.total}`).attr("title", `execution time: ${this.statsValue.execution}\nreading time: ${this.statsValue.read}\ntotal time: ${this.statsValue.total}`);
+                this.footerRows.html(`${this.statsValue.rows} rows`);
             }
             else if (this.error) {
                 this.footerTime.html(`🕛 ${this.error.time}`).attr("title", `execution time: ${this.error.time}`);
-            }
-            if (this.exeStatsVal) {
-                if (this.exeStatsVal.rows == -1) {
-                    this.footerRows.html(` - `);
-                }
-                else {
-                    this.footerRows.html(`${this.exeStatsVal.rows} rows`);
-                }
+                this.footerRows.html(` - `);
             }
             this.adjustGrid();
         }

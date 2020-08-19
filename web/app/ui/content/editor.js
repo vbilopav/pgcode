@@ -185,11 +185,10 @@ define(["require", "exports", "app/api", "app/_sys/pubsub", "app/_sys/timeout", 
                                 setTimeout(() => pubsub_1.publish(pubsub_1.DISMISS_FOOTER_MESSAGE), 5000);
                             });
                         },
-                        readStats: e => this.results.readStats(e),
-                        executeStats: e => this.results.executeStats(e),
+                        stats: e => this.results.stats(e),
                         message: e => this.results.message(e),
                         header: e => this.results.header(e),
-                        row: e => this.results.row(e),
+                        row: (rn, e) => this.results.row(rn, e),
                         end: () => this.results.end()
                     });
                 }

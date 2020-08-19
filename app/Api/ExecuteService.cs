@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Threading.Tasks;
 using Grpc.Core;
-using Microsoft.AspNetCore.SignalR;
-using Npgsql;
 using Pgcode.Connection;
 using Pgcode.Execution;
 using Pgcode.Middleware;
@@ -41,37 +38,8 @@ namespace Pgcode.Api
                 return;
             }
 
-            var messageName = $"message-{request.Id}";
-            void NoticeHandler(object sender, NpgsqlNoticeEventArgs e)
-            {
-                ws.Proxy?.SendAsync(messageName, new Message(e.Notice), context.CancellationToken);
-            }
-            ws.Connection.Notice += NoticeHandler;
-            
-            var stopwatch = new Stopwatch();
-            stopwatch.Start();
-            try
-            {
-                var handler = new ExecuteHandler(ws, request);
-                if (handler.HasExecute)
-                {
-                    await handler.ExecuteAsync(context.CancellationToken);
-                }
-                if (handler.HasReads)
-                {
-                    await foreach (var reply in handler.ReadAsync(context.CancellationToken))
-                    {
-                        await responseStream.WriteAsync(reply);
-                    }
-                }
-            }
-            catch (PostgresException e)
-            {
-                stopwatch.Stop();
-                ws?.Proxy?.SendAsync(messageName, new Message(e, stopwatch.Elapsed), context.CancellationToken);
-            }
-            stopwatch.Stop();
-            ws.Connection.Notice -= NoticeHandler;
+            var handler = new ExecuteHandler(ws, request);
+            await handler.ReadAsync(responseStream, context.CancellationToken);
         }
     }
 }

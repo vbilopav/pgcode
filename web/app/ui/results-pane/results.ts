@@ -24,11 +24,12 @@ export default class  {
         window
             .on("mousedown", (e:MouseEvent)=>this.mousedown(e))
             .on("mouseup", (e:MouseEvent)=>this.mouseup(e))
-            .on("mousemove", (e:MouseEvent)=>this.mousemove(e));
+            .on("mousemove", (e:MouseEvent)=>this.mousemove(e))
+            .on("resize", () => this.adjustGrid());
     }
 
     addHeader(header: IHeader[]) {
-        const th = document.createElement("div").appendElementTo(this.table).addClass("th");
+        const th = document.createElement("div").appendElementTo(this.table).addClass("th").dataAttr("rn", 0);
         document.createElement("div").appendElementTo(th).addClass("td");
         let i = 1;
         for(let item of header) {
@@ -43,7 +44,7 @@ export default class  {
     }
 
     addRow(rn: number, row: Array<string>) {
-        const tr = document.createElement("div").appendElementTo(this.table).addClass("tr");
+        const tr = document.createElement("div").appendElementTo(this.table).addClass("tr").dataAttr("rn", rn);
         if (!this.first) {
             this.first = tr;
         }
@@ -69,8 +70,11 @@ export default class  {
         }
         const rect = this.element.parentElement.getBoundingClientRect() as DOMRect;
         this.table.css("height", rect.height + "px");
+        if (this.last == null || this.first == null) {
+            return;
+        }
         const last = this.last.getBoundingClientRect() as DOMRect;
-        const first = this.last.getBoundingClientRect() as DOMRect;
+        const first = this.first.getBoundingClientRect() as DOMRect;
         if (first.y < rect.y || last.y > (rect.y + rect.height)) {
             this.table.css("overflow-y", "scroll");
         } else {
@@ -90,7 +94,7 @@ export default class  {
         const cell = e.currentTarget as Element;
         const rect = cell.getBoundingClientRect();
 
-        if (e.offsetX < 4) {
+        if (e.offsetX < 2) {
             document.body.css("cursor", "col-resize");
             this.toMove = cell.previousElementSibling;
         } else if (e.offsetX > rect.width - 4) {
@@ -133,12 +137,15 @@ export default class  {
 
     private mousemove(e: MouseEvent) {
         if (!this.moving) {
+            if (!(e.target as Element).hasClass("th") && !(e.target as Element).parentElement.hasClass("th") && !(e.target as Element).parentElement.parentElement.hasClass("th")) {
+                document.body.css("cursor", "default");
+            }
             return;
         }
         const rect = this.toMove.getBoundingClientRect() as DOMRect;
         const w = (e.clientX - rect.x - 11) + "px";
         this.toMove.css("min-width", w).css("max-width", w);
-        this.table.findAll(`div.tr > div.td${this.toMove.dataAttr("i")}`).css("min-width", w).css("max-width", w)
+        this.table.findAll(`div.tr > div.td${this.toMove.dataAttr("i")}`).css("min-width", w).css("max-width", w);
     }
 
 }

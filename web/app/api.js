@@ -207,19 +207,16 @@ define(["require", "exports", "app/_sys/pubsub", "libs/signalr/signalr.min.js", 
             return;
         }
         const messageName = `message-${id}`;
-        const statsExecute = `stats-execute-${id}`;
-        const statsRead = `stats-read-${id}`;
+        const statsName = `stats-${id}`;
         const grpcStream = grpc.serverStreaming({
             service: "/api.ExecuteService/Execute",
             request: [grpc_service_1.GrpcType.String, grpc_service_1.GrpcType.String, grpc_service_1.GrpcType.String, grpc_service_1.GrpcType.String],
-            reply: [{ data: [grpc_service_1.GrpcType.String] }, { nullIndexes: grpc_service_1.GrpcType.PackedUint32 }]
+            reply: [{ rn: grpc_service_1.GrpcType.Uint32 }, { data: [grpc_service_1.GrpcType.String] }, { nullIndexes: grpc_service_1.GrpcType.PackedUint32 }]
         }, connection, schema, id, content, hub.connection.connectionId);
         hub.off(messageName);
-        hub.off(statsExecute);
-        hub.off(statsRead);
+        hub.off(statsName);
         hub.on(messageName, (msg) => callStreamMethod("message", msg));
-        hub.on(statsExecute, (msg) => callStreamMethod("executeStats", msg));
-        hub.on(statsRead, (msg) => callStreamMethod("readStats", msg));
+        hub.on(statsName, (msg) => callStreamMethod("stats", msg));
         let header = false;
         grpcStream
             .on("error", e => {
@@ -253,7 +250,7 @@ define(["require", "exports", "app/_sys/pubsub", "libs/signalr/signalr.min.js", 
                     }
                     ;
                 }
-                stream.row(row.data);
+                stream.row(row.rn, row.data);
             }
         })
             .on("end", () => callStreamMethod("end"));
