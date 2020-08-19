@@ -1,4 +1,5 @@
 import { IHeader } from "app/api";
+import { timeout } from "app/_sys/timeout";
 
 export default class  {
     private readonly element: Element;
@@ -6,6 +7,7 @@ export default class  {
     private table: Element;
     private last: Element;
     private first: Element;
+    private headerHeight: number;
 
     private toMove: Element;
     private moving = false;
@@ -18,7 +20,7 @@ export default class  {
 
     initGrid() {
         this.element.html("");
-        this.table = document.createElement("div").appendElementTo(this.element).addClass("table");
+        this.table = document.createElement("div").appendElementTo(this.element).addClass("table").on("scroll", e => this.onTableScroll())
         this.last = null;
         this.first = null;
         window
@@ -29,7 +31,7 @@ export default class  {
     }
 
     addHeader(header: IHeader[]) {
-        const th = document.createElement("div").appendElementTo(this.table).addClass("th").dataAttr("rn", 0);
+        const th = document.createElement("div").appendElementTo(this.table).addClass("th").dataAttr("rn", 0) as Element;
         document.createElement("div").appendElementTo(th).addClass("td");
         let i = 1;
         for(let item of header) {
@@ -41,6 +43,7 @@ export default class  {
                 .dataAttr("i", i++)
                 .on("mousemove", (e: MouseEvent)=>this.cellMousemove(e));
         }
+        this.headerHeight = th.clientHeight;
     }
 
     addRow(rn: number, row: Array<string>) {
@@ -85,6 +88,16 @@ export default class  {
         } else {
             this.table.css("overflow-x", "hidden");
         }
+    }
+
+    private onTableScroll() {
+        timeout(() => {
+            const rect = this.table.getBoundingClientRect() as DOMRect;
+            const first = document.elementFromPoint(rect.x, rect.y + this.headerHeight).parentElement;
+            const last = document.elementFromPoint(rect.x, rect.y + this.table.clientHeight - 5).parentElement;
+            
+            console.log(first.dataAttr("rn"), last.dataAttr("rn"));
+        }, 75, `${this.id}-grid-scroll`);
     }
 
     private cellMousemove(e: MouseEvent) {

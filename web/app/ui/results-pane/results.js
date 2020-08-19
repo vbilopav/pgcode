@@ -1,4 +1,4 @@
-define(["require", "exports"], function (require, exports) {
+define(["require", "exports", "app/_sys/timeout"], function (require, exports, timeout_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class default_1 {
@@ -10,7 +10,7 @@ define(["require", "exports"], function (require, exports) {
         }
         initGrid() {
             this.element.html("");
-            this.table = document.createElement("div").appendElementTo(this.element).addClass("table");
+            this.table = document.createElement("div").appendElementTo(this.element).addClass("table").on("scroll", e => this.onTableScroll());
             this.last = null;
             this.first = null;
             window
@@ -32,6 +32,7 @@ define(["require", "exports"], function (require, exports) {
                     .dataAttr("i", i++)
                     .on("mousemove", (e) => this.cellMousemove(e));
             }
+            this.headerHeight = th.clientHeight;
         }
         addRow(rn, row) {
             const tr = document.createElement("div").appendElementTo(this.table).addClass("tr").dataAttr("rn", rn);
@@ -76,6 +77,14 @@ define(["require", "exports"], function (require, exports) {
             else {
                 this.table.css("overflow-x", "hidden");
             }
+        }
+        onTableScroll() {
+            timeout_1.timeout(() => {
+                const rect = this.table.getBoundingClientRect();
+                const first = document.elementFromPoint(rect.x, rect.y + this.headerHeight).parentElement;
+                const last = document.elementFromPoint(rect.x, rect.y + this.table.clientHeight - 5).parentElement;
+                console.log(first.dataAttr("rn"), last.dataAttr("rn"));
+            }, 75, `${this.id}-grid-scroll`);
         }
         cellMousemove(e) {
             if (this.moving) {

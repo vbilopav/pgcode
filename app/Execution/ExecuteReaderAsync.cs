@@ -27,7 +27,7 @@ namespace Pgcode.Execution
             stopwatch.Stop();
             
             var executionTime = stopwatch.Elapsed;
-            var rows = reader.RecordsAffected;
+            var rowsAffected = reader.RecordsAffected;
             uint row = 0;
             var headerRow = false;
 
@@ -63,7 +63,8 @@ namespace Pgcode.Execution
                 }
 
                 yield return reply;
-                if (row == Program.Settings.InitialReadSize)
+                row--;
+                if (row == Program.Settings.ReadLimit)
                 {
                     break;
                 }
@@ -71,7 +72,7 @@ namespace Pgcode.Execution
             stopwatch.Stop();
 
             await reader.CloseAsync();
-            await ws.SendStatsMessageAsync(stopwatch.Elapsed, executionTime, rows, "reader", cancellationToken);
+            await ws.SendStatsMessageAsync(stopwatch.Elapsed, executionTime, rowsAffected, row, "reader", cancellationToken);
         }
     }
 }

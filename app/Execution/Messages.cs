@@ -12,7 +12,8 @@ namespace Pgcode.Execution
         public string Read { get; set; }
         public string Execution { get; set; }
         public string Total { get; set; }
-        public int Rows { get; set; }
+        public int RowsAffected { get; set; }
+        public uint RowsFetched { get; set; }
         public string Message { get; set; }
     }
 
@@ -81,7 +82,8 @@ namespace Pgcode.Execution
             this WorkspaceConnection ws,
             TimeSpan? readTime,
             TimeSpan executionTime,
-            int rows,
+            int rowsAffected,
+            uint rowsFetched,
             string message,
             CancellationToken cancellationToken = default)
         {
@@ -90,7 +92,8 @@ namespace Pgcode.Execution
                 Read = readTime?.Format(),
                 Execution = executionTime.Format(),
                 Total = readTime != null ? (executionTime + readTime.Value).Format() : executionTime.Format(),
-                Rows = rows,
+                RowsAffected = rowsAffected,
+                RowsFetched = rowsFetched,
                 Message = message
             }, cancellationToken);
         }
@@ -113,7 +116,7 @@ namespace Pgcode.Execution
             var message = new Message(e, time);
             if (ws.ErrorOffset.HasValue && message.Position != 0)
             {
-                message.Position += ws.ErrorOffset.Value;
+                message.Position -= ws.ErrorOffset.Value;
             }
             await ws.SendPgMessageInternalAsync(message, cancellationToken);
         }

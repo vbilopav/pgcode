@@ -20,9 +20,9 @@ namespace Pgcode.Execution
             await ws.CloseCursorIfExists(cmd);
             cmd.CommandText = content;
             stopwatch.Start();
-            var rows = await cmd.ExecuteNonQueryAsync(cancellationToken);
+            var rowsAffected = await cmd.ExecuteNonQueryAsync(cancellationToken);
             stopwatch.Stop();
-            await ws.SendStatsMessageAsync(null, stopwatch.Elapsed, rows, "execution", cancellationToken);
+            await ws.SendStatsMessageAsync(null, stopwatch.Elapsed, rowsAffected, 0, "execution", cancellationToken);
         }
     }
 }

@@ -102,7 +102,7 @@ define(["require", "exports", "app/api", "app/ui/results-pane/results", "app/ui/
             }
             if (this.statsValue) {
                 this.footerTime.html(`🕛 ${this.statsValue.total}`).attr("title", `execution time: ${this.statsValue.execution}\nreading time: ${this.statsValue.read}\ntotal time: ${this.statsValue.total}`);
-                this.footerRows.html(`${this.statsValue.rows} rows`);
+                this.footerRows.html(`${this.statsValue.rowsAffected} rows`);
             }
             else if (this.error) {
                 this.footerTime.html(`🕛 ${this.error.time}`).attr("title", `execution time: ${this.error.time}`);

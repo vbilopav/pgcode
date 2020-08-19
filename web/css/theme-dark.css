@@ -693,17 +693,21 @@ body > div.container {
     overflow: hidden;
     max-width: 350px;
     user-select: none; }
+  #results.pane > div.table > div.th > div.td {
+    border-top: 0px !important; }
   #results.pane > div.table > div.th > div.td:first-child {
     position: sticky;
     left: 0;
-    z-index: 1; }
+    z-index: 1;
+    border-left: 0px !important; }
   #results.pane > div.table > div.tr > div.td.null {
     color: #f7dcb8; }
   #results.pane > div.table > div.tr > div.td.th {
     background-color: #333333;
     position: sticky;
     left: 0;
-    font-weight: bold; }
+    font-weight: bold;
+    border-left: 0px !important; }
   #results.pane > div.table::-webkit-scrollbar {
     width: 16px; }
   #results.pane > div.table::-webkit-scrollbar-track {

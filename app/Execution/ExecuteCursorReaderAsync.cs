@@ -68,10 +68,10 @@ namespace Pgcode.Execution
 
             stopwatch.Start();
             cmd.CommandText = $"move forward all in \"{cursor}\"";
-            var rows = await cmd.ExecuteNonQueryAsync(cancellationToken);
+            var rowsAffected = await cmd.ExecuteNonQueryAsync(cancellationToken);
             cmd.CommandText = $"move absolute 0 in \"{cursor}\"";
             await cmd.ExecuteNonQueryAsync(cancellationToken);
-            cmd.CommandText = $"fetch {Program.Settings.InitialReadSize} in \"{cursor}\"";
+            cmd.CommandText = $"fetch {Program.Settings.CursorFetch} in \"{cursor}\"";
             await using var reader = await cmd.ExecuteReaderAsync(cancellationToken);
         
             while (await reader.ReadAsync(cancellationToken))
@@ -104,11 +104,12 @@ namespace Pgcode.Execution
             }
             stopwatch.Stop();
             await reader.CloseAsync();
-            if (row - 1 == rows)
+            row--;
+            if (row == rowsAffected)
             {
                 await ws.CloseCursorIfExists(cmd);
             }
-            await ws.SendStatsMessageAsync(stopwatch.Elapsed, executionTime, rows, $"cursor reader \"{ cursor}\"", cancellationToken);
+            await ws.SendStatsMessageAsync(stopwatch.Elapsed, executionTime, rowsAffected, row, $"cursor reader \"{ cursor}\"", cancellationToken);
         }
     }
 }

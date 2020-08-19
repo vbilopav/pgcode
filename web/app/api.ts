@@ -316,7 +316,8 @@ export interface IStats {
     read: string;
     execution: string;
     total: string;
-    rows: number;
+    rowsAffected: number;
+    rowsFetched: number;
     message: string;
 }
 
