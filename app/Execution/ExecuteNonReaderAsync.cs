@@ -17,10 +17,9 @@ namespace Pgcode.Execution
         {
             var stopwatch = new Stopwatch();
             await using var cmd = ws.Connection.CreateCommand();
-            await ws.CloseCursorIfExists(cmd);
             cmd.CommandText = content;
             stopwatch.Start();
-            var rowsAffected = await cmd.ExecuteNonQueryAsync(cancellationToken);
+            var rowsAffected = await cmd.ExecuteAsync(content, cancellationToken);
             stopwatch.Stop();
             await ws.SendStatsMessageAsync(null, stopwatch.Elapsed, rowsAffected, 0, "execution", cancellationToken);
         }

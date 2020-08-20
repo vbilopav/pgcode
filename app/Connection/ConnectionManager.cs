@@ -56,15 +56,8 @@ namespace Pgcode.Connection
         {
             if (WorkspaceConnections.TryRemove(connectionId, out var ws))
             {
-                try
-                {
-                    await ws.CloseCursorIfExists();
-                }
-                finally
-                {
-                    await ws.Connection.CloseAsync();
-                    ws.Connection.Dispose();
-                }
+                await ws.Connection.CloseAsync();
+                ws.Connection.Dispose();
             }
         }
 

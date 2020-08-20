@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.SignalR;
+﻿using Microsoft.AspNetCore.SignalR;
 using Npgsql;
 
 namespace Pgcode.Connection
@@ -22,5 +20,7 @@ namespace Pgcode.Connection
         public string Cursor { get; set; } = null;
 
         public int? ErrorOffset { get; set; } = null;
+
+        public bool IsNewTran { get; set; } = false;
     }
 }

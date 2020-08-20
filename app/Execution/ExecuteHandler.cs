@@ -8,6 +8,7 @@ using Grpc.Core;
 using Npgsql;
 using Pgcode.Connection;
 using Pgcode.Protos;
+// ReSharper disable MethodHasAsyncOverloadWithCancellation
 
 namespace Pgcode.Execution
 {
@@ -95,9 +96,16 @@ namespace Pgcode.Execution
                             await responseStream.WriteAsync(reply);
                         }
                     }
-                    catch
+                    catch (PostgresException)
                     {
-                        await _ws.CloseCursorIfExists();
+                        if (!_ws.IsNewTran)
+                        {
+                            throw;
+                        }
+                        await using var cmd = _ws.Connection.CreateCommand();
+                        cmd.Execute("end");
+                        _ws.Cursor = null;
+                        _ws.IsNewTran = false;
                         throw;
                     }
                 }
@@ -110,9 +118,6 @@ namespace Pgcode.Execution
                     throw new ArgumentException();
                 }
             }
-            //
-            // Npgsql..NpgsqlOperationInProgressException?
-            //
             catch (PostgresException e)
             {
                 stopwatch.Stop();

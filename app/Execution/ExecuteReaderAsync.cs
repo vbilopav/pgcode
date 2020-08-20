@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using Npgsql;
 using Pgcode.Connection;
 using Pgcode.Protos;
 
@@ -19,60 +20,63 @@ namespace Pgcode.Execution
         {
             var stopwatch = new Stopwatch();
             await using var cmd = ws.Connection.CreateCommand();
-            await ws.CloseCursorIfExists(cmd);
-            cmd.CommandText = content;
 
             stopwatch.Start();
-            await using var reader = await cmd.ExecuteReaderAsync(cancellationToken);
+            await using var reader = await cmd.ReaderAsync(content, cancellationToken);
             stopwatch.Stop();
             
             var executionTime = stopwatch.Elapsed;
             var rowsAffected = reader.RecordsAffected;
-            uint row = 0;
-            var headerRow = false;
 
             stopwatch.Start();
+            uint row = 0;
             while (await reader.ReadAsync(cancellationToken))
             {
-                var count = reader.FieldCount;
-                if (!headerRow)
+                if (row == 0)
                 {
-                    var header = new ExecuteReply {RowNumber = row++};
-                    for (var index = 0; index < reader.FieldCount; index++)
-                    {
-                        header.Data.Add(
-                            $"{{\"name\":\"{reader.GetName(index)}\",\"type\":\"{reader.GetDataTypeName(index)}\"}}");
-                    }
-
-                    yield return header;
-                    headerRow = true;
+                    yield return GetHeaderReply(row++, reader);
                 }
 
-                var values = new object[count];
-                reader.GetProviderSpecificValues(values);
+                yield return GetRowReply(row++, reader);
 
-                var reply = new ExecuteReply {RowNumber = row++};
-                for (uint index = 0; index < values.Length; index++)
-                {
-                    var value = values[index];
-                    reply.Data.Add(value.ToString());
-                    if (value == DBNull.Value)
-                    {
-                        reply.NullIndexes.Add(index);
-                    }
-                }
-
-                yield return reply;
-                row--;
-                if (row == Program.Settings.ReadLimit)
+                if (row - 1 == Program.Settings.ReadLimit)
                 {
                     break;
                 }
             }
             stopwatch.Stop();
-
+            row = row > 0 ? row - 1 : 0;
             await reader.CloseAsync();
-            await ws.SendStatsMessageAsync(stopwatch.Elapsed, executionTime, rowsAffected, row, "reader", cancellationToken);
+            await ws.SendStatsMessageAsync(stopwatch.Elapsed, executionTime, rowsAffected, row > 0 ? row - 1 : 0, "reader", cancellationToken);
+        }
+
+        private static ExecuteReply GetHeaderReply(uint row, NpgsqlDataReader r)
+        {
+            var headerReply = new ExecuteReply { RowNumber = row };
+            for (var index = 0; index < r.FieldCount; index++)
+            {
+                headerReply.Data.Add(
+                    $"{{\"name\":\"{r.GetName(index)}\",\"type\":\"{r.GetDataTypeName(index)}\"}}");
+            }
+            return headerReply;
+        }
+
+        private static ExecuteReply GetRowReply(uint row, NpgsqlDataReader r)
+        {
+            var values = new object[r.FieldCount];
+            r.GetProviderSpecificValues(values);
+
+            var rowReply = new ExecuteReply { RowNumber = row };
+            for (uint index = 0; index < values.Length; index++)
+            {
+                var value = values[index];
+                rowReply.Data.Add(value.ToString());
+                if (value == DBNull.Value)
+                {
+                    rowReply.NullIndexes.Add(index);
+                }
+            }
+            return rowReply;
         }
     }
 }

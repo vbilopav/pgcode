@@ -82,7 +82,7 @@ define(["require", "exports", "app/api", "app/ui/results-pane/results", "app/ui/
             this.statsValue = e;
         }
         message(e) {
-            console.log(e);
+            console.log(e.messageText);
             if (e.severity == "ERROR") {
                 this.error = e;
             }

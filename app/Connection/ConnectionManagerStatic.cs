@@ -354,7 +354,7 @@ namespace Pgcode.Connection
         {
             foreach (var (_, data) in _connections)
             {
-                if (data.Connection.State == ConnectionState.Open)
+                if (data.Connection.State != ConnectionState.Closed)
                 {
                     data.Connection.Close();
                 }
@@ -362,16 +362,9 @@ namespace Pgcode.Connection
             }
             foreach (var (_, data) in WorkspaceConnections)
             {
-                if (data.Connection.State == ConnectionState.Open)
+                if (data.Connection.State != ConnectionState.Closed)
                 {
-                    try
-                    {
-                        data.CloseCursorIfExists().GetAwaiter().GetResult();
-                    }
-                    finally
-                    {
-                        data.Connection.Close();
-                    }
+                    data.Connection.Close();
                 }
                 data.Connection.Dispose();
             }

@@ -104,7 +104,7 @@ export default class  {
     }
 
     message(e: INotice) {
-        console.log(e);
+        console.log(e.messageText);
         if (e.severity == "ERROR") {
             this.error = e;
         }
