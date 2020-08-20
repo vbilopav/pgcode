@@ -35,7 +35,6 @@ namespace Pgcode.Execution
                     cmd.Execute($"close \"{ws.Cursor}\"");
                 }
             }
-
             ws.Cursor = $"cursor-{ws.Id}";
 
             var declareStatement = $"declare \"{ws.Cursor}\" cursor for ";

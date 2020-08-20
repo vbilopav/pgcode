@@ -47,36 +47,7 @@ namespace Pgcode.Execution
             stopwatch.Stop();
             row = row > 0 ? row - 1 : 0;
             await reader.CloseAsync();
-            await ws.SendStatsMessageAsync(stopwatch.Elapsed, executionTime, rowsAffected, row > 0 ? row - 1 : 0, "reader", cancellationToken);
-        }
-
-        private static ExecuteReply GetHeaderReply(uint row, NpgsqlDataReader r)
-        {
-            var headerReply = new ExecuteReply { RowNumber = row };
-            for (var index = 0; index < r.FieldCount; index++)
-            {
-                headerReply.Data.Add(
-                    $"{{\"name\":\"{r.GetName(index)}\",\"type\":\"{r.GetDataTypeName(index)}\"}}");
-            }
-            return headerReply;
-        }
-
-        private static ExecuteReply GetRowReply(uint row, NpgsqlDataReader r)
-        {
-            var values = new object[r.FieldCount];
-            r.GetProviderSpecificValues(values);
-
-            var rowReply = new ExecuteReply { RowNumber = row };
-            for (uint index = 0; index < values.Length; index++)
-            {
-                var value = values[index];
-                rowReply.Data.Add(value.ToString());
-                if (value == DBNull.Value)
-                {
-                    rowReply.NullIndexes.Add(index);
-                }
-            }
-            return rowReply;
+            await ws.SendStatsMessageAsync(stopwatch.Elapsed, executionTime, rowsAffected, row, "reader", cancellationToken);
         }
     }
 }
