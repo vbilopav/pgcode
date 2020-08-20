@@ -14,10 +14,7 @@ namespace Pgcode.Connection
         {
             var (command, dataParam) = GetCommand(data, name, parameters);
             await using var connection = data.Connection.CloneWith(data.ConnectionString);
-            return await data.Connection
-                .Prepared()
-                .AsProcedure()
-                .SingleAsync<T>(command, GetParam(dataParam));
+            return await connection.AsProcedure().SingleAsync<T>(command, GetParam(dataParam));
         }
 
         public static string Format(this TimeSpan ts) => ts.ToString("hh':'mm':'ss'.'fff");

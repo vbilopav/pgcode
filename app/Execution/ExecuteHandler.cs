@@ -110,6 +110,9 @@ namespace Pgcode.Execution
                     throw new ArgumentException();
                 }
             }
+            //
+            // Npgsql..NpgsqlOperationInProgressException?
+            //
             catch (PostgresException e)
             {
                 stopwatch.Stop();

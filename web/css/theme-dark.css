@@ -191,7 +191,7 @@ body > div.container {
   background-color: #007ACC;
   user-select: none;
   display: grid;
-  grid-template-columns: 155px fit-content(40%) fit-content(40%) fit-content(40%) fit-content(40%) auto auto min-content min-content min-content 27px;
+  grid-template-columns: min-content fit-content(40%) fit-content(40%) fit-content(40%) fit-content(40%) auto auto min-content min-content min-content 27px;
   grid-template-areas: 'connections info             schemas          content          lang             gap1 msg  editor      user        version     feed'; }
   .footer > div.clickable {
     cursor: pointer; }

@@ -345,9 +345,9 @@ export default class  {
 
     private adjustWidths(showMsg = false) {
         if (showMsg) {
-            this.footer.css("grid-template-columns", "155px 0px 0px 0px 0px 0px auto 0px 0px 0px 27px");
+            this.footer.css("grid-template-columns", "min-content 0px 0px 0px 0px 0px auto 0px 0px 0px 27px");
         } else {
-            this.footer.css("grid-template-columns", "155px fit-content(40%) fit-content(40%) fit-content(40%) fit-content(40%) auto auto min-content min-content min-content 27px");
+            this.footer.css("grid-template-columns", "min-content fit-content(40%) fit-content(40%) fit-content(40%) fit-content(40%) auto auto min-content min-content min-content 27px");
         }
     }
 

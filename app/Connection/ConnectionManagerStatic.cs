@@ -270,7 +270,10 @@ namespace Pgcode.Connection
             try
             {
                 connectionString = section.Value;
-                var builder = new NpgsqlConnectionStringBuilder(connectionString);
+                var builder = new NpgsqlConnectionStringBuilder(connectionString)
+                {
+                    ApplicationName = Program.Settings.ConnectionApplicationName, Pooling = false
+                };
                 if (string.IsNullOrEmpty(builder.Password))
                 {
                     Console.WriteLine();
