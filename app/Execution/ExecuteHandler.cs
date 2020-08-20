@@ -124,13 +124,13 @@ namespace Pgcode.Execution
         private static bool IsSuitableForCursor(string content)
         {
             content = content.ToLowerInvariant();
-            if (content.StartsWith("select ", StringComparison.Ordinal) || 
-                content.StartsWith("with ", StringComparison.Ordinal) ||
-                content.StartsWith("values ", StringComparison.Ordinal))
+            if (content.StartsWith("select ", StringComparison.OrdinalIgnoreCase) || 
+                content.StartsWith("with ", StringComparison.OrdinalIgnoreCase) ||
+                content.StartsWith("values ", StringComparison.OrdinalIgnoreCase))
             {
-                if ((content.IndexOf("insert ", StringComparison.Ordinal) != -1) ||
-                    (content.IndexOf("update ", StringComparison.Ordinal) != -1) ||
-                    (content.IndexOf("delete ", StringComparison.Ordinal) != -1))
+                if ((content.IndexOf("insert ", StringComparison.OrdinalIgnoreCase) != -1) ||
+                    (content.IndexOf("update ", StringComparison.OrdinalIgnoreCase) != -1) ||
+                    (content.IndexOf("delete ", StringComparison.OrdinalIgnoreCase) != -1))
                 {
                     return false;
                 }

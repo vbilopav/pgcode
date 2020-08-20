@@ -64,7 +64,7 @@ define(["require", "exports", "app/controls/footer-context-menu", "app/controls/
                 this.msgMode = false;
                 this.msg.html("");
                 this.footer.findAll("div:not(.connections):not(.msg):not(.feed)").css("display", "");
-                this.adjustWidths();
+                this.adjustWidths(false);
                 pubsub_1.publish(pubsub_1.FOOTER_MESSAGE_DISMISSED, ...this.msgArgs);
                 this.msgArgs = null;
             };
@@ -73,22 +73,8 @@ define(["require", "exports", "app/controls/footer-context-menu", "app/controls/
                 this.msg.html(msg);
                 this.msgMode = true;
                 this.msgArgs = args;
-                const columns = this.footer.css("grid-template-columns").split(" ");
-                columns[0] = this.connections.getBoundingClientRect().width + "px";
-                columns[1] = "0px";
-                columns[2] = "0px";
-                columns[3] = "0px";
-                columns[4] = "0px";
-                columns[5] = "0px";
-                columns[6] = "auto";
-                columns[7] = "0px";
-                columns[8] = "0px";
-                columns[9] = "0px";
-                columns[10] = "27px";
-                this.footer
-                    .css("grid-template-columns", columns.join(" "))
-                    .findAll("div:not(.connections):not(.msg):not(.feed)")
-                    .css("display", "none");
+                this.adjustWidths(true);
+                this.footer.findAll("div:not(.connections):not(.msg):not(.feed)").css("display", "none");
             });
             window.on("click keydown contextmenu", () => cancelHandler());
         }
@@ -102,7 +88,6 @@ define(["require", "exports", "app/controls/footer-context-menu", "app/controls/
                     this.editor.html("");
                     this.lang.html("");
                 }
-                this.adjustWidths();
             });
         }
         subscribeEditorPosition() {
@@ -113,7 +98,6 @@ define(["require", "exports", "app/controls/footer-context-menu", "app/controls/
                 }
                 this.editor.html(`Ln ${lineNumber}, Col ${column} ${(selection)}`);
                 this.lang.html(language);
-                this.adjustWidths();
             });
         }
         initFooterContextMenu() {
@@ -254,7 +238,6 @@ define(["require", "exports", "app/controls/footer-context-menu", "app/controls/
                 this.info.find("span").html("");
                 this.info.attr("title", "no connection...");
                 this.schemas.showElement(false);
-                this.adjustWidths();
                 storage.connection = null;
                 pubsub_1.publish(pubsub_1.SET_APP_STATUS, api_1.AppStatus.NO_CONNECTION);
             }
@@ -265,7 +248,6 @@ define(["require", "exports", "app/controls/footer-context-menu", "app/controls/
                 this.connections.find("span").html(name).attr("title", title);
                 this.info.find("span").html(`v${connection.version}&nbsp;&nbsp;//&nbsp;&nbsp;${connection.user}@${connection.host}:${connection.port}/${connection.database}`);
                 this.info.attr("title", title);
-                this.adjustWidths();
                 this.info.visible(true);
                 this.schemas.visible(true);
                 if (this.connectionMenu) {
@@ -297,7 +279,6 @@ define(["require", "exports", "app/controls/footer-context-menu", "app/controls/
                     pubsub_1.publish(pubsub_1.SET_APP_STATUS, api_1.AppStatus.READY, name);
                 }
             }
-            this.adjustWidths();
         }
         selectSchema(name) {
             const checked = this.schemasMenu.getCheckedItem();
@@ -311,30 +292,19 @@ define(["require", "exports", "app/controls/footer-context-menu", "app/controls/
             }
             this.schemasMenu.updateMenuItem(name, { checked: true });
             this.schemas.showElement().find("span").html(name);
-            this.adjustWidths();
         }
         async fetchSchema(name) {
             const response = await api_1.fetchSchema(name);
             pubsub_1.publish(pubsub_1.SCHEMA_CHANGED, response.data, response.data.name);
             pubsub_1.publish(pubsub_1.SET_APP_STATUS, api_1.AppStatus.READY);
         }
-        adjustWidths() {
-            if (this.msgMode == true) {
-                return;
+        adjustWidths(showMsg = false) {
+            if (showMsg) {
+                this.footer.css("grid-template-columns", "155px 0px 0px 0px 0px 0px auto 0px 0px 0px 27px");
             }
-            const columns = this.footer.css("grid-template-columns").split(" ");
-            columns[0] = this.connections.getBoundingClientRect().width + "px";
-            columns[1] = this.info.getBoundingClientRect().width + "px";
-            columns[2] = this.schemas.getBoundingClientRect().width + "px";
-            columns[3] = this.content.getBoundingClientRect().width + "px";
-            columns[4] = this.lang.getBoundingClientRect().width + "px";
-            columns[5] = "auto";
-            columns[6] = this.msg.getBoundingClientRect().width + "px";
-            columns[7] = this.editor.getBoundingClientRect().width + "px";
-            columns[8] = this.user.getBoundingClientRect().width + "px";
-            columns[9] = this.version.getBoundingClientRect().width + "px";
-            columns[10] = "27px";
-            this.footer.css("grid-template-columns", columns.join(" "));
+            else {
+                this.footer.css("grid-template-columns", "155px fit-content(40%) fit-content(40%) fit-content(40%) fit-content(40%) auto auto min-content min-content min-content 27px");
+            }
         }
         formatTitleFromConn(connection) {
             return `PostgreSQL ${connection.version}\nHost: ${connection.host}\nPort: ${connection.port}\nDatabase: ${connection.database}\nUser: ${connection.user}`;

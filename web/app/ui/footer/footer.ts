@@ -94,7 +94,7 @@ export default class  {
             this.msgMode = false;
             this.msg.html("");
             this.footer.findAll("div:not(.connections):not(.msg):not(.feed)").css("display", "");
-            this.adjustWidths();
+            this.adjustWidths(false);
             publish(FOOTER_MESSAGE_DISMISSED, ...this.msgArgs);
             this.msgArgs = null;
         };
@@ -103,22 +103,8 @@ export default class  {
             this.msg.html(msg);
             this.msgMode = true;
             this.msgArgs = args;
-            const columns = this.footer.css("grid-template-columns").split(" ");
-            columns[0] = this.connections.getBoundingClientRect().width + "px";
-            columns[1] = "0px";
-            columns[2] = "0px";
-            columns[3] = "0px";
-            columns[4] = "0px";
-            columns[5] = "0px";
-            columns[6] = "auto";
-            columns[7] = "0px";
-            columns[8] = "0px";
-            columns[9] = "0px";
-            columns[10] = "27px";
-            this.footer
-                .css("grid-template-columns", columns.join(" "))
-                .findAll("div:not(.connections):not(.msg):not(.feed)")
-                .css("display", "none");
+            this.adjustWidths(true);
+            this.footer.findAll("div:not(.connections):not(.msg):not(.feed)").css("display", "none");
         });
         window.on("click keydown contextmenu", () => cancelHandler());
     }
@@ -132,7 +118,6 @@ export default class  {
                 this.editor.html("");
                 this.lang.html("");
             }
-            this.adjustWidths();
         });
     }
 
@@ -144,7 +129,6 @@ export default class  {
             }
             this.editor.html(`Ln ${lineNumber}, Col ${column} ${(selection)}`);
             this.lang.html(language);
-            this.adjustWidths();
         });
 
     }
@@ -296,7 +280,6 @@ export default class  {
             this.info.find("span").html("");
             this.info.attr("title", "no connection...");
             this.schemas.showElement(false);
-            this.adjustWidths();
             storage.connection = null;
             publish(SET_APP_STATUS, AppStatus.NO_CONNECTION);
         } else {
@@ -306,7 +289,6 @@ export default class  {
             this.connections.find("span").html(name).attr("title", title);
             this.info.find("span").html(`v${connection.version}&nbsp;&nbsp;//&nbsp;&nbsp;${connection.user}@${connection.host}:${connection.port}/${connection.database}`);
             this.info.attr("title", title);
-            this.adjustWidths();
             this.info.visible(true);
             this.schemas.visible(true);
             
@@ -340,7 +322,6 @@ export default class  {
                 publish(SET_APP_STATUS, AppStatus.READY, name);
             }
         }
-        this.adjustWidths();
     }
 
     private selectSchema(name: string) {
@@ -354,7 +335,6 @@ export default class  {
         }
         this.schemasMenu.updateMenuItem(name, {checked: true} as MenuItemType);
         this.schemas.showElement().find("span").html(name);
-        this.adjustWidths();
     }
 
     private async fetchSchema(name: string) {
@@ -363,24 +343,12 @@ export default class  {
         publish(SET_APP_STATUS, AppStatus.READY);
     }
 
-    private adjustWidths() {
-        if (this.msgMode == true) {
-            return;
+    private adjustWidths(showMsg = false) {
+        if (showMsg) {
+            this.footer.css("grid-template-columns", "155px 0px 0px 0px 0px 0px auto 0px 0px 0px 27px");
+        } else {
+            this.footer.css("grid-template-columns", "155px fit-content(40%) fit-content(40%) fit-content(40%) fit-content(40%) auto auto min-content min-content min-content 27px");
         }
-        const columns = this.footer.css("grid-template-columns").split(" ");
-        columns[0] = this.connections.getBoundingClientRect().width + "px";
-        columns[1] = this.info.getBoundingClientRect().width + "px";
-        columns[2] = this.schemas.getBoundingClientRect().width + "px";
-        columns[3] = this.content.getBoundingClientRect().width + "px"
-        columns[4] = this.lang.getBoundingClientRect().width + "px";
-        columns[5] = "auto";
-        columns[6] = this.msg.getBoundingClientRect().width + "px";
-        columns[7] = this.editor.getBoundingClientRect().width + "px";
-        columns[8] = this.user.getBoundingClientRect().width + "px";
-        columns[9] = this.version.getBoundingClientRect().width + "px";
-        columns[10] = "27px"; // feed
-
-        this.footer.css("grid-template-columns", columns.join(" "));
     }
 
     private formatTitleFromConn(connection: IConnectionInfo) {

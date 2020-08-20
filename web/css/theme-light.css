@@ -191,8 +191,8 @@ body > div.container {
   background-color: #007ACC;
   user-select: none;
   display: grid;
-  grid-template-columns: 155px       320px 150px   auto    auto auto auto auto   auto auto    27px;
-  grid-template-areas: 'connections info  schemas content lang gap1 msg  editor user version feed'; }
+  grid-template-columns: 155px fit-content(40%) fit-content(40%) fit-content(40%) fit-content(40%) auto auto min-content min-content min-content 27px;
+  grid-template-areas: 'connections info             schemas          content          lang             gap1 msg  editor      user        version     feed'; }
   .footer > div.clickable {
     cursor: pointer; }
   .footer > div.clickable:hover {
@@ -210,7 +210,6 @@ body > div.container {
     background-color: #16825d;
     cursor: pointer;
     width: fit-content;
-    width: -moz-fit-content;
     max-width: 155px;
     transition-duration: 0.4s; }
   .footer > div.connections:hover {
@@ -219,8 +218,7 @@ body > div.container {
     grid-area: info;
     padding-left: 5px;
     padding-right: 5px;
-    width: fit-content;
-    width: -moz-fit-content;
+    overflow: hidden;
     max-width: 340px;
     cursor: initial;
     user-select: text;
@@ -236,8 +234,7 @@ body > div.container {
     grid-area: schemas;
     padding-left: 5px;
     padding-right: 5px;
-    width: fit-content;
-    width: -moz-fit-content;
+    overflow: hidden;
     max-width: 150px;
     transition-duration: 0.4s; }
   .footer > div.schemas > i {
@@ -257,19 +254,16 @@ body > div.container {
   .footer > div.content {
     grid-area: content;
     opacity: 0.75;
-    width: fit-content;
-    width: -moz-fit-content;
+    overflow: hidden;
     padding-left: 10px;
     padding-right: 10px; }
   .footer > div.msg {
     width: fit-content;
-    width: -moz-fit-content;
     grid-area: msg;
     margin: auto;
     text-shadow: 0px 0px 8px #000000; }
   .footer > div.editor {
     width: fit-content;
-    width: -moz-fit-content;
     grid-area: editor;
     opacity: 0.75; }
   .footer > div.editor > span {
@@ -278,8 +272,7 @@ body > div.container {
   .footer > div.lang {
     grid-area: lang;
     opacity: 0.75;
-    width: fit-content;
-    width: -moz-fit-content;
+    overflow: hidden;
     cursor: default; }
   .footer > div.lang > span {
     padding-left: 10px;
@@ -287,7 +280,6 @@ body > div.container {
   .footer > div.version {
     grid-area: version;
     width: fit-content;
-    width: -moz-fit-content;
     opacity: 0.75;
     cursor: default; }
   .footer > div.version > span {
@@ -297,7 +289,6 @@ body > div.container {
     grid-area: user;
     opacity: 0.75;
     width: fit-content;
-    width: -moz-fit-content;
     cursor: default; }
   .footer > div.user > span {
     padding-left: 10px;
