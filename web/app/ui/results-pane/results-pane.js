@@ -94,6 +94,7 @@ define(["require", "exports", "app/api", "app/ui/results-pane/grid", "app/ui/res
             this.grid.addRow(rn, e);
         }
         end() {
+            this.grid.done(this.statsValue, this.error != null);
             if (this.error) {
                 this.footerMsg.html(`⚠️ ${this.error.messageText}`);
             }

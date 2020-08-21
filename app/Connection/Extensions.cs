@@ -71,6 +71,12 @@ namespace Pgcode.Connection
             return default;
         }
 
+        public static bool Any(this NpgsqlCommand cmd, string command)
+        {
+            using var reader = cmd.Reader(command);
+            return reader.Read();
+        }
+
         public static async ValueTask<T> FunctionSingleAsync<T>(this NpgsqlConnection connection, string command, NpgsqlParameter param1 = null)
         {
             await using var cmd = connection.CreateCommand();

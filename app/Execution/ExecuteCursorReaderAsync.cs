@@ -14,7 +14,7 @@ namespace Pgcode.Execution
     {
         public static void CloseCursorIfExists(this WorkspaceConnection ws, NpgsqlCommand cmd)
         {
-            if (ws.Cursor != null && cmd.Single<int>($"select 1 from pg_cursors where name = \"{ws.Cursor}\"") != 1)
+            if (ws.Cursor != null && cmd.Any($"select 1 from pg_cursors where name = '{ws.Cursor}'"))
             {
                 cmd.Execute($"close \"{ws.Cursor}\"");
             }
@@ -31,6 +31,7 @@ namespace Pgcode.Execution
             
             var tranId1 = cmd.Single<long>("select txid_current()");
             var tranId2 = cmd.Single<long>("select txid_current()");
+            var cursor = ws.Cursor = $"pgcode_{ws.ConnectionId}";
             if (tranId1 != tranId2)
             {
                 ws.IsNewTran = true;
@@ -40,7 +41,6 @@ namespace Pgcode.Execution
             {
                 ws.CloseCursorIfExists(cmd);
             }
-            var cursor = ws.Cursor = $"pgcode_{ws.ConnectionId}";
 
             var declareStatement = $"declare \"{cursor}\" cursor for ";
             ws.ErrorOffset = declareStatement.Length;

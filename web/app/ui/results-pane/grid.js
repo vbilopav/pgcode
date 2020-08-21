@@ -21,7 +21,10 @@ define(["require", "exports", "app/_sys/timeout"], function (require, exports, t
         }
         addHeader(header) {
             const th = document.createElement("div").appendElementTo(this.table).addClass("th").dataAttr("rn", 0);
-            document.createElement("div").appendElementTo(th).addClass("td");
+            document.createElement("div").appendElementTo(th)
+                .addClass("td")
+                .on("mouseenter", (e) => this.cellMouseEnter(e.currentTarget))
+                .on("mouseleave", (e) => this.cellMouseLeave(e.currentTarget));
             let i = 1;
             for (let item of header) {
                 document
@@ -30,7 +33,9 @@ define(["require", "exports", "app/_sys/timeout"], function (require, exports, t
                     .appendElementTo(th)
                     .addClass("td")
                     .dataAttr("i", i++)
-                    .on("mousemove", (e) => this.cellMousemove(e));
+                    .on("mousemove", (e) => this.headerCellMousemove(e))
+                    .on("mouseenter", (e) => this.cellMouseEnter(e.currentTarget))
+                    .on("mouseleave", (e) => this.cellMouseLeave(e.currentTarget));
             }
             this.headerHeight = th.clientHeight;
         }
@@ -40,7 +45,11 @@ define(["require", "exports", "app/_sys/timeout"], function (require, exports, t
                 this.first = tr;
             }
             this.last = tr;
-            document.createElement("div").html(`${rn}`).appendElementTo(tr).addClass("td").addClass("th");
+            document.createElement("div").html(`${rn}`).appendElementTo(tr)
+                .addClass("td")
+                .addClass("th")
+                .on("mouseenter", (e) => this.cellMouseEnter(e.currentTarget))
+                .on("mouseleave", (e) => this.cellMouseLeave(e.currentTarget));
             let i = 1;
             for (let item of row) {
                 let td = document
@@ -48,11 +57,17 @@ define(["require", "exports", "app/_sys/timeout"], function (require, exports, t
                     .html(`${(item == null ? "NULL" : item)}`)
                     .appendElementTo(tr)
                     .addClass("td")
-                    .addClass(`td${i++}`);
+                    .addClass(`td${i++}`)
+                    .on("mouseenter", (e) => this.cellMouseEnter(e.currentTarget))
+                    .on("mouseleave", (e) => this.cellMouseLeave(e.currentTarget));
                 if (item == null) {
                     td.addClass("null");
                 }
             }
+        }
+        done(stats, hasError) {
+            this.stats = stats;
+            this.hasError = hasError;
         }
         adjust() {
             if (!this.table) {
@@ -79,14 +94,23 @@ define(["require", "exports", "app/_sys/timeout"], function (require, exports, t
             }
         }
         onTableScroll() {
+            if (this.cantLoadMore) {
+                return;
+            }
             timeout_1.timeout(() => {
+                if (this.cantLoadMore) {
+                    return;
+                }
                 const rect = this.table.getBoundingClientRect();
                 const first = document.elementFromPoint(rect.x, rect.y + this.headerHeight).parentElement;
                 const last = document.elementFromPoint(rect.x, rect.y + this.table.clientHeight - 5).parentElement;
                 console.log(first.dataAttr("rn"), last.dataAttr("rn"));
             }, 75, `${this.id}-grid-scroll`);
         }
-        cellMousemove(e) {
+        cantLoadMore() {
+            return !this.stats || this.hasError || this.stats.rowsAffected == this.stats.rowsFetched;
+        }
+        headerCellMousemove(e) {
             if (this.moving) {
                 return;
             }
@@ -104,6 +128,10 @@ define(["require", "exports", "app/_sys/timeout"], function (require, exports, t
                 document.body.css("cursor", "default");
                 this.toMove = null;
             }
+        }
+        cellMouseEnter(cell) {
+        }
+        cellMouseLeave(cell) {
         }
         mousedown(e) {
             if (this.toMove) {
@@ -133,7 +161,7 @@ define(["require", "exports", "app/_sys/timeout"], function (require, exports, t
         }
         mousemove(e) {
             if (!this.moving) {
-                if (!e.target.hasClass("th") && !e.target.parentElement.hasClass("th") && !e.target.parentElement.parentElement.hasClass("th")) {
+                if (!e.target.parentElement.hasClass("th") && !e.target.parentElement.parentElement.hasClass("th")) {
                     document.body.css("cursor", "default");
                     this.toMove = null;
                     this.moving = false;

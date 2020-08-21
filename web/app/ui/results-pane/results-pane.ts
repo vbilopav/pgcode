@@ -119,7 +119,8 @@ export default class  {
         this.grid.addRow(rn,  e);
     }
 
-    end () {
+    end() {
+        this.grid.done(this.statsValue, this.error != null);
         if (this.error) {
             this.footerMsg.html(`⚠️ ${this.error.messageText}`);
         } else {

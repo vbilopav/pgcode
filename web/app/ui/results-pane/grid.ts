@@ -1,4 +1,4 @@
-import { IHeader } from "app/api";
+import { IHeader, IStats } from "app/api";
 import { timeout } from "app/_sys/timeout";
 
 export default class  {
@@ -11,6 +11,9 @@ export default class  {
 
     private toMove: Element;
     private moving = false;
+
+    private stats: IStats;
+    private hasError: boolean
 
     constructor(id: string, element: Element) {
         this.id = id;
@@ -32,7 +35,10 @@ export default class  {
 
     addHeader(header: IHeader[]) {
         const th = document.createElement("div").appendElementTo(this.table).addClass("th").dataAttr("rn", 0) as Element;
-        document.createElement("div").appendElementTo(th).addClass("td");
+        document.createElement("div").appendElementTo(th)
+            .addClass("td")
+            .on("mouseenter", (e: MouseEvent)=>this.cellMouseEnter(e.currentTarget as Element))
+            .on("mouseleave", (e: MouseEvent)=>this.cellMouseLeave(e.currentTarget as Element));
         let i = 1;
         for(let item of header) {
             document
@@ -41,7 +47,9 @@ export default class  {
                 .appendElementTo(th)
                 .addClass("td")
                 .dataAttr("i", i++)
-                .on("mousemove", (e: MouseEvent)=>this.cellMousemove(e));
+                .on("mousemove", (e: MouseEvent)=>this.headerCellMousemove(e))
+                .on("mouseenter", (e: MouseEvent)=>this.cellMouseEnter(e.currentTarget as Element))
+                .on("mouseleave", (e: MouseEvent)=>this.cellMouseLeave(e.currentTarget as Element));
         }
         this.headerHeight = th.clientHeight;
     }
@@ -52,7 +60,11 @@ export default class  {
             this.first = tr;
         }
         this.last = tr;
-        document.createElement("div").html(`${rn}`).appendElementTo(tr).addClass("td").addClass("th");
+        document.createElement("div").html(`${rn}`).appendElementTo(tr)
+            .addClass("td")
+            .addClass("th")
+            .on("mouseenter", (e: MouseEvent)=>this.cellMouseEnter(e.currentTarget as Element))
+            .on("mouseleave", (e: MouseEvent)=>this.cellMouseLeave(e.currentTarget as Element));
         let i = 1;
         for(let item of row) {
             let td = document
@@ -60,11 +72,18 @@ export default class  {
                 .html(`${(item == null? "NULL" : item)}`)
                 .appendElementTo(tr)
                 .addClass("td")
-                .addClass(`td${i++}`);
+                .addClass(`td${i++}`)
+                .on("mouseenter", (e: MouseEvent)=>this.cellMouseEnter(e.currentTarget as Element))
+                .on("mouseleave", (e: MouseEvent)=>this.cellMouseLeave(e.currentTarget as Element));
             if (item == null) {
                 td.addClass("null");
             }
         }
+    }
+
+    done(stats: IStats, hasError: boolean) {
+        this.stats = stats;
+        this.hasError = hasError;
     }
 
     adjust() {
@@ -91,7 +110,13 @@ export default class  {
     }
 
     private onTableScroll() {
+        if (this.cantLoadMore) {
+            return
+        }
         timeout(() => {
+            if (this.cantLoadMore) {
+                return
+            }
             const rect = this.table.getBoundingClientRect() as DOMRect;
             const first = document.elementFromPoint(rect.x, rect.y + this.headerHeight).parentElement;
             const last = document.elementFromPoint(rect.x, rect.y + this.table.clientHeight - 5).parentElement;
@@ -100,13 +125,16 @@ export default class  {
         }, 75, `${this.id}-grid-scroll`);
     }
 
-    private cellMousemove(e: MouseEvent) {
+    private cantLoadMore() {
+        return !this.stats || this.hasError || this.stats.rowsAffected == this.stats.rowsFetched;
+    }
+
+    private headerCellMousemove(e: MouseEvent) {
         if (this.moving) {
             return;
         }
         const cell = e.currentTarget as Element;
         const rect = cell.getBoundingClientRect();
-
         if (e.offsetX < 2) {
             document.body.css("cursor", "col-resize");
             this.toMove = cell.previousElementSibling;
@@ -117,6 +145,16 @@ export default class  {
             document.body.css("cursor", "default");
             this.toMove = null;
         }
+    }
+
+    private cellMouseEnter(cell: Element) {
+        //cell.css("border-color", "blue");
+        // highlight
+    }
+
+    private cellMouseLeave(cell: Element) {
+        //cell.css("border-color", "blue");
+        // unhighlight
     }
 
     private mousedown(e: MouseEvent) {
@@ -150,7 +188,7 @@ export default class  {
 
     private mousemove(e: MouseEvent) {
         if (!this.moving) {
-            if (!(e.target as Element).hasClass("th") && !(e.target as Element).parentElement.hasClass("th") && !(e.target as Element).parentElement.parentElement.hasClass("th")) {
+            if (!(e.target as Element).parentElement.hasClass("th") && !(e.target as Element).parentElement.parentElement.hasClass("th")) {
                 document.body.css("cursor", "default");
                 this.toMove = null;
                 this.moving = false;
