@@ -1,5 +1,5 @@
 import { ItemInfoType, getConnectionColor, IStats, INotice, IHeader } from "app/api";
-import Results from "app/ui/results-pane/results";
+import Grid from "app/ui/results-pane/grid";
 import Messages from "app/ui/results-pane/messages";
 
 enum Status {Ready, Disconnected, Running, Complete}
@@ -14,7 +14,7 @@ export default class  {
     private readonly footerTime: Element;
     private readonly footerRows: Element;
     private readonly undock: ()=>void;
-    private readonly results: Results;
+    private readonly grid: Grid;
     private status: Status;
     private error: INotice;
     private statsValue: IStats;
@@ -60,7 +60,7 @@ export default class  {
         this.footerTime = this.element.children[2].children[1].children[0];
         this.footerRows = this.element.children[2].children[2].children[0];
 
-        this.results = new Results(id, this.panes[0]);
+        this.grid = new Grid(id, this.panes[0]);
         new Messages(this.panes[1]);
 
         this.activateByTab(this.tabs[0]);
@@ -94,7 +94,7 @@ export default class  {
         this.footerMsg.html("Running...");
         this.error = null;
         this.statsValue = null;
-        this.results.initGrid();
+        this.grid.init();
     }
 
     stats(e: IStats) {
@@ -112,11 +112,11 @@ export default class  {
     }
 
     header(e: IHeader[]) {
-        this.results.addHeader(e);
+        this.grid.addHeader(e);
     }
 
     row(rn: number, e: Array<string>) {
-        this.results.addRow(rn,  e);
+        this.grid.addRow(rn,  e);
     }
 
     end () {
@@ -137,7 +137,7 @@ export default class  {
     }
 
     adjustGrid() {
-        this.results.adjustGrid();
+        this.grid.adjust();
     }
 
     private activateByTab(tab: Element) {

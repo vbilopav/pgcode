@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 using Npgsql;
-using Pgcode.Execution;
 using Pgcode.Middleware;
 
 namespace Pgcode.Connection
@@ -27,7 +26,7 @@ namespace Pgcode.Connection
             {
                 var data = GetConnectionDataByName(connectionName);
                 var builder = new NpgsqlConnectionStringBuilder(data.ConnectionString);
-                builder.ApplicationName = $"{builder.ApplicationName} - {key.Id}";
+                builder.ApplicationName = $"{builder.ApplicationName} - {key.UserName}: {key.Id}";
                 var connection = data.Connection.CloneWith(builder.ToString());
                 await connection.OpenAsync();
                 WorkspaceConnections.TryAdd(key.ConnectionId, new WorkspaceConnection

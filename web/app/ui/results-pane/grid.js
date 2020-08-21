@@ -8,7 +8,7 @@ define(["require", "exports", "app/_sys/timeout"], function (require, exports, t
             this.element = element;
             this.table = null;
         }
-        initGrid() {
+        init() {
             this.element.html("");
             this.table = document.createElement("div").appendElementTo(this.element).addClass("table").on("scroll", e => this.onTableScroll());
             this.last = null;
@@ -17,7 +17,7 @@ define(["require", "exports", "app/_sys/timeout"], function (require, exports, t
                 .on("mousedown", (e) => this.mousedown(e))
                 .on("mouseup", (e) => this.mouseup(e))
                 .on("mousemove", (e) => this.mousemove(e))
-                .on("resize", () => this.adjustGrid());
+                .on("resize", () => this.adjust());
         }
         addHeader(header) {
             const th = document.createElement("div").appendElementTo(this.table).addClass("th").dataAttr("rn", 0);
@@ -54,7 +54,7 @@ define(["require", "exports", "app/_sys/timeout"], function (require, exports, t
                 }
             }
         }
-        adjustGrid() {
+        adjust() {
             if (!this.table) {
                 return;
             }
@@ -135,6 +135,8 @@ define(["require", "exports", "app/_sys/timeout"], function (require, exports, t
             if (!this.moving) {
                 if (!e.target.hasClass("th") && !e.target.parentElement.hasClass("th") && !e.target.parentElement.parentElement.hasClass("th")) {
                     document.body.css("cursor", "default");
+                    this.toMove = null;
+                    this.moving = false;
                 }
                 return;
             }
@@ -146,4 +148,4 @@ define(["require", "exports", "app/_sys/timeout"], function (require, exports, t
     }
     exports.default = default_1;
 });
-//# sourceMappingURL=results.js.map
+//# sourceMappingURL=grid.js.map

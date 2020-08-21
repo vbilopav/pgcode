@@ -40,9 +40,9 @@ namespace Pgcode.Execution
             {
                 ws.CloseCursorIfExists(cmd);
             }
-            ws.Cursor = $"cursor-{ws.Id}";
+            var cursor = ws.Cursor = $"pgcode_{ws.ConnectionId}";
 
-            var declareStatement = $"declare \"{ws.Cursor}\" cursor for ";
+            var declareStatement = $"declare \"{cursor}\" cursor for ";
             ws.ErrorOffset = declareStatement.Length;
             stopwatch.Start();
             await cmd.ExecuteAsync($"{declareStatement}{content}", cancellationToken);
@@ -50,11 +50,11 @@ namespace Pgcode.Execution
             var executionTime = stopwatch.Elapsed;
 
             stopwatch.Start();
-            var rowsAffected = cmd.Execute($"move forward all in \"{ws.Cursor}\""); 
-            cmd.Execute($"move absolute 0 in \"{ws.Cursor}\"");
+            var rowsAffected = cmd.Execute($"move forward all in \"{cursor}\""); 
+            cmd.Execute($"move absolute 0 in \"{cursor}\"");
 
             uint row = 1;
-            await using var reader = await cmd.ReaderAsync($"fetch {Program.Settings.CursorFetch} in \"{ws.Cursor}\"", cancellationToken);
+            await using var reader = await cmd.ReaderAsync($"fetch {Program.Settings.CursorFetch} in \"{cursor}\"", cancellationToken);
             if (reader.FieldCount > 0)
             {
                 yield return GetHeaderReply(reader);
@@ -68,7 +68,7 @@ namespace Pgcode.Execution
             row = row > 0 ? row - 1 : 0;
             if (row == 0 || row == rowsAffected)
             {
-                cmd.Execute(ws.IsNewTran ? "end" : $"close \"{ws.Cursor}\"");
+                cmd.Execute(ws.IsNewTran ? "end" : $"close \"{cursor}\"");
                 ws.Cursor = null;
             }
             await ws.SendStatsMessageAsync(new MessageRequest
@@ -77,7 +77,7 @@ namespace Pgcode.Execution
                 ExecutionTime = executionTime,
                 RowsAffected = rowsAffected,
                 RowsFetched = row,
-                Message = $"cursor reader \"{ws.Cursor}\""
+                Message = $"cursor reader \"{cursor}\""
             }, cancellationToken);
         }
     }

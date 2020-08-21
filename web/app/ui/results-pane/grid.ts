@@ -18,7 +18,7 @@ export default class  {
         this.table = null;
     }
 
-    initGrid() {
+    init() {
         this.element.html("");
         this.table = document.createElement("div").appendElementTo(this.element).addClass("table").on("scroll", e => this.onTableScroll())
         this.last = null;
@@ -27,7 +27,7 @@ export default class  {
             .on("mousedown", (e:MouseEvent)=>this.mousedown(e))
             .on("mouseup", (e:MouseEvent)=>this.mouseup(e))
             .on("mousemove", (e:MouseEvent)=>this.mousemove(e))
-            .on("resize", () => this.adjustGrid());
+            .on("resize", () => this.adjust());
     }
 
     addHeader(header: IHeader[]) {
@@ -67,7 +67,7 @@ export default class  {
         }
     }
 
-    adjustGrid() {
+    adjust() {
         if (!this.table) {
             return;
         }
@@ -152,6 +152,8 @@ export default class  {
         if (!this.moving) {
             if (!(e.target as Element).hasClass("th") && !(e.target as Element).parentElement.hasClass("th") && !(e.target as Element).parentElement.parentElement.hasClass("th")) {
                 document.body.css("cursor", "default");
+                this.toMove = null;
+                this.moving = false;
             }
             return;
         }
@@ -160,5 +162,4 @@ export default class  {
         this.toMove.css("min-width", w).css("max-width", w);
         this.table.findAll(`div.tr > div.td${this.toMove.dataAttr("i")}`).css("min-width", w).css("max-width", w);
     }
-
 }

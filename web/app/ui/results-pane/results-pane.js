@@ -1,4 +1,4 @@
-define(["require", "exports", "app/api", "app/ui/results-pane/results", "app/ui/results-pane/messages"], function (require, exports, api_1, results_1, messages_1) {
+define(["require", "exports", "app/api", "app/ui/results-pane/grid", "app/ui/results-pane/messages"], function (require, exports, api_1, grid_1, messages_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var Status;
@@ -45,7 +45,7 @@ define(["require", "exports", "app/api", "app/ui/results-pane/results", "app/ui/
             this.footerMsg = this.element.children[2].children[0].children[0];
             this.footerTime = this.element.children[2].children[1].children[0];
             this.footerRows = this.element.children[2].children[2].children[0];
-            this.results = new results_1.default(id, this.panes[0]);
+            this.grid = new grid_1.default(id, this.panes[0]);
             new messages_1.default(this.panes[1]);
             this.activateByTab(this.tabs[0]);
             this.status = Status.Disconnected;
@@ -75,7 +75,7 @@ define(["require", "exports", "app/api", "app/ui/results-pane/results", "app/ui/
             this.footerMsg.html("Running...");
             this.error = null;
             this.statsValue = null;
-            this.results.initGrid();
+            this.grid.init();
         }
         stats(e) {
             console.log(e);
@@ -88,10 +88,10 @@ define(["require", "exports", "app/api", "app/ui/results-pane/results", "app/ui/
             }
         }
         header(e) {
-            this.results.addHeader(e);
+            this.grid.addHeader(e);
         }
         row(rn, e) {
-            this.results.addRow(rn, e);
+            this.grid.addRow(rn, e);
         }
         end() {
             if (this.error) {
@@ -111,7 +111,7 @@ define(["require", "exports", "app/api", "app/ui/results-pane/results", "app/ui/
             this.adjustGrid();
         }
         adjustGrid() {
-            this.results.adjustGrid();
+            this.grid.adjust();
         }
         activateByTab(tab) {
             for (let current of this.tabs) {
