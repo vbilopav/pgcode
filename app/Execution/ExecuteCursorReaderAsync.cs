@@ -53,15 +53,14 @@ namespace Pgcode.Execution
             var rowsAffected = cmd.Execute($"move forward all in \"{ws.Cursor}\""); 
             cmd.Execute($"move absolute 0 in \"{ws.Cursor}\"");
 
-            uint row = 0;
+            uint row = 1;
             await using var reader = await cmd.ReaderAsync($"fetch {Program.Settings.CursorFetch} in \"{ws.Cursor}\"", cancellationToken);
+            if (reader.FieldCount > 0)
+            {
+                yield return GetHeaderReply(reader);
+            }
             while (await reader.ReadAsync(cancellationToken))
             {
-                if (row == 0)
-                {
-                    yield return GetHeaderReply(row++, reader);
-                }
-
                 yield return GetRowReply(row++, reader);
             }
             stopwatch.Stop();
@@ -72,7 +71,14 @@ namespace Pgcode.Execution
                 cmd.Execute(ws.IsNewTran ? "end" : $"close \"{ws.Cursor}\"");
                 ws.Cursor = null;
             }
-            await ws.SendStatsMessageAsync(stopwatch.Elapsed, executionTime, rowsAffected, row, $"cursor reader \"{ws.Cursor}\"", cancellationToken);
+            await ws.SendStatsMessageAsync(new MessageRequest
+            {
+                ReadTime = stopwatch.Elapsed,
+                ExecutionTime = executionTime,
+                RowsAffected = rowsAffected,
+                RowsFetched = row,
+                Message = $"cursor reader \"{ws.Cursor}\""
+            }, cancellationToken);
         }
     }
 }

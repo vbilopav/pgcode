@@ -29,14 +29,13 @@ namespace Pgcode.Execution
             var rowsAffected = reader.RecordsAffected;
 
             stopwatch.Start();
-            uint row = 0;
+            uint row = 1;
+            if (reader.FieldCount > 0)
+            {
+                yield return GetHeaderReply(reader);
+            }
             while (await reader.ReadAsync(cancellationToken))
             {
-                if (row == 0)
-                {
-                    yield return GetHeaderReply(row++, reader);
-                }
-
                 yield return GetRowReply(row++, reader);
 
                 if (row - 1 == Program.Settings.ReadLimit)
@@ -47,7 +46,14 @@ namespace Pgcode.Execution
             stopwatch.Stop();
             row = row > 0 ? row - 1 : 0;
             await reader.CloseAsync();
-            await ws.SendStatsMessageAsync(stopwatch.Elapsed, executionTime, rowsAffected, row, "reader", cancellationToken);
+            await ws.SendStatsMessageAsync(new MessageRequest
+            {
+                ReadTime = stopwatch.Elapsed,
+                ExecutionTime = executionTime,
+                RowsAffected = rowsAffected,
+                RowsFetched = row,
+                Message = "reader"
+            }, cancellationToken);
         }
     }
 }

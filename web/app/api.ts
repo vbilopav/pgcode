@@ -235,8 +235,6 @@ export const checkItemExists = (connection: string, schema: string, key: string,
     return _runConnectionsHub<boolean>(hub => hub.invoke("CheckItemExists", connection, schema, key, id));
 }
 
-
-
 const _createExecuteHub = () => new signalR
     .HubConnectionBuilder()
     .configureLogging(signalR.LogLevel.None)

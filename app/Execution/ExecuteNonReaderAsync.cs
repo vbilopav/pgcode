@@ -21,7 +21,13 @@ namespace Pgcode.Execution
             stopwatch.Start();
             var rowsAffected = await cmd.ExecuteAsync(content, cancellationToken);
             stopwatch.Stop();
-            await ws.SendStatsMessageAsync(null, stopwatch.Elapsed, rowsAffected, 0, "execution", cancellationToken);
+            await ws.SendStatsMessageAsync(new MessageRequest
+            {
+                ExecutionTime = stopwatch.Elapsed,
+                RowsAffected = rowsAffected,
+                RowsFetched = 0,
+                Message = "execution"
+            }, cancellationToken);
         }
     }
 }

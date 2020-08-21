@@ -6,21 +6,21 @@ namespace Pgcode.Execution
 {
     public static partial class ExecuteExtension
     {
-        private static ExecuteReply GetHeaderReply(uint row, NpgsqlDataReader r)
+        private static ExecuteReply GetHeaderReply(NpgsqlDataReader reader)
         {
-            var headerReply = new ExecuteReply { RowNumber = row };
-            for (var index = 0; index < r.FieldCount; index++)
+            var headerReply = new ExecuteReply { RowNumber = 0 };
+            for (var index = 0; index < reader.FieldCount; index++)
             {
                 headerReply.Data.Add(
-                    $"{{\"name\":\"{r.GetName(index)}\",\"type\":\"{r.GetDataTypeName(index)}\"}}");
+                    $"{{\"name\":\"{reader.GetName(index)}\",\"type\":\"{reader.GetDataTypeName(index)}\"}}");
             }
             return headerReply;
         }
 
-        private static ExecuteReply GetRowReply(uint row, NpgsqlDataReader r)
+        private static ExecuteReply GetRowReply(uint row, NpgsqlDataReader reader)
         {
-            var values = new object[r.FieldCount];
-            r.GetProviderSpecificValues(values);
+            var values = new object[reader.FieldCount];
+            reader.GetProviderSpecificValues(values);
 
             var rowReply = new ExecuteReply { RowNumber = row };
             for (uint index = 0; index < values.Length; index++)

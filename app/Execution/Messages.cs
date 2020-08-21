@@ -76,25 +76,30 @@ namespace Pgcode.Execution
         public string Time { get; set; }
     }
 
+    public class MessageRequest
+    {
+        public TimeSpan? ReadTime { get; set; }
+        public TimeSpan ExecutionTime { get; set; }
+        public int RowsAffected { get; set; }
+        public uint RowsFetched { get; set; }
+        public string Message { get; set; }
+    }
+
     public static partial class ExecuteExtension
     {
         public static async ValueTask SendStatsMessageAsync(
             this WorkspaceConnection ws,
-            TimeSpan? readTime,
-            TimeSpan executionTime,
-            int rowsAffected,
-            uint rowsFetched,
-            string message,
+            MessageRequest request,
             CancellationToken cancellationToken = default)
         {
             await ws.Proxy.SendAsync($"stats-{ws.Id}", new StatsMessage
             {
-                Read = readTime?.Format(),
-                Execution = executionTime.Format(),
-                Total = readTime != null ? (executionTime + readTime.Value).Format() : executionTime.Format(),
-                RowsAffected = rowsAffected,
-                RowsFetched = rowsFetched,
-                Message = message
+                Read = request.ReadTime?.Format(),
+                Execution = request.ExecutionTime.Format(),
+                Total = request.ReadTime != null ? (request.ExecutionTime + request.ReadTime.Value).Format() : request.ExecutionTime.Format(),
+                RowsAffected = request.RowsAffected,
+                RowsFetched = request.RowsFetched,
+                Message = request.Message
             }, cancellationToken);
         }
 
