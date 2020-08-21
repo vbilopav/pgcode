@@ -323,16 +323,15 @@ export interface IStats {
 
 export interface IExecutionStream {
     reconnect: () => void;
-    stats: (e: IStats) => void;
     error: (e: GrpcStatus) => void;
     status: (e: GrpcStatus) => void;
     message: (e: INotice) => void;
     header: (e: Array<IHeader>) => void;
     row: (rn: number, e: Array<string>) => void;
-    end: () => void;
+    end: (e: IStats) => void;
 }
 
-export const execute = async (connection: string, schema: string, id: string, content: string, stream: IExecutionStream) => {
+export const execute = async (id: string, content: string, stream: IExecutionStream) => {
     const hub = await _getExecuteHub(id, false);
     const callStreamMethod = (method: string, ...args: any[]) => {
         if (stream[method]) {
@@ -351,13 +350,12 @@ export const execute = async (connection: string, schema: string, id: string, co
         service: "/api.ExecuteService/Execute",
         request: [GrpcType.String, GrpcType.String, GrpcType.String, GrpcType.String],
         reply: [{rn: GrpcType.Uint32}, {data: [GrpcType.String]}, {nullIndexes: GrpcType.PackedUint32}]
-    }, connection, schema, id, content, hub.connection.connectionId);
+    }, hub.connection.connectionId, content);
 
     hub.off(messageName);
     hub.off(statsName);
-
     hub.on(messageName, (msg: INotice) => callStreamMethod("message", msg));
-    hub.on(statsName, (msg: IStats) => callStreamMethod("stats", msg));
+    const statsPromise = new Promise<IStats>(resolve => hub.on(statsName, (msg: IStats) => resolve(msg)));
 
     let header = false;
     grpcStream
@@ -392,5 +390,42 @@ export const execute = async (connection: string, schema: string, id: string, co
                 stream.row(row.rn, row.data);
             }
         })
-        .on("end", () => callStreamMethod("end"));
+        .on("end", () => statsPromise.then(stats => callStreamMethod("end", stats)));
+}
+
+export const cursor = async (id: string, from: number, to: number) => {
+    const hub = await _getExecuteHub(id, false);
+    
+    if (hub.state != signalR.HubConnectionState.Connected || hub.connectionId == undefined) {
+        throw "connection lost";
+    }
+
+    const grpcStream = grpc.serverStreaming({
+        service: "/api.ExecuteService/Cursor",
+        request: [GrpcType.String, GrpcType.Uint32, GrpcType.Uint32],
+        reply: [{rn: GrpcType.Uint32}, {data: [GrpcType.String]}, {nullIndexes: GrpcType.PackedUint32}]
+    }, hub.connection.connectionId, from, to);
+
+    /*
+    grpcStream
+        .on("error", e => {
+            if ((e as GrpcStatus).code == GrpcErrorCode.NotFound && (e as GrpcStatus).message == "connection not initialized") {
+                throw "connection lost";
+            } else {
+                throw e;
+            }
+        })
+        .on("data", e => {
+            if (stream["row"]) {
+                let row = e as IRow;
+                if (row.nullIndexes && row.nullIndexes.length) {
+                    for(let idx of row.nullIndexes){
+                        row.data[idx] = null;
+                    };
+                }
+                stream.row(row.rn, row.data);
+            }
+        })
+        .on("end", () => statsPromise.then(stats => callStreamMethod("end", stats)));
+        */
 }

@@ -38,7 +38,7 @@ namespace Pgcode.Execution
             Routine = e.Routine;
         }
 
-        public Message(PostgresException e, TimeSpan time)
+        public Message(PostgresException e, TimeSpan? time)
         {
             ConstraintName = e.ConstraintName;
             DataTypeName = e.DataTypeName;
@@ -55,7 +55,7 @@ namespace Pgcode.Execution
             SqlState = e.SqlState;
             Severity = e.Severity;
             Routine = e.Routine;
-            Time = time.Format();
+            Time = time?.Format();
         }
 
         public string ConstraintName { get; set; }
@@ -114,7 +114,7 @@ namespace Pgcode.Execution
         public static async ValueTask SendPgErrorAsync(
             this WorkspaceConnection ws,
             PostgresException e, 
-            TimeSpan time,
+            TimeSpan? time,
             CancellationToken cancellationToken = default)
         {
             var message = new Message(e, time);

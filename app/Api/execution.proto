@@ -6,14 +6,18 @@ package api;
 
 service ExecuteService {
 	rpc Execute (ExecuteRequest) returns (stream ExecuteReply);
+	rpc Cursor (CursorRequest) returns (stream ExecuteReply);
 }
 
 message ExecuteRequest { 
-	string Connection = 1;
-	string Schema = 2;
-	string Id = 3;
-	string Content = 4;
-	string ConnectionId = 5;
+	string ConnectionId = 1;
+	string Content = 2;
+}
+
+message CursorRequest { 
+	string ConnectionId = 1;
+	uint32 From = 2;
+	uint32 To = 3;
 }
 
 message ExecuteReply { 

@@ -197,7 +197,7 @@ define(["require", "exports", "app/_sys/pubsub", "libs/signalr/signalr.min.js", 
     };
     ;
     ;
-    exports.execute = async (connection, schema, id, content, stream) => {
+    exports.execute = async (id, content, stream) => {
         const hub = await _getExecuteHub(id, false);
         const callStreamMethod = (method, ...args) => {
             if (stream[method]) {
@@ -214,11 +214,11 @@ define(["require", "exports", "app/_sys/pubsub", "libs/signalr/signalr.min.js", 
             service: "/api.ExecuteService/Execute",
             request: [grpc_service_1.GrpcType.String, grpc_service_1.GrpcType.String, grpc_service_1.GrpcType.String, grpc_service_1.GrpcType.String],
             reply: [{ rn: grpc_service_1.GrpcType.Uint32 }, { data: [grpc_service_1.GrpcType.String] }, { nullIndexes: grpc_service_1.GrpcType.PackedUint32 }]
-        }, connection, schema, id, content, hub.connection.connectionId);
+        }, hub.connection.connectionId, content);
         hub.off(messageName);
         hub.off(statsName);
         hub.on(messageName, (msg) => callStreamMethod("message", msg));
-        hub.on(statsName, (msg) => callStreamMethod("stats", msg));
+        const statsPromise = new Promise(resolve => hub.on(statsName, (msg) => resolve(msg)));
         let header = false;
         grpcStream
             .on("error", e => {
@@ -255,7 +255,18 @@ define(["require", "exports", "app/_sys/pubsub", "libs/signalr/signalr.min.js", 
                 stream.row(row.rn, row.data);
             }
         })
-            .on("end", () => callStreamMethod("end"));
+            .on("end", () => statsPromise.then(stats => callStreamMethod("end", stats)));
+    };
+    exports.cursor = async (id, from, to) => {
+        const hub = await _getExecuteHub(id, false);
+        if (hub.state != signalR.HubConnectionState.Connected || hub.connectionId == undefined) {
+            throw "connection lost";
+        }
+        const grpcStream = grpc.serverStreaming({
+            service: "/api.ExecuteService/Cursor",
+            request: [grpc_service_1.GrpcType.String, grpc_service_1.GrpcType.Uint32, grpc_service_1.GrpcType.Uint32],
+            reply: [{ rn: grpc_service_1.GrpcType.Uint32 }, { data: [grpc_service_1.GrpcType.String] }, { nullIndexes: grpc_service_1.GrpcType.PackedUint32 }]
+        }, hub.connection.connectionId, from, to);
     };
 });
 //# sourceMappingURL=api.js.map

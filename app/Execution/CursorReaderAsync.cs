@@ -21,7 +21,21 @@ namespace Pgcode.Execution
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Security", "CA2100:Review SQL queries for security vulnerabilities", Justification = "<Pending>")]
-        public static async IAsyncEnumerable<ExecuteReply> ExecuteCursorReaderAsync(
+        public static async IAsyncEnumerable<ExecuteReply> CursorReaderAsync(this WorkspaceConnection ws, CursorRequest request)
+        {
+            await using var cmd = ws.Connection.CreateCommand();
+            await cmd.ExecuteAsync($"move absolute {request.From - 1} in \"{ws.Cursor}\"");
+            var row = request.From;
+            await using var reader = await cmd.ReaderAsync($"fetch {request.To - request.From} in \"{ws.Cursor}\"");
+            while (await reader.ReadAsync())
+            {
+                yield return GetRowReply(row++, reader);
+            }
+            await reader.CloseAsync();
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Security", "CA2100:Review SQL queries for security vulnerabilities", Justification = "<Pending>")]
+        public static async IAsyncEnumerable<ExecuteReply> CreateCursorReaderAsync(
             this WorkspaceConnection ws,
             string content,
             [EnumeratorCancellation] CancellationToken cancellationToken = default)

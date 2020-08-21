@@ -225,7 +225,7 @@ export class Editor implements IEditor {
             if (!selection.isEmpty()) {
                 const value = this.monaco.getModel().getValueInRange(selection);
                 this.results.start();
-                execute(this.data.connection, this.data.schema, this.id, value, {
+                execute(this.id, value, {
                     reconnect: () => {
                         this.initConnection().then(result => {
                             if (result) {
@@ -236,11 +236,10 @@ export class Editor implements IEditor {
                             setTimeout(() => publish(DISMISS_FOOTER_MESSAGE), 5000);
                         });
                     },
-                    stats: e => this.results.stats(e),
                     message: e => this.results.message(e),
                     header: e => this.results.header(e),
                     row: (rn, e) => this.results.row(rn, e),
-                    end: () => this.results.end()
+                    end: e => this.results.end(e)
                 } as IExecutionStream);
 
             } else {

@@ -5,15 +5,15 @@ export default class  {
     private readonly element: Element;
     private readonly id: string;
     private table: Element;
+    private header: Element;
     private last: Element;
     private first: Element;
     private headerHeight: number;
-
     private toMove: Element;
     private moving = false;
-
     private stats: IStats;
-    private hasError: boolean
+    private start: number;
+    private end: number;
 
     constructor(id: string, element: Element) {
         this.id = id;
@@ -34,28 +34,35 @@ export default class  {
     }
 
     addHeader(header: IHeader[]) {
-        const th = document.createElement("div").appendElementTo(this.table).addClass("th").dataAttr("rn", 0) as Element;
-        document.createElement("div").appendElementTo(th)
+        let i = 0;
+        this.header = document.createElement("div").appendElementTo(this.table).addClass("th").dataAttr("row", 0) as Element;
+        document.createElement("div").appendElementTo(this.header)
             .addClass("td")
+            .addClass(`td${++i}`)
+            .dataAttr("col", i)
             .on("mouseenter", (e: MouseEvent)=>this.cellMouseEnter(e.currentTarget as Element))
             .on("mouseleave", (e: MouseEvent)=>this.cellMouseLeave(e.currentTarget as Element));
-        let i = 1;
         for(let item of header) {
             document
                 .createElement("div")
                 .html(`<div>${item.name}</div><div>${item.type}</div>`)
-                .appendElementTo(th)
+                .appendElementTo(this.header)
                 .addClass("td")
-                .dataAttr("i", i++)
+                .addClass(`td${++i}`)
+                .dataAttr("col", i)
                 .on("mousemove", (e: MouseEvent)=>this.headerCellMousemove(e))
                 .on("mouseenter", (e: MouseEvent)=>this.cellMouseEnter(e.currentTarget as Element))
                 .on("mouseleave", (e: MouseEvent)=>this.cellMouseLeave(e.currentTarget as Element));
         }
-        this.headerHeight = th.clientHeight;
+        this.headerHeight = this.header.clientHeight;
     }
 
     addRow(rn: number, row: Array<string>) {
-        const tr = document.createElement("div").appendElementTo(this.table).addClass("tr").dataAttr("rn", rn);
+        let i = 0;
+        const tr = document.createElement("div").appendElementTo(this.table)
+            .addClass("tr")
+            .addClass(`tr${rn}`)
+            .dataAttr("row", rn);
         if (!this.first) {
             this.first = tr;
         }
@@ -63,16 +70,17 @@ export default class  {
         document.createElement("div").html(`${rn}`).appendElementTo(tr)
             .addClass("td")
             .addClass("th")
+            .dataAttr("col", ++i)
             .on("mouseenter", (e: MouseEvent)=>this.cellMouseEnter(e.currentTarget as Element))
             .on("mouseleave", (e: MouseEvent)=>this.cellMouseLeave(e.currentTarget as Element));
-        let i = 1;
         for(let item of row) {
             let td = document
                 .createElement("div")
                 .html(`${(item == null? "NULL" : item)}`)
                 .appendElementTo(tr)
                 .addClass("td")
-                .addClass(`td${i++}`)
+                .addClass(`td${++i}`)
+                .dataAttr("col", i)
                 .on("mouseenter", (e: MouseEvent)=>this.cellMouseEnter(e.currentTarget as Element))
                 .on("mouseleave", (e: MouseEvent)=>this.cellMouseLeave(e.currentTarget as Element));
             if (item == null) {
@@ -81,9 +89,10 @@ export default class  {
         }
     }
 
-    done(stats: IStats, hasError: boolean) {
+    done(stats: IStats) {
         this.stats = stats;
-        this.hasError = hasError;
+        this.start = 1;
+        this.end = stats.rowsFetched;
     }
 
     adjust() {
@@ -110,23 +119,41 @@ export default class  {
     }
 
     private onTableScroll() {
-        if (this.cantLoadMore) {
+        if (this.cantLoadMore()) {
             return
         }
         timeout(() => {
-            if (this.cantLoadMore) {
+            if (this.cantLoadMore()) {
                 return
             }
             const rect = this.table.getBoundingClientRect() as DOMRect;
-            const first = document.elementFromPoint(rect.x, rect.y + this.headerHeight).parentElement;
-            const last = document.elementFromPoint(rect.x, rect.y + this.table.clientHeight - 5).parentElement;
-            
-            console.log(first.dataAttr("rn"), last.dataAttr("rn"));
+            const first = document.elementFromPoint(rect.x, rect.y + this.headerHeight).parentElement.dataAttr("row") as number;
+            const last = document.elementFromPoint(rect.x, rect.y + this.table.clientHeight - 5).parentElement.dataAttr("row") as number;
+            if (first == undefined || last == undefined) {
+                return
+            }
+            const page = this.end - this.start
+            const mid = Math.round(page / 2);
+            const half = Math.round((last - first) / 2);
+
+            if (last > mid + half && last < this.stats.rowsAffected)  {
+                const from = this.end + 1;
+                let to = from + page;
+                if (to > this.stats.rowsAffected) {
+                    to = this.stats.rowsAffected
+                }
+                if (to <= this.stats.rowsAffected) {
+                    console.log("load from", from, " to ", to);
+                    console.log("remove from", this.start, " to ", this.start + (to - from));
+                    console.log();
+                }
+            }
+
         }, 75, `${this.id}-grid-scroll`);
     }
 
     private cantLoadMore() {
-        return !this.stats || this.hasError || this.stats.rowsAffected == this.stats.rowsFetched;
+        return !this.stats || this.stats.rowsAffected == this.stats.rowsFetched;
     }
 
     private headerCellMousemove(e: MouseEvent) {
@@ -148,13 +175,15 @@ export default class  {
     }
 
     private cellMouseEnter(cell: Element) {
-        //cell.css("border-color", "blue");
-        // highlight
+        cell.addClass("highlight");
+        cell.parentElement.firstElementChild.addClass("highlight");
+        this.header.find(`div.td${cell.dataAttr("col")}`).addClass("highlight");
     }
 
     private cellMouseLeave(cell: Element) {
-        //cell.css("border-color", "blue");
-        // unhighlight
+        cell.removeClass("highlight");
+        cell.parentElement.firstElementChild.removeClass("highlight");
+        this.header.find(`div.td${cell.dataAttr("col")}`).removeClass("highlight");
     }
 
     private mousedown(e: MouseEvent) {
@@ -166,8 +195,8 @@ export default class  {
             if (this.toMove.nextElementSibling) {
                 this.toMove.nextElementSibling.css("border-left-style", "dotted");
             }
-            this.table.findAll(`div.tr > div.td${this.toMove.dataAttr("i")}`).css("border-right-style", "dotted");
-            this.table.findAll(`div.tr > div.td${this.toMove.dataAttr("i")+1}`).css("border-left-style", "dotted");
+            this.table.findAll(`div.tr > div.td${this.toMove.dataAttr("col")}`).css("border-right-style", "dotted");
+            this.table.findAll(`div.tr > div.td${this.toMove.dataAttr("col")+1}`).css("border-left-style", "dotted");
         }
     }
 
@@ -181,14 +210,16 @@ export default class  {
         if (this.toMove.nextElementSibling) {
             this.toMove.nextElementSibling.css("border-left-style", "");
         }
-        this.table.findAll(`div.tr > div.td${this.toMove.dataAttr("i")}`).css("border-right-style", "");
-        this.table.findAll(`div.tr > div.td${this.toMove.dataAttr("i")+1}`).css("border-left-style", "");
+        const i = this.toMove.dataAttr("col");
+        this.table.findAll(`div.tr > div.td${i}`).css("border-right-style", "");
+        this.table.findAll(`div.tr > div.td${i+1}`).css("border-left-style", "");
         this.toMove = null;
     }
 
     private mousemove(e: MouseEvent) {
         if (!this.moving) {
-            if (!(e.target as Element).parentElement.hasClass("th") && !(e.target as Element).parentElement.parentElement.hasClass("th")) {
+            const t = (e.target as Element);
+            if (!t.parentElement || (!t.parentElement.hasClass("th") && !t.parentElement.parentElement.hasClass("th"))) {
                 document.body.css("cursor", "default");
                 this.toMove = null;
                 this.moving = false;
@@ -198,6 +229,7 @@ export default class  {
         const rect = this.toMove.getBoundingClientRect() as DOMRect;
         const w = (e.clientX - rect.x - 11) + "px";
         this.toMove.css("min-width", w).css("max-width", w);
-        this.table.findAll(`div.tr > div.td${this.toMove.dataAttr("i")}`).css("min-width", w).css("max-width", w);
+        const i = this.toMove.dataAttr("col");
+        this.table.findAll(`div.tr > div.td${i}`).css("min-width", w).css("max-width", w);
     }
 }

@@ -74,17 +74,13 @@ define(["require", "exports", "app/api", "app/ui/results-pane/grid", "app/ui/res
             this.status = Status.Running;
             this.footerMsg.html("Running...");
             this.error = null;
-            this.statsValue = null;
             this.grid.init();
-        }
-        stats(e) {
-            console.log(e);
-            this.statsValue = e;
         }
         message(e) {
             console.log(e.messageText);
             if (e.severity == "ERROR") {
                 this.error = e;
+                this.end(null);
             }
         }
         header(e) {
@@ -93,17 +89,18 @@ define(["require", "exports", "app/api", "app/ui/results-pane/grid", "app/ui/res
         row(rn, e) {
             this.grid.addRow(rn, e);
         }
-        end() {
-            this.grid.done(this.statsValue, this.error != null);
+        end(stats) {
+            console.log(stats);
+            this.grid.done(stats);
             if (this.error) {
                 this.footerMsg.html(`⚠️ ${this.error.messageText}`);
             }
             else {
                 this.footerMsg.html("✔️ Query executed successfully.");
             }
-            if (this.statsValue) {
-                this.footerTime.html(`🕛 ${this.statsValue.total}`).attr("title", `execution time: ${this.statsValue.execution}\nreading time: ${this.statsValue.read}\ntotal time: ${this.statsValue.total}`);
-                this.footerRows.html(`${this.statsValue.rowsAffected} rows`);
+            if (stats) {
+                this.footerTime.html(`🕛 ${stats.total}`).attr("title", `execution time: ${stats.execution}\nreading time: ${stats.read}\ntotal time: ${stats.total}`);
+                this.footerRows.html(`${stats.rowsAffected} rows`);
             }
             else if (this.error) {
                 this.footerTime.html(`🕛 ${this.error.time}`).attr("title", `execution time: ${this.error.time}`);

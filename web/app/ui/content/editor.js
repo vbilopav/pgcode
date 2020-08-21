@@ -174,7 +174,7 @@ define(["require", "exports", "app/api", "app/_sys/pubsub", "app/_sys/timeout", 
                 if (!selection.isEmpty()) {
                     const value = this.monaco.getModel().getValueInRange(selection);
                     this.results.start();
-                    api_1.execute(this.data.connection, this.data.schema, this.id, value, {
+                    api_1.execute(this.id, value, {
                         reconnect: () => {
                             this.initConnection().then(result => {
                                 if (result) {
@@ -185,11 +185,10 @@ define(["require", "exports", "app/api", "app/_sys/pubsub", "app/_sys/timeout", 
                                 setTimeout(() => pubsub_1.publish(pubsub_1.DISMISS_FOOTER_MESSAGE), 5000);
                             });
                         },
-                        stats: e => this.results.stats(e),
                         message: e => this.results.message(e),
                         header: e => this.results.header(e),
                         row: (rn, e) => this.results.row(rn, e),
-                        end: () => this.results.end()
+                        end: e => this.results.end(e)
                     });
                 }
                 else {

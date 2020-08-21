@@ -10,6 +10,10 @@
             display: table-row;
         }
 
+        & .highlight {
+            background-color: $grid-cell-highlight-background-color !important;
+        }
+
         & > div.th > div.td {
             background-color: $grid-headers-background-color;
             position: sticky;
@@ -31,12 +35,12 @@
         & > div.tr > div.td {
             display: table-cell;
             padding: 5px;
-            border: 1px #8e8e8e outset;
+            border: 1px #8e8e8e inset;
             text-overflow: ellipsis;
             white-space: nowrap;
             overflow: hidden;
             max-width: 350px;
-            user-select: none;
+            user-select: none; 
         }
         & > div.th > div.td {
             border-top: 0px !important;

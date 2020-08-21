@@ -45,9 +45,9 @@ namespace Pgcode.Connection
             }
         }
 
-        public WorkspaceConnection GetWsConnection(WorkspaceKey key)
+        public WorkspaceConnection GetWsConnection(string connectionId)
         {
-            return WorkspaceConnections.TryGetValue(key.ConnectionId, out var ws) ? ws : null;
+            return WorkspaceConnections.TryGetValue(connectionId, out var ws) ? ws : null;
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Security", "CA2100:Review SQL queries for security vulnerabilities", Justification = "<Pending>")]

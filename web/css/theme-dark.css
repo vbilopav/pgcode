@@ -661,6 +661,8 @@ body > div.container {
     display: table-row; }
   #results.pane > div.table > div.tr {
     display: table-row; }
+  #results.pane > div.table .highlight {
+    background-color: #1b2734 !important; }
   #results.pane > div.table > div.th > div.td {
     background-color: #333333;
     position: sticky;
@@ -678,7 +680,7 @@ body > div.container {
   #results.pane > div.table > div.tr > div.td {
     display: table-cell;
     padding: 5px;
-    border: 1px #8e8e8e outset;
+    border: 1px #8e8e8e inset;
     text-overflow: ellipsis;
     white-space: nowrap;
     overflow: hidden;

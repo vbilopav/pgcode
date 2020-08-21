@@ -259,3 +259,11 @@ $grid-scroll-color: default;
 @if $theme == "light" {
     $grid-scroll-color: #ffffff;
 }
+
+$grid-cell-highlight-background-color: default;
+@if $theme == "dark" {
+    $grid-cell-highlight-background-color: #1b2734;
+} 
+@if $theme == "light" {
+    $grid-cell-highlight-background-color: #1b2734;
+}

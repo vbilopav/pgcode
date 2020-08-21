@@ -10,7 +10,7 @@ namespace Pgcode.Execution
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Security",
             "CA2100:Review SQL queries for security vulnerabilities", Justification = "<Pending>")]
-        public static async ValueTask ExecuteNonReaderAsync(
+        public static async ValueTask ExecuteAsync(
             this WorkspaceConnection ws,
             string content,
             CancellationToken cancellationToken = default)

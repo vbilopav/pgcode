@@ -17,7 +17,6 @@ export default class  {
     private readonly grid: Grid;
     private status: Status;
     private error: INotice;
-    private statsValue: IStats;
 
     constructor(id: string, element: Element, data: ItemInfoType, undock: ()=>void) {
         //this.id = id;
@@ -93,20 +92,14 @@ export default class  {
         this.status = Status.Running;
         this.footerMsg.html("Running...");
         this.error = null;
-        this.statsValue = null;
         this.grid.init();
-    }
-
-    stats(e: IStats) {
-        console.log(e);
-        this.statsValue = e;
-        // add message e
     }
 
     message(e: INotice) {
         console.log(e.messageText);
         if (e.severity == "ERROR") {
             this.error = e;
+            this.end(null);
         }
         // add message e
     }
@@ -119,17 +112,18 @@ export default class  {
         this.grid.addRow(rn,  e);
     }
 
-    end() {
-        this.grid.done(this.statsValue, this.error != null);
+    end(stats: IStats) {
+        console.log(stats);
+        this.grid.done(stats);
         if (this.error) {
             this.footerMsg.html(`⚠️ ${this.error.messageText}`);
         } else {
             this.footerMsg.html("✔️ Query executed successfully.");
         }
         
-        if (this.statsValue) {
-            this.footerTime.html(`🕛 ${this.statsValue.total}`).attr("title", `execution time: ${this.statsValue.execution}\nreading time: ${this.statsValue.read}\ntotal time: ${this.statsValue.total}`);
-            this.footerRows.html(`${this.statsValue.rowsAffected} rows`);
+        if (stats) {
+            this.footerTime.html(`🕛 ${stats.total}`).attr("title", `execution time: ${stats.execution}\nreading time: ${stats.read}\ntotal time: ${stats.total}`);
+            this.footerRows.html(`${stats.rowsAffected} rows`);
         } else if (this.error) {
             this.footerTime.html(`🕛 ${this.error.time}`).attr("title", `execution time: ${this.error.time}`);
             this.footerRows.html(` - `);
