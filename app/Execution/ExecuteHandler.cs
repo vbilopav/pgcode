@@ -98,12 +98,15 @@ namespace Pgcode.Execution
                     }
                     catch (PostgresException)
                     {
-                        if (!_ws.IsNewTran)
-                        {
-                            throw;
-                        }
                         await using var cmd = _ws.Connection.CreateCommand();
-                        cmd.Execute("end");
+                        if (_ws.IsNewTran)
+                        {
+                            cmd.Execute("end");
+                        }
+                        else
+                        {
+                            _ws.CloseCursorIfExists(cmd);
+                        }
                         _ws.Cursor = null;
                         _ws.IsNewTran = false;
                         throw;

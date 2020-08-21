@@ -37,6 +37,7 @@ define(["require", "exports", "app/_sys/pubsub", "libs/signalr/signalr.min.js", 
     })(Languages = exports.Languages || (exports.Languages = {}));
     const _connectionsHub = new signalR
         .HubConnectionBuilder()
+        .configureLogging(signalR.LogLevel.None)
         .withUrl("/connectionsHub")
         .withAutomaticReconnect({ nextRetryDelayInMilliseconds: () => 250 })
         .build();
@@ -153,6 +154,7 @@ define(["require", "exports", "app/_sys/pubsub", "libs/signalr/signalr.min.js", 
     };
     const _createExecuteHub = () => new signalR
         .HubConnectionBuilder()
+        .configureLogging(signalR.LogLevel.None)
         .withUrl("/executeHub")
         .withAutomaticReconnect({ nextRetryDelayInMilliseconds: () => 250 })
         .build();

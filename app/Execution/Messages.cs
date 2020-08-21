@@ -106,7 +106,6 @@ namespace Pgcode.Execution
             await ws.SendPgMessageInternalAsync(new Message(notice), cancellationToken);
         }
 
-
         public static async ValueTask SendPgErrorAsync(
             this WorkspaceConnection ws,
             PostgresException e, 

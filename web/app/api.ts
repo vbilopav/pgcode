@@ -100,6 +100,7 @@ export type ItemInfoType = IRoutineInfo | IScriptInfo | ITableInfo;
 
 const _connectionsHub = new signalR
     .HubConnectionBuilder()
+    .configureLogging(signalR.LogLevel.None)
     .withUrl("/connectionsHub")
     .withAutomaticReconnect({nextRetryDelayInMilliseconds: () => 250})
     .build();
@@ -238,6 +239,7 @@ export const checkItemExists = (connection: string, schema: string, key: string,
 
 const _createExecuteHub = () => new signalR
     .HubConnectionBuilder()
+    .configureLogging(signalR.LogLevel.None)
     .withUrl("/executeHub")
     .withAutomaticReconnect({nextRetryDelayInMilliseconds: () => 250})
     .build();

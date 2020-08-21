@@ -12,6 +12,14 @@ namespace Pgcode.Execution
 {
     public static partial class ExecuteExtension
     {
+        public static void CloseCursorIfExists(this WorkspaceConnection ws, NpgsqlCommand cmd)
+        {
+            if (ws.Cursor != null && cmd.Single<int>($"select 1 from pg_cursors where name = \"{ws.Cursor}\"") != 1)
+            {
+                cmd.Execute($"close \"{ws.Cursor}\"");
+            }
+        }
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Security", "CA2100:Review SQL queries for security vulnerabilities", Justification = "<Pending>")]
         public static async IAsyncEnumerable<ExecuteReply> ExecuteCursorReaderAsync(
             this WorkspaceConnection ws,
@@ -30,10 +38,7 @@ namespace Pgcode.Execution
             }
             else
             {
-                if (ws.Cursor != null && cmd.Single<int>($"select 1 from pg_cursors where name = \"{ws.Cursor}\"") != 1)
-                {
-                    cmd.Execute($"close \"{ws.Cursor}\"");
-                }
+                ws.CloseCursorIfExists(cmd);
             }
             ws.Cursor = $"cursor-{ws.Id}";
 
