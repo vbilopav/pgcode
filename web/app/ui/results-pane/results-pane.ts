@@ -66,6 +66,10 @@ export default class  {
         this.status = Status.Disconnected;
     }
 
+    setConnectionId(connectionId: string) {
+        this.grid.setConnectionId(connectionId);
+    }
+
     setReady() {
         this.footerMsg.html("🔗 Connected.");
         this.footerTime.html("🕛 --:--:--").css("title", "");

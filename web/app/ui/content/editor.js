@@ -178,7 +178,7 @@ define(["require", "exports", "app/api", "app/_sys/pubsub", "app/_sys/timeout", 
                         reconnect: () => {
                             this.initConnection().then(result => {
                                 if (result) {
-                                    pubsub_1.publish(pubsub_1.FOOTER_MESSAGE, "connection reconnected, temporary data and transactions may be lost...");
+                                    pubsub_1.publish(pubsub_1.FOOTER_MESSAGE, "connection reconnected, any temporary data or transactions may be lost...");
                                     this.results.setReconnected();
                                 }
                                 this.execute();
@@ -189,7 +189,8 @@ define(["require", "exports", "app/api", "app/_sys/pubsub", "app/_sys/timeout", 
                         header: e => this.results.header(e),
                         row: (rn, e) => this.results.row(rn, e),
                         end: e => this.results.end(e)
-                    });
+                    })
+                        .then(connectionId => this.results.setConnectionId(connectionId));
                 }
                 else {
                     this.tempViewState = this.monaco.saveViewState();

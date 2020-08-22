@@ -11,8 +11,6 @@ namespace Pgcode.Execution
 {
     public static partial class ExecuteExtension
     {
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Security",
-            "CA2100:Review SQL queries for security vulnerabilities", Justification = "<Pending>")]
         public static async IAsyncEnumerable<ExecuteReply> ExecuteReaderAsync(
             this WorkspaceConnection ws,
             string content,

@@ -50,6 +50,9 @@ define(["require", "exports", "app/api", "app/ui/results-pane/grid", "app/ui/res
             this.activateByTab(this.tabs[0]);
             this.status = Status.Disconnected;
         }
+        setConnectionId(connectionId) {
+            this.grid.setConnectionId(connectionId);
+        }
         setReady() {
             this.footerMsg.html("🔗 Connected.");
             this.footerTime.html("🕛 --:--:--").css("title", "");

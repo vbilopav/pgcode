@@ -23,12 +23,15 @@ namespace Pgcode.Api
         public async ValueTask InitConnection(string connection, string schema, string id)
         {
             var user = GetIdentityAndLogRequest();
-            await _connectionManager.AddWsConnectionAsync(new WorkspaceKey
+            await _connectionManager.AddWsConnectionAsync(new AddWorkspaceConnection
             {
                 Id = id,
                 UserName = user.Name,
                 ConnectionId = this.Context.ConnectionId,
-            }, connection, schema, Clients.Caller);
+                ConnectionName = connection,
+                Schema = schema,
+                Proxy = Clients.Caller
+            });
         }
 
         public async ValueTask DisposeConnection()

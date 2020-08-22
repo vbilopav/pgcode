@@ -19,7 +19,7 @@ namespace Pgcode.Execution
             await using var cmd = ws.Connection.CreateCommand();
             cmd.CommandText = content;
             stopwatch.Start();
-            var rowsAffected = await cmd.ExecuteAsync(content, cancellationToken);
+            var rowsAffected = await cmd.ExecuteAsync(content, cancellationToken: cancellationToken);
             stopwatch.Stop();
             await ws.SendStatsMessageAsync(new MessageRequest
             {

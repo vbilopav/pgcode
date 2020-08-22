@@ -1,4 +1,4 @@
-import {API_INITIAL, publish, SET_APP_STATUS, CONNECTION_SET} from "app/_sys/pubsub";
+import {API_INITIAL, publish, SET_APP_STATUS, CONNECTION_SET, FOOTER_MESSAGE} from "app/_sys/pubsub";
 import * as signalR from "libs/signalr/signalr.min.js";
 import { GrpcService, GrpcType, GrpcErrorCode, GrpcStatus } from "app/_sys/grpc-service";
 import "vs/editor/editor.main";
@@ -331,7 +331,7 @@ export interface IExecutionStream {
     end: (e: IStats) => void;
 }
 
-export const execute = async (id: string, content: string, stream: IExecutionStream) => {
+export const execute: (id: string, content: string, stream: IExecutionStream) => Promise<string> = async (id, content, stream)  => {
     const hub = await _getExecuteHub(id, false);
     const callStreamMethod = (method: string, ...args: any[]) => {
         if (stream[method]) {
@@ -341,24 +341,22 @@ export const execute = async (id: string, content: string, stream: IExecutionStr
 
     if (hub.state != signalR.HubConnectionState.Connected || hub.connectionId == undefined) {
         callStreamMethod("reconnect");
-        return;
+        return null;
     }
     const messageName = `message-${id}`;
     const statsName = `stats-${id}`;
-
-    const grpcStream = grpc.serverStreaming({
-        service: "/api.ExecuteService/Execute",
-        request: [GrpcType.String, GrpcType.String, GrpcType.String, GrpcType.String],
-        reply: [{rn: GrpcType.Uint32}, {data: [GrpcType.String]}, {nullIndexes: GrpcType.PackedUint32}]
-    }, hub.connection.connectionId, content);
-
     hub.off(messageName);
     hub.off(statsName);
     hub.on(messageName, (msg: INotice) => callStreamMethod("message", msg));
     const statsPromise = new Promise<IStats>(resolve => hub.on(statsName, (msg: IStats) => resolve(msg)));
 
     let header = false;
-    grpcStream
+    grpc.serverStreaming({
+        service: "/api.ExecuteService/Execute",
+        request: [GrpcType.String, GrpcType.String, GrpcType.String, GrpcType.String],
+        reply: [{rn: GrpcType.Uint32}, {data: [GrpcType.String]}, {nullIndexes: GrpcType.PackedUint32}]
+    }, 
+    hub.connection.connectionId, content)
         .on("error", e => {
             if ((e as GrpcStatus).code == GrpcErrorCode.NotFound && (e as GrpcStatus).message == "connection not initialized" && stream["reconnect"]) {
                 stream.reconnect();
@@ -391,28 +389,27 @@ export const execute = async (id: string, content: string, stream: IExecutionStr
             }
         })
         .on("end", () => statsPromise.then(stats => callStreamMethod("end", stats)));
+
+    return hub.connection.connectionId;
 }
 
-export const cursor = async (id: string, from: number, to: number) => {
-    const hub = await _getExecuteHub(id, false);
-    
-    if (hub.state != signalR.HubConnectionState.Connected || hub.connectionId == undefined) {
-        throw "connection lost";
-    }
+export interface ICursorStream {
+    row: (rn: number, e: Array<string>) => void;
+    end: () => void;
+}
 
-    const grpcStream = grpc.serverStreaming({
+export const cursor = (connectionId: string, from: number, to: number, stream: ICursorStream) => {
+    grpc.serverStreaming({
         service: "/api.ExecuteService/Cursor",
         request: [GrpcType.String, GrpcType.Uint32, GrpcType.Uint32],
         reply: [{rn: GrpcType.Uint32}, {data: [GrpcType.String]}, {nullIndexes: GrpcType.PackedUint32}]
-    }, hub.connection.connectionId, from, to);
-
-    /*
-    grpcStream
+    }, 
+    connectionId, from, to)
         .on("error", e => {
-            if ((e as GrpcStatus).code == GrpcErrorCode.NotFound && (e as GrpcStatus).message == "connection not initialized") {
-                throw "connection lost";
-            } else {
-                throw e;
+            console.warn(e);
+            publish(FOOTER_MESSAGE, "can't load more grid data, connection may be reset, try running query again...");
+            if (stream["end"]) {
+                stream.end();
             }
         })
         .on("data", e => {
@@ -426,6 +423,9 @@ export const cursor = async (id: string, from: number, to: number) => {
                 stream.row(row.rn, row.data);
             }
         })
-        .on("end", () => statsPromise.then(stats => callStreamMethod("end", stats)));
-        */
+        .on("end", () => {
+            if (stream["end"]) {
+                stream.end();
+            }
+        });
 }

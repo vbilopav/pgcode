@@ -229,7 +229,7 @@ export class Editor implements IEditor {
                     reconnect: () => {
                         this.initConnection().then(result => {
                             if (result) {
-                                publish(FOOTER_MESSAGE, "connection reconnected, temporary data and transactions may be lost...");
+                                publish(FOOTER_MESSAGE, "connection reconnected, any temporary data or transactions may be lost...");
                                 this.results.setReconnected();
                             }
                             this.execute();
@@ -240,7 +240,8 @@ export class Editor implements IEditor {
                     header: e => this.results.header(e),
                     row: (rn, e) => this.results.row(rn, e),
                     end: e => this.results.end(e)
-                } as IExecutionStream);
+                } as IExecutionStream)
+                .then(connectionId => this.results.setConnectionId(connectionId));
 
             } else {
                 this.tempViewState = this.monaco.saveViewState();

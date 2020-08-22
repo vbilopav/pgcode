@@ -1,7 +1,9 @@
 ﻿using System.Threading.Tasks;
 using Grpc.Core;
+using Microsoft.Extensions.Logging;
 using Pgcode.Connection;
 using Pgcode.Execution;
+using Pgcode.Middleware;
 using Pgcode.Protos;
 
 namespace Pgcode.Api
@@ -9,16 +11,25 @@ namespace Pgcode.Api
     public class ExecuteService : Protos.ExecuteService.ExecuteServiceBase
     {
         private readonly ConnectionManager _connectionManager;
+        private readonly CookieMiddleware _cookieMiddleware;
+        private readonly ILoggerFactory _loggerFactory;
+        private readonly Settings _settings;
 
-        public ExecuteService(ConnectionManager connectionManager)
+        public ExecuteService(
+            ConnectionManager connectionManager, 
+            CookieMiddleware cookieMiddleware, 
+            ILoggerFactory loggerFactory, 
+            Settings settings)
         {
             _connectionManager = connectionManager;
+            _cookieMiddleware = cookieMiddleware;
+            _loggerFactory = loggerFactory;
+            _settings = settings;
         }
 
         public override async Task Execute(ExecuteRequest request, IServerStreamWriter<ExecuteReply> responseStream, ServerCallContext context)
         {
-            //var ctx = context.GetHttpContext();
-            //_cookieMiddleware.ProcessCookieAndAddIdentity(ctx);
+            LogRequest(context);
 
             var ws = _connectionManager.GetWsConnection(request.ConnectionId);
             if (ws == null)
@@ -33,6 +44,8 @@ namespace Pgcode.Api
 
         public override async Task Cursor(CursorRequest request, IServerStreamWriter<ExecuteReply> responseStream, ServerCallContext context)
         {
+            LogRequest(context);
+
             var ws = _connectionManager.GetWsConnection(request.ConnectionId);
             if (ws == null)
             {
@@ -41,6 +54,16 @@ namespace Pgcode.Api
             }
 
             await ExecuteHandler.CursorAsync(ws, request, responseStream);
+        }
+
+        private void LogRequest(ServerCallContext context)
+        {
+            if (!_settings.LogRequests)
+            {
+                return;
+            }
+            var ctx = context.GetHttpContext();
+            new LoggingMiddleware(_loggerFactory).LogMessage(ctx);
         }
     }
 }

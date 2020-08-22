@@ -19,28 +19,28 @@ namespace Pgcode.Connection
             return await connection.FunctionSingleAsync<T>(command, GetParam(dataParam));
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Security", "CA2100:Review SQL queries for security vulnerabilities", Justification = "<Pending>")]
-        public static Task<int> ExecuteAsync(this NpgsqlCommand cmd, string command, CancellationToken cancellationToken = default)
+        public static Task<int> ExecuteAsync(this NpgsqlCommand cmd, string command, NpgsqlParameter param1 = null, CancellationToken cancellationToken = default)
         {
             cmd.CommandText = command;
+            if (param1 != null)
+            {
+                cmd.Parameters.Add(param1);
+            }
             return cmd.ExecuteNonQueryAsync(cancellationToken);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Security", "CA2100:Review SQL queries for security vulnerabilities", Justification = "<Pending>")]
         public static int Execute(this NpgsqlCommand cmd, string command)
         {
             cmd.CommandText = command;
             return cmd.ExecuteNonQuery();
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Security", "CA2100:Review SQL queries for security vulnerabilities", Justification = "<Pending>")]
         public static Task<NpgsqlDataReader> ReaderAsync(this NpgsqlCommand cmd, string command, CancellationToken cancellationToken = default)
         {
             cmd.CommandText = command;
             return cmd.ExecuteReaderAsync(cancellationToken);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Security", "CA2100:Review SQL queries for security vulnerabilities", Justification = "<Pending>")]
         public static NpgsqlDataReader Reader(this NpgsqlCommand cmd, string command, NpgsqlParameter param1 = null)
         {
             cmd.CommandText = command;

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.SignalR;
 using Npgsql;
 using Pgcode.Middleware;
 
@@ -20,28 +19,39 @@ namespace Pgcode.Connection
             throw new ApiException($"Unknown connection name {connectionName}", 404);
         }
 
-        public async ValueTask AddWsConnectionAsync(WorkspaceKey key, string connectionName, string schema, IClientProxy proxy)
+        public async ValueTask AddWsConnectionAsync(AddWorkspaceConnection request)
         {
-            if (!WorkspaceConnections.ContainsKey(key.ConnectionId))
+            if (!WorkspaceConnections.ContainsKey(request.ConnectionId))
             {
-                var data = GetConnectionDataByName(connectionName);
+                var data = GetConnectionDataByName(request.ConnectionName);
                 var builder = new NpgsqlConnectionStringBuilder(data.ConnectionString);
-                builder.ApplicationName = $"{builder.ApplicationName} - {key.UserName}: {key.Id}";
+                builder.ApplicationName = $"{builder.ApplicationName} - {request.UserName}: {request.Id}";
                 var connection = data.Connection.CloneWith(builder.ToString());
                 await connection.OpenAsync();
-                WorkspaceConnections.TryAdd(key.ConnectionId, new WorkspaceConnection
+                if (request.Schema != "public")
                 {
-                    Id = key.Id,
-                    ConnectionId = key.ConnectionId,
+                    await using var cmd = connection.CreateCommand();
+                    await cmd.ExecuteAsync($"set search_path to @schema", 
+                        new NpgsqlParameter { Value = request.Schema, ParameterName = "schema" });
+                    var schema = await cmd.SingleAsync<string>("select current_schema()");
+                    if (schema == null)
+                    {
+                        throw new ArgumentException($"couldn't set search_path to @schema {request.Schema}");
+                    }
+                }
+                WorkspaceConnections.TryAdd(request.ConnectionId, new WorkspaceConnection
+                {
+                    Id = request.Id,
+                    ConnectionId = request.ConnectionId,
                     Connection = connection,
-                    Name = connectionName,
-                    Schema = schema,
-                    Proxy = proxy
+                    Name = request.ConnectionName,
+                    Schema = request.Schema,
+                    Proxy = request.Proxy
                 });
             }
             else
             {
-                WorkspaceConnections[key.ConnectionId].Proxy = proxy;
+                WorkspaceConnections[request.ConnectionId].Proxy = request.Proxy;
             }
         }
 

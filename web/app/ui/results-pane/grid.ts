@@ -1,5 +1,5 @@
-import { IHeader, IStats } from "app/api";
-import { timeout } from "app/_sys/timeout";
+import { IHeader, IStats, cursor } from "app/api";
+import { timeoutAsync } from "app/_sys/timeout";
 
 export default class  {
     private readonly element: Element;
@@ -14,6 +14,7 @@ export default class  {
     private stats: IStats;
     private start: number;
     private end: number;
+    private connectionId: string;
 
     constructor(id: string, element: Element) {
         this.id = id;
@@ -58,8 +59,12 @@ export default class  {
     }
 
     addRow(rn: number, row: Array<string>) {
+        this.newRow(rn, row).appendElementTo(this.table);
+    }
+
+    newRow(rn: number, row: Array<string>) : Element {
         let i = 0;
-        const tr = document.createElement("div").appendElementTo(this.table)
+        const tr = document.createElement("div")
             .addClass("tr")
             .addClass(`tr${rn}`)
             .dataAttr("row", rn);
@@ -87,6 +92,7 @@ export default class  {
                 td.addClass("null");
             }
         }
+        return tr;
     }
 
     done(stats: IStats) {
@@ -118,42 +124,104 @@ export default class  {
         }
     }
 
+    setConnectionId(connectionId: string) {
+        this.connectionId = connectionId;
+    }
+
     private onTableScroll() {
         if (this.cantLoadMore()) {
             return
         }
-        timeout(() => {
+        timeoutAsync(async () => {
             if (this.cantLoadMore()) {
                 return
             }
             const rect = this.table.getBoundingClientRect() as DOMRect;
             const first = document.elementFromPoint(rect.x, rect.y + this.headerHeight).parentElement.dataAttr("row") as number;
             const last = document.elementFromPoint(rect.x, rect.y + this.table.clientHeight - 5).parentElement.dataAttr("row") as number;
-            if (first == undefined || last == undefined) {
-                return
-            }
-            const page = this.end - this.start
-            const mid = Math.round(page / 2);
-            const half = Math.round((last - first) / 2);
-
-            if (last > mid + half && last < this.stats.rowsAffected)  {
-                const from = this.end + 1;
-                let to = from + page;
-                if (to > this.stats.rowsAffected) {
-                    to = this.stats.rowsAffected
+            const viewPage = last - first;
+            const page = viewPage * 2;
+            
+            if (this.end < this.stats.rowsAffected && last >= (this.end - viewPage)) {
+                let addFrom = this.end + 1;
+                let addTo = addFrom + page;
+                if (addTo > this.stats.rowsAffected) {
+                    addTo = this.stats.rowsAffected
                 }
-                if (to <= this.stats.rowsAffected) {
-                    console.log("load from", from, " to ", to);
-                    console.log("remove from", this.start, " to ", this.start + (to - from));
-                    console.log();
+                let removeFrom = this.start;
+                let removeTo = this.start + addTo - addFrom;
+                console.log("adding (" + (addTo - addFrom) + ")", addFrom, addTo, "     removing(" + (removeTo - removeFrom) + ")", removeFrom, removeTo);
+                const removal = new Array<Element>();
+                this.table.css("overflow-y", "hidden");
+                for(let row of this.table.children) {
+                    let rn = row.dataAttr("row");
+                    if (rn == 0) {
+                        continue;
+                    }
+                    if (rn >= removeFrom && rn <= removeTo) {
+                        removal.push(row);
+                    } else {
+                        break;
+                    }
                 }
+                removal.forEach(r => r.remove());
+                await new Promise<void>(resolve => {
+                    cursor(this.connectionId, addFrom, addTo, {
+                        end: () => resolve(),
+                        row: (rowNum, newRow: Array<string>) => this.addRow(rowNum, newRow)
+                    });
+                });
+                this.start = removeTo + 1;
+                this.end = addTo;
+                this.adjust();
             }
 
+            if (this.start > 1 && first <= (this.start + viewPage)) {
+                let addFrom = this.start - page;
+                if (addFrom < 1) {
+                    addFrom = 1;
+                }
+                let addTo = this.start - 1;
+                let removeFrom = this.end - page;
+                let removeTo = this.end;
+                console.log("adding (" + (addTo - addFrom) + ")", addFrom, addTo, "     removing(" + (removeTo - removeFrom) + ")", removeFrom, removeTo);
+                const removal = new Array<Element>();
+                this.table.css("overflow-y", "hidden");
+                for(let row of this.table.children) {
+                    let rn = row.dataAttr("row");
+                    if (rn == 0) {
+                        continue;
+                    }
+                    if (rn >= removeFrom && rn <= removeTo) {
+                        removal.push(row);
+                    }
+                }
+                removal.forEach(r => r.remove());
+                let last: Element;
+                await new Promise<void>(resolve => {
+                    cursor(this.connectionId, addFrom, addTo, {
+                        end: () => resolve(),
+                        row: (rowNum, row: Array<string>) => {
+                            let newRow = this.newRow(rowNum, row);
+                            if (!last) {
+                                this.header.after(newRow);
+                            } else {
+                                last.after(newRow);
+                            }
+                            last = newRow;
+                        }
+                    });
+                });
+                this.start = addFrom;
+                this.end = removeFrom - 1;
+                this.adjust();
+            }
+            console.log(this.table.children.length);
         }, 75, `${this.id}-grid-scroll`);
     }
 
     private cantLoadMore() {
-        return !this.stats || this.stats.rowsAffected == this.stats.rowsFetched;
+        return !this.connectionId || !this.stats || this.stats.rowsAffected == this.stats.rowsFetched;
     }
 
     private headerCellMousemove(e: MouseEvent) {

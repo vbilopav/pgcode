@@ -206,21 +206,20 @@ define(["require", "exports", "app/_sys/pubsub", "libs/signalr/signalr.min.js", 
         };
         if (hub.state != signalR.HubConnectionState.Connected || hub.connectionId == undefined) {
             callStreamMethod("reconnect");
-            return;
+            return null;
         }
         const messageName = `message-${id}`;
         const statsName = `stats-${id}`;
-        const grpcStream = grpc.serverStreaming({
-            service: "/api.ExecuteService/Execute",
-            request: [grpc_service_1.GrpcType.String, grpc_service_1.GrpcType.String, grpc_service_1.GrpcType.String, grpc_service_1.GrpcType.String],
-            reply: [{ rn: grpc_service_1.GrpcType.Uint32 }, { data: [grpc_service_1.GrpcType.String] }, { nullIndexes: grpc_service_1.GrpcType.PackedUint32 }]
-        }, hub.connection.connectionId, content);
         hub.off(messageName);
         hub.off(statsName);
         hub.on(messageName, (msg) => callStreamMethod("message", msg));
         const statsPromise = new Promise(resolve => hub.on(statsName, (msg) => resolve(msg)));
         let header = false;
-        grpcStream
+        grpc.serverStreaming({
+            service: "/api.ExecuteService/Execute",
+            request: [grpc_service_1.GrpcType.String, grpc_service_1.GrpcType.String, grpc_service_1.GrpcType.String, grpc_service_1.GrpcType.String],
+            reply: [{ rn: grpc_service_1.GrpcType.Uint32 }, { data: [grpc_service_1.GrpcType.String] }, { nullIndexes: grpc_service_1.GrpcType.PackedUint32 }]
+        }, hub.connection.connectionId, content)
             .on("error", e => {
             if (e.code == grpc_service_1.GrpcErrorCode.NotFound && e.message == "connection not initialized" && stream["reconnect"]) {
                 stream.reconnect();
@@ -256,17 +255,38 @@ define(["require", "exports", "app/_sys/pubsub", "libs/signalr/signalr.min.js", 
             }
         })
             .on("end", () => statsPromise.then(stats => callStreamMethod("end", stats)));
+        return hub.connection.connectionId;
     };
-    exports.cursor = async (id, from, to) => {
-        const hub = await _getExecuteHub(id, false);
-        if (hub.state != signalR.HubConnectionState.Connected || hub.connectionId == undefined) {
-            throw "connection lost";
-        }
-        const grpcStream = grpc.serverStreaming({
+    exports.cursor = (connectionId, from, to, stream) => {
+        grpc.serverStreaming({
             service: "/api.ExecuteService/Cursor",
             request: [grpc_service_1.GrpcType.String, grpc_service_1.GrpcType.Uint32, grpc_service_1.GrpcType.Uint32],
             reply: [{ rn: grpc_service_1.GrpcType.Uint32 }, { data: [grpc_service_1.GrpcType.String] }, { nullIndexes: grpc_service_1.GrpcType.PackedUint32 }]
-        }, hub.connection.connectionId, from, to);
+        }, connectionId, from, to)
+            .on("error", e => {
+            console.warn(e);
+            pubsub_1.publish(pubsub_1.FOOTER_MESSAGE, "can't load more grid data, connection may be reset, try running query again...");
+            if (stream["end"]) {
+                stream.end();
+            }
+        })
+            .on("data", e => {
+            if (stream["row"]) {
+                let row = e;
+                if (row.nullIndexes && row.nullIndexes.length) {
+                    for (let idx of row.nullIndexes) {
+                        row.data[idx] = null;
+                    }
+                    ;
+                }
+                stream.row(row.rn, row.data);
+            }
+        })
+            .on("end", () => {
+            if (stream["end"]) {
+                stream.end();
+            }
+        });
     };
 });
 //# sourceMappingURL=api.js.map
