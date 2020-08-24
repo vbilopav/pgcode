@@ -85,6 +85,9 @@ export default class  {
         this.virtualBottom = document.createElement("div").appendElementTo(this.table)
             .css("height", ((stats.rowsAffected - stats.rowsFetched) * this.rowHeight) + "px")
             .dataAttr("bottom", true);
+        for(let cell of this.header.children) {
+            cell.css("width", cell.clientWidth + "px");
+        }
     }
 
     adjust() {
@@ -161,9 +164,9 @@ export default class  {
                 return
             }
             const {first, last} = this.calcPosition();
-
             if ((last > this.end && first > this.end) || (last < this.start && first < this.start)) {
-                const forDelete = Array.from(this.rows.keys());
+                this.rows.forEach(r => r.remove());
+                this.rows.clear();
                 this.start = first;
                 this.end = last;
                 await new Promise<void>(resolve => {
@@ -176,14 +179,10 @@ export default class  {
                         }
                     });
                 });
-                for(let key of forDelete) {
-                    this.rows.get(key).remove();
-                    this.rows.delete(key);
-                }
                 this.calcVirtual();
                 return;
             }
-
+            
             if (last > this.end && first >= this.start) {
                 await new Promise<void>(resolve => {
                     cursor(this.connectionId, this.end + 1, last, {
@@ -272,7 +271,17 @@ export default class  {
                 last = this.start - Math.ceil((topRect.bottom -  tableRect.bottom) / this.rowHeight);
             }
         }
-
+        const delta = last - first;
+        if (first - delta < 1) {
+            first = 1;
+        } else {
+            first = first - delta;
+        }
+        if (last + delta > this.stats.rowsAffected) {
+            last = this.stats.rowsAffected;
+        } else {
+            last = last + delta;
+        }
         return {first, last}
     }
 

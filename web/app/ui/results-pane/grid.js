@@ -77,6 +77,9 @@ define(["require", "exports", "app/api", "app/_sys/timeout"], function (require,
             this.virtualBottom = document.createElement("div").appendElementTo(this.table)
                 .css("height", ((stats.rowsAffected - stats.rowsFetched) * this.rowHeight) + "px")
                 .dataAttr("bottom", true);
+            for (let cell of this.header.children) {
+                cell.css("width", cell.clientWidth + "px");
+            }
         }
         adjust() {
             if (!this.table) {
@@ -152,7 +155,8 @@ define(["require", "exports", "app/api", "app/_sys/timeout"], function (require,
                 }
                 const { first, last } = this.calcPosition();
                 if ((last > this.end && first > this.end) || (last < this.start && first < this.start)) {
-                    const forDelete = Array.from(this.rows.keys());
+                    this.rows.forEach(r => r.remove());
+                    this.rows.clear();
                     this.start = first;
                     this.end = last;
                     await new Promise(resolve => {
@@ -165,10 +169,6 @@ define(["require", "exports", "app/api", "app/_sys/timeout"], function (require,
                             }
                         });
                     });
-                    for (let key of forDelete) {
-                        this.rows.get(key).remove();
-                        this.rows.delete(key);
-                    }
                     this.calcVirtual();
                     return;
                 }
@@ -256,6 +256,19 @@ define(["require", "exports", "app/api", "app/_sys/timeout"], function (require,
                     const topRect = this.virtualTop.getBoundingClientRect();
                     last = this.start - Math.ceil((topRect.bottom - tableRect.bottom) / this.rowHeight);
                 }
+            }
+            const delta = last - first;
+            if (first - delta < 1) {
+                first = 1;
+            }
+            else {
+                first = first - delta;
+            }
+            if (last + delta > this.stats.rowsAffected) {
+                last = this.stats.rowsAffected;
+            }
+            else {
+                last = last + delta;
             }
             return { first, last };
         }
