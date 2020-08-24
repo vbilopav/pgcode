@@ -106,10 +106,12 @@ define(["require", "exports", "app/api", "app/ui/results-pane/grid", "app/ui/res
                 this.footerRows.html(`${stats.rowsAffected} rows`);
             }
             else if (this.error) {
-                this.footerTime.html(`🕛 ${this.error.time}`).attr("title", `execution time: ${this.error.time}`);
+                if (this.error.time) {
+                    this.footerTime.html(`🕛 ${this.error.time}`).attr("title", `execution time: ${this.error.time}`);
+                }
                 this.footerRows.html(` - `);
             }
-            this.adjustGrid();
+            this.grid.adjustGridScrollBars();
         }
         adjustGrid() {
             this.grid.adjust();

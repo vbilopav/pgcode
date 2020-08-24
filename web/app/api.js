@@ -259,7 +259,7 @@ define(["require", "exports", "app/_sys/pubsub", "libs/signalr/signalr.min.js", 
     };
     exports.cursor = (connectionId, from, to, stream) => {
         grpc.serverStreaming({
-            service: "/api.ExecuteService/Cursor",
+            service: "/api.ExecuteService/ReadCursor",
             request: [grpc_service_1.GrpcType.String, grpc_service_1.GrpcType.Uint32, grpc_service_1.GrpcType.Uint32],
             reply: [{ rn: grpc_service_1.GrpcType.Uint32 }, { data: [grpc_service_1.GrpcType.String] }, { nullIndexes: grpc_service_1.GrpcType.PackedUint32 }]
         }, connectionId, from, to)

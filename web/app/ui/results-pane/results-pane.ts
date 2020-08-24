@@ -129,10 +129,12 @@ export default class  {
             this.footerTime.html(`🕛 ${stats.total}`).attr("title", `execution time: ${stats.execution}\nreading time: ${stats.read}\ntotal time: ${stats.total}`);
             this.footerRows.html(`${stats.rowsAffected} rows`);
         } else if (this.error) {
-            this.footerTime.html(`🕛 ${this.error.time}`).attr("title", `execution time: ${this.error.time}`);
+            if (this.error.time) {
+                this.footerTime.html(`🕛 ${this.error.time}`).attr("title", `execution time: ${this.error.time}`);
+            }
             this.footerRows.html(` - `);
         }
-        this.adjustGrid();
+        this.grid.adjustGridScrollBars();
     }
 
     adjustGrid() {

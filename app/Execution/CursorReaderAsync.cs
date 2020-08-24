@@ -57,7 +57,7 @@ namespace Pgcode.Execution
                 ws.CloseCursorIfExists(cmd);
             }
 
-            var declareStatement = $"declare \"{cursor}\" cursor for ";
+            var declareStatement = $"declare \"{cursor}\" scroll cursor for ";
             ws.ErrorOffset = declareStatement.Length;
             stopwatch.Start();
             await cmd.ExecuteAsync($"{declareStatement}{content}", cancellationToken: cancellationToken);

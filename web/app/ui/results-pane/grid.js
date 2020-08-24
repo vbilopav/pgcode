@@ -71,22 +71,48 @@ define(["require", "exports", "app/api", "app/_sys/timeout"], function (require,
             }
         }
         done(stats) {
-            this.stats = stats;
+            this.stats = Object.assign({}, stats);
             this.start = 1;
-            this.end = stats.rowsFetched;
+            this.end = this.stats.rowsFetched;
             this.virtualBottom = document.createElement("div").appendElementTo(this.table)
-                .css("height", ((stats.rowsAffected - stats.rowsFetched) * this.rowHeight) + "px")
+                .css("height", ((this.stats.rowsAffected - this.stats.rowsFetched) * this.rowHeight) + "px")
                 .dataAttr("bottom", true);
-            for (let cell of this.header.children) {
-                cell.css("width", cell.clientWidth + "px");
+            if (this.header) {
+                for (let cell of this.header.children) {
+                    cell.css("min-width", cell.clientWidth + "px").css("max-width", cell.clientWidth + "px");
+                }
             }
         }
         adjust() {
-            this.adjustTableScrollBars();
+            this.adjustGridScrollBars();
             this.scrollTable(true);
         }
         setConnectionId(connectionId) {
             this.connectionId = connectionId;
+        }
+        adjustGridScrollBars() {
+            if (!this.table) {
+                return;
+            }
+            const rect = this.element.parentElement.getBoundingClientRect();
+            this.table.css("height", rect.height + "px");
+            if (this.last == null || this.first == null) {
+                return;
+            }
+            const last = this.last.getBoundingClientRect();
+            const first = this.first.getBoundingClientRect();
+            if (first.y < rect.y || last.y > (rect.y + rect.height)) {
+                this.table.css("overflow-y", "scroll");
+            }
+            else {
+                this.table.css("overflow-y", "hidden");
+            }
+            if (first.width > rect.width) {
+                this.table.css("overflow-x", "scroll");
+            }
+            else {
+                this.table.css("overflow-x", "hidden");
+            }
         }
         newRow(rn, row) {
             let i = 0;
@@ -126,7 +152,7 @@ define(["require", "exports", "app/api", "app/_sys/timeout"], function (require,
             if (this.cantLoadMore()) {
                 return;
             }
-            timeout_1.timeoutAsync(() => this.scrollTable(false), 0, `${this.id}-grid-scroll`);
+            timeout_1.timeoutAsync(() => this.scrollTable(false), 500, `${this.id}-grid-scroll`);
         }
         async scrollTable(precise) {
             if (this.cantLoadMore()) {
@@ -205,37 +231,21 @@ define(["require", "exports", "app/api", "app/_sys/timeout"], function (require,
                 return;
             }
         }
-        adjustTableScrollBars() {
-            if (!this.table) {
-                return;
-            }
-            const rect = this.element.parentElement.getBoundingClientRect();
-            this.table.css("height", rect.height + "px");
-            if (this.last == null || this.first == null) {
-                return;
-            }
-            const last = this.last.getBoundingClientRect();
-            const first = this.first.getBoundingClientRect();
-            if (first.y < rect.y || last.y > (rect.y + rect.height)) {
-                this.table.css("overflow-y", "scroll");
-            }
-            else {
-                this.table.css("overflow-y", "hidden");
-            }
-            if (first.width > rect.width) {
-                this.table.css("overflow-x", "scroll");
-            }
-            else {
-                this.table.css("overflow-x", "hidden");
-            }
-        }
         calcVirtual() {
-            this.virtualBottom.css("height", ((this.stats.rowsAffected - this.end) * this.rowHeight) + "px");
-            this.virtualTop.css("height", ((this.start - 1) * this.rowHeight) + "px");
+            let h = (this.stats.rowsAffected - this.end) * this.rowHeight;
+            if (h > 16776199) {
+                h = 16776199;
+            }
+            this.virtualBottom.css("height", h + "px");
+            h = (this.start - 1) * this.rowHeight;
+            if (h > 16776199) {
+                h = 16776199;
+            }
+            this.virtualTop.css("height", h + "px");
         }
         calcPosition(precise) {
             const tableRect = this.table.getBoundingClientRect();
-            const firstEl = document.elementFromPoint(tableRect.x, tableRect.y + this.headerHeight);
+            const firstEl = document.elementFromPoint(tableRect.x, tableRect.y + this.headerHeight + 1);
             const lastEl = document.elementFromPoint(tableRect.x, tableRect.y + this.table.clientHeight - 1);
             let first = firstEl.dataAttr("row");
             if (first == undefined) {

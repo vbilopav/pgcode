@@ -144,6 +144,19 @@ namespace Pgcode.Execution
             }
             catch (PostgresException e)
             {
+                /*
+                using var cmd = ws.Connection.CreateCommand();
+                if (ws.IsNewTran)
+                {
+                    cmd.Execute("end");
+                }
+                else
+                {
+                    ws.CloseCursorIfExists(cmd);
+                }
+                ws.Cursor = null;
+                ws.IsNewTran = false;
+                */
                 ws.SendPgErrorAsync(e, null).GetAwaiter().GetResult();
             }
         }

@@ -400,7 +400,7 @@ export interface ICursorStream {
 
 export const cursor = (connectionId: string, from: number, to: number, stream: ICursorStream) => {
     grpc.serverStreaming({
-        service: "/api.ExecuteService/Cursor",
+        service: "/api.ExecuteService/ReadCursor",
         request: [GrpcType.String, GrpcType.Uint32, GrpcType.Uint32],
         reply: [{rn: GrpcType.Uint32}, {data: [GrpcType.String]}, {nullIndexes: GrpcType.PackedUint32}]
     }, 

@@ -42,7 +42,7 @@ namespace Pgcode.Api
             await handler.ReadAsync(responseStream, context.CancellationToken);
         }
 
-        public override Task Cursor(CursorRequest request, IServerStreamWriter<ExecuteReply> responseStream, ServerCallContext context)
+        public override Task ReadCursor(CursorRequest request, IServerStreamWriter<ExecuteReply> responseStream, ServerCallContext context)
         {
             LogRequest(context);
 

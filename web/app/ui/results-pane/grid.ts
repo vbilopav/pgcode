@@ -79,24 +79,49 @@ export default class  {
     }
 
     done(stats: IStats) {
-        this.stats = stats;
+        this.stats = Object.assign({}, stats);
         this.start = 1;
-        this.end = stats.rowsFetched;
+        this.end = this.stats.rowsFetched;
         this.virtualBottom = document.createElement("div").appendElementTo(this.table)
-            .css("height", ((stats.rowsAffected - stats.rowsFetched) * this.rowHeight) + "px")
+            .css("height", ((this.stats.rowsAffected - this.stats.rowsFetched) * this.rowHeight) + "px")
             .dataAttr("bottom", true);
-        for(let cell of this.header.children) {
-            cell.css("width", cell.clientWidth + "px");
+        if (this.header) {
+            for(let cell of this.header.children) {
+                cell.css("min-width", cell.clientWidth + "px").css("max-width", cell.clientWidth + "px");
+            }
         }
     }
 
     adjust() {
-        this.adjustTableScrollBars();
+        this.adjustGridScrollBars();
         this.scrollTable(true);
     }
 
     setConnectionId(connectionId: string) {
         this.connectionId = connectionId;
+    }
+
+    adjustGridScrollBars() {
+        if (!this.table) {
+            return;
+        }
+        const rect = this.element.parentElement.getBoundingClientRect() as DOMRect;
+        this.table.css("height", rect.height + "px");
+        if (this.last == null || this.first == null) {
+            return;
+        }
+        const last = this.last.getBoundingClientRect() as DOMRect;
+        const first = this.first.getBoundingClientRect() as DOMRect;
+        if (first.y < rect.y || last.y > (rect.y + rect.height)) {
+            this.table.css("overflow-y", "scroll");
+        } else {
+            this.table.css("overflow-y", "hidden");
+        }
+        if (first.width > rect.width) {
+            this.table.css("overflow-x", "scroll");
+        } else {
+            this.table.css("overflow-x", "hidden");
+        }
     }
 
     private newRow(rn: number, row: Array<string>) : Element {
@@ -138,7 +163,7 @@ export default class  {
         if (this.cantLoadMore()) {
             return
         }
-        timeoutAsync(() => this.scrollTable(false), 0, `${this.id}-grid-scroll`);
+        timeoutAsync(() => this.scrollTable(false), 500, `${this.id}-grid-scroll`);
     }
 
     private async scrollTable(precise: boolean) {
@@ -220,37 +245,23 @@ export default class  {
         }
     }
 
-    private adjustTableScrollBars() {
-        if (!this.table) {
-            return;
-        }
-        const rect = this.element.parentElement.getBoundingClientRect() as DOMRect;
-        this.table.css("height", rect.height + "px");
-        if (this.last == null || this.first == null) {
-            return;
-        }
-        const last = this.last.getBoundingClientRect() as DOMRect;
-        const first = this.first.getBoundingClientRect() as DOMRect;
-        if (first.y < rect.y || last.y > (rect.y + rect.height)) {
-            this.table.css("overflow-y", "scroll");
-        } else {
-            this.table.css("overflow-y", "hidden");
-        }
-        if (first.width > rect.width) {
-            this.table.css("overflow-x", "scroll");
-        } else {
-            this.table.css("overflow-x", "hidden");
-        }
-    }
-
     private calcVirtual() {
-        this.virtualBottom.css("height", ((this.stats.rowsAffected - this.end) * this.rowHeight) + "px");
-        this.virtualTop.css("height", ((this.start - 1) * this.rowHeight) + "px");
+        //16776199 
+        let h = (this.stats.rowsAffected - this.end) * this.rowHeight;
+        if (h > 16776199) {
+            h = 16776199;
+        }
+        this.virtualBottom.css("height", h + "px");
+        h = (this.start - 1) * this.rowHeight;
+        if (h > 16776199) {
+            h = 16776199;
+        }
+        this.virtualTop.css("height", h + "px");
     }
 
     private calcPosition(precise: boolean) {
         const tableRect = this.table.getBoundingClientRect() as DOMRect;
-        const firstEl = document.elementFromPoint(tableRect.x, tableRect.y + this.headerHeight);
+        const firstEl = document.elementFromPoint(tableRect.x, tableRect.y + this.headerHeight + 1);
         const lastEl = document.elementFromPoint(tableRect.x, tableRect.y + this.table.clientHeight - 1);
         
         let first = firstEl.dataAttr("row") as number;
