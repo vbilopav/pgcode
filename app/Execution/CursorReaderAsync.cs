@@ -20,17 +20,20 @@ namespace Pgcode.Execution
             }
         }
 
-        public static async IAsyncEnumerable<ExecuteReply> CursorReaderAsync(this WorkspaceConnection ws, CursorRequest request)
+        public static IEnumerable<ExecuteReply> CursorReader(this WorkspaceConnection ws, CursorRequest request)
         {
-            await using var cmd = ws.Connection.CreateCommand();
-            await cmd.ExecuteAsync($"move absolute {request.From - 1} in \"{ws.Cursor}\"");
-            var row = request.From;
-            await using var reader = await cmd.ReaderAsync($"fetch {request.To - request.From + 1} in \"{ws.Cursor}\"");
-            while (await reader.ReadAsync())
+            lock (ws.Connection)
             {
-                yield return GetRowReply(row++, reader);
+                using var cmd = ws.Connection.CreateCommand();
+                cmd.Execute($"move absolute {request.From - 1} in \"{ws.Cursor}\"");
+                var row = request.From;
+                using var reader = cmd.Reader($"fetch {request.To - request.From + 1} in \"{ws.Cursor}\"");
+                while (reader.Read())
+                {
+                    yield return GetRowReply(row++, reader);
+                }
+                reader.Close();
             }
-            await reader.CloseAsync();
         }
 
         public static async IAsyncEnumerable<ExecuteReply> CreateCursorReaderAsync(

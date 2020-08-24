@@ -6,7 +6,7 @@ package api;
 
 service ExecuteService {
 	rpc Execute (ExecuteRequest) returns (stream ExecuteReply);
-	rpc Cursor (CursorRequest) returns (stream ExecuteReply);
+	rpc ReadCursor (CursorRequest) returns (stream ExecuteReply);
 }
 
 message ExecuteRequest { 

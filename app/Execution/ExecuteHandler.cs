@@ -133,18 +133,18 @@ namespace Pgcode.Execution
             }
         }
 
-        public static async ValueTask CursorAsync(WorkspaceConnection ws, CursorRequest request, IServerStreamWriter<ExecuteReply> responseStream)
+        public static void ReadCursor(WorkspaceConnection ws, CursorRequest request, IServerStreamWriter<ExecuteReply> responseStream)
         {
             try
             {
-                await foreach (var reply in ws.CursorReaderAsync(request))
+                foreach (var reply in ws.CursorReader(request))
                 {
-                    await responseStream.WriteAsync(reply);
+                    responseStream.WriteAsync(reply);
                 }
             }
             catch (PostgresException e)
             {
-                await ws.SendPgErrorAsync(e, null);
+                ws.SendPgErrorAsync(e, null).GetAwaiter().GetResult();
             }
         }
 

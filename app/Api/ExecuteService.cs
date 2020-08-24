@@ -42,7 +42,7 @@ namespace Pgcode.Api
             await handler.ReadAsync(responseStream, context.CancellationToken);
         }
 
-        public override async Task Cursor(CursorRequest request, IServerStreamWriter<ExecuteReply> responseStream, ServerCallContext context)
+        public override Task Cursor(CursorRequest request, IServerStreamWriter<ExecuteReply> responseStream, ServerCallContext context)
         {
             LogRequest(context);
 
@@ -50,10 +50,11 @@ namespace Pgcode.Api
             if (ws == null)
             {
                 context.Status = new Status(StatusCode.NotFound, "connection not initialized");
-                return;
+                return Task.CompletedTask;
             }
 
-            await ExecuteHandler.CursorAsync(ws, request, responseStream);
+            ExecuteHandler.ReadCursor(ws, request, responseStream);
+            return Task.CompletedTask;
         }
 
         private void LogRequest(ServerCallContext context)
