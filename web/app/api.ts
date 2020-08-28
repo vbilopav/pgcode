@@ -407,7 +407,7 @@ export const cursor = (connectionId: string, from: number, to: number, stream: I
     connectionId, from, to)
         .on("error", e => {
             console.warn(e);
-            publish(FOOTER_MESSAGE, "can't load more grid data, connection may be reset, try running query again...");
+            setTimeout(() => publish(FOOTER_MESSAGE, "can't load more grid data, connection may be reset, try running query again..."), 250);
             if (stream["end"]) {
                 stream.end();
             }

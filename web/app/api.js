@@ -265,7 +265,7 @@ define(["require", "exports", "app/_sys/pubsub", "libs/signalr/signalr.min.js", 
         }, connectionId, from, to)
             .on("error", e => {
             console.warn(e);
-            pubsub_1.publish(pubsub_1.FOOTER_MESSAGE, "can't load more grid data, connection may be reset, try running query again...");
+            setTimeout(() => pubsub_1.publish(pubsub_1.FOOTER_MESSAGE, "can't load more grid data, connection may be reset, try running query again..."), 250);
             if (stream["end"]) {
                 stream.end();
             }

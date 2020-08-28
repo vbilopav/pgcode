@@ -22,18 +22,15 @@ namespace Pgcode.Execution
 
         public static IEnumerable<ExecuteReply> CursorReader(this WorkspaceConnection ws, CursorRequest request)
         {
-            lock (ws.Connection)
+            using var cmd = ws.Connection.CreateCommand();
+            cmd.Execute($"move absolute {request.From - 1} in \"{ws.Cursor}\"");
+            var row = request.From;
+            using var reader = cmd.Reader($"fetch {request.To - request.From + 1} in \"{ws.Cursor}\"");
+            while (reader.Read())
             {
-                using var cmd = ws.Connection.CreateCommand();
-                cmd.Execute($"move absolute {request.From - 1} in \"{ws.Cursor}\"");
-                var row = request.From;
-                using var reader = cmd.Reader($"fetch {request.To - request.From + 1} in \"{ws.Cursor}\"");
-                while (reader.Read())
-                {
-                    yield return GetRowReply(row++, reader);
-                }
-                reader.Close();
+                yield return GetRowReply(row++, reader);
             }
+            reader.Close();
         }
 
         public static async IAsyncEnumerable<ExecuteReply> CreateCursorReaderAsync(
@@ -68,7 +65,7 @@ namespace Pgcode.Execution
             var rowsAffected = cmd.Execute($"move forward all in \"{cursor}\""); 
             cmd.Execute($"move absolute 0 in \"{cursor}\"");
 
-            uint row = 1;
+            ulong row = 1;
             await using var reader = await cmd.ReaderAsync($"fetch {Program.Settings.CursorFetch} in \"{cursor}\"", cancellationToken);
             if (reader.FieldCount > 0)
             {
@@ -81,7 +78,7 @@ namespace Pgcode.Execution
             stopwatch.Stop();
             await reader.CloseAsync();
             row = row > 0 ? row - 1 : 0;
-            if (row == 0 || row == rowsAffected)
+            if (row == 0 || (int)row == rowsAffected)
             {
                 cmd.Execute(ws.IsNewTran ? "end" : $"close \"{cursor}\"");
                 ws.Cursor = null;
@@ -91,7 +88,7 @@ namespace Pgcode.Execution
                 ReadTime = stopwatch.Elapsed,
                 ExecutionTime = executionTime,
                 RowsAffected = rowsAffected,
-                RowsFetched = row,
+                RowsFetched = (uint)row,
                 Message = $"cursor reader \"{cursor}\""
             }, cancellationToken);
         }

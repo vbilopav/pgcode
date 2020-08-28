@@ -13,7 +13,7 @@ namespace Pgcode.Execution
         public string Execution { get; set; }
         public string Total { get; set; }
         public int RowsAffected { get; set; }
-        public uint RowsFetched { get; set; }
+        public ulong RowsFetched { get; set; }
         public string Message { get; set; }
     }
 

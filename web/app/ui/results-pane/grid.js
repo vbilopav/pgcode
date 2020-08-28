@@ -1,4 +1,4 @@
-define(["require", "exports", "app/api", "app/_sys/timeout"], function (require, exports, api_1, timeout_1) {
+define(["require", "exports", "app/api"], function (require, exports, api_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class default_1 {
@@ -18,6 +18,9 @@ define(["require", "exports", "app/api", "app/_sys/timeout"], function (require,
             this.connectionId = null;
             this.virtualTop = null;
             this.virtualBottom = null;
+            this._rowWidths = new Array();
+            this._shouldScroll = false;
+            this._started = false;
             this.id = id;
             this.element = element;
             window
@@ -36,6 +39,8 @@ define(["require", "exports", "app/api", "app/_sys/timeout"], function (require,
             this.virtualTop = null;
             this.virtualBottom = null;
             this.rows.clear();
+            this.startGridScrollConsumer();
+            this._rowWidths = new Array();
         }
         addHeader(header) {
             let i = 0;
@@ -47,6 +52,7 @@ define(["require", "exports", "app/api", "app/_sys/timeout"], function (require,
                 .on("mouseenter", (e) => this.cellMouseEnter(e.currentTarget))
                 .on("mouseleave", (e) => this.cellMouseLeave(e.currentTarget));
             this.virtualTop = document.createElement("div").css("display", "table-row").css("height", "0px").dataAttr("top", true);
+            document.createElement("div").css("display", "table-cell").appendElementTo(this.virtualTop);
             for (let item of header) {
                 document
                     .createElement("div")
@@ -74,12 +80,16 @@ define(["require", "exports", "app/api", "app/_sys/timeout"], function (require,
             this.stats = Object.assign({}, stats);
             this.start = 1;
             this.end = this.stats.rowsFetched;
-            this.virtualBottom = document.createElement("div").appendElementTo(this.table)
-                .css("height", ((this.stats.rowsAffected - this.stats.rowsFetched) * this.rowHeight) + "px")
-                .dataAttr("bottom", true);
+            this.virtualBottom = document.createElement("div").appendElementTo(this.table).dataAttr("bottom", true).dataAttr("bottom", true);
+            this.calcVirtual();
             if (this.header) {
+                let i = 0;
                 for (let cell of this.header.children) {
-                    cell.css("min-width", cell.clientWidth + "px").css("max-width", cell.clientWidth + "px");
+                    this._rowWidths[i++] = cell.clientWidth;
+                    const w = cell.clientWidth + "px";
+                    cell.css("min-width", w).css("max-width", w);
+                    this.table.findAll(`div.tr > div.td${cell.dataAttr("col")}`).css("min-width", w).css("max-width", w);
+                    this.virtualTop.children[i - 1].css("min-width", w).css("max-width", w);
                 }
             }
         }
@@ -124,13 +134,17 @@ define(["require", "exports", "app/api", "app/_sys/timeout"], function (require,
                 this.first = tr;
             }
             this.last = tr;
-            document.createElement("div").html(`${rn}`).appendElementTo(tr)
+            let td = document.createElement("div").html(`${rn}`).appendElementTo(tr)
                 .addClass("td")
                 .addClass("th")
                 .dataAttr("col", ++i)
                 .dataAttr("row", rn)
                 .on("mouseenter", (e) => this.cellMouseEnter(e.currentTarget))
                 .on("mouseleave", (e) => this.cellMouseLeave(e.currentTarget));
+            if (this._rowWidths.length) {
+                let w = this._rowWidths[i - 1] + "px";
+                td.css("min-width", w).css("max-width", w);
+            }
             for (let item of row) {
                 let td = document
                     .createElement("div")
@@ -145,6 +159,10 @@ define(["require", "exports", "app/api", "app/_sys/timeout"], function (require,
                 if (item == null) {
                     td.addClass("null");
                 }
+                if (this._rowWidths.length) {
+                    let w = this._rowWidths[i - 1] + "px";
+                    td.css("min-width", w).css("max-width", w);
+                }
             }
             return tr;
         }
@@ -152,13 +170,31 @@ define(["require", "exports", "app/api", "app/_sys/timeout"], function (require,
             if (this.cantLoadMore()) {
                 return;
             }
-            timeout_1.timeoutAsync(() => this.scrollTable(false), 500, `${this.id}-grid-scroll`);
+            this._shouldScroll = true;
+            setTimeout(() => this._shouldScroll = true, 0);
+        }
+        async startGridScrollConsumer() {
+            setTimeout(async () => {
+                if (this._shouldScroll) {
+                    this._shouldScroll = false;
+                    if (this._started) {
+                        return;
+                    }
+                    this._started = true;
+                    await this.scrollTable(false);
+                    this._started = false;
+                }
+                await this.startGridScrollConsumer();
+            }, 1);
         }
         async scrollTable(precise) {
             if (this.cantLoadMore()) {
                 return;
             }
             const { first, last } = this.calcPosition(precise);
+            if (first == undefined && last == undefined) {
+                return;
+            }
             if ((last > this.end && first > this.end) || (last < this.start && first < this.start)) {
                 this.rows.forEach(r => r.remove());
                 this.rows.clear();
@@ -232,41 +268,93 @@ define(["require", "exports", "app/api", "app/_sys/timeout"], function (require,
             }
         }
         calcVirtual() {
-            let h = (this.stats.rowsAffected - this.end) * this.rowHeight;
-            if (h > 16776199) {
-                h = 16776199;
+            if (this.stats.rowsAffected == -1) {
+                return;
             }
-            this.virtualBottom.css("height", h + "px");
-            h = (this.start - 1) * this.rowHeight;
-            if (h > 16776199) {
-                h = 16776199;
+            let cap = 5000000;
+            let bh = (this.stats.rowsAffected - this.end) * this.rowHeight;
+            let th = (this.start - 1) * this.rowHeight;
+            if (bh > cap || th > cap) {
+                let bhv;
+                let thv;
+                if (bh >= th) {
+                    bhv = cap;
+                    thv = Math.round((cap * th) / bh);
+                }
+                else {
+                    thv = cap;
+                    bhv = Math.round((cap * bh) / th);
+                }
+                this.virtualTop.css("height", thv + "px").dataAttr("actual", th);
+                this.virtualBottom.css("height", bhv + "px").dataAttr("actual", bh);
+                console.log("virtual");
             }
-            this.virtualTop.css("height", h + "px");
+            else {
+                this.virtualTop.css("height", th + "px").dataAttr("actual", null);
+                this.virtualBottom.css("height", bh + "px").dataAttr("actual", null);
+            }
         }
         calcPosition(precise) {
             const tableRect = this.table.getBoundingClientRect();
             const firstEl = document.elementFromPoint(tableRect.x, tableRect.y + this.headerHeight + 1);
             const lastEl = document.elementFromPoint(tableRect.x, tableRect.y + this.table.clientHeight - 1);
+            let virtual = false;
             let first = firstEl.dataAttr("row");
             if (first == undefined) {
                 if (firstEl.dataAttr("bottom")) {
+                    const actual = firstEl.dataAttr("actual");
                     const bottomRect = this.virtualBottom.getBoundingClientRect();
-                    first = this.end + Math.ceil(((tableRect.top + this.headerHeight) - bottomRect.top) / this.rowHeight);
+                    const h = tableRect.top + this.headerHeight - bottomRect.top;
+                    if (actual == null) {
+                        first = this.end + Math.ceil(h / this.rowHeight);
+                    }
+                    else {
+                        console.log("debugger");
+                        first = this.end + Math.ceil(((actual * h) / bottomRect.height) / this.rowHeight);
+                        virtual = true;
+                    }
                 }
                 else if (firstEl.parentElement.dataAttr("top")) {
+                    const actual = firstEl.dataAttr("actual");
                     const topRect = this.virtualTop.getBoundingClientRect();
-                    first = this.start - Math.ceil((topRect.bottom - (tableRect.top + this.headerHeight)) / this.rowHeight);
+                    const h = topRect.bottom - tableRect.top + this.headerHeight;
+                    if (actual == null) {
+                        first = this.start - Math.ceil(h / this.rowHeight);
+                    }
+                    else {
+                        console.log("debugger");
+                        first = this.start - Math.ceil(((actual * h) / topRect.height) / this.rowHeight);
+                        virtual = true;
+                    }
                 }
             }
             let last = lastEl.dataAttr("row");
             if (last == undefined) {
                 if (lastEl.dataAttr("bottom")) {
+                    const actual = lastEl.dataAttr("actual");
                     const bottomRect = this.virtualBottom.getBoundingClientRect();
-                    last = this.end + Math.ceil((tableRect.bottom - bottomRect.top) / this.rowHeight);
+                    const h = tableRect.bottom - bottomRect.top;
+                    if (actual == null) {
+                        last = this.end + Math.ceil(h / this.rowHeight);
+                    }
+                    else {
+                        console.log("debugger");
+                        last = this.end + Math.ceil(((actual * h) / bottomRect.height) / this.rowHeight);
+                        virtual = true;
+                    }
                 }
                 else if (lastEl.parentElement.dataAttr("top")) {
+                    const actual = lastEl.dataAttr("actual");
                     const topRect = this.virtualTop.getBoundingClientRect();
-                    last = this.start - Math.ceil((topRect.bottom - tableRect.bottom) / this.rowHeight);
+                    const h = topRect.bottom - tableRect.bottom;
+                    if (actual == null) {
+                        last = this.start - Math.ceil(h / this.rowHeight);
+                    }
+                    else {
+                        console.log("debugger");
+                        last = this.start - Math.ceil(((actual * h) / topRect.height) / this.rowHeight);
+                        virtual = true;
+                    }
                 }
             }
             const delta = precise ? 0 : last - first;
@@ -281,6 +369,9 @@ define(["require", "exports", "app/api", "app/_sys/timeout"], function (require,
             }
             else {
                 last = last + delta;
+            }
+            if (virtual) {
+                console.log(first, last);
             }
             return { first, last };
         }
@@ -363,10 +454,14 @@ define(["require", "exports", "app/api", "app/_sys/timeout"], function (require,
                 return;
             }
             const rect = this.toMove.getBoundingClientRect();
-            const w = (e.clientX - rect.x - 11) + "px";
+            const wl = (e.clientX - rect.x - 11);
+            const w = wl + "px";
             this.toMove.css("min-width", w).css("max-width", w);
             const i = this.toMove.dataAttr("col");
             this.table.findAll(`div.tr > div.td${i}`).css("min-width", w).css("max-width", w);
+            if (this._rowWidths.length) {
+                this._rowWidths[i - 1] = wl;
+            }
         }
     }
     exports.default = default_1;

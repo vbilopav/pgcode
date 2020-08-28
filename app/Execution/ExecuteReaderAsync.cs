@@ -27,7 +27,7 @@ namespace Pgcode.Execution
             var rowsAffected = reader.RecordsAffected;
 
             stopwatch.Start();
-            uint row = 1;
+            ulong row = 1;
             if (reader.FieldCount > 0)
             {
                 yield return GetHeaderReply(reader);
@@ -49,7 +49,7 @@ namespace Pgcode.Execution
                 ReadTime = stopwatch.Elapsed,
                 ExecutionTime = executionTime,
                 RowsAffected = rowsAffected,
-                RowsFetched = row,
+                RowsFetched = (uint)row,
                 Message = "reader"
             }, cancellationToken);
         }

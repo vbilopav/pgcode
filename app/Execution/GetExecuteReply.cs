@@ -17,19 +17,19 @@ namespace Pgcode.Execution
             return headerReply;
         }
 
-        private static ExecuteReply GetRowReply(uint row, NpgsqlDataReader reader)
+        private static ExecuteReply GetRowReply(ulong row, NpgsqlDataReader reader)
         {
             var values = new object[reader.FieldCount];
             reader.GetProviderSpecificValues(values);
 
-            var rowReply = new ExecuteReply { RowNumber = row };
-            for (uint index = 0; index < values.Length; index++)
+            var rowReply = new ExecuteReply { RowNumber = (uint)row };
+            for (ulong index = 0; index < (uint)values.Length; index++)
             {
                 var value = values[index];
                 rowReply.Data.Add(value.ToString());
                 if (value == DBNull.Value)
                 {
-                    rowReply.NullIndexes.Add(index);
+                    rowReply.NullIndexes.Add((uint)index);
                 }
             }
             return rowReply;

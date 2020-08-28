@@ -29,7 +29,7 @@ namespace Pgcode.Api
 
         public override async Task Execute(ExecuteRequest request, IServerStreamWriter<ExecuteReply> responseStream, ServerCallContext context)
         {
-            LogRequest(context);
+            LogRequest(context, request);
 
             var ws = _connectionManager.GetWsConnection(request.ConnectionId);
             if (ws == null)
@@ -44,7 +44,7 @@ namespace Pgcode.Api
 
         public override Task ReadCursor(CursorRequest request, IServerStreamWriter<ExecuteReply> responseStream, ServerCallContext context)
         {
-            LogRequest(context);
+            LogRequest(context, request);
 
             var ws = _connectionManager.GetWsConnection(request.ConnectionId);
             if (ws == null)
@@ -57,14 +57,14 @@ namespace Pgcode.Api
             return Task.CompletedTask;
         }
 
-        private void LogRequest(ServerCallContext context)
+        private void LogRequest(ServerCallContext context, object parameters)
         {
             if (!_settings.LogRequests)
             {
                 return;
             }
             var ctx = context.GetHttpContext();
-            new LoggingMiddleware(_loggerFactory).LogMessage(ctx);
+            new LoggingMiddleware(_loggerFactory).LogMessage(ctx, additional: parameters);
         }
     }
 }

@@ -10,7 +10,7 @@ namespace Pgcode
         public string PgCodeSchema { get; set; } = "pgcode";
         public string DefaultSchema { get; set; } = "public";
         public string SkipSchemaPattern { get; set; } = "(pg_temp|pg_toast)%";
-        public bool LogRequests { get; set; } = false;
+        public bool LogRequests { get; set; } = true;
         public bool LogPgCodeDbCommands { get; set; } = false;
         public bool LogPgCodeCommandNotice { get; set; } = true;
         public string OpenCommandUrl { get; set; } = null; //"https://pgcode";
@@ -19,6 +19,6 @@ namespace Pgcode
         public string LinuxOpenCommand { get; set; } = "xdg-open";
         public string FreeBsdOpenCommand { get; set; } = "xdg-open";
         public int CursorFetch { get; set; } = 176;
-        public int ReadLimit { get; set; } = 1000;
+        public ulong ReadLimit { get; set; } = 1000;
     }
 }

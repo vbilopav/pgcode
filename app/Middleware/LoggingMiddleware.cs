@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Npgsql;
@@ -26,11 +27,16 @@ namespace Pgcode.Middleware
             _deleteLogger = loggerFactory.CreateLogger("DELETE");
         }
 
-        public void LogMessage(HttpContext context, ApiException exception = null)
+        public void LogMessage(HttpContext context, ApiException exception = null, object additional = null)
         {
             var userInfo = context.User.Identity.Name == null ? "" : $"{NL}User: {context.User.Identity.Name}";
             var (statusCode, error, logLevel) = GetStatusCodeErrorAndLogLevel(context, exception);
-            var msg = $"{context.Request.Path}{context.Request.QueryString} {statusCode}{userInfo}{error}";
+            string additionalValue = null;
+            if (additional != null)
+            {
+                additionalValue = string.Concat("   ", JsonSerializer.Serialize(additional));
+            }
+            var msg = $"{context.Request.Path}{context.Request.QueryString} {statusCode}{userInfo}{error}{additionalValue ?? ""}";
 
             switch (context.Request.Method)
             {

@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Grpc.Core;
@@ -92,17 +93,7 @@ namespace Pgcode.Execution
                     }
                     catch (PostgresException)
                     {
-                        await using var cmd = _ws.Connection.CreateCommand();
-                        if (_ws.IsNewTran)
-                        {
-                            cmd.Execute("end");
-                        }
-                        else
-                        {
-                            _ws.CloseCursorIfExists(cmd);
-                        }
-                        _ws.Cursor = null;
-                        _ws.IsNewTran = false;
+                        CleanupWs(_ws);
                         throw;
                     }
                 }
@@ -144,21 +135,24 @@ namespace Pgcode.Execution
             }
             catch (PostgresException e)
             {
-                /*
-                using var cmd = ws.Connection.CreateCommand();
-                if (ws.IsNewTran)
-                {
-                    cmd.Execute("end");
-                }
-                else
-                {
-                    ws.CloseCursorIfExists(cmd);
-                }
-                ws.Cursor = null;
-                ws.IsNewTran = false;
-                */
+                CleanupWs(ws);
                 ws.SendPgErrorAsync(e, null).GetAwaiter().GetResult();
             }
+        }
+
+        private static void CleanupWs(WorkspaceConnection ws)
+        {
+            using var cmd = ws.Connection.CreateCommand();
+            if (ws.IsNewTran)
+            {
+                cmd.Execute("end");
+            }
+            else
+            {
+                ws.CloseCursorIfExists(cmd);
+            }
+            ws.Cursor = null;
+            ws.IsNewTran = false;
         }
 
         private static bool IsSuitableForCursor(string content)
