@@ -4,7 +4,7 @@ export default class  {
     private readonly element: Element;
     private readonly id: string;
     private readonly rows = new Map<number, Element>();
-    private table: Element = null;
+    private table: HTMLElement = null;
     private header: Element = null;
     private last: Element = null;
     private first: Element = null;
@@ -16,8 +16,9 @@ export default class  {
     private start: number = null;
     private end: number = null;
     private connectionId: string = null;
-    private virtualTop: Element = null;
-    private virtualBottom: Element = null;
+
+    private scroll: HTMLElement = null;
+    private scroller: Element = null;
 
     constructor(id: string, element: Element) {
         this.id = id;
@@ -31,13 +32,15 @@ export default class  {
 
     init() {
         this.element.html("");
-        this.table = document.createElement("div").appendElementTo(this.element).addClass("table").on("scroll", e => this.onTableScroll())
+        this.table = document.createElement("div").appendElementTo(this.element).addClass("table") as HTMLElement;
+        
+        this.scroll = document.createElement("div").addClass("v-scroll").appendElementTo(this.element).on("scroll", e => this.onTableScroll()) as HTMLElement;
+        this.scroller = document.createElement("div").appendElementTo(this.scroll);
+
         this.header = null;
         this.last = null;
         this.first = null;
         this.rowHeight = null;
-        this.virtualTop = null;
-        this.virtualBottom = null;
         this.rows.clear();
         this.startGridScrollConsumer();
         this._rowWidths = new Array<number>();
@@ -52,8 +55,6 @@ export default class  {
             .dataAttr("col", i)
             .on("mouseenter", (e: MouseEvent)=>this.cellMouseEnter(e.currentTarget as Element))
             .on("mouseleave", (e: MouseEvent)=>this.cellMouseLeave(e.currentTarget as Element));
-        this.virtualTop = document.createElement("div").css("display", "table-row").css("height", "0px").dataAttr("top", true);
-        document.createElement("div").css("display", "table-cell").appendElementTo(this.virtualTop);
         for(let item of header) {
             document
                 .createElement("div")
@@ -64,12 +65,9 @@ export default class  {
                 .dataAttr("col", i)
                 .on("mousemove", (e: MouseEvent)=>this.headerCellMousemove(e))
                 .on("mouseenter", (e: MouseEvent)=>this.cellMouseEnter(e.currentTarget as Element))
-                .on("mouseleave", (e: MouseEvent)=>this.cellMouseLeave(e.currentTarget as Element));
-
-            document.createElement("div").css("display", "table-cell").appendElementTo(this.virtualTop);
+                .on("mouseleave", (e: MouseEvent)=>this.cellMouseLeave(e.currentTarget as Element));;
         }
         this.headerHeight = this.header.clientHeight;
-        this.virtualTop.appendElementTo(this.table);
     }
 
     addRow(rn: number, row: Array<string>) {
@@ -87,7 +85,6 @@ export default class  {
         this.start = 1;
         this.end = this.stats.rowsFetched;
         
-        this.virtualBottom = document.createElement("div").appendElementTo(this.table).dataAttr("bottom", true).dataAttr("bottom", true);
         this.calcVirtual();
         if (this.header) {
             let i = 0;
@@ -96,14 +93,13 @@ export default class  {
                 const w = cell.clientWidth + "px";
                 cell.css("min-width", w).css("max-width", w);
                 this.table.findAll(`div.tr > div.td${cell.dataAttr("col")}`).css("min-width", w).css("max-width", w);
-                this.virtualTop.children[i-1].css("min-width", w).css("max-width", w);
             }
         }
     }
 
     adjust() {
         this.adjustGridScrollBars();
-        this.scrollTable(true);
+        this.scrollTable();
     }
 
     setConnectionId(connectionId: string) {
@@ -121,11 +117,13 @@ export default class  {
         }
         const last = this.last.getBoundingClientRect() as DOMRect;
         const first = this.first.getBoundingClientRect() as DOMRect;
+
         if (first.y < rect.y || last.y > (rect.y + rect.height)) {
-            this.table.css("overflow-y", "scroll");
+            this.scroll.showElement();
         } else {
-            this.table.css("overflow-y", "hidden");
+            this.scroll.hideElement();
         }
+
         if (first.width > rect.width) {
             this.table.css("overflow-x", "scroll");
         } else {
@@ -181,13 +179,21 @@ export default class  {
 
     private _shouldScroll = false;
     private _started = false;
+    private _timeout: number;
 
     private onTableScroll() {
-        if (this.cantLoadMore()) {
+        if (!this.connectionId || !this.stats ) {
             return
         }
         this._shouldScroll = true;
-        setTimeout(() => this._shouldScroll = true, 0);
+        this._timeout = setTimeout(() => {
+            if (this._timeout) {
+                clearTimeout(this._timeout)
+                this._timeout = undefined;
+            }
+            
+            this._shouldScroll = true;
+        }, 0);
     }
 
     private async startGridScrollConsumer() {
@@ -198,22 +204,30 @@ export default class  {
                     return;
                 }
                 this._started = true;
-                await this.scrollTable(false);
+                console.log("started");
+                await this.scrollTable();
+                console.log("ended");
                 this._started = false;
             }
             await this.startGridScrollConsumer();
-        }, 1);
+        }, 0);
     }
 
-    private async scrollTable(precise: boolean) {
-        if (this.cantLoadMore()) {
-            return
+    private async scrollTable() {
+        if (this.scroll == null) {
+            return {first: undefined, last: undefined}
         }
-        const {first, last} = this.calcPosition(precise);
-        if (first == undefined && last == undefined) {
-            return;
+        let first = Math.trunc(this.scroll.scrollTop / this.rowHeight);
+        let last = Math.trunc((this.scroll.scrollTop + this.scroll.offsetHeight) / this.rowHeight);
+        if (first < 1) {
+            first = 1;
         }
+        if (last > this.stats.rowsAffected) {
+            last = this.stats.rowsAffected;
+        }
+
         if ((last > this.end && first > this.end) || (last < this.start && first < this.start)) {
+
             this.rows.forEach(r => r.remove());
             this.rows.clear();
             this.start = first;
@@ -223,22 +237,20 @@ export default class  {
                     end: () => resolve(),
                     row: (rowNum, row: Array<string>) => {
                         const newRow = this.newRow(rowNum, row);
-                        this.virtualBottom.before(newRow);
+                        newRow.appendElementTo(this.table);
                         this.rows.set(rowNum, newRow);
                     }
                 });
             });
-            this.calcVirtual();
-            return;
-        }
-        
-        if (last > this.end && first >= this.start) {
+
+        } else if (last > this.end && first >= this.start) {
+
             await new Promise<void>(resolve => {
                 cursor(this.connectionId, this.end + 1, last, {
                     end: () => resolve(),
                     row: (rowNum, row: Array<string>) => {
                         const newRow = this.newRow(rowNum, row);
-                        this.virtualBottom.before(newRow);
+                        newRow.appendElementTo(this.table);
                         const forDelete = this.rows.get(this.start);
                         if (forDelete) {
                             forDelete.remove();
@@ -252,11 +264,9 @@ export default class  {
                     }
                 });
             });
-            this.calcVirtual();
-            return;
-        }
 
-        if (last <= this.end && first < this.start) {
+        } else if (last <= this.end && first < this.start) {
+
             await new Promise<void>(resolve => {
                 let last: Element;
                 cursor(this.connectionId, first, this.start - 1, {
@@ -264,7 +274,7 @@ export default class  {
                     row: (rowNum, row: Array<string>) => {
                         let newRow = this.newRow(rowNum, row);
                         if (!last) {
-                            this.virtualTop.after(newRow);
+                            this.header.after(newRow);
                         } else {
                             last.after(newRow);
                         }
@@ -282,8 +292,12 @@ export default class  {
                     }
                 });
             });
-            this.calcVirtual();
-            return;
+        }
+
+        if (first + ((last - first) / 2) < this.stats.rowsAffected / 2) {
+            this.table.scrollTo({top: ((first - 1) * this.rowHeight) + (this.scroll.scrollTop % this.rowHeight), behavior: 'auto'});
+        } else {
+            this.table.scrollTo({top: (first * this.rowHeight) + (this.scroll.scrollTop % this.rowHeight), behavior: 'auto'})
         }
     }
 
@@ -291,115 +305,7 @@ export default class  {
         if (this.stats.rowsAffected == -1) {
             return;
         }
-        let cap = 5000000;
-        let bh = (this.stats.rowsAffected - this.end) * this.rowHeight;
-        let th = (this.start - 1) * this.rowHeight;
-
-        if (bh > cap || th > cap) {
-            let bhv: number;
-            let thv: number;
-            if (bh >= th) {
-                bhv = cap;
-                thv = Math.round((cap * th) / bh);
-            } else {
-                thv = cap;
-                bhv = Math.round((cap * bh) / th);
-            }
-
-            this.virtualTop.css("height", thv + "px").dataAttr("actual", th);
-            this.virtualBottom.css("height", bhv + "px").dataAttr("actual", bh);
-
-            console.log("virtual");
-        } else {
-            this.virtualTop.css("height", th + "px").dataAttr("actual", null);
-            this.virtualBottom.css("height", bh + "px").dataAttr("actual", null);
-        }
-    }
-
-    private calcPosition(precise: boolean) {
-        const tableRect = this.table.getBoundingClientRect() as DOMRect;
-        const firstEl = document.elementFromPoint(tableRect.x, tableRect.y + this.headerHeight + 1);
-        const lastEl = document.elementFromPoint(tableRect.x, tableRect.y + this.table.clientHeight - 1);
-        let virtual = false;
-        let first = firstEl.dataAttr("row") as number;
-        if (first == undefined) {
-            if (firstEl.dataAttr("bottom")) {
-                const actual = firstEl.dataAttr("actual");
-                const bottomRect = this.virtualBottom.getBoundingClientRect() as DOMRect;
-                const h = tableRect.top + this.headerHeight - bottomRect.top;
-                if (actual == null) {
-                    first = this.end + Math.ceil(h / this.rowHeight);
-                } else {
-                    console.log("debugger");
-                    first = this.end + Math.ceil(((actual * h) / bottomRect.height) / this.rowHeight); // include actual height
-                    virtual = true;
-                    //return {first: undefined, last: undefined}
-                }
-            } else if (firstEl.parentElement.dataAttr("top")) {
-                const actual = firstEl.dataAttr("actual");
-                const topRect = this.virtualTop.getBoundingClientRect() as DOMRect;
-                const h = topRect.bottom - tableRect.top + this.headerHeight
-                if (actual == null) {
-                    first = this.start - Math.ceil(h / this.rowHeight);
-                } else {
-                    console.log("debugger");
-                    first = this.start - Math.ceil(((actual * h) / topRect.height) / this.rowHeight); // include actual height
-                    virtual = true;
-                    //return {first: undefined, last: undefined}
-                }
-            }
-        }
-        let last = lastEl.dataAttr("row") as number;
-        if (last == undefined) {
-            if (lastEl.dataAttr("bottom")) {
-                const actual = lastEl.dataAttr("actual");
-                const bottomRect = this.virtualBottom.getBoundingClientRect() as DOMRect;
-                const h = tableRect.bottom - bottomRect.top;
-                if (actual == null) {
-                    last = this.end + Math.ceil(h / this.rowHeight);
-                } else {
-                    console.log("debugger");
-                    last = this.end + Math.ceil(((actual * h) / bottomRect.height) / this.rowHeight); // include actual height
-                    virtual = true;
-                    //return {first: undefined, last: undefined}
-                }
-            } else if (lastEl.parentElement.dataAttr("top")) {
-                const actual = lastEl.dataAttr("actual");
-                const topRect = this.virtualTop.getBoundingClientRect() as DOMRect;
-                const h = topRect.bottom -  tableRect.bottom;
-                if (actual == null) {
-                    last = this.start - Math.ceil(h / this.rowHeight);
-                } else {
-                    console.log("debugger");
-                    last = this.start - Math.ceil(((actual * h) / topRect.height) / this.rowHeight); // include actual height
-                    virtual = true;
-                    //return {first: undefined, last: undefined}
-                }
-            }
-        }
-
-        const delta = precise ? 0 : last - first;
-        if (first - delta < 1) {
-            first = 1;
-        } else {
-            first = first - delta;
-        }
-        if (last + delta > this.stats.rowsAffected) {
-            last = this.stats.rowsAffected;
-        } else {
-            last = last + delta;
-        }
-
-        if (virtual) {
-            console.log(first, last);
-            //return {first: undefined, last: undefined}
-        }
-
-        return {first, last}
-    }
-
-    private cantLoadMore() {
-        return !this.connectionId || !this.stats || this.stats.rowsAffected == this.stats.rowsFetched;
+        this.scroller.css("height", (this.stats.rowsAffected * this.rowHeight) + this.headerHeight + "px");
     }
 
     private headerCellMousemove(e: MouseEvent) {

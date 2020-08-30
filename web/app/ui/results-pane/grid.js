@@ -16,8 +16,8 @@ define(["require", "exports", "app/api"], function (require, exports, api_1) {
             this.start = null;
             this.end = null;
             this.connectionId = null;
-            this.virtualTop = null;
-            this.virtualBottom = null;
+            this.scroll = null;
+            this.scroller = null;
             this._rowWidths = new Array();
             this._shouldScroll = false;
             this._started = false;
@@ -31,13 +31,13 @@ define(["require", "exports", "app/api"], function (require, exports, api_1) {
         }
         init() {
             this.element.html("");
-            this.table = document.createElement("div").appendElementTo(this.element).addClass("table").on("scroll", e => this.onTableScroll());
+            this.table = document.createElement("div").appendElementTo(this.element).addClass("table");
+            this.scroll = document.createElement("div").addClass("v-scroll").appendElementTo(this.element).on("scroll", e => this.onTableScroll());
+            this.scroller = document.createElement("div").appendElementTo(this.scroll);
             this.header = null;
             this.last = null;
             this.first = null;
             this.rowHeight = null;
-            this.virtualTop = null;
-            this.virtualBottom = null;
             this.rows.clear();
             this.startGridScrollConsumer();
             this._rowWidths = new Array();
@@ -51,8 +51,6 @@ define(["require", "exports", "app/api"], function (require, exports, api_1) {
                 .dataAttr("col", i)
                 .on("mouseenter", (e) => this.cellMouseEnter(e.currentTarget))
                 .on("mouseleave", (e) => this.cellMouseLeave(e.currentTarget));
-            this.virtualTop = document.createElement("div").css("display", "table-row").css("height", "0px").dataAttr("top", true);
-            document.createElement("div").css("display", "table-cell").appendElementTo(this.virtualTop);
             for (let item of header) {
                 document
                     .createElement("div")
@@ -64,10 +62,9 @@ define(["require", "exports", "app/api"], function (require, exports, api_1) {
                     .on("mousemove", (e) => this.headerCellMousemove(e))
                     .on("mouseenter", (e) => this.cellMouseEnter(e.currentTarget))
                     .on("mouseleave", (e) => this.cellMouseLeave(e.currentTarget));
-                document.createElement("div").css("display", "table-cell").appendElementTo(this.virtualTop);
+                ;
             }
             this.headerHeight = this.header.clientHeight;
-            this.virtualTop.appendElementTo(this.table);
         }
         addRow(rn, row) {
             const e = this.newRow(rn, row).appendElementTo(this.table);
@@ -80,7 +77,6 @@ define(["require", "exports", "app/api"], function (require, exports, api_1) {
             this.stats = Object.assign({}, stats);
             this.start = 1;
             this.end = this.stats.rowsFetched;
-            this.virtualBottom = document.createElement("div").appendElementTo(this.table).dataAttr("bottom", true).dataAttr("bottom", true);
             this.calcVirtual();
             if (this.header) {
                 let i = 0;
@@ -89,13 +85,12 @@ define(["require", "exports", "app/api"], function (require, exports, api_1) {
                     const w = cell.clientWidth + "px";
                     cell.css("min-width", w).css("max-width", w);
                     this.table.findAll(`div.tr > div.td${cell.dataAttr("col")}`).css("min-width", w).css("max-width", w);
-                    this.virtualTop.children[i - 1].css("min-width", w).css("max-width", w);
                 }
             }
         }
         adjust() {
             this.adjustGridScrollBars();
-            this.scrollTable(true);
+            this.scrollTable();
         }
         setConnectionId(connectionId) {
             this.connectionId = connectionId;
@@ -112,10 +107,10 @@ define(["require", "exports", "app/api"], function (require, exports, api_1) {
             const last = this.last.getBoundingClientRect();
             const first = this.first.getBoundingClientRect();
             if (first.y < rect.y || last.y > (rect.y + rect.height)) {
-                this.table.css("overflow-y", "scroll");
+                this.scroll.showElement();
             }
             else {
-                this.table.css("overflow-y", "hidden");
+                this.scroll.hideElement();
             }
             if (first.width > rect.width) {
                 this.table.css("overflow-x", "scroll");
@@ -167,11 +162,17 @@ define(["require", "exports", "app/api"], function (require, exports, api_1) {
             return tr;
         }
         onTableScroll() {
-            if (this.cantLoadMore()) {
+            if (!this.connectionId || !this.stats) {
                 return;
             }
             this._shouldScroll = true;
-            setTimeout(() => this._shouldScroll = true, 0);
+            this._timeout = setTimeout(() => {
+                if (this._timeout) {
+                    clearTimeout(this._timeout);
+                    this._timeout = undefined;
+                }
+                this._shouldScroll = true;
+            }, 0);
         }
         async startGridScrollConsumer() {
             setTimeout(async () => {
@@ -181,19 +182,25 @@ define(["require", "exports", "app/api"], function (require, exports, api_1) {
                         return;
                     }
                     this._started = true;
-                    await this.scrollTable(false);
+                    console.log("started");
+                    await this.scrollTable();
+                    console.log("ended");
                     this._started = false;
                 }
                 await this.startGridScrollConsumer();
-            }, 1);
+            }, 0);
         }
-        async scrollTable(precise) {
-            if (this.cantLoadMore()) {
-                return;
+        async scrollTable() {
+            if (this.scroll == null) {
+                return { first: undefined, last: undefined };
             }
-            const { first, last } = this.calcPosition(precise);
-            if (first == undefined && last == undefined) {
-                return;
+            let first = Math.trunc(this.scroll.scrollTop / this.rowHeight);
+            let last = Math.trunc((this.scroll.scrollTop + this.scroll.offsetHeight) / this.rowHeight);
+            if (first < 1) {
+                first = 1;
+            }
+            if (last > this.stats.rowsAffected) {
+                last = this.stats.rowsAffected;
             }
             if ((last > this.end && first > this.end) || (last < this.start && first < this.start)) {
                 this.rows.forEach(r => r.remove());
@@ -205,21 +212,19 @@ define(["require", "exports", "app/api"], function (require, exports, api_1) {
                         end: () => resolve(),
                         row: (rowNum, row) => {
                             const newRow = this.newRow(rowNum, row);
-                            this.virtualBottom.before(newRow);
+                            newRow.appendElementTo(this.table);
                             this.rows.set(rowNum, newRow);
                         }
                     });
                 });
-                this.calcVirtual();
-                return;
             }
-            if (last > this.end && first >= this.start) {
+            else if (last > this.end && first >= this.start) {
                 await new Promise(resolve => {
                     api_1.cursor(this.connectionId, this.end + 1, last, {
                         end: () => resolve(),
                         row: (rowNum, row) => {
                             const newRow = this.newRow(rowNum, row);
-                            this.virtualBottom.before(newRow);
+                            newRow.appendElementTo(this.table);
                             const forDelete = this.rows.get(this.start);
                             if (forDelete) {
                                 forDelete.remove();
@@ -233,10 +238,8 @@ define(["require", "exports", "app/api"], function (require, exports, api_1) {
                         }
                     });
                 });
-                this.calcVirtual();
-                return;
             }
-            if (last <= this.end && first < this.start) {
+            else if (last <= this.end && first < this.start) {
                 await new Promise(resolve => {
                     let last;
                     api_1.cursor(this.connectionId, first, this.start - 1, {
@@ -244,7 +247,7 @@ define(["require", "exports", "app/api"], function (require, exports, api_1) {
                         row: (rowNum, row) => {
                             let newRow = this.newRow(rowNum, row);
                             if (!last) {
-                                this.virtualTop.after(newRow);
+                                this.header.after(newRow);
                             }
                             else {
                                 last.after(newRow);
@@ -263,120 +266,19 @@ define(["require", "exports", "app/api"], function (require, exports, api_1) {
                         }
                     });
                 });
-                this.calcVirtual();
-                return;
+            }
+            if (first + ((last - first) / 2) < this.stats.rowsAffected / 2) {
+                this.table.scrollTo({ top: ((first - 1) * this.rowHeight) + (this.scroll.scrollTop % this.rowHeight), behavior: 'auto' });
+            }
+            else {
+                this.table.scrollTo({ top: (first * this.rowHeight) + (this.scroll.scrollTop % this.rowHeight), behavior: 'auto' });
             }
         }
         calcVirtual() {
             if (this.stats.rowsAffected == -1) {
                 return;
             }
-            let cap = 5000000;
-            let bh = (this.stats.rowsAffected - this.end) * this.rowHeight;
-            let th = (this.start - 1) * this.rowHeight;
-            if (bh > cap || th > cap) {
-                let bhv;
-                let thv;
-                if (bh >= th) {
-                    bhv = cap;
-                    thv = Math.round((cap * th) / bh);
-                }
-                else {
-                    thv = cap;
-                    bhv = Math.round((cap * bh) / th);
-                }
-                this.virtualTop.css("height", thv + "px").dataAttr("actual", th);
-                this.virtualBottom.css("height", bhv + "px").dataAttr("actual", bh);
-                console.log("virtual");
-            }
-            else {
-                this.virtualTop.css("height", th + "px").dataAttr("actual", null);
-                this.virtualBottom.css("height", bh + "px").dataAttr("actual", null);
-            }
-        }
-        calcPosition(precise) {
-            const tableRect = this.table.getBoundingClientRect();
-            const firstEl = document.elementFromPoint(tableRect.x, tableRect.y + this.headerHeight + 1);
-            const lastEl = document.elementFromPoint(tableRect.x, tableRect.y + this.table.clientHeight - 1);
-            let virtual = false;
-            let first = firstEl.dataAttr("row");
-            if (first == undefined) {
-                if (firstEl.dataAttr("bottom")) {
-                    const actual = firstEl.dataAttr("actual");
-                    const bottomRect = this.virtualBottom.getBoundingClientRect();
-                    const h = tableRect.top + this.headerHeight - bottomRect.top;
-                    if (actual == null) {
-                        first = this.end + Math.ceil(h / this.rowHeight);
-                    }
-                    else {
-                        console.log("debugger");
-                        first = this.end + Math.ceil(((actual * h) / bottomRect.height) / this.rowHeight);
-                        virtual = true;
-                    }
-                }
-                else if (firstEl.parentElement.dataAttr("top")) {
-                    const actual = firstEl.dataAttr("actual");
-                    const topRect = this.virtualTop.getBoundingClientRect();
-                    const h = topRect.bottom - tableRect.top + this.headerHeight;
-                    if (actual == null) {
-                        first = this.start - Math.ceil(h / this.rowHeight);
-                    }
-                    else {
-                        console.log("debugger");
-                        first = this.start - Math.ceil(((actual * h) / topRect.height) / this.rowHeight);
-                        virtual = true;
-                    }
-                }
-            }
-            let last = lastEl.dataAttr("row");
-            if (last == undefined) {
-                if (lastEl.dataAttr("bottom")) {
-                    const actual = lastEl.dataAttr("actual");
-                    const bottomRect = this.virtualBottom.getBoundingClientRect();
-                    const h = tableRect.bottom - bottomRect.top;
-                    if (actual == null) {
-                        last = this.end + Math.ceil(h / this.rowHeight);
-                    }
-                    else {
-                        console.log("debugger");
-                        last = this.end + Math.ceil(((actual * h) / bottomRect.height) / this.rowHeight);
-                        virtual = true;
-                    }
-                }
-                else if (lastEl.parentElement.dataAttr("top")) {
-                    const actual = lastEl.dataAttr("actual");
-                    const topRect = this.virtualTop.getBoundingClientRect();
-                    const h = topRect.bottom - tableRect.bottom;
-                    if (actual == null) {
-                        last = this.start - Math.ceil(h / this.rowHeight);
-                    }
-                    else {
-                        console.log("debugger");
-                        last = this.start - Math.ceil(((actual * h) / topRect.height) / this.rowHeight);
-                        virtual = true;
-                    }
-                }
-            }
-            const delta = precise ? 0 : last - first;
-            if (first - delta < 1) {
-                first = 1;
-            }
-            else {
-                first = first - delta;
-            }
-            if (last + delta > this.stats.rowsAffected) {
-                last = this.stats.rowsAffected;
-            }
-            else {
-                last = last + delta;
-            }
-            if (virtual) {
-                console.log(first, last);
-            }
-            return { first, last };
-        }
-        cantLoadMore() {
-            return !this.connectionId || !this.stats || this.stats.rowsAffected == this.stats.rowsFetched;
+            this.scroller.css("height", (this.stats.rowsAffected * this.rowHeight) + this.headerHeight + "px");
         }
         headerCellMousemove(e) {
             if (this.moving) {
