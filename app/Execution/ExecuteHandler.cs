@@ -1,15 +1,9 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Threading;
-using System.Threading.Tasks;
 using Grpc.Core;
 using Npgsql;
 using Pgcode.Connection;
 using Pgcode.Protos;
-// ReSharper disable MethodHasAsyncOverloadWithCancellation
 
 namespace Pgcode.Execution
 {
@@ -53,8 +47,7 @@ namespace Pgcode.Execution
             }
         }
 
-        [SuppressMessage("ReSharper", "MethodSupportsCancellation")]
-        public async ValueTask ReadAsync(IServerStreamWriter<ExecuteReply> responseStream, CancellationToken cancellationToken = default)
+        public void Read(IServerStreamWriter<ExecuteReply> responseStream)
         {
             void NoticeHandler(object sender, NpgsqlNoticeEventArgs e)
             {
@@ -71,24 +64,24 @@ namespace Pgcode.Execution
                 {
                     if (_execContent != null)
                     {
-                        await _ws.ExecuteAsync(_execContent, cancellationToken);
+                        _ws.Execute(_execContent);
                     }
-                    await foreach (var reply in _ws.ExecuteReaderAsync(_readContent, cancellationToken))
+                    foreach (var reply in _ws.ExecuteReader(_readContent))
                     {
-                        await responseStream.WriteAsync(reply);
+                        responseStream.WriteAsync(reply).GetAwaiter().GetResult();
                     }
                 } 
                 else if (_cursorContent != null)
                 {
                     if (_execContent != null)
                     {
-                        await _ws.ExecuteAsync(_execContent, cancellationToken);
+                        _ws.Execute(_execContent);
                     }
                     try
                     {
-                        await foreach (var reply in _ws.CreateCursorReaderAsync(_cursorContent, cancellationToken))
+                        foreach (var reply in _ws.CreateCursorReader(_cursorContent))
                         {
-                            await responseStream.WriteAsync(reply);
+                            responseStream.WriteAsync(reply).GetAwaiter().GetResult();
                         }
                     }
                     catch (PostgresException)
@@ -99,24 +92,24 @@ namespace Pgcode.Execution
                 }
                 else if (_execContent != null)
                 {
-                    await _ws.ExecuteAsync(_execContent, cancellationToken);
+                    _ws.Execute(_execContent);
                 }
                 else
                 {
-                    await _ws.SendStatsMessageAsync(new MessageRequest
+                    _ws.SendStatsMessageAsync(new MessageRequest
                     {
                         ReadTime = null,
                         ExecutionTime = stopwatch.Elapsed,
                         RowsAffected = 0,
                         RowsFetched = 0,
                         Message = "empty"
-                    }, cancellationToken);
+                    }).GetAwaiter().GetResult();
                 }
             }
             catch (PostgresException e)
             {
                 stopwatch.Stop();
-                await _ws.SendPgErrorAsync(e, stopwatch.Elapsed);
+                _ws.SendPgErrorAsync(e, stopwatch.Elapsed).GetAwaiter().GetResult();
             }
             finally
             {
@@ -130,7 +123,7 @@ namespace Pgcode.Execution
             {
                 foreach (var reply in ws.CursorReader(request))
                 {
-                    responseStream.WriteAsync(reply);
+                    responseStream.WriteAsync(reply).GetAwaiter().GetResult();
                 }
             }
             catch (PostgresException e)

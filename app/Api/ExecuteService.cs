@@ -27,7 +27,7 @@ namespace Pgcode.Api
             _settings = settings;
         }
 
-        public override async Task Execute(ExecuteRequest request, IServerStreamWriter<ExecuteReply> responseStream, ServerCallContext context)
+        public override Task Execute(ExecuteRequest request, IServerStreamWriter<ExecuteReply> responseStream, ServerCallContext context)
         {
             LogRequest(context, request);
 
@@ -35,11 +35,12 @@ namespace Pgcode.Api
             if (ws == null)
             {
                 context.Status = new Status(StatusCode.NotFound, "connection not initialized");
-                return;
+                return Task.CompletedTask;
             }
 
             var handler = new ExecuteHandler(ws, request);
-            await handler.ReadAsync(responseStream, context.CancellationToken);
+            handler.Read(responseStream);
+            return Task.CompletedTask;
         }
 
         public override Task ReadCursor(CursorRequest request, IServerStreamWriter<ExecuteReply> responseStream, ServerCallContext context)
