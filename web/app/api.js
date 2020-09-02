@@ -197,7 +197,7 @@ define(["require", "exports", "app/_sys/pubsub", "libs/signalr/signalr.min.js", 
     };
     ;
     ;
-    exports.execute = async (id, content, stream) => {
+    exports.execute = async (id, content, size, stream) => {
         const hub = await _getExecuteHub(id, false);
         const callStreamMethod = (method, ...args) => {
             if (stream[method]) {
@@ -217,9 +217,9 @@ define(["require", "exports", "app/_sys/pubsub", "libs/signalr/signalr.min.js", 
         let header = false;
         grpc.serverStreaming({
             service: "/api.ExecuteService/Execute",
-            request: [grpc_service_1.GrpcType.String, grpc_service_1.GrpcType.String, grpc_service_1.GrpcType.String, grpc_service_1.GrpcType.String],
+            request: [grpc_service_1.GrpcType.String, grpc_service_1.GrpcType.String, grpc_service_1.GrpcType.Uint32],
             reply: [{ rn: grpc_service_1.GrpcType.Uint32 }, { data: [grpc_service_1.GrpcType.String] }, { nullIndexes: grpc_service_1.GrpcType.PackedUint32 }]
-        }, hub.connection.connectionId, content)
+        }, hub.connection.connectionId, content, size)
             .on("error", e => {
             if (e.code == grpc_service_1.GrpcErrorCode.NotFound && e.message == "connection not initialized" && stream["reconnect"]) {
                 stream.reconnect();

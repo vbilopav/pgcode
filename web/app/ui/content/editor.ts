@@ -225,7 +225,7 @@ export class Editor implements IEditor {
             if (!selection.isEmpty()) {
                 const value = this.monaco.getModel().getValueInRange(selection);
                 this.results.start();
-                execute(this.id, value, {
+                execute(this.id, value, this.results.estimateNumberOfItems(), {
                     reconnect: () => {
                         this.initConnection().then(result => {
                             if (result) {

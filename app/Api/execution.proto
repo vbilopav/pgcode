@@ -12,6 +12,7 @@ service ExecuteService {
 message ExecuteRequest { 
 	string ConnectionId = 1;
 	string Content = 2;
+	uint32 Size = 3;
 }
 
 message CursorRequest { 

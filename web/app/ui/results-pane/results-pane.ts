@@ -134,11 +134,15 @@ export default class  {
             }
             this.footerRows.html(` - `);
         }
-        this.grid.adjustGridScrollBars();
+        //this.grid.adjustGridScrollBars();
     }
 
     adjustGrid() {
         this.grid.adjust();
+    }
+
+    estimateNumberOfItems() {
+        return this.grid.estimateNumberOfItems();
     }
 
     private activateByTab(tab: Element) {

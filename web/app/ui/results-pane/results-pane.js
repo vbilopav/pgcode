@@ -111,10 +111,12 @@ define(["require", "exports", "app/api", "app/ui/results-pane/grid", "app/ui/res
                 }
                 this.footerRows.html(` - `);
             }
-            this.grid.adjustGridScrollBars();
         }
         adjustGrid() {
             this.grid.adjust();
+        }
+        estimateNumberOfItems() {
+            return this.grid.estimateNumberOfItems();
         }
         activateByTab(tab) {
             for (let current of this.tabs) {

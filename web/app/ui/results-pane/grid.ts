@@ -32,7 +32,9 @@ export default class  {
 
     init() {
         this.element.html("");
-        this.table = document.createElement("div").appendElementTo(this.element).addClass("table") as HTMLElement;
+        this.table = document.createElement("div").appendElementTo(this.element).addClass("table").on("wheel", e => {
+            console.log((e as any).deltaY);
+        }) as HTMLElement;
         
         this.scroll = document.createElement("div").addClass("v-scroll").appendElementTo(this.element).on("scroll", e => this.onTableScroll()) as HTMLElement;
         this.scroller = document.createElement("div").appendElementTo(this.scroll);
@@ -40,7 +42,6 @@ export default class  {
         this.header = null;
         this.last = null;
         this.first = null;
-        this.rowHeight = null;
         this.rows.clear();
         this.startGridScrollConsumer();
         this._rowWidths = new Array<number>();
@@ -86,6 +87,7 @@ export default class  {
         this.end = this.stats.rowsFetched;
         
         this.calcVirtual();
+        this.adjustGridScrollBars();
         if (this.header) {
             let i = 0;
             for(let cell of this.header.children) {
@@ -98,8 +100,8 @@ export default class  {
     }
 
     adjust() {
+        this.onTableScroll();
         this.adjustGridScrollBars();
-        this.scrollTable();
     }
 
     setConnectionId(connectionId: string) {
@@ -110,25 +112,24 @@ export default class  {
         if (!this.table) {
             return;
         }
-        const rect = this.element.parentElement.getBoundingClientRect() as DOMRect;
-        this.table.css("height", rect.height + "px");
-        if (this.last == null || this.first == null) {
-            return;
-        }
-        const last = this.last.getBoundingClientRect() as DOMRect;
-        const first = this.first.getBoundingClientRect() as DOMRect;
-
-        if (first.y < rect.y || last.y > (rect.y + rect.height)) {
+        this.table.css("height", this.element.clientHeight + "px");
+        if (this.scroller.clientHeight > this.table.clientHeight) {
             this.scroll.showElement();
+            this.element.css("grid-template-columns", "auto 16px");
         } else {
             this.scroll.hideElement();
+            this.element.css("grid-template-columns", "auto 0px");
         }
 
-        if (first.width > rect.width) {
+        if (this.header.clientWidth > this.element.clientWidth) {
             this.table.css("overflow-x", "scroll");
         } else {
             this.table.css("overflow-x", "hidden");
         }
+    }
+
+    estimateNumberOfItems() {
+        return Math.trunc(this.table.scrollHeight / (this.rowHeight ? this.rowHeight : 25));
     }
 
     private newRow(rn: number, row: Array<string>) : Element {
@@ -226,7 +227,11 @@ export default class  {
             last = this.stats.rowsAffected;
         }
 
-        if ((last > this.end && first > this.end) || (last < this.start && first < this.start)) {
+        if (
+            (last > this.end && first > this.end) || 
+            (last < this.start && first < this.start) ||
+            (last > this.end && first < this.end)
+            ) {
 
             this.rows.forEach(r => r.remove());
             this.rows.clear();

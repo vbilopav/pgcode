@@ -89,7 +89,7 @@ namespace Pgcode.Execution
             reader.Close();
         }
 
-        public static IEnumerable<ExecuteReply> CreateCursorReader(this WorkspaceConnection ws, string content)
+        public static IEnumerable<ExecuteReply> CreateCursorReader(this WorkspaceConnection ws, string content, uint size)
         {
             var stopwatch = new Stopwatch();
             using var cmd = ws.Connection.CreateCommand();
@@ -119,7 +119,7 @@ namespace Pgcode.Execution
             cmd.Execute($"move absolute 0 in \"{cursor}\"");
 
             ulong row = 1;
-            using var reader = cmd.Reader($"fetch {Program.Settings.CursorFetch} in \"{cursor}\"");
+            using var reader = cmd.Reader($"fetch {size} in \"{cursor}\"");
             if (reader.FieldCount > 0)
             {
                 yield return GetHeaderReply(reader);

@@ -331,7 +331,7 @@ export interface IExecutionStream {
     end: (e: IStats) => void;
 }
 
-export const execute: (id: string, content: string, stream: IExecutionStream) => Promise<string> = async (id, content, stream)  => {
+export const execute: (id: string, content: string, size: number, stream: IExecutionStream) => Promise<string> = async (id, content, size, stream)  => {
     const hub = await _getExecuteHub(id, false);
     const callStreamMethod = (method: string, ...args: any[]) => {
         if (stream[method]) {
@@ -353,10 +353,10 @@ export const execute: (id: string, content: string, stream: IExecutionStream) =>
     let header = false;
     grpc.serverStreaming({
         service: "/api.ExecuteService/Execute",
-        request: [GrpcType.String, GrpcType.String, GrpcType.String, GrpcType.String],
+        request: [GrpcType.String, GrpcType.String, GrpcType.Uint32],
         reply: [{rn: GrpcType.Uint32}, {data: [GrpcType.String]}, {nullIndexes: GrpcType.PackedUint32}]
     }, 
-    hub.connection.connectionId, content)
+    hub.connection.connectionId, content, size)
         .on("error", e => {
             if ((e as GrpcStatus).code == GrpcErrorCode.NotFound && (e as GrpcStatus).message == "connection not initialized" && stream["reconnect"]) {
                 stream.reconnect();

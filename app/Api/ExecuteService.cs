@@ -39,7 +39,7 @@ namespace Pgcode.Api
             }
 
             var handler = new ExecuteHandler(ws, request);
-            handler.Read(responseStream);
+            handler.Read(responseStream, request.Size);
             return Task.CompletedTask;
         }
 

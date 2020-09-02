@@ -47,7 +47,7 @@ namespace Pgcode.Execution
             }
         }
 
-        public void Read(IServerStreamWriter<ExecuteReply> responseStream)
+        public void Read(IServerStreamWriter<ExecuteReply> responseStream, uint size)
         {
             void NoticeHandler(object sender, NpgsqlNoticeEventArgs e)
             {
@@ -79,7 +79,7 @@ namespace Pgcode.Execution
                     }
                     try
                     {
-                        foreach (var reply in _ws.CreateCursorReader(_cursorContent))
+                        foreach (var reply in _ws.CreateCursorReader(_cursorContent, size))
                         {
                             responseStream.WriteAsync(reply).GetAwaiter().GetResult();
                         }

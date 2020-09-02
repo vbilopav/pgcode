@@ -174,7 +174,7 @@ define(["require", "exports", "app/api", "app/_sys/pubsub", "app/_sys/timeout", 
                 if (!selection.isEmpty()) {
                     const value = this.monaco.getModel().getValueInRange(selection);
                     this.results.start();
-                    api_1.execute(this.id, value, {
+                    api_1.execute(this.id, value, this.results.estimateNumberOfItems(), {
                         reconnect: () => {
                             this.initConnection().then(result => {
                                 if (result) {
