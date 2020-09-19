@@ -16,9 +16,9 @@ define(["require", "exports", "app/api"], function (require, exports, api_1) {
             this.start = null;
             this.end = null;
             this.connectionId = null;
+            this.rowWidths = new Array();
             this.scroll = null;
             this.scroller = null;
-            this._rowWidths = new Array();
             this._shouldScroll = false;
             this._started = false;
             this.id = id;
@@ -31,9 +31,7 @@ define(["require", "exports", "app/api"], function (require, exports, api_1) {
         }
         init() {
             this.element.html("");
-            this.table = document.createElement("div").appendElementTo(this.element).addClass("table").on("wheel", e => {
-                console.log(e.deltaY);
-            });
+            this.table = document.createElement("div").appendElementTo(this.element).addClass("table").on("wheel", (e) => this.onTableWheel(e));
             this.scroll = document.createElement("div").addClass("v-scroll").appendElementTo(this.element).on("scroll", e => this.onTableScroll());
             this.scroller = document.createElement("div").appendElementTo(this.scroll);
             this.header = null;
@@ -41,7 +39,7 @@ define(["require", "exports", "app/api"], function (require, exports, api_1) {
             this.first = null;
             this.rows.clear();
             this.startGridScrollConsumer();
-            this._rowWidths = new Array();
+            this.rowWidths = new Array();
         }
         addHeader(header) {
             let i = 0;
@@ -83,7 +81,7 @@ define(["require", "exports", "app/api"], function (require, exports, api_1) {
             if (this.header) {
                 let i = 0;
                 for (let cell of this.header.children) {
-                    this._rowWidths[i++] = cell.clientWidth;
+                    this.rowWidths[i++] = cell.clientWidth;
                     const w = cell.clientWidth + "px";
                     cell.css("min-width", w).css("max-width", w);
                     this.table.findAll(`div.tr > div.td${cell.dataAttr("col")}`).css("min-width", w).css("max-width", w);
@@ -137,8 +135,8 @@ define(["require", "exports", "app/api"], function (require, exports, api_1) {
                 .dataAttr("row", rn)
                 .on("mouseenter", (e) => this.cellMouseEnter(e.currentTarget))
                 .on("mouseleave", (e) => this.cellMouseLeave(e.currentTarget));
-            if (this._rowWidths.length) {
-                let w = this._rowWidths[i - 1] + "px";
+            if (this.rowWidths.length) {
+                let w = this.rowWidths[i - 1] + "px";
                 td.css("min-width", w).css("max-width", w);
             }
             for (let item of row) {
@@ -155,18 +153,27 @@ define(["require", "exports", "app/api"], function (require, exports, api_1) {
                 if (item == null) {
                     td.addClass("null");
                 }
-                if (this._rowWidths.length) {
-                    let w = this._rowWidths[i - 1] + "px";
+                if (this.rowWidths.length) {
+                    let w = this.rowWidths[i - 1] + "px";
                     td.css("min-width", w).css("max-width", w);
                 }
             }
             return tr;
         }
+        async onTableWheel(e) {
+            if (this.scroll == null) {
+                return;
+            }
+            this.scroll.scrollTop = this.scroll.scrollTop + e.deltaY;
+        }
         onTableScroll() {
             if (!this.connectionId || !this.stats) {
                 return;
             }
-            this._shouldScroll = true;
+            if (this._timeout) {
+                clearTimeout(this._timeout);
+                this._timeout = undefined;
+            }
             this._timeout = setTimeout(() => {
                 if (this._timeout) {
                     clearTimeout(this._timeout);
@@ -183,9 +190,7 @@ define(["require", "exports", "app/api"], function (require, exports, api_1) {
                         return;
                     }
                     this._started = true;
-                    console.log("started");
                     await this.scrollTable();
-                    console.log("ended");
                     this._started = false;
                 }
                 await this.startGridScrollConsumer();
@@ -364,8 +369,8 @@ define(["require", "exports", "app/api"], function (require, exports, api_1) {
             this.toMove.css("min-width", w).css("max-width", w);
             const i = this.toMove.dataAttr("col");
             this.table.findAll(`div.tr > div.td${i}`).css("min-width", w).css("max-width", w);
-            if (this._rowWidths.length) {
-                this._rowWidths[i - 1] = wl;
+            if (this.rowWidths.length) {
+                this.rowWidths[i - 1] = wl;
             }
         }
     }

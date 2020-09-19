@@ -1,5 +1,8 @@
+using System;
+using System.IO.Compression;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -13,8 +16,14 @@ namespace Pgcode
     {
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddGrpc();
-            services.AddSignalR();
+            services.AddGrpc(o =>
+            {
+                o.ResponseCompressionLevel = CompressionLevel.NoCompression;
+            });
+            services.AddSignalR(o =>
+            {
+                o.ClientTimeoutInterval = TimeSpan.MaxValue;
+            });
             services.AddSingleton<ConnectionManager, ConnectionManager>();
             services.AddSingleton(Program.Settings);
             services.AddSingleton<CookieMiddleware, CookieMiddleware>();
@@ -28,7 +37,10 @@ namespace Pgcode
             {
                 endpoints.MapGrpcService<ExecuteService>().EnableGrpcWeb();
                 endpoints.MapHub<ConnectionsHub>("/connectionsHub");
-                endpoints.MapHub<ExecuteHub>("/executeHub");
+                endpoints.MapHub<ExecuteHub>("/executeHub", o =>
+                {
+                    o.LongPolling.PollTimeout = TimeSpan.MaxValue;
+                });
             });
 
             IMiddleware cookieMiddleware = new CookieMiddleware();

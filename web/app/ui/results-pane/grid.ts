@@ -16,6 +16,7 @@ export default class  {
     private start: number = null;
     private end: number = null;
     private connectionId: string = null;
+    private rowWidths = new Array<number>();
 
     private scroll: HTMLElement = null;
     private scroller: Element = null;
@@ -32,9 +33,7 @@ export default class  {
 
     init() {
         this.element.html("");
-        this.table = document.createElement("div").appendElementTo(this.element).addClass("table").on("wheel", e => {
-            console.log((e as any).deltaY);
-        }) as HTMLElement;
+        this.table = document.createElement("div").appendElementTo(this.element).addClass("table").on("wheel", (e: WheelEvent) => this.onTableWheel(e)) as HTMLElement;
         
         this.scroll = document.createElement("div").addClass("v-scroll").appendElementTo(this.element).on("scroll", e => this.onTableScroll()) as HTMLElement;
         this.scroller = document.createElement("div").appendElementTo(this.scroll);
@@ -44,7 +43,7 @@ export default class  {
         this.first = null;
         this.rows.clear();
         this.startGridScrollConsumer();
-        this._rowWidths = new Array<number>();
+        this.rowWidths = new Array<number>();
     }
 
     addHeader(header: IHeader[]) {
@@ -79,8 +78,6 @@ export default class  {
         }
     }
 
-    private _rowWidths = new Array<number>();
-
     done(stats: IStats) {
         this.stats = Object.assign({}, stats);
         this.start = 1;
@@ -91,7 +88,7 @@ export default class  {
         if (this.header) {
             let i = 0;
             for(let cell of this.header.children) {
-                this._rowWidths[i++] = cell.clientWidth;
+                this.rowWidths[i++] = cell.clientWidth;
                 const w = cell.clientWidth + "px";
                 cell.css("min-width", w).css("max-width", w);
                 this.table.findAll(`div.tr > div.td${cell.dataAttr("col")}`).css("min-width", w).css("max-width", w);
@@ -150,8 +147,8 @@ export default class  {
             .on("mouseenter", (e: MouseEvent)=>this.cellMouseEnter(e.currentTarget as Element))
             .on("mouseleave", (e: MouseEvent)=>this.cellMouseLeave(e.currentTarget as Element));
             
-            if (this._rowWidths.length) {
-                let w = this._rowWidths[i-1] + "px";
+            if (this.rowWidths.length) {
+                let w = this.rowWidths[i-1] + "px";
                 td.css("min-width", w).css("max-width", w);
             }
 
@@ -170,8 +167,8 @@ export default class  {
                 td.addClass("null");
             }
             
-            if (this._rowWidths.length) {
-                let w = this._rowWidths[i-1] + "px";
+            if (this.rowWidths.length) {
+                let w = this.rowWidths[i-1] + "px";
                 td.css("min-width", w).css("max-width", w);
             }
         }
@@ -182,17 +179,26 @@ export default class  {
     private _started = false;
     private _timeout: number;
 
+    private async onTableWheel(e: WheelEvent) {
+        if (this.scroll == null) {
+            return;
+        }
+        this.scroll.scrollTop = this.scroll.scrollTop + e.deltaY;
+    }
+
     private onTableScroll() {
         if (!this.connectionId || !this.stats ) {
             return
         }
-        this._shouldScroll = true;
+        if (this._timeout) {
+            clearTimeout(this._timeout)
+            this._timeout = undefined;
+        }
         this._timeout = setTimeout(() => {
             if (this._timeout) {
                 clearTimeout(this._timeout)
                 this._timeout = undefined;
             }
-            
             this._shouldScroll = true;
         }, 0);
     }
@@ -205,9 +211,7 @@ export default class  {
                     return;
                 }
                 this._started = true;
-                console.log("started");
                 await this.scrollTable();
-                console.log("ended");
                 this._started = false;
             }
             await this.startGridScrollConsumer();
@@ -398,8 +402,8 @@ export default class  {
         this.toMove.css("min-width", w).css("max-width", w);
         const i = this.toMove.dataAttr("col");
         this.table.findAll(`div.tr > div.td${i}`).css("min-width", w).css("max-width", w);
-        if (this._rowWidths.length) {
-            this._rowWidths[i-1] = wl;
+        if (this.rowWidths.length) {
+            this.rowWidths[i-1] = wl;
         }
     }
 }
