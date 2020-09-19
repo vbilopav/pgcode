@@ -126,7 +126,7 @@ export default class  {
     }
 
     estimateNumberOfItems() {
-        return Math.trunc(this.table.scrollHeight / (this.rowHeight ? this.rowHeight : 25));
+        return (Math.trunc(this.table.scrollHeight / (this.rowHeight ? this.rowHeight : 25)) * 2);
     }
 
     private newRow(rn: number, row: Array<string>) : Element {
@@ -224,6 +224,7 @@ export default class  {
         }
         let first = Math.trunc(this.scroll.scrollTop / this.rowHeight);
         let last = Math.trunc((this.scroll.scrollTop + this.scroll.offsetHeight) / this.rowHeight);
+        
         if (first < 1) {
             first = 1;
         }
@@ -231,12 +232,9 @@ export default class  {
             last = this.stats.rowsAffected;
         }
 
-        if (
-            (last > this.end && first > this.end) || 
-            (last < this.start && first < this.start) ||
-            (last > this.end && first < this.end)
-            ) {
+        //console.log(`first: ${first}    last: ${last}     this.start: ${this.start}     first: ${this.end}`);
 
+        if ((first >= this.end && last > this.end) || (first < this.start && last <= this.start)) { //load all
             this.rows.forEach(r => r.remove());
             this.rows.clear();
             this.start = first;
@@ -252,8 +250,7 @@ export default class  {
                 });
             });
 
-        } else if (last > this.end && first >= this.start) {
-
+        } else if (last > this.end && first >= this.start) { // load bottom
             await new Promise<void>(resolve => {
                 cursor(this.connectionId, this.end + 1, last, {
                     end: () => resolve(),
@@ -274,8 +271,7 @@ export default class  {
                 });
             });
 
-        } else if (last <= this.end && first < this.start) {
-
+        } else if (last <= this.end && first < this.start) { //load top
             await new Promise<void>(resolve => {
                 let last: Element;
                 cursor(this.connectionId, first, this.start - 1, {
@@ -301,6 +297,49 @@ export default class  {
                     }
                 });
             });
+
+        } else if (first <= this.start && last >= this.end) { // load top and bottom
+
+            if (first < this.start) { 
+                await new Promise<void>(resolve => {
+                    let last: Element;
+                    cursor(this.connectionId, first, this.start - 1, {
+                        end: () => resolve(),
+                        row: (rowNum, row: Array<string>) => {
+                            let newRow = this.newRow(rowNum, row);
+                            if (!last) {
+                                this.header.after(newRow);
+                            } else {
+                                last.after(newRow);
+                            }
+                            last = newRow;
+                            if (rowNum < this.start) {
+                                this.start = rowNum; 
+                            }
+                            this.rows.set(rowNum, newRow);
+                        }
+                    });
+                });
+            }
+
+            if (last > this.end) {
+                await new Promise<void>(resolve => {
+                    cursor(this.connectionId, this.end + 1, last, {
+                        end: () => resolve(),
+                        row: (rowNum, row: Array<string>) => {
+                            const newRow = this.newRow(rowNum, row);
+                            newRow.appendElementTo(this.table);
+                            if (rowNum > this.end) {
+                                this.end = rowNum; 
+                            }
+                            this.rows.set(rowNum, newRow);
+                        }
+                    });
+                });
+            }
+
+        } else {
+            console.log("load nothing");
         }
 
         if (first + ((last - first) / 2) < this.stats.rowsAffected / 2) {

@@ -116,7 +116,7 @@ define(["require", "exports", "app/api"], function (require, exports, api_1) {
             }
         }
         estimateNumberOfItems() {
-            return Math.trunc(this.table.scrollHeight / (this.rowHeight ? this.rowHeight : 25));
+            return (Math.trunc(this.table.scrollHeight / (this.rowHeight ? this.rowHeight : 25)) * 2);
         }
         newRow(rn, row) {
             let i = 0;
@@ -208,9 +208,7 @@ define(["require", "exports", "app/api"], function (require, exports, api_1) {
             if (last > this.stats.rowsAffected) {
                 last = this.stats.rowsAffected;
             }
-            if ((last > this.end && first > this.end) ||
-                (last < this.start && first < this.start) ||
-                (last > this.end && first < this.end)) {
+            if ((first >= this.end && last > this.end) || (first < this.start && last <= this.start)) {
                 this.rows.forEach(r => r.remove());
                 this.rows.clear();
                 this.start = first;
@@ -274,6 +272,48 @@ define(["require", "exports", "app/api"], function (require, exports, api_1) {
                         }
                     });
                 });
+            }
+            else if (first <= this.start && last >= this.end) {
+                if (first < this.start) {
+                    await new Promise(resolve => {
+                        let last;
+                        api_1.cursor(this.connectionId, first, this.start - 1, {
+                            end: () => resolve(),
+                            row: (rowNum, row) => {
+                                let newRow = this.newRow(rowNum, row);
+                                if (!last) {
+                                    this.header.after(newRow);
+                                }
+                                else {
+                                    last.after(newRow);
+                                }
+                                last = newRow;
+                                if (rowNum < this.start) {
+                                    this.start = rowNum;
+                                }
+                                this.rows.set(rowNum, newRow);
+                            }
+                        });
+                    });
+                }
+                if (last > this.end) {
+                    await new Promise(resolve => {
+                        api_1.cursor(this.connectionId, this.end + 1, last, {
+                            end: () => resolve(),
+                            row: (rowNum, row) => {
+                                const newRow = this.newRow(rowNum, row);
+                                newRow.appendElementTo(this.table);
+                                if (rowNum > this.end) {
+                                    this.end = rowNum;
+                                }
+                                this.rows.set(rowNum, newRow);
+                            }
+                        });
+                    });
+                }
+            }
+            else {
+                console.log("load nothing");
             }
             if (first + ((last - first) / 2) < this.stats.rowsAffected / 2) {
                 this.table.scrollTo({ top: ((first - 1) * this.rowHeight) + (this.scroll.scrollTop % this.rowHeight), behavior: 'auto' });
