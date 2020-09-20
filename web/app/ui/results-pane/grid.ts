@@ -53,6 +53,7 @@ export default class  {
             .addClass("td")
             .addClass(`td${++i}`)
             .dataAttr("col", i)
+            .on("mousemove", (e: MouseEvent)=>this.headerCellMousemove(e))
             .on("mouseenter", (e: MouseEvent)=>this.cellMouseEnter(e.currentTarget as Element))
             .on("mouseleave", (e: MouseEvent)=>this.cellMouseLeave(e.currentTarget as Element));
         for(let item of header) {
@@ -89,9 +90,15 @@ export default class  {
             let i = 0;
             for(let cell of this.header.children) {
                 this.rowWidths[i++] = cell.clientWidth;
-                const w = cell.clientWidth + "px";
+                let w: string;
+                if (i == 1) {
+                    w = (this.stats.rowsAffected.toString().length * 8) + "px";
+                } else {
+                    w = cell.clientWidth + "px";
+                }
                 cell.css("min-width", w).css("max-width", w);
-                this.table.findAll(`div.tr > div.td${cell.dataAttr("col")}`).css("min-width", w).css("max-width", w);
+                const h = this.table.findAll(`div.tr > div.td${cell.dataAttr("col")}`);
+                h.css("min-width", w).css("max-width", w);
             }
         }
     }
@@ -142,7 +149,8 @@ export default class  {
         let td = document.createElement("div").html(`${rn}`).appendElementTo(tr)
             .addClass("td")
             .addClass("th")
-            .dataAttr("col", ++i)
+            .addClass(`td${++i}`)
+            .dataAttr("col", i)
             .dataAttr("row", rn)
             .on("mouseenter", (e: MouseEvent)=>this.cellMouseEnter(e.currentTarget as Element))
             .on("mouseleave", (e: MouseEvent)=>this.cellMouseLeave(e.currentTarget as Element));
@@ -231,8 +239,6 @@ export default class  {
         if (last > this.stats.rowsAffected) {
             last = this.stats.rowsAffected;
         }
-
-        //console.log(`first: ${first}    last: ${last}     this.start: ${this.start}     first: ${this.end}`);
 
         if ((first >= this.end && last > this.end) || (first < this.start && last <= this.start)) { //load all
             this.rows.forEach(r => r.remove());
@@ -338,8 +344,6 @@ export default class  {
                 });
             }
 
-        } else {
-            console.log("load nothing");
         }
 
         if (first + ((last - first) / 2) < this.stats.rowsAffected / 2) {

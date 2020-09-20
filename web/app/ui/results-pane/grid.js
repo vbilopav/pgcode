@@ -48,6 +48,7 @@ define(["require", "exports", "app/api"], function (require, exports, api_1) {
                 .addClass("td")
                 .addClass(`td${++i}`)
                 .dataAttr("col", i)
+                .on("mousemove", (e) => this.headerCellMousemove(e))
                 .on("mouseenter", (e) => this.cellMouseEnter(e.currentTarget))
                 .on("mouseleave", (e) => this.cellMouseLeave(e.currentTarget));
             for (let item of header) {
@@ -82,9 +83,16 @@ define(["require", "exports", "app/api"], function (require, exports, api_1) {
                 let i = 0;
                 for (let cell of this.header.children) {
                     this.rowWidths[i++] = cell.clientWidth;
-                    const w = cell.clientWidth + "px";
+                    let w;
+                    if (i == 1) {
+                        w = (this.stats.rowsAffected.toString().length * 8) + "px";
+                    }
+                    else {
+                        w = cell.clientWidth + "px";
+                    }
                     cell.css("min-width", w).css("max-width", w);
-                    this.table.findAll(`div.tr > div.td${cell.dataAttr("col")}`).css("min-width", w).css("max-width", w);
+                    const h = this.table.findAll(`div.tr > div.td${cell.dataAttr("col")}`);
+                    h.css("min-width", w).css("max-width", w);
                 }
             }
         }
@@ -131,7 +139,8 @@ define(["require", "exports", "app/api"], function (require, exports, api_1) {
             let td = document.createElement("div").html(`${rn}`).appendElementTo(tr)
                 .addClass("td")
                 .addClass("th")
-                .dataAttr("col", ++i)
+                .addClass(`td${++i}`)
+                .dataAttr("col", i)
                 .dataAttr("row", rn)
                 .on("mouseenter", (e) => this.cellMouseEnter(e.currentTarget))
                 .on("mouseleave", (e) => this.cellMouseLeave(e.currentTarget));
@@ -311,9 +320,6 @@ define(["require", "exports", "app/api"], function (require, exports, api_1) {
                         });
                     });
                 }
-            }
-            else {
-                console.log("load nothing");
             }
             if (first + ((last - first) / 2) < this.stats.rowsAffected / 2) {
                 this.table.scrollTo({ top: ((first - 1) * this.rowHeight) + (this.scroll.scrollTop % this.rowHeight), behavior: 'auto' });
