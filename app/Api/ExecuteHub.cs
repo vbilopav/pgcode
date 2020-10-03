@@ -1,9 +1,10 @@
-﻿using System;
+﻿// ReSharper disable ClassNeverInstantiated.Global
+using System;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Pgcode.Connection;
+using Pgcode.Execution;
 using Pgcode.Middleware;
-
 
 namespace Pgcode.Api
 {
@@ -20,10 +21,10 @@ namespace Pgcode.Api
             _connectionManager = connectionManager;
         }
 
-        public async ValueTask InitConnection(string connection, string schema, string id)
+        public void InitConnection(string connection, string schema, string id)
         {
             var user = GetIdentityAndLogRequest();
-            await _connectionManager.AddWsConnectionAsync(new AddWorkspaceConnection
+            _connectionManager.AddWsConnection(new AddWorkspaceConnection
             {
                 Id = id,
                 UserName = user.Name,
@@ -34,15 +35,24 @@ namespace Pgcode.Api
             });
         }
 
-        public async ValueTask DisposeConnection()
+        public void DisposeConnection()
         {
-            var user = GetIdentityAndLogRequest();
-            await _connectionManager.RemoveWsConnectionAsync(this.Context.ConnectionId);
+            GetIdentityAndLogRequest();
+            _connectionManager.RemoveWsConnection(this.Context.ConnectionId);
+        }
+
+        public ExecuteResponse Execute(string content)
+        {
+            this.LogRequest();
+            var ws = _connectionManager.GetWsConnection(this.Context.ConnectionId);
+            return ws == null ? 
+                new ExecuteResponse{ Message = "404"} : 
+                new ExecuteHandler(ws, content).TryExecute();
         }
 
         public override async Task OnDisconnectedAsync(Exception exception)
         {
-            await _connectionManager.RemoveWsConnectionAsync(this.Context.ConnectionId);
+            _connectionManager.RemoveWsConnection(this.Context.ConnectionId);
             await base.OnDisconnectedAsync(exception);
         }
     }

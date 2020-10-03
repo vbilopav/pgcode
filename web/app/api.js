@@ -175,7 +175,11 @@ define(["require", "exports", "app/_sys/pubsub", "libs/signalr/signalr.min.js", 
     exports.initConnection = async (connection, schema, id) => {
         const hub = await _getExecuteHub(id, true);
         try {
-            return { ok: true, status: 200, data: hub.invoke("InitConnection", connection, schema, id) };
+            return {
+                ok: true,
+                status: 200,
+                data: await hub.invoke("InitConnection", connection, schema, id)
+            };
         }
         catch (error) {
             console.error(error);
@@ -183,12 +187,15 @@ define(["require", "exports", "app/_sys/pubsub", "libs/signalr/signalr.min.js", 
         }
     };
     exports.disposeConnection = async (id) => {
-        const hub = await _getExecuteHub(id, true);
+        const hub = await _getExecuteHub(id, false);
         try {
-            const result = { ok: true, status: 200, data: hub.invoke("DisposeConnection") };
             await hub.stop();
             delete _executeHubs[id];
-            return result;
+            return {
+                ok: true,
+                status: 200,
+                data: null
+            };
         }
         catch (error) {
             console.error(error);
@@ -197,69 +204,53 @@ define(["require", "exports", "app/_sys/pubsub", "libs/signalr/signalr.min.js", 
     };
     ;
     ;
-    exports.execute = async (id, content, size, stream) => {
-        const hub = await _getExecuteHub(id, false);
-        const callStreamMethod = (method, ...args) => {
-            if (stream[method]) {
-                stream[method](...args);
+    ;
+    exports.execute = async (request) => {
+        let hub = await _getExecuteHub(request.id, false);
+        const runEvent = (method, ...args) => {
+            if (request.events[method]) {
+                request.events[method](...args);
             }
         };
         if (hub.state != signalR.HubConnectionState.Connected || hub.connectionId == undefined) {
-            callStreamMethod("reconnect");
-            return null;
+            let result = await exports.initConnection(request.connection, request.schema, request.id);
+            if (!result.ok) {
+                throw new Error("connection could be re-initialized");
+            }
+            hub = await _getExecuteHub(request.id, false);
         }
-        const messageName = `message-${id}`;
-        const statsName = `stats-${id}`;
-        hub.off(messageName);
-        hub.off(statsName);
-        hub.on(messageName, (msg) => callStreamMethod("message", msg));
-        const statsPromise = new Promise(resolve => hub.on(statsName, (msg) => resolve(msg)));
-        let header = false;
-        grpc.serverStreaming({
-            service: "/api.ExecuteService/Execute",
-            request: [grpc_service_1.GrpcType.String, grpc_service_1.GrpcType.String, grpc_service_1.GrpcType.Uint32],
-            reply: [{ rn: grpc_service_1.GrpcType.Uint32 }, { data: [grpc_service_1.GrpcType.String] }, { nullIndexes: grpc_service_1.GrpcType.PackedUint32 }]
-        }, hub.connection.connectionId, content, size)
-            .on("error", e => {
-            if (e.code == grpc_service_1.GrpcErrorCode.NotFound && e.message == "connection not initialized" && stream["reconnect"]) {
-                stream.reconnect();
-            }
-            else {
-                callStreamMethod("error", e);
-                pubsub_1.publish(pubsub_1.SET_APP_STATUS, AppStatus.ERROR, e.message);
-            }
-        })
-            .on("status", e => callStreamMethod("status", e))
-            .on("data", e => {
-            if (!header) {
-                if (stream["header"]) {
-                    const headerResult = new Array();
-                    for (let item of e.data) {
-                        headerResult.push(JSON.parse(item));
-                    }
-                    ;
-                    stream.header(headerResult);
+        const notice = `notice-${request.id}`;
+        const error = `error-${request.id}`;
+        hub.off(notice);
+        hub.off(error);
+        hub.on(notice, (msg) => runEvent("notice", msg));
+        hub.on(error, (msg) => runEvent("error", msg));
+        const response = await hub.invoke("Execute", request.content);
+        if (response.message == "404") {
+            let result = await exports.initConnection(request.connection, request.schema, request.id);
+            try {
+                if (!result.ok || request._call > 3) {
+                    throw new Error("connection could be re-initialized");
                 }
-                header = true;
-                return;
             }
-            if (stream["row"]) {
-                let row = e;
-                if (row.nullIndexes && row.nullIndexes.length) {
-                    for (let idx of row.nullIndexes) {
-                        row.data[idx] = null;
-                    }
-                    ;
-                }
-                stream.row(row.rn, row.data);
+            catch (e) {
+                hub.off(notice);
+                hub.off(error);
+                throw e;
             }
-        })
-            .on("end", () => statsPromise.then(stats => callStreamMethod("end", stats)));
-        return hub.connection.connectionId;
+            request._call = (request._call == undefined ? 0 : request._call) + 1;
+            console.warn("reconnect attempt " + request._call);
+            return exports.execute(request);
+        }
+        hub.off(notice);
+        hub.off(error);
+        response.connectionId = hub.connectionId;
+        return response;
     };
+    ;
     exports.cursor = (connectionId, from, to, stream) => {
         grpc.serverStreaming({
-            service: "/api.ExecuteService/ReadCursor",
+            service: "/api.CursorService/Read",
             request: [grpc_service_1.GrpcType.String, grpc_service_1.GrpcType.Uint32, grpc_service_1.GrpcType.Uint32],
             reply: [{ rn: grpc_service_1.GrpcType.Uint32 }, { data: [grpc_service_1.GrpcType.String] }, { nullIndexes: grpc_service_1.GrpcType.PackedUint32 }]
         }, connectionId, from, to)
@@ -270,9 +261,8 @@ define(["require", "exports", "app/_sys/pubsub", "libs/signalr/signalr.min.js", 
                 stream.end();
             }
         })
-            .on("data", e => {
+            .on("data", (row) => {
             if (stream["row"]) {
-                let row = e;
                 if (row.nullIndexes && row.nullIndexes.length) {
                     for (let idx of row.nullIndexes) {
                         row.data[idx] = null;

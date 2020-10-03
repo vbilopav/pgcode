@@ -29,9 +29,13 @@ namespace Pgcode.Connection
             return cmd.ExecuteNonQueryAsync(cancellationToken);
         }
 
-        public static int Execute(this NpgsqlCommand cmd, string command)
+        public static int Execute(this NpgsqlCommand cmd, string command, NpgsqlParameter param1 = null)
         {
             cmd.CommandText = command;
+            if (param1 != null)
+            {
+                cmd.Parameters.Add(param1);
+            }
             return cmd.ExecuteNonQuery();
         }
 

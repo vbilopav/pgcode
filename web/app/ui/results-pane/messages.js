@@ -5,6 +5,15 @@ define(["require", "exports"], function (require, exports) {
         constructor(element) {
             this.element = element;
         }
+        clear() {
+            this.element.html("");
+        }
+        message(e) {
+            document.createElement("code").html(JSON.stringify(e)).appendElementTo(this.element);
+        }
+        finished(e) {
+            document.createElement("code").html(JSON.stringify(e)).appendElementTo(this.element);
+        }
     }
     exports.default = default_1;
 });

@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿// ReSharper disable ClassNeverInstantiated.Global
+using System.Threading.Tasks;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
 using Pgcode.Connection;
@@ -8,14 +9,14 @@ using Pgcode.Protos;
 
 namespace Pgcode.Api
 {
-    public class ExecuteService : Protos.ExecuteService.ExecuteServiceBase
+    public class CursorService : Protos.CursorService.CursorServiceBase
     {
         private readonly ConnectionManager _connectionManager;
         private readonly CookieMiddleware _cookieMiddleware;
         private readonly ILoggerFactory _loggerFactory;
         private readonly Settings _settings;
 
-        public ExecuteService(
+        public CursorService(
             ConnectionManager connectionManager, 
             CookieMiddleware cookieMiddleware, 
             ILoggerFactory loggerFactory, 
@@ -27,34 +28,18 @@ namespace Pgcode.Api
             _settings = settings;
         }
 
-        public override Task Execute(ExecuteRequest request, IServerStreamWriter<ExecuteReply> responseStream, ServerCallContext context)
+        public override Task Read(CursorRequest request, IServerStreamWriter<ExecuteReply> responseStream, ServerCallContext context)
         {
             LogRequest(context, request);
 
             var ws = _connectionManager.GetWsConnection(request.ConnectionId);
             if (ws == null)
             {
-                context.Status = new Status(StatusCode.NotFound, "connection not initialized");
+                // connection needs re-initialization
+                context.Status = new Status(StatusCode.NotFound, "404");
                 return Task.CompletedTask;
             }
-
-            var handler = new ExecuteHandler(ws, request);
-            handler.Read(responseStream, request.Size);
-            return Task.CompletedTask;
-        }
-
-        public override Task ReadCursor(CursorRequest request, IServerStreamWriter<ExecuteReply> responseStream, ServerCallContext context)
-        {
-            LogRequest(context, request);
-
-            var ws = _connectionManager.GetWsConnection(request.ConnectionId);
-            if (ws == null)
-            {
-                context.Status = new Status(StatusCode.NotFound, "connection not initialized");
-                return Task.CompletedTask;
-            }
-
-            ExecuteHandler.ReadCursor(ws, request, responseStream);
+            ExecuteHandler.TryReadCursor(ws, request, responseStream);
             return Task.CompletedTask;
         }
 

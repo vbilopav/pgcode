@@ -1,4 +1,4 @@
-import { IHeader, IStats, cursor } from "app/api";
+import { IExecuteResponse, cursor } from "app/api";
 
 export default class  {
     private readonly element: Element;
@@ -9,17 +9,21 @@ export default class  {
     private last: Element = null;
     private first: Element = null;
     private headerHeight: number = null;
-    private rowHeight: number = null;
+    private readonly rowHeight: number = 25;
     private toMove: Element = null;
     private moving = false;
-    private stats: IStats = null;
+
+    private response: IExecuteResponse = null;
     private start: number = null;
     private end: number = null;
-    private connectionId: string = null;
     private rowWidths = new Array<number>();
 
     private scroll: HTMLElement = null;
     private scroller: Element = null;
+
+    private shouldScroll = false;
+    private scrollStarted = false;
+    private scrollTimeout: number;
 
     constructor(id: string, element: Element) {
         this.id = id;
@@ -29,6 +33,7 @@ export default class  {
             .on("mouseup", (e:MouseEvent)=>this.mouseup(e))
             .on("mousemove", (e:MouseEvent)=>this.mousemove(e))
             .on("resize", () => this.adjust());
+        this.startGridScrollConsumer();
     }
 
     init() {
@@ -41,12 +46,38 @@ export default class  {
         this.header = null;
         this.last = null;
         this.first = null;
+        this.start = null;
+        this.end = null;
         this.rows.clear();
-        this.startGridScrollConsumer();
+        this.shouldScroll = false;
         this.rowWidths = new Array<number>();
     }
 
-    addHeader(header: IHeader[]) {
+    done(response: IExecuteResponse) {
+        this.response = Object.assign({}, response);
+        this.addHeader();
+        if (this.header) {
+            let i = 0;
+            for(let cell of this.header.children) {
+                this.rowWidths[i++] = cell.clientWidth;
+                let w: string;
+                if (i == 1) {
+                    w = (this.response.rowsAffected.toString().length * 8) + "px";
+                } else {
+                    w = cell.clientWidth + "px";
+                }
+                cell.css("min-width", w).css("max-width", w);
+                const h = this.table.findAll(`div.tr > div.td${cell.dataAttr("col")}`);
+                h.css("min-width", w).css("max-width", w);
+            }
+        }
+
+        this.scroller.css("height", (this.response.rowsAffected * this.rowHeight) + this.headerHeight + "px");
+        console.log(this.start, this.end);
+        this.scrollTable();
+    }
+
+    addHeader() {
         let i = 0;
         this.header = document.createElement("div").appendElementTo(this.table).addClass("th").dataAttr("row", 0) as Element;
         document.createElement("div").appendElementTo(this.header)
@@ -56,17 +87,19 @@ export default class  {
             .on("mousemove", (e: MouseEvent)=>this.headerCellMousemove(e))
             .on("mouseenter", (e: MouseEvent)=>this.cellMouseEnter(e.currentTarget as Element))
             .on("mouseleave", (e: MouseEvent)=>this.cellMouseLeave(e.currentTarget as Element));
-        for(let item of header) {
-            document
-                .createElement("div")
-                .html(`<div>${item.name}</div><div>${item.type}</div>`)
-                .appendElementTo(this.header)
-                .addClass("td")
-                .addClass(`td${++i}`)
-                .dataAttr("col", i)
-                .on("mousemove", (e: MouseEvent)=>this.headerCellMousemove(e))
-                .on("mouseenter", (e: MouseEvent)=>this.cellMouseEnter(e.currentTarget as Element))
-                .on("mouseleave", (e: MouseEvent)=>this.cellMouseLeave(e.currentTarget as Element));;
+        if (this.response.header) {
+            for(let item of this.response.header) {
+                document
+                    .createElement("div")
+                    .html(`<div>${item.name}</div><div>${item.type}</div>`)
+                    .appendElementTo(this.header)
+                    .addClass("td")
+                    .addClass(`td${++i}`)
+                    .dataAttr("col", i)
+                    .on("mousemove", (e: MouseEvent)=>this.headerCellMousemove(e))
+                    .on("mouseenter", (e: MouseEvent)=>this.cellMouseEnter(e.currentTarget as Element))
+                    .on("mouseleave", (e: MouseEvent)=>this.cellMouseLeave(e.currentTarget as Element));;
+            }
         }
         this.headerHeight = this.header.clientHeight;
     }
@@ -74,66 +107,11 @@ export default class  {
     addRow(rn: number, row: Array<string>) {
         const e = this.newRow(rn, row).appendElementTo(this.table);
         this.rows.set(rn, e);
-        if (this.rowHeight == null) {
-            this.rowHeight = e.clientHeight;
-        }
-    }
-
-    done(stats: IStats) {
-        this.stats = Object.assign({}, stats);
-        this.start = 1;
-        this.end = this.stats.rowsFetched;
-        
-        this.calcVirtual();
-        this.adjustGridScrollBars();
-        if (this.header) {
-            let i = 0;
-            for(let cell of this.header.children) {
-                this.rowWidths[i++] = cell.clientWidth;
-                let w: string;
-                if (i == 1) {
-                    w = (this.stats.rowsAffected.toString().length * 8) + "px";
-                } else {
-                    w = cell.clientWidth + "px";
-                }
-                cell.css("min-width", w).css("max-width", w);
-                const h = this.table.findAll(`div.tr > div.td${cell.dataAttr("col")}`);
-                h.css("min-width", w).css("max-width", w);
-            }
-        }
     }
 
     adjust() {
         this.onTableScroll();
         this.adjustGridScrollBars();
-    }
-
-    setConnectionId(connectionId: string) {
-        this.connectionId = connectionId;
-    }
-
-    adjustGridScrollBars() {
-        if (!this.table) {
-            return;
-        }
-        this.table.css("height", this.element.clientHeight + "px");
-        if (this.scroller.clientHeight > this.table.clientHeight) {
-            this.scroll.showElement();
-            this.element.css("grid-template-columns", "auto 16px");
-        } else {
-            this.scroll.hideElement();
-            this.element.css("grid-template-columns", "auto 0px");
-        }
-
-        if (this.header.clientWidth > this.element.clientWidth) {
-            this.table.css("overflow-x", "scroll");
-        } else {
-            this.table.css("overflow-x", "hidden");
-        }
-    }
-
-    estimateNumberOfItems() {
-        return (Math.trunc(this.table.scrollHeight / (this.rowHeight ? this.rowHeight : 25)) * 2);
     }
 
     private newRow(rn: number, row: Array<string>) : Element {
@@ -183,9 +161,25 @@ export default class  {
         return tr;
     }
 
-    private _shouldScroll = false;
-    private _started = false;
-    private _timeout: number;
+    private adjustGridScrollBars() {
+        if (!this.table) {
+            return;
+        }
+        this.table.css("height", this.element.clientHeight + "px");
+        if (this.scroller.clientHeight > this.table.clientHeight) {
+            this.scroll.showElement();
+            this.element.css("grid-template-columns", "auto 16px");
+        } else {
+            this.scroll.hideElement();
+            this.element.css("grid-template-columns", "auto 0px");
+        }
+
+        if (this.header.clientWidth > this.element.clientWidth) {
+            this.table.css("overflow-x", "scroll");
+        } else {
+            this.table.css("overflow-x", "hidden");
+        }
+    }
 
     private async onTableWheel(e: WheelEvent) {
         if (this.scroll == null) {
@@ -195,32 +189,32 @@ export default class  {
     }
 
     private onTableScroll() {
-        if (!this.connectionId || !this.stats ) {
+        if (!this.response) {
             return
         }
-        if (this._timeout) {
-            clearTimeout(this._timeout)
-            this._timeout = undefined;
+        if (this.scrollTimeout) {
+            clearTimeout(this.scrollTimeout)
+            this.scrollTimeout = undefined;
         }
-        this._timeout = setTimeout(() => {
-            if (this._timeout) {
-                clearTimeout(this._timeout)
-                this._timeout = undefined;
+        this.scrollTimeout = setTimeout(() => {
+            if (this.scrollTimeout) {
+                clearTimeout(this.scrollTimeout)
+                this.scrollTimeout = undefined;
             }
-            this._shouldScroll = true;
+            this.shouldScroll = true;
         }, 0);
     }
 
     private async startGridScrollConsumer() {
         setTimeout(async () => {
-            if (this._shouldScroll) {
-                this._shouldScroll = false;
-                if (this._started) {
+            if (this.shouldScroll) {
+                this.shouldScroll = false;
+                if (this.scrollStarted) {
                     return;
                 }
-                this._started = true;
+                this.scrollStarted = true;
                 await this.scrollTable();
-                this._started = false;
+                this.scrollStarted = false;
             }
             await this.startGridScrollConsumer();
         }, 0);
@@ -236,8 +230,8 @@ export default class  {
         if (first < 1) {
             first = 1;
         }
-        if (last > this.stats.rowsAffected) {
-            last = this.stats.rowsAffected;
+        if (last > this.response.rowsAffected) {
+            last = this.response.rowsAffected;
         }
 
         if ((first >= this.end && last > this.end) || (first < this.start && last <= this.start)) { //load all
@@ -246,7 +240,7 @@ export default class  {
             this.start = first;
             this.end = last;
             await new Promise<void>(resolve => {
-                cursor(this.connectionId, first, last, {
+                cursor(this.response.connectionId, first, last, {
                     end: () => resolve(),
                     row: (rowNum, row: Array<string>) => {
                         const newRow = this.newRow(rowNum, row);
@@ -258,7 +252,7 @@ export default class  {
 
         } else if (last > this.end && first >= this.start) { // load bottom
             await new Promise<void>(resolve => {
-                cursor(this.connectionId, this.end + 1, last, {
+                cursor(this.response.connectionId, this.end + 1, last, {
                     end: () => resolve(),
                     row: (rowNum, row: Array<string>) => {
                         const newRow = this.newRow(rowNum, row);
@@ -280,7 +274,7 @@ export default class  {
         } else if (last <= this.end && first < this.start) { //load top
             await new Promise<void>(resolve => {
                 let last: Element;
-                cursor(this.connectionId, first, this.start - 1, {
+                cursor(this.response.connectionId, first, this.start - 1, {
                     end: () => resolve(),
                     row: (rowNum, row: Array<string>) => {
                         let newRow = this.newRow(rowNum, row);
@@ -309,7 +303,7 @@ export default class  {
             if (first < this.start) { 
                 await new Promise<void>(resolve => {
                     let last: Element;
-                    cursor(this.connectionId, first, this.start - 1, {
+                    cursor(this.response.connectionId, first, this.start - 1, {
                         end: () => resolve(),
                         row: (rowNum, row: Array<string>) => {
                             let newRow = this.newRow(rowNum, row);
@@ -330,7 +324,7 @@ export default class  {
 
             if (last > this.end) {
                 await new Promise<void>(resolve => {
-                    cursor(this.connectionId, this.end + 1, last, {
+                    cursor(this.response.connectionId, this.end + 1, last, {
                         end: () => resolve(),
                         row: (rowNum, row: Array<string>) => {
                             const newRow = this.newRow(rowNum, row);
@@ -346,18 +340,11 @@ export default class  {
 
         }
 
-        if (first + ((last - first) / 2) < this.stats.rowsAffected / 2) {
+        if (first + ((last - first) / 2) < this.response.rowsAffected / 2) {
             this.table.scrollTo({top: ((first - 1) * this.rowHeight) + (this.scroll.scrollTop % this.rowHeight), behavior: 'auto'});
         } else {
             this.table.scrollTo({top: (first * this.rowHeight) + (this.scroll.scrollTop % this.rowHeight), behavior: 'auto'})
         }
-    }
-
-    private calcVirtual() {
-        if (this.stats.rowsAffected == -1) {
-            return;
-        }
-        this.scroller.css("height", (this.stats.rowsAffected * this.rowHeight) + this.headerHeight + "px");
     }
 
     private headerCellMousemove(e: MouseEvent) {

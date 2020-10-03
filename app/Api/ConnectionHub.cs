@@ -1,9 +1,8 @@
-﻿using System;
+﻿// ReSharper disable ClassNeverInstantiated.Global
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Principal;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using Pgcode.Connection;
 using Pgcode.Middleware;
@@ -21,8 +20,7 @@ namespace Pgcode.Api
     public class ConnectionsHub : BaseHub
     {
         private readonly ConnectionManager _connectionManager;
-
-
+        
         public ConnectionsHub(
             ConnectionManager connectionManager, 
             Settings settings, 

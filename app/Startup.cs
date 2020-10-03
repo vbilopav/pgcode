@@ -2,7 +2,6 @@ using System;
 using System.IO.Compression;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -35,7 +34,7 @@ namespace Pgcode
             app.UseGrpcWeb();
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapGrpcService<ExecuteService>().EnableGrpcWeb();
+                endpoints.MapGrpcService<CursorService>().EnableGrpcWeb();
                 endpoints.MapHub<ConnectionsHub>("/connectionsHub");
                 endpoints.MapHub<ExecuteHub>("/executeHub", o =>
                 {

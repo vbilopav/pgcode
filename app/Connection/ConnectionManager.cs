@@ -1,11 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.SignalR;
 using Npgsql;
 using Pgcode.Middleware;
 
 namespace Pgcode.Connection
 {
+    public class AddWorkspaceConnection
+    {
+        public string ConnectionId { get; set; }
+        public string UserName { get; set; }
+        public string Id { get; set; }
+        public string ConnectionName { get; set; }
+        public string Schema { get; set; }
+        public IClientProxy Proxy { get; set; }
+    }
+    
     public sealed partial class ConnectionManager : IDisposable
     {
         public IEnumerable<ConnectionData> GetConnectionsData() => _connections.Values;
@@ -19,7 +30,7 @@ namespace Pgcode.Connection
             throw new ApiException($"Unknown connection name {connectionName}", 404);
         }
 
-        public async ValueTask AddWsConnectionAsync(AddWorkspaceConnection request)
+        public void AddWsConnection(AddWorkspaceConnection request)
         {
             if (!WorkspaceConnections.ContainsKey(request.ConnectionId))
             {
@@ -27,13 +38,13 @@ namespace Pgcode.Connection
                 var builder = new NpgsqlConnectionStringBuilder(data.ConnectionString);
                 builder.ApplicationName = $"{builder.ApplicationName} - {request.UserName}: {request.Id}";
                 var connection = data.Connection.CloneWith(builder.ToString());
-                await connection.OpenAsync();
+                connection.Open();
                 if (request.Schema != "public")
                 {
-                    await using var cmd = connection.CreateCommand();
-                    await cmd.ExecuteAsync($"set search_path to @schema", 
+                    using var cmd = connection.CreateCommand();
+                    cmd.Execute($"set search_path to @schema", 
                         new NpgsqlParameter { Value = request.Schema, ParameterName = "schema" });
-                    var schema = await cmd.SingleAsync<string>("select current_schema()");
+                    var schema = cmd.Single<string>("select current_schema()");
                     if (schema == null)
                     {
                         throw new ArgumentException($"couldn't set search_path to @schema {request.Schema}");
@@ -60,14 +71,14 @@ namespace Pgcode.Connection
             return WorkspaceConnections.TryGetValue(connectionId, out var ws) ? ws : null;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Security", "CA2100:Review SQL queries for security vulnerabilities", Justification = "<Pending>")]
-        public async ValueTask RemoveWsConnectionAsync(string connectionId)
+        public void RemoveWsConnection(string connectionId)
         {
-            if (WorkspaceConnections.TryRemove(connectionId, out var ws))
+            if (!WorkspaceConnections.TryRemove(connectionId, out var ws))
             {
-                await ws.Connection.CloseAsync();
-                ws.Connection.Dispose();
+                return;
             }
+            ws.Connection.Close();
+            ws.Connection.Dispose();
         }
 
         public void Dispose()

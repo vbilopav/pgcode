@@ -4,17 +4,6 @@ option csharp_namespace = "Pgcode.Protos";
 
 package api;
 
-service ExecuteService {
-	rpc Execute (ExecuteRequest) returns (stream ExecuteReply);
-	rpc ReadCursor (CursorRequest) returns (stream ExecuteReply);
-}
-
-message ExecuteRequest { 
-	string ConnectionId = 1;
-	string Content = 2;
-	uint32 Size = 3;
-}
-
 message CursorRequest { 
 	string ConnectionId = 1;
 	uint64 From = 2;
@@ -25,4 +14,8 @@ message ExecuteReply {
 	uint32 RowNumber = 1;
 	repeated string Data = 2;
 	repeated uint32 NullIndexes = 3 [packed=true];
+}
+
+service CursorService {
+	rpc Read (CursorRequest) returns (stream ExecuteReply);
 }

@@ -10,14 +10,14 @@ namespace Pgcode.Execution
     public class ExecuteHandler
     {
         private readonly WorkspaceConnection _ws;
-        private readonly string _readContent = null;
-        private readonly string _cursorContent = null;
-        private readonly string _execContent = null;
+        private readonly string _readContent;
+        private readonly string _cursorContent;
+        private readonly string _execContent;
 
-        public ExecuteHandler(WorkspaceConnection ws, ExecuteRequest request)
+        public ExecuteHandler(WorkspaceConnection ws, string content)
         {
             _ws = ws;
-            var content = request.Content.Trim();
+            content = content.Trim();
             var parts = content.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
             var len = parts.Length;
             switch (len)
@@ -25,10 +25,10 @@ namespace Pgcode.Execution
                 case 0:
                     return;
                 case 1 when IsSuitableForCursor(content):
-                    _cursorContent = request.Content;
+                    _cursorContent = content;
                     break;
                 case 1:
-                    _readContent = request.Content;
+                    _readContent = content;
                     break;
                 default:
                 {
@@ -40,18 +40,18 @@ namespace Pgcode.Execution
                     }
                     else
                     {
-                        _execContent = request.Content;
+                        _execContent = content;
                     }
                     break;
                 }
             }
         }
 
-        public void Read(IServerStreamWriter<ExecuteReply> responseStream, uint size)
+        public ExecuteResponse TryExecute()
         {
             void NoticeHandler(object sender, NpgsqlNoticeEventArgs e)
             {
-                _ws?.SendPgNoticeAsync(e.Notice);
+                _ws.SendPgNotice(e.Notice);
             }
             _ws.Connection.Notice += NoticeHandler;
             _ws.ErrorOffset = null;
@@ -60,56 +60,21 @@ namespace Pgcode.Execution
             stopwatch.Start();
             try
             {
-                if (_readContent != null)
-                {
-                    if (_execContent != null)
-                    {
-                        _ws.Execute(_execContent);
-                    }
-                    foreach (var reply in _ws.ExecuteReader(_readContent))
-                    {
-                        responseStream.WriteAsync(reply).GetAwaiter().GetResult();
-                    }
-                } 
-                else if (_cursorContent != null)
-                {
-                    if (_execContent != null)
-                    {
-                        _ws.Execute(_execContent);
-                    }
-                    try
-                    {
-                        foreach (var reply in _ws.CreateCursorReader(_cursorContent, size))
-                        {
-                            responseStream.WriteAsync(reply).GetAwaiter().GetResult();
-                        }
-                    }
-                    catch (PostgresException)
-                    {
-                        CleanupWs(_ws);
-                        throw;
-                    }
-                }
-                else if (_execContent != null)
-                {
-                    _ws.Execute(_execContent);
-                }
-                else
-                {
-                    _ws.SendStatsMessageAsync(new MessageRequest
-                    {
-                        ReadTime = null,
-                        ExecutionTime = stopwatch.Elapsed,
-                        RowsAffected = 0,
-                        RowsFetched = 0,
-                        Message = "empty"
-                    }).GetAwaiter().GetResult();
-                }
+               var response = this.Execute();
+               stopwatch.Stop();
+               response.ExecutionTime = stopwatch.Elapsed.Format();
+               return response;
             }
             catch (PostgresException e)
             {
                 stopwatch.Stop();
-                _ws.SendPgErrorAsync(e, stopwatch.Elapsed).GetAwaiter().GetResult();
+                _ws.SendPgError(e);
+                var response = new ExecuteResponse
+                {
+                    Message = "error", 
+                    ExecutionTime = stopwatch.Elapsed.Format()
+                };
+                return response;
             }
             finally
             {
@@ -117,11 +82,48 @@ namespace Pgcode.Execution
             }
         }
 
-        public static void ReadCursor(WorkspaceConnection ws, CursorRequest request, IServerStreamWriter<ExecuteReply> responseStream)
+        private ExecuteResponse Execute()
+        {
+            if (_readContent != null)
+            {
+                if (_execContent != null)
+                {
+                    _ws.ExecuteVoid(_execContent);
+                }
+
+                return _ws.ExecuteReader(_readContent);
+            }
+
+            if (_cursorContent != null)
+            {
+                if (_execContent != null)
+                {
+                    _ws.ExecuteVoid(_execContent);
+                }
+                try
+                {
+                    return _ws.ExecuteCursor(_cursorContent);
+                }
+                catch (PostgresException)
+                {
+                    CleanupWs(_ws);
+                    throw;
+                }
+            }
+
+            if (_execContent == null)
+            {
+                return new ExecuteResponse {Message = "empty"};
+            }
+            _ws.ExecuteVoid(_execContent);
+            return new ExecuteResponse{ Message = "execute" };
+        }
+
+        public static void TryReadCursor(WorkspaceConnection ws, CursorRequest request, IServerStreamWriter<ExecuteReply> responseStream)
         {
             try
             {
-                foreach (var reply in ws.CursorReader(request))
+                foreach (var reply in ws.ExecuteCursorReader(request))
                 {
                     responseStream.WriteAsync(reply).GetAwaiter().GetResult();
                 }
@@ -129,7 +131,7 @@ namespace Pgcode.Execution
             catch (PostgresException e)
             {
                 CleanupWs(ws);
-                ws.SendPgErrorAsync(e, null).GetAwaiter().GetResult();
+                ws.SendPgError(e);
             }
         }
 
@@ -151,7 +153,7 @@ namespace Pgcode.Execution
         private static bool IsSuitableForCursor(string content)
         {
             content = content.ToLowerInvariant();
-            if (content.StartsWith("select ", StringComparison.OrdinalIgnoreCase) || 
+            if (content.StartsWith("select ", StringComparison.OrdinalIgnoreCase) ||
                 content.StartsWith("with ", StringComparison.OrdinalIgnoreCase) ||
                 content.StartsWith("values ", StringComparison.OrdinalIgnoreCase))
             {

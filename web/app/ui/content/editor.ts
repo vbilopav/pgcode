@@ -7,7 +7,6 @@
     initConnection,
     disposeConnection,
     execute, 
-    IExecutionStream
 } from "app/api";
 import {
     SIDEBAR_DOCKED, 
@@ -225,23 +224,17 @@ export class Editor implements IEditor {
             if (!selection.isEmpty()) {
                 const value = this.monaco.getModel().getValueInRange(selection);
                 this.results.start();
-                execute(this.id, value, this.results.estimateNumberOfItems(), {
-                    reconnect: () => {
-                        this.initConnection().then(result => {
-                            if (result) {
-                                publish(FOOTER_MESSAGE, "connection reconnected, any temporary data or transactions may be lost...");
-                                this.results.setReconnected();
-                            }
-                            this.execute();
-                            setTimeout(() => publish(DISMISS_FOOTER_MESSAGE), 5000);
-                        });
-                    },
-                    message: e => this.results.message(e),
-                    header: e => this.results.header(e),
-                    row: (rn, e) => this.results.row(rn, e),
-                    end: e => this.results.end(e)
-                } as IExecutionStream)
-                .then(connectionId => this.results.setConnectionId(connectionId));
+
+                execute({
+                    connection: this.data.connection,
+                    schema: this.data.schema,
+                    id: this.id,
+                    content: value,
+                    events: {
+                        error: e => this.results.error(e), 
+                        notice: e => this.results.notice(e)
+                    }
+                }).then(response => this.results.end(response));
 
             } else {
                 this.tempViewState = this.monaco.saveViewState();

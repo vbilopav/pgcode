@@ -7,7 +7,6 @@ using System.Linq;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Npgsql;
-using Pgcode.Execution;
 using Pgcode.Migrations;
 
 namespace Pgcode.Connection

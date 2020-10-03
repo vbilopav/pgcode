@@ -261,7 +261,11 @@ const _getExecuteHub = async (id: string, start = false) => {
 export const initConnection = async (connection: string, schema: string, id: string) => {
     const hub = await _getExecuteHub(id, true);
     try {
-        return {ok: true, status: 200, data: hub.invoke("InitConnection", connection, schema, id)} 
+        return {
+            ok: true, 
+            status: 200, 
+            data: await hub.invoke("InitConnection", connection, schema, id)
+        } 
     } catch (error) {
         console.error(error);
         return {ok: false, status: 500, data: null}
@@ -269,25 +273,32 @@ export const initConnection = async (connection: string, schema: string, id: str
 }
 
 export const disposeConnection = async (id: string) => {
-    const hub = await _getExecuteHub(id, true);
+    const hub = await _getExecuteHub(id, false);
     try {
-        const result = {ok: true, status: 200, data: hub.invoke("DisposeConnection")};
         await hub.stop();
         delete _executeHubs[id];
-        return result;
+        return {
+            ok: true, 
+            status: 200, 
+            data: null
+        };
     } catch (error) {
         console.error(error);
         return {ok: false, status: 500, data: null}
     }
 }
 
-interface IRow {
-    rn: number;
-    data: Array<string>;
-    nullIndexes: Array<number>;
+export interface IExecuteResponse {
+    executionTime: string;
+    rowsAffected: number;
+    rowsFetched: number;
+    message: string;
+    header: Array<IField>;
+    connectionId: string;
 };
 
-export interface IHeader {
+interface IField {
+    index: number;
     name: string;
     type: string;
 };
@@ -312,95 +323,84 @@ export interface INotice {
     time: string;
 }
 
-export interface IStats {
-    read: string;
-    execution: string;
-    total: string;
-    rowsAffected: number;
-    rowsFetched: number;
-    message: string;
+interface IExecuteEvents {
+    notice: (e: INotice) => void;
+    error: (e: INotice) => void;
 }
 
-export interface IExecutionStream {
-    reconnect: () => void;
-    error: (e: GrpcStatus) => void;
-    status: (e: GrpcStatus) => void;
-    message: (e: INotice) => void;
-    header: (e: Array<IHeader>) => void;
-    row: (rn: number, e: Array<string>) => void;
-    end: (e: IStats) => void;
-}
+export interface IExecuteRequest {
+    connection: string;
+    schema: string;
+    id: string;
+    content: string;
+    events: IExecuteEvents;
+    _call?: number
+};
 
-export const execute: (id: string, content: string, size: number, stream: IExecutionStream) => Promise<string> = async (id, content, size, stream)  => {
-    const hub = await _getExecuteHub(id, false);
-    const callStreamMethod = (method: string, ...args: any[]) => {
-        if (stream[method]) {
-            stream[method](...args);
+
+// execute with hub
+export const execute: (request: IExecuteRequest) => Promise<IExecuteResponse> = async request  => {
+    let hub = await _getExecuteHub(request.id, false);
+    const runEvent = (method: string, ...args: any[]) => {
+        if (request.events[method]) {
+            request.events[method](...args);
         }
     };
 
     if (hub.state != signalR.HubConnectionState.Connected || hub.connectionId == undefined) {
-        callStreamMethod("reconnect");
-        return null;
+        let result = await initConnection(request.connection, request.schema, request.id);
+        if (!result.ok) {
+            throw new Error("connection could be re-initialized");
+        }
+        hub = await _getExecuteHub(request.id, false);
     }
-    const messageName = `message-${id}`;
-    const statsName = `stats-${id}`;
-    hub.off(messageName);
-    hub.off(statsName);
-    hub.on(messageName, (msg: INotice) => callStreamMethod("message", msg));
-    const statsPromise = new Promise<IStats>(resolve => hub.on(statsName, (msg: IStats) => resolve(msg)));
 
-    let header = false;
-    grpc.serverStreaming({
-        service: "/api.ExecuteService/Execute",
-        request: [GrpcType.String, GrpcType.String, GrpcType.Uint32],
-        reply: [{rn: GrpcType.Uint32}, {data: [GrpcType.String]}, {nullIndexes: GrpcType.PackedUint32}]
-    }, 
-    hub.connection.connectionId, content, size)
-        .on("error", e => {
-            if ((e as GrpcStatus).code == GrpcErrorCode.NotFound && (e as GrpcStatus).message == "connection not initialized" && stream["reconnect"]) {
-                stream.reconnect();
-            } else {
-                callStreamMethod("error", e);
-                publish(SET_APP_STATUS, AppStatus.ERROR, (e as GrpcStatus).message);
-            }
-        })
-        .on("status", e => callStreamMethod("status", e))
-        .on("data", e => {
-            if (!header) {
-                if (stream["header"]) {
-                    const headerResult = new Array<IHeader>();
-                    for(let item of (e as IRow).data){
-                        headerResult.push(JSON.parse(item));
-                    };
-                    stream.header(headerResult);
-                }
-                header = true;
-                return;
-            }
-            if (stream["row"]) {
-                let row = e as IRow;
-                if (row.nullIndexes && row.nullIndexes.length) {
-                    for(let idx of row.nullIndexes){
-                        row.data[idx] = null;
-                    };
-                }
-                stream.row(row.rn, row.data);
-            }
-        })
-        .on("end", () => statsPromise.then(stats => callStreamMethod("end", stats)));
+    const notice = `notice-${request.id}`;
+    const error = `error-${request.id}`;
+    hub.off(notice);
+    hub.off(error);
+    hub.on(notice, (msg: INotice) => runEvent("notice", msg));
+    hub.on(error, (msg: INotice) => runEvent("error", msg));
 
-    return hub.connection.connectionId;
+    const response = await hub.invoke("Execute", request.content) as IExecuteResponse;
+    if (response.message == "404") {
+        let result = await initConnection(request.connection, request.schema, request.id);
+        try {
+            if (!result.ok || request._call > 3) {
+                throw new Error("connection could be re-initialized");
+            }
+        } catch(e) {
+            hub.off(notice);
+            hub.off(error);
+            throw e;
+        }
+        request._call = (request._call == undefined ? 0 : request._call) + 1;
+        console.warn("reconnect attempt " + request._call);
+        return execute(request);
+        
+    }
+
+    hub.off(notice);
+    hub.off(error);
+    response.connectionId = hub.connectionId;
+    return response;
 }
 
-export interface ICursorStream {
+interface IRow {
+    rn: number;
+    data: Array<string>;
+    nullIndexes: Array<number>;
+};
+
+
+interface ICursorStream {
     row: (rn: number, e: Array<string>) => void;
     end: () => void;
 }
 
 export const cursor = (connectionId: string, from: number, to: number, stream: ICursorStream) => {
     grpc.serverStreaming({
-        service: "/api.ExecuteService/ReadCursor",
+        service: "/api.CursorService/Read",
         request: [GrpcType.String, GrpcType.Uint32, GrpcType.Uint32],
         reply: [{rn: GrpcType.Uint32}, {data: [GrpcType.String]}, {nullIndexes: GrpcType.PackedUint32}]
     }, 
@@ -412,9 +412,8 @@ export const cursor = (connectionId: string, from: number, to: number, stream: I
                 stream.end();
             }
         })
-        .on("data", e => {
+        .on("data", (row: IRow) => {
             if (stream["row"]) {
-                let row = e as IRow;
                 if (row.nullIndexes && row.nullIndexes.length) {
                     for(let idx of row.nullIndexes){
                         row.data[idx] = null;

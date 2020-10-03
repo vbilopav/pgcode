@@ -1,13 +1,6 @@
 define(["require", "exports", "app/api", "app/ui/results-pane/grid", "app/ui/results-pane/messages"], function (require, exports, api_1, grid_1, messages_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    var Status;
-    (function (Status) {
-        Status[Status["Ready"] = 0] = "Ready";
-        Status[Status["Disconnected"] = 1] = "Disconnected";
-        Status[Status["Running"] = 2] = "Running";
-        Status[Status["Complete"] = 3] = "Complete";
-    })(Status || (Status = {}));
     class default_1 {
         constructor(id, element, data, undock) {
             this.undock = undock;
@@ -46,77 +39,50 @@ define(["require", "exports", "app/api", "app/ui/results-pane/grid", "app/ui/res
             this.footerTime = this.element.children[2].children[1].children[0];
             this.footerRows = this.element.children[2].children[2].children[0];
             this.grid = new grid_1.default(id, this.panes[0]);
-            new messages_1.default(this.panes[1]);
+            this.messages = new messages_1.default(this.panes[1]);
             this.activateByTab(this.tabs[0]);
-            this.status = Status.Disconnected;
-        }
-        setConnectionId(connectionId) {
-            this.grid.setConnectionId(connectionId);
         }
         setReady() {
             this.footerMsg.html("🔗 Connected.");
             this.footerTime.html("🕛 --:--:--").css("title", "");
             this.footerRows.html("0 rows").css("title", "");
             ;
-            this.status = Status.Ready;
         }
         setDisconnected() {
             this.footerMsg.html("⛔ Disconnected.");
             this.footerTime.html("🕛 --:--:--").attr("title", "");
             this.footerRows.html("0 rows").attr("title", "");
             ;
-            this.status = Status.Disconnected;
-        }
-        setReconnected() {
         }
         start() {
             this.undock();
-            if (this.status == Status.Disconnected) {
-                return;
-            }
-            this.status = Status.Running;
             this.footerMsg.html("Running...");
-            this.error = null;
+            this.footerTime.html("🕛 --:--:--").attr("title", "");
+            this.footerRows.html(" - ");
             this.grid.init();
+            this.messages.clear();
         }
-        message(e) {
-            console.log(e.messageText);
-            if (e.severity == "ERROR") {
-                this.error = e;
-                this.end(null);
-            }
+        notice(e) {
+            console.log("notice", e);
+            this.messages.message(e);
         }
-        header(e) {
-            this.grid.addHeader(e);
+        error(e) {
+            console.log("error", e);
+            this.footerMsg.html(`⚠️ ${e.messageText}`);
+            this.messages.message(e);
         }
-        row(rn, e) {
-            this.grid.addRow(rn, e);
-        }
-        end(stats) {
-            console.log(stats);
-            this.grid.done(stats);
-            if (this.error) {
-                this.footerMsg.html(`⚠️ ${this.error.messageText}`);
-            }
-            else {
+        end(e) {
+            console.log("end", e);
+            this.messages.finished(e);
+            if (e.message != "error") {
                 this.footerMsg.html("✔️ Query executed successfully.");
             }
-            if (stats) {
-                this.footerTime.html(`🕛 ${stats.total}`).attr("title", `execution time: ${stats.execution}\nreading time: ${stats.read}\ntotal time: ${stats.total}`);
-                this.footerRows.html(`${stats.rowsAffected} rows`);
-            }
-            else if (this.error) {
-                if (this.error.time) {
-                    this.footerTime.html(`🕛 ${this.error.time}`).attr("title", `execution time: ${this.error.time}`);
-                }
-                this.footerRows.html(` - `);
-            }
+            this.footerTime.html(`🕛 ${e.executionTime}`).attr("title", `total time: ${e.executionTime}`);
+            this.footerRows.html(`${e.rowsAffected} rows`);
+            this.grid.done(e);
         }
         adjustGrid() {
             this.grid.adjust();
-        }
-        estimateNumberOfItems() {
-            return this.grid.estimateNumberOfItems();
         }
         activateByTab(tab) {
             for (let current of this.tabs) {
