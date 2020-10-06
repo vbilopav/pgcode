@@ -57,7 +57,7 @@ define(["require", "exports", "app/api", "app/_sys/timeout"], function (require,
                 }
             }
             this.scroller.css("height", (this.response.rowsAffected * this.rowHeight) + this.headerHeight + "px");
-            this.scrollTable();
+            this.scrollTable().then(() => this.adjustGridScrollBars());
         }
         adjust() {
             this.onTableScroll();

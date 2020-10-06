@@ -66,7 +66,7 @@ export default class {
         }
 
         this.scroller.css("height", (this.response.rowsAffected * this.rowHeight) + this.headerHeight + "px");
-        this.scrollTable();
+        this.scrollTable().then(() => this.adjustGridScrollBars());
     }
 
     adjust() {

@@ -398,38 +398,7 @@ interface ICursorStream {
     row: (rn: number, e: Array<string>) => void;
     end: () => void;
 }
-/*
-export const cursor = (connectionId: string, from: number, to: number, stream: ICursorStream) => {
-    grpc.serverStreaming({
-        service: "/api.CursorService/Read",
-        request: [GrpcType.String, GrpcType.Uint32, GrpcType.Uint32],
-        reply: [{rn: GrpcType.Uint32}, {data: [GrpcType.String]}, {nullIndexes: GrpcType.PackedUint32}]
-    }, 
-    connectionId, from, to)
-        .on("error", e => {
-            console.warn(e);
-            setTimeout(() => publish(FOOTER_MESSAGE, "can't load more grid data, connection may be reset, try running query again..."), 250);
-            if (stream["end"]) {
-                stream.end();
-            }
-        })
-        .on("data", (row: IRow) => {
-            if (stream["row"]) {
-                if (row.nullIndexes && row.nullIndexes.length) {
-                    for(let idx of row.nullIndexes){
-                        row.data[idx] = null;
-                    };
-                }
-                stream.row(row.rn, row.data);
-            }
-        })
-        .on("end", () => {
-            if (stream["end"]) {
-                stream.end();
-            }
-        });
-}
-*/
+
 const _cursor = (connectionId: string, from: number, to: number, stream: ICursorStream) => new Promise(resolve => {
     grpc.serverStreaming({
         service: "/api.CursorService/Read",
