@@ -210,8 +210,8 @@ export default class {
     }
 
     private getActualGridSize() {
-        let first = Math.trunc(this.scroll.scrollTop / this.rowHeight);
-        let last = Math.trunc((this.scroll.scrollTop + this.scroll.offsetHeight) / this.rowHeight);
+        let first = (Math.trunc((this.scroll.scrollTop - this.headerHeight) / this.rowHeight) + 1);
+        let last = (Math.trunc(((this.scroll.scrollTop - this.headerHeight) + this.scroll.offsetHeight) / this.rowHeight) + 1);
         
         if (first < 1) {
             first = 1;

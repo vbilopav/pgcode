@@ -191,8 +191,8 @@ define(["require", "exports", "app/api", "app/_sys/timeout"], function (require,
             this.performScroll();
         }
         getActualGridSize() {
-            let first = Math.trunc(this.scroll.scrollTop / this.rowHeight);
-            let last = Math.trunc((this.scroll.scrollTop + this.scroll.offsetHeight) / this.rowHeight);
+            let first = (Math.trunc((this.scroll.scrollTop - this.headerHeight) / this.rowHeight) + 1);
+            let last = (Math.trunc(((this.scroll.scrollTop - this.headerHeight) + this.scroll.offsetHeight) / this.rowHeight) + 1);
             if (first < 1) {
                 first = 1;
             }
