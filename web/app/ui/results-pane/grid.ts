@@ -1,5 +1,5 @@
 import { IExecuteResponse, cursor } from "app/api";
-import {timeout, timeoutAsync} from "app/_sys/timeout";
+import {Consumer} from "app/_sys/timeout";
 
 export default class {
     private readonly element: Element;
@@ -7,8 +7,6 @@ export default class {
     private readonly rows = new Map<number, Element>();
     private table: HTMLElement = null;
     private header: Element = null;
-    private last: Element = null;
-    private first: Element = null;
     private headerHeight: number = null;
     private readonly rowHeight: number = 25;
     private toMove: Element = null;
@@ -22,9 +20,7 @@ export default class {
     private scroll: HTMLElement = null;
     private scroller: Element = null;
 
-    private shouldScroll = false;
-    private scrollStarted = false;
-    private scrollTimeout: number;
+    private scrollConsumer: Consumer;
 
     constructor(id: string, element: Element) {
         this.id = id;
@@ -34,24 +30,19 @@ export default class {
             .on("mouseup", (e:MouseEvent)=>this.mouseup(e))
             .on("mousemove", (e:MouseEvent)=>this.mousemove(e))
             .on("resize", () => this.adjust());
-
-        this.startGridScrollConsumer();
+        this.scrollConsumer = new Consumer(() => this.scrollTable(), 5);
     }
 
     init() {
         this.element.html("");
         this.table = document.createElement("div").appendElementTo(this.element).addClass("table").on("wheel", (e: WheelEvent) => this.onTableWheel(e)) as HTMLElement;
-        
         this.scroll = document.createElement("div").addClass("v-scroll").appendElementTo(this.element).on("scroll", e => this.onTableScroll()) as HTMLElement;
         this.scroller = document.createElement("div").appendElementTo(this.scroll);
-
         this.header = null;
-        this.last = null;
-        this.first = null;
         this.start = null;
         this.end = null;
         this.rows.clear();
-        this.shouldScroll = false;
+        this.scrollConsumer.stop();
         this.rowWidths = new Array<number>();
     }
 
@@ -78,7 +69,12 @@ export default class {
         this.scrollTable();
     }
 
-    addHeader() {
+    adjust() {
+        this.onTableScroll();
+        this.adjustGridScrollBars();
+    }
+
+    private addHeader() {
         let i = 0;
         this.header = document.createElement("div").appendElementTo(this.table).addClass("th").dataAttr("row", 0) as Element;
         document.createElement("div").appendElementTo(this.header)
@@ -99,20 +95,10 @@ export default class {
                     .dataAttr("col", i)
                     .on("mousemove", (e: MouseEvent)=>this.headerCellMousemove(e))
                     .on("mouseenter", (e: MouseEvent)=>this.cellMouseEnter(e.currentTarget as Element))
-                    .on("mouseleave", (e: MouseEvent)=>this.cellMouseLeave(e.currentTarget as Element));;
+                    .on("mouseleave", (e: MouseEvent)=>this.cellMouseLeave(e.currentTarget as Element));
             }
         }
         this.headerHeight = this.header.clientHeight;
-    }
-
-    addRow(rn: number, row: Array<string>) {
-        const e = this.newRow(rn, row).appendElementTo(this.table);
-        this.rows.set(rn, e);
-    }
-
-    adjust() {
-        this.onTableScroll();
-        this.adjustGridScrollBars();
     }
 
     private newRow(rn: number, row: Array<string>) : Element {
@@ -121,10 +107,6 @@ export default class {
             .addClass("tr")
             .addClass(`tr${rn}`)
             .dataAttr("row", rn);
-        if (!this.first) {
-            this.first = tr;
-        }
-        this.last = tr;
         let td = document.createElement("div").html(`${rn}`).appendElementTo(tr)
             .addClass("td")
             .addClass("th")
@@ -193,80 +175,34 @@ export default class {
         if (!this.response) {
             return
         }
-        /*
-        if (this.scrollTimeout) {
-            clearTimeout(this.scrollTimeout)
-            this.scrollTimeout = undefined;
-        }
-        this.scrollTimeout = setTimeout(() => {
-            if (this.scrollTimeout) {
-                clearTimeout(this.scrollTimeout)
-                this.scrollTimeout = undefined;
-            }
-            this.shouldScroll = true;
-        }, 0);
-        */
-        //this.shouldScroll = true;
-        timeout(() => this.shouldScroll = true, 10, `${this.id}-grid-scroll`);
-        //timeoutAsync(async () => {await this.scrollTable()}, 0, `${this.id}-grid-scroll`);
-    }
-/*
-    private async startGridScrollConsumer() {
-        setTimeout(async () => {
-            if (this.shouldScroll) {
-                this.shouldScroll = false;
-                if (this.scrollStarted) {
-                    return;
-                }
-                this.scrollStarted = true;
-                await this.scrollTable();
-                this.scrollStarted = false;
-            }
-            await this.startGridScrollConsumer();
-        }, 0);
-    }
-*/
-    private async startGridScrollConsumer() {
-        setTimeout(async () => {
-            if (this.shouldScroll) {
-                this.shouldScroll = false;
-                if (this.scrollStarted) {
-                    return;
-                }
-                this.scrollStarted = true;
-                await this.scrollTable();
-                this.scrollStarted = false;
-            }
-            await this.startGridScrollConsumer();
-        }, 0);
+        this.scrollConsumer.run();
     }
 
     private async scrollTable() {
         const {first, last} = this.getActualGridSize();
-
         if ((first == this.start) && (last == this.end)) {
             return;
         }
         if ((first == this.start && last < this.end) || (first > this.start && last < this.end) || (first > this.start && last == this.end)) {
             this.performScroll();
             return;
-        }
-        if ((first > this.end && last > this.end) || (first < this.start && last < this.start)) {
+
+        } else if ((first > this.end && last > this.end) || (first < this.start && last < this.start)) {
             await this.removeAndLoadAllRows(first, last);
         }
         if ((first == this.end && last > this.end) || (first < this.end && first > this.start && last > this.end)) {
             await this.removeAndLoadTopRows(first, last);
-        }
-        if (first == this.start && last > this.end && last > this.end) {
+
+        } else if (first == this.start && last > this.end && last > this.end) {
             await this.loadTopRows(first, last);
-        }
-        if ((first < this.start && last < this.end && last > this.start) || (first < this.start && last == this.start)) {
+
+        } else if ((first < this.start && last < this.end && last > this.start) || (first < this.start && last == this.start)) {
             await this.removeAndLoadBottomRows(first, last);
-        }
-        if (first < this.start && last == this.end) {
+
+        } else if (first < this.start && last == this.end) {
             await this.loadBottomRows(first, last);
-        }
-        if (first < this.start && last > this.end) {
+
+        } else if (first < this.start && last > this.end) {
             await this.loadTopRows(first, last);
             await this.loadBottomRows(first, last);
         }

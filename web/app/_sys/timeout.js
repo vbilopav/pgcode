@@ -31,5 +31,37 @@ define(["require", "exports"], function (require, exports) {
             _promises[key] = undefined;
         }, timeout);
     };
+    class Consumer {
+        constructor(handler, timeout) {
+            this.shouldRun = false;
+            this.timeout = 0;
+            if (handler) {
+                this.handler = handler;
+            }
+            if (timeout) {
+                this.timeout = timeout;
+            }
+            this.start();
+        }
+        run(handler) {
+            if (handler) {
+                this.handler = handler;
+            }
+            this.shouldRun = true;
+        }
+        stop() {
+            this.shouldRun = false;
+        }
+        start() {
+            setTimeout(async () => {
+                if (this.shouldRun) {
+                    this.shouldRun = false;
+                    await this.handler();
+                }
+                this.start();
+            }, this.timeout);
+        }
+    }
+    exports.Consumer = Consumer;
 });
 //# sourceMappingURL=timeout.js.map

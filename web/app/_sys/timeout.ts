@@ -31,3 +31,40 @@ export const timeoutAsync = async (handler: ()=>Promise<void>, timeout: number, 
         _promises[key] = undefined;
     }, timeout);
 };
+
+export class Consumer {
+    private shouldRun: boolean = false;
+    private handler: () => Promise<void>;
+    private timeout: number = 0;
+
+    constructor(handler?: () => Promise<void>, timeout?: number) {
+        if (handler) {
+            this.handler = handler;
+        }
+        if (timeout) {
+            this.timeout = timeout;
+        }
+        this.start();
+    }
+
+    run(handler?: () => Promise<void>) {
+        if (handler) {
+            this.handler = handler;
+        }
+        this.shouldRun = true;
+    }
+
+    stop() {
+        this.shouldRun = false;
+    }
+
+    private start() {
+        setTimeout(async () => {
+            if (this.shouldRun) {
+                this.shouldRun = false;
+                await this.handler();
+            }
+            this.start();
+        }, this.timeout);
+    }
+}

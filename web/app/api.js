@@ -1,4 +1,4 @@
-define(["require", "exports", "app/_sys/pubsub", "libs/signalr/signalr.min.js", "app/_sys/grpc-service", "vs/editor/editor.main"], function (require, exports, pubsub_1, signalR, grpc_service_1) {
+define(["require", "exports", "app/_sys/pubsub", "libs/signalr/signalr.min.js", "app/_sys/grpc-service", "app/_sys/timeout", "vs/editor/editor.main"], function (require, exports, pubsub_1, signalR, grpc_service_1, timeout_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.ScriptId = item => `${Keys.SCRIPTS}-${item.connection}-${item.schema}-${item.id}`;
@@ -248,7 +248,7 @@ define(["require", "exports", "app/_sys/pubsub", "libs/signalr/signalr.min.js", 
         return response;
     };
     ;
-    exports.cursor = (connectionId, from, to, stream) => {
+    const _cursor = (connectionId, from, to, stream) => new Promise(resolve => {
         grpc.serverStreaming({
             service: "/api.CursorService/Read",
             request: [grpc_service_1.GrpcType.String, grpc_service_1.GrpcType.Uint32, grpc_service_1.GrpcType.Uint32],
@@ -260,6 +260,7 @@ define(["require", "exports", "app/_sys/pubsub", "libs/signalr/signalr.min.js", 
             if (stream["end"]) {
                 stream.end();
             }
+            resolve();
         })
             .on("data", (row) => {
             if (stream["row"]) {
@@ -276,7 +277,12 @@ define(["require", "exports", "app/_sys/pubsub", "libs/signalr/signalr.min.js", 
             if (stream["end"]) {
                 stream.end();
             }
+            resolve();
         });
-    };
+    });
+    const cursorConsumer = new timeout_1.Consumer();
+    exports.cursor = (connectionId, from, to, stream) => cursorConsumer.run(async () => {
+        await _cursor(connectionId, from, to, stream);
+    });
 });
 //# sourceMappingURL=api.js.map

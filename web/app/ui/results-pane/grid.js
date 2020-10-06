@@ -6,8 +6,6 @@ define(["require", "exports", "app/api", "app/_sys/timeout"], function (require,
             this.rows = new Map();
             this.table = null;
             this.header = null;
-            this.last = null;
-            this.first = null;
             this.headerHeight = null;
             this.rowHeight = 25;
             this.toMove = null;
@@ -18,8 +16,6 @@ define(["require", "exports", "app/api", "app/_sys/timeout"], function (require,
             this.rowWidths = new Array();
             this.scroll = null;
             this.scroller = null;
-            this.shouldScroll = false;
-            this.scrollStarted = false;
             this.id = id;
             this.element = element;
             window
@@ -27,7 +23,7 @@ define(["require", "exports", "app/api", "app/_sys/timeout"], function (require,
                 .on("mouseup", (e) => this.mouseup(e))
                 .on("mousemove", (e) => this.mousemove(e))
                 .on("resize", () => this.adjust());
-            this.startGridScrollConsumer();
+            this.scrollConsumer = new timeout_1.Consumer(() => this.scrollTable(), 5);
         }
         init() {
             this.element.html("");
@@ -35,12 +31,10 @@ define(["require", "exports", "app/api", "app/_sys/timeout"], function (require,
             this.scroll = document.createElement("div").addClass("v-scroll").appendElementTo(this.element).on("scroll", e => this.onTableScroll());
             this.scroller = document.createElement("div").appendElementTo(this.scroll);
             this.header = null;
-            this.last = null;
-            this.first = null;
             this.start = null;
             this.end = null;
             this.rows.clear();
-            this.shouldScroll = false;
+            this.scrollConsumer.stop();
             this.rowWidths = new Array();
         }
         done(response) {
@@ -65,6 +59,10 @@ define(["require", "exports", "app/api", "app/_sys/timeout"], function (require,
             this.scroller.css("height", (this.response.rowsAffected * this.rowHeight) + this.headerHeight + "px");
             this.scrollTable();
         }
+        adjust() {
+            this.onTableScroll();
+            this.adjustGridScrollBars();
+        }
         addHeader() {
             let i = 0;
             this.header = document.createElement("div").appendElementTo(this.table).addClass("th").dataAttr("row", 0);
@@ -87,18 +85,9 @@ define(["require", "exports", "app/api", "app/_sys/timeout"], function (require,
                         .on("mousemove", (e) => this.headerCellMousemove(e))
                         .on("mouseenter", (e) => this.cellMouseEnter(e.currentTarget))
                         .on("mouseleave", (e) => this.cellMouseLeave(e.currentTarget));
-                    ;
                 }
             }
             this.headerHeight = this.header.clientHeight;
-        }
-        addRow(rn, row) {
-            const e = this.newRow(rn, row).appendElementTo(this.table);
-            this.rows.set(rn, e);
-        }
-        adjust() {
-            this.onTableScroll();
-            this.adjustGridScrollBars();
         }
         newRow(rn, row) {
             let i = 0;
@@ -106,10 +95,6 @@ define(["require", "exports", "app/api", "app/_sys/timeout"], function (require,
                 .addClass("tr")
                 .addClass(`tr${rn}`)
                 .dataAttr("row", rn);
-            if (!this.first) {
-                this.first = tr;
-            }
-            this.last = tr;
             let td = document.createElement("div").html(`${rn}`).appendElementTo(tr)
                 .addClass("td")
                 .addClass("th")
@@ -173,21 +158,7 @@ define(["require", "exports", "app/api", "app/_sys/timeout"], function (require,
             if (!this.response) {
                 return;
             }
-            timeout_1.timeout(() => this.shouldScroll = true, 10, `${this.id}-grid-scroll`);
-        }
-        async startGridScrollConsumer() {
-            setTimeout(async () => {
-                if (this.shouldScroll) {
-                    this.shouldScroll = false;
-                    if (this.scrollStarted) {
-                        return;
-                    }
-                    this.scrollStarted = true;
-                    await this.scrollTable();
-                    this.scrollStarted = false;
-                }
-                await this.startGridScrollConsumer();
-            }, 0);
+            this.scrollConsumer.run();
         }
         async scrollTable() {
             const { first, last } = this.getActualGridSize();
@@ -198,22 +169,22 @@ define(["require", "exports", "app/api", "app/_sys/timeout"], function (require,
                 this.performScroll();
                 return;
             }
-            if ((first > this.end && last > this.end) || (first < this.start && last < this.start)) {
+            else if ((first > this.end && last > this.end) || (first < this.start && last < this.start)) {
                 await this.removeAndLoadAllRows(first, last);
             }
             if ((first == this.end && last > this.end) || (first < this.end && first > this.start && last > this.end)) {
                 await this.removeAndLoadTopRows(first, last);
             }
-            if (first == this.start && last > this.end && last > this.end) {
+            else if (first == this.start && last > this.end && last > this.end) {
                 await this.loadTopRows(first, last);
             }
-            if ((first < this.start && last < this.end && last > this.start) || (first < this.start && last == this.start)) {
+            else if ((first < this.start && last < this.end && last > this.start) || (first < this.start && last == this.start)) {
                 await this.removeAndLoadBottomRows(first, last);
             }
-            if (first < this.start && last == this.end) {
+            else if (first < this.start && last == this.end) {
                 await this.loadBottomRows(first, last);
             }
-            if (first < this.start && last > this.end) {
+            else if (first < this.start && last > this.end) {
                 await this.loadTopRows(first, last);
                 await this.loadBottomRows(first, last);
             }

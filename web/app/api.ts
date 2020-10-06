@@ -1,6 +1,7 @@
 import {API_INITIAL, publish, SET_APP_STATUS, CONNECTION_SET, FOOTER_MESSAGE} from "app/_sys/pubsub";
 import * as signalR from "libs/signalr/signalr.min.js";
-import { GrpcService, GrpcType, GrpcErrorCode, GrpcStatus } from "app/_sys/grpc-service";
+import { GrpcService, GrpcType } from "app/_sys/grpc-service";
+import {Consumer} from "app/_sys/timeout";
 import "vs/editor/editor.main";
 import ICodeEditorViewState = monaco.editor.ICodeEditorViewState;
 import INewScrollPosition = monaco.editor.INewScrollPosition;
@@ -397,7 +398,7 @@ interface ICursorStream {
     row: (rn: number, e: Array<string>) => void;
     end: () => void;
 }
-
+/*
 export const cursor = (connectionId: string, from: number, to: number, stream: ICursorStream) => {
     grpc.serverStreaming({
         service: "/api.CursorService/Read",
@@ -428,3 +429,41 @@ export const cursor = (connectionId: string, from: number, to: number, stream: I
             }
         });
 }
+*/
+const _cursor = (connectionId: string, from: number, to: number, stream: ICursorStream) => new Promise(resolve => {
+    grpc.serverStreaming({
+        service: "/api.CursorService/Read",
+        request: [GrpcType.String, GrpcType.Uint32, GrpcType.Uint32],
+        reply: [{rn: GrpcType.Uint32}, {data: [GrpcType.String]}, {nullIndexes: GrpcType.PackedUint32}]
+    }, 
+    connectionId, from, to)
+        .on("error", e => {
+            console.warn(e);
+            setTimeout(() => publish(FOOTER_MESSAGE, "can't load more grid data, connection may be reset, try running query again..."), 250);
+            if (stream["end"]) {
+                stream.end();
+            }
+            resolve();
+        })
+        .on("data", (row: IRow) => {
+            if (stream["row"]) {
+                if (row.nullIndexes && row.nullIndexes.length) {
+                    for(let idx of row.nullIndexes){
+                        row.data[idx] = null;
+                    };
+                }
+                stream.row(row.rn, row.data);
+            }
+        })
+        .on("end", () => {
+            if (stream["end"]) {
+                stream.end();
+            }
+            resolve();
+        });
+});
+
+const cursorConsumer = new Consumer();
+export const cursor = (connectionId: string, from: number, to: number, stream: ICursorStream) => cursorConsumer.run(async () => {
+    await _cursor(connectionId, from, to, stream);
+});
