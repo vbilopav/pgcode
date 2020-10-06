@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Threading;
 using Grpc.Core;
 using Npgsql;
 using Pgcode.Connection;
@@ -57,12 +58,13 @@ namespace Pgcode.Execution
             _ws.ErrorOffset = null;
 
             var stopwatch = new Stopwatch();
-            stopwatch.Start();
+            
             try
             {
-               var response = this.Execute();
-               stopwatch.Stop();
-               response.ExecutionTime = stopwatch.Elapsed.Format();
+                stopwatch.Start();
+                var response = this.Execute();
+                stopwatch.Stop();
+                response.ExecutionTime = stopwatch.Elapsed.Format();
                return response;
             }
             catch (PostgresException e)

@@ -1,6 +1,7 @@
 import { IExecuteResponse, cursor } from "app/api";
+import {timeout, timeoutAsync} from "app/_sys/timeout";
 
-export default class  {
+export default class {
     private readonly element: Element;
     private readonly id: string;
     private readonly rows = new Map<number, Element>();
@@ -33,6 +34,7 @@ export default class  {
             .on("mouseup", (e:MouseEvent)=>this.mouseup(e))
             .on("mousemove", (e:MouseEvent)=>this.mousemove(e))
             .on("resize", () => this.adjust());
+
         this.startGridScrollConsumer();
     }
 
@@ -73,7 +75,6 @@ export default class  {
         }
 
         this.scroller.css("height", (this.response.rowsAffected * this.rowHeight) + this.headerHeight + "px");
-        console.log(this.start, this.end);
         this.scrollTable();
     }
 
@@ -192,6 +193,7 @@ export default class  {
         if (!this.response) {
             return
         }
+        /*
         if (this.scrollTimeout) {
             clearTimeout(this.scrollTimeout)
             this.scrollTimeout = undefined;
@@ -203,8 +205,27 @@ export default class  {
             }
             this.shouldScroll = true;
         }, 0);
+        */
+        //this.shouldScroll = true;
+        timeout(() => this.shouldScroll = true, 10, `${this.id}-grid-scroll`);
+        //timeoutAsync(async () => {await this.scrollTable()}, 0, `${this.id}-grid-scroll`);
     }
-
+/*
+    private async startGridScrollConsumer() {
+        setTimeout(async () => {
+            if (this.shouldScroll) {
+                this.shouldScroll = false;
+                if (this.scrollStarted) {
+                    return;
+                }
+                this.scrollStarted = true;
+                await this.scrollTable();
+                this.scrollStarted = false;
+            }
+            await this.startGridScrollConsumer();
+        }, 0);
+    }
+*/
     private async startGridScrollConsumer() {
         setTimeout(async () => {
             if (this.shouldScroll) {
@@ -221,9 +242,38 @@ export default class  {
     }
 
     private async scrollTable() {
-        if (this.scroll == null) {
-            return {first: undefined, last: undefined}
+        const {first, last} = this.getActualGridSize();
+
+        if ((first == this.start) && (last == this.end)) {
+            return;
         }
+        if ((first == this.start && last < this.end) || (first > this.start && last < this.end) || (first > this.start && last == this.end)) {
+            this.performScroll();
+            return;
+        }
+        if ((first > this.end && last > this.end) || (first < this.start && last < this.start)) {
+            await this.removeAndLoadAllRows(first, last);
+        }
+        if ((first == this.end && last > this.end) || (first < this.end && first > this.start && last > this.end)) {
+            await this.removeAndLoadTopRows(first, last);
+        }
+        if (first == this.start && last > this.end && last > this.end) {
+            await this.loadTopRows(first, last);
+        }
+        if ((first < this.start && last < this.end && last > this.start) || (first < this.start && last == this.start)) {
+            await this.removeAndLoadBottomRows(first, last);
+        }
+        if (first < this.start && last == this.end) {
+            await this.loadBottomRows(first, last);
+        }
+        if (first < this.start && last > this.end) {
+            await this.loadTopRows(first, last);
+            await this.loadBottomRows(first, last);
+        }
+        this.performScroll();
+    }
+
+    private getActualGridSize() {
         let first = Math.trunc(this.scroll.scrollTop / this.rowHeight);
         let last = Math.trunc((this.scroll.scrollTop + this.scroll.offsetHeight) / this.rowHeight);
         
@@ -233,118 +283,120 @@ export default class  {
         if (last > this.response.rowsAffected) {
             last = this.response.rowsAffected;
         }
+        return {first, last};
+    }
 
-        if ((first >= this.end && last > this.end) || (first < this.start && last <= this.start)) { //load all
-            this.rows.forEach(r => r.remove());
-            this.rows.clear();
-            this.start = first;
-            this.end = last;
-            await new Promise<void>(resolve => {
-                cursor(this.response.connectionId, first, last, {
-                    end: () => resolve(),
-                    row: (rowNum, row: Array<string>) => {
-                        const newRow = this.newRow(rowNum, row);
-                        newRow.appendElementTo(this.table);
-                        this.rows.set(rowNum, newRow);
-                    }
-                });
-            });
-
-        } else if (last > this.end && first >= this.start) { // load bottom
-            await new Promise<void>(resolve => {
-                cursor(this.response.connectionId, this.end + 1, last, {
-                    end: () => resolve(),
-                    row: (rowNum, row: Array<string>) => {
-                        const newRow = this.newRow(rowNum, row);
-                        newRow.appendElementTo(this.table);
-                        const forDelete = this.rows.get(this.start);
-                        if (forDelete) {
-                            forDelete.remove();
-                            this.rows.delete(this.start);
-                            this.start++;
-                        }
-                        if (rowNum > this.end) {
-                            this.end = rowNum; 
-                        }
-                        this.rows.set(rowNum, newRow);
-                    }
-                });
-            });
-
-        } else if (last <= this.end && first < this.start) { //load top
-            await new Promise<void>(resolve => {
-                let last: Element;
-                cursor(this.response.connectionId, first, this.start - 1, {
-                    end: () => resolve(),
-                    row: (rowNum, row: Array<string>) => {
-                        let newRow = this.newRow(rowNum, row);
-                        if (!last) {
-                            this.header.after(newRow);
-                        } else {
-                            last.after(newRow);
-                        }
-                        last = newRow;
-                        const forDelete = this.rows.get(this.end);
-                        if (forDelete) {
-                            forDelete.remove();
-                            this.rows.delete(this.end);
-                            this.end--;
-                        }
-                        if (rowNum < this.start) {
-                            this.start = rowNum; 
-                        }
-                        this.rows.set(rowNum, newRow);
-                    }
-                });
-            });
-
-        } else if (first <= this.start && last >= this.end) { // load top and bottom
-
-            if (first < this.start) { 
-                await new Promise<void>(resolve => {
-                    let last: Element;
-                    cursor(this.response.connectionId, first, this.start - 1, {
-                        end: () => resolve(),
-                        row: (rowNum, row: Array<string>) => {
-                            let newRow = this.newRow(rowNum, row);
-                            if (!last) {
-                                this.header.after(newRow);
-                            } else {
-                                last.after(newRow);
-                            }
-                            last = newRow;
-                            if (rowNum < this.start) {
-                                this.start = rowNum; 
-                            }
-                            this.rows.set(rowNum, newRow);
-                        }
-                    });
-                });
-            }
-
-            if (last > this.end) {
-                await new Promise<void>(resolve => {
-                    cursor(this.response.connectionId, this.end + 1, last, {
-                        end: () => resolve(),
-                        row: (rowNum, row: Array<string>) => {
-                            const newRow = this.newRow(rowNum, row);
-                            newRow.appendElementTo(this.table);
-                            if (rowNum > this.end) {
-                                this.end = rowNum; 
-                            }
-                            this.rows.set(rowNum, newRow);
-                        }
-                    });
-                });
-            }
-
-        }
-
-        if (first + ((last - first) / 2) < this.response.rowsAffected / 2) {
-            this.table.scrollTo({top: ((first - 1) * this.rowHeight) + (this.scroll.scrollTop % this.rowHeight), behavior: 'auto'});
+    private performScroll() {
+        if (this.start + ((this.end - this.start) / 2) < this.response.rowsAffected / 2) {
+            this.table.scrollTo({top: ((this.start - 1) * this.rowHeight) + (this.scroll.scrollTop % this.rowHeight), behavior: 'auto'});
         } else {
-            this.table.scrollTo({top: (first * this.rowHeight) + (this.scroll.scrollTop % this.rowHeight), behavior: 'auto'})
+            this.table.scrollTo({top: (this.start * this.rowHeight) + (this.scroll.scrollTop % this.rowHeight), behavior: 'auto'})
         }
+    }
+
+    private async removeAndLoadAllRows(first: number, last: number) {
+        this.rows.forEach(r => r.remove());
+        this.rows.clear();
+        await new Promise<void>(resolve => {
+            cursor(this.response.connectionId, first, last, {
+                end: () => resolve(),
+                row: (rowNum, row: Array<string>) => {
+                    const newRow = this.newRow(rowNum, row);
+                    newRow.appendElementTo(this.table);
+                    this.rows.set(rowNum, newRow);
+                }
+            });
+        });
+        this.start = first;
+        this.end = last;
+    }
+
+    private async removeAndLoadTopRows(first: number, last: number) {
+        await new Promise<void>(resolve => {
+            cursor(this.response.connectionId, this.end + 1, last, {
+                end: () => resolve(),
+                row: (rowNum, row: Array<string>) => {
+                    const newRow = this.newRow(rowNum, row);
+                    newRow.appendElementTo(this.table);
+                    const forDelete = this.rows.get(this.start);
+                    if (forDelete) {
+                        forDelete.remove();
+                        this.rows.delete(this.start);
+                        this.start++;
+                    }
+                    if (rowNum > this.end) {
+                        this.end = rowNum; 
+                    }
+                    this.rows.set(rowNum, newRow);
+                }
+            });
+        });
+    }
+
+    private async loadTopRows(first: number, last: number) {
+        await new Promise<void>(resolve => {
+            cursor(this.response.connectionId, this.end + 1, last, {
+                end: () => resolve(),
+                row: (rowNum, row: Array<string>) => {
+                    const newRow = this.newRow(rowNum, row);
+                    newRow.appendElementTo(this.table);
+                    if (rowNum > this.end) {
+                        this.end = rowNum; 
+                    }
+                    this.rows.set(rowNum, newRow);
+                }
+            });
+        });
+    }
+
+    private async removeAndLoadBottomRows(first: number, last: number) {
+        await new Promise<void>(resolve => {
+            let lastElement: Element;
+            cursor(this.response.connectionId, first, this.start - 1, {
+                end: () => resolve(),
+                row: (rowNum, row: Array<string>) => {
+                    let newRow = this.newRow(rowNum, row);
+                    if (!lastElement) {
+                        this.header.after(newRow);
+                    } else {
+                        lastElement.after(newRow);
+                    }
+                    lastElement = newRow;
+                    const forDelete = this.rows.get(this.end);
+                    if (forDelete) {
+                        forDelete.remove();
+                        this.rows.delete(this.end);
+                        this.end--;
+                    }
+                    if (rowNum < this.start) {
+                        this.start = rowNum; 
+                    }
+                    this.rows.set(rowNum, newRow);
+                }
+            });
+        });
+    }
+
+    private async loadBottomRows(first: number, last: number) {
+        await new Promise<void>(resolve => {
+            let lastElement: Element;
+            cursor(this.response.connectionId, first, this.start - 1, {
+                end: () => resolve(),
+                row: (rowNum, row: Array<string>) => {
+                    let newRow = this.newRow(rowNum, row);
+                    if (!lastElement) {
+                        this.header.after(newRow);
+                    } else {
+                        lastElement.after(newRow);
+                    }
+                    lastElement = newRow;
+                    if (rowNum < this.start) {
+                        this.start = rowNum; 
+                    }
+                    this.rows.set(rowNum, newRow);
+                }
+            });
+        });
     }
 
     private headerCellMousemove(e: MouseEvent) {

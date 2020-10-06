@@ -1,4 +1,4 @@
-define(["require", "exports", "app/api"], function (require, exports, api_1) {
+define(["require", "exports", "app/api", "app/_sys/timeout"], function (require, exports, api_1, timeout_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class default_1 {
@@ -63,7 +63,6 @@ define(["require", "exports", "app/api"], function (require, exports, api_1) {
                 }
             }
             this.scroller.css("height", (this.response.rowsAffected * this.rowHeight) + this.headerHeight + "px");
-            console.log(this.start, this.end);
             this.scrollTable();
         }
         addHeader() {
@@ -174,17 +173,7 @@ define(["require", "exports", "app/api"], function (require, exports, api_1) {
             if (!this.response) {
                 return;
             }
-            if (this.scrollTimeout) {
-                clearTimeout(this.scrollTimeout);
-                this.scrollTimeout = undefined;
-            }
-            this.scrollTimeout = setTimeout(() => {
-                if (this.scrollTimeout) {
-                    clearTimeout(this.scrollTimeout);
-                    this.scrollTimeout = undefined;
-                }
-                this.shouldScroll = true;
-            }, 0);
+            timeout_1.timeout(() => this.shouldScroll = true, 10, `${this.id}-grid-scroll`);
         }
         async startGridScrollConsumer() {
             setTimeout(async () => {
@@ -201,9 +190,36 @@ define(["require", "exports", "app/api"], function (require, exports, api_1) {
             }, 0);
         }
         async scrollTable() {
-            if (this.scroll == null) {
-                return { first: undefined, last: undefined };
+            const { first, last } = this.getActualGridSize();
+            if ((first == this.start) && (last == this.end)) {
+                return;
             }
+            if ((first == this.start && last < this.end) || (first > this.start && last < this.end) || (first > this.start && last == this.end)) {
+                this.performScroll();
+                return;
+            }
+            if ((first > this.end && last > this.end) || (first < this.start && last < this.start)) {
+                await this.removeAndLoadAllRows(first, last);
+            }
+            if ((first == this.end && last > this.end) || (first < this.end && first > this.start && last > this.end)) {
+                await this.removeAndLoadTopRows(first, last);
+            }
+            if (first == this.start && last > this.end && last > this.end) {
+                await this.loadTopRows(first, last);
+            }
+            if ((first < this.start && last < this.end && last > this.start) || (first < this.start && last == this.start)) {
+                await this.removeAndLoadBottomRows(first, last);
+            }
+            if (first < this.start && last == this.end) {
+                await this.loadBottomRows(first, last);
+            }
+            if (first < this.start && last > this.end) {
+                await this.loadTopRows(first, last);
+                await this.loadBottomRows(first, last);
+            }
+            this.performScroll();
+        }
+        getActualGridSize() {
             let first = Math.trunc(this.scroll.scrollTop / this.rowHeight);
             let last = Math.trunc((this.scroll.scrollTop + this.scroll.offsetHeight) / this.rowHeight);
             if (first < 1) {
@@ -212,116 +228,117 @@ define(["require", "exports", "app/api"], function (require, exports, api_1) {
             if (last > this.response.rowsAffected) {
                 last = this.response.rowsAffected;
             }
-            if ((first >= this.end && last > this.end) || (first < this.start && last <= this.start)) {
-                this.rows.forEach(r => r.remove());
-                this.rows.clear();
-                this.start = first;
-                this.end = last;
-                await new Promise(resolve => {
-                    api_1.cursor(this.response.connectionId, first, last, {
-                        end: () => resolve(),
-                        row: (rowNum, row) => {
-                            const newRow = this.newRow(rowNum, row);
-                            newRow.appendElementTo(this.table);
-                            this.rows.set(rowNum, newRow);
-                        }
-                    });
-                });
-            }
-            else if (last > this.end && first >= this.start) {
-                await new Promise(resolve => {
-                    api_1.cursor(this.response.connectionId, this.end + 1, last, {
-                        end: () => resolve(),
-                        row: (rowNum, row) => {
-                            const newRow = this.newRow(rowNum, row);
-                            newRow.appendElementTo(this.table);
-                            const forDelete = this.rows.get(this.start);
-                            if (forDelete) {
-                                forDelete.remove();
-                                this.rows.delete(this.start);
-                                this.start++;
-                            }
-                            if (rowNum > this.end) {
-                                this.end = rowNum;
-                            }
-                            this.rows.set(rowNum, newRow);
-                        }
-                    });
-                });
-            }
-            else if (last <= this.end && first < this.start) {
-                await new Promise(resolve => {
-                    let last;
-                    api_1.cursor(this.response.connectionId, first, this.start - 1, {
-                        end: () => resolve(),
-                        row: (rowNum, row) => {
-                            let newRow = this.newRow(rowNum, row);
-                            if (!last) {
-                                this.header.after(newRow);
-                            }
-                            else {
-                                last.after(newRow);
-                            }
-                            last = newRow;
-                            const forDelete = this.rows.get(this.end);
-                            if (forDelete) {
-                                forDelete.remove();
-                                this.rows.delete(this.end);
-                                this.end--;
-                            }
-                            if (rowNum < this.start) {
-                                this.start = rowNum;
-                            }
-                            this.rows.set(rowNum, newRow);
-                        }
-                    });
-                });
-            }
-            else if (first <= this.start && last >= this.end) {
-                if (first < this.start) {
-                    await new Promise(resolve => {
-                        let last;
-                        api_1.cursor(this.response.connectionId, first, this.start - 1, {
-                            end: () => resolve(),
-                            row: (rowNum, row) => {
-                                let newRow = this.newRow(rowNum, row);
-                                if (!last) {
-                                    this.header.after(newRow);
-                                }
-                                else {
-                                    last.after(newRow);
-                                }
-                                last = newRow;
-                                if (rowNum < this.start) {
-                                    this.start = rowNum;
-                                }
-                                this.rows.set(rowNum, newRow);
-                            }
-                        });
-                    });
-                }
-                if (last > this.end) {
-                    await new Promise(resolve => {
-                        api_1.cursor(this.response.connectionId, this.end + 1, last, {
-                            end: () => resolve(),
-                            row: (rowNum, row) => {
-                                const newRow = this.newRow(rowNum, row);
-                                newRow.appendElementTo(this.table);
-                                if (rowNum > this.end) {
-                                    this.end = rowNum;
-                                }
-                                this.rows.set(rowNum, newRow);
-                            }
-                        });
-                    });
-                }
-            }
-            if (first + ((last - first) / 2) < this.response.rowsAffected / 2) {
-                this.table.scrollTo({ top: ((first - 1) * this.rowHeight) + (this.scroll.scrollTop % this.rowHeight), behavior: 'auto' });
+            return { first, last };
+        }
+        performScroll() {
+            if (this.start + ((this.end - this.start) / 2) < this.response.rowsAffected / 2) {
+                this.table.scrollTo({ top: ((this.start - 1) * this.rowHeight) + (this.scroll.scrollTop % this.rowHeight), behavior: 'auto' });
             }
             else {
-                this.table.scrollTo({ top: (first * this.rowHeight) + (this.scroll.scrollTop % this.rowHeight), behavior: 'auto' });
+                this.table.scrollTo({ top: (this.start * this.rowHeight) + (this.scroll.scrollTop % this.rowHeight), behavior: 'auto' });
             }
+        }
+        async removeAndLoadAllRows(first, last) {
+            this.rows.forEach(r => r.remove());
+            this.rows.clear();
+            await new Promise(resolve => {
+                api_1.cursor(this.response.connectionId, first, last, {
+                    end: () => resolve(),
+                    row: (rowNum, row) => {
+                        const newRow = this.newRow(rowNum, row);
+                        newRow.appendElementTo(this.table);
+                        this.rows.set(rowNum, newRow);
+                    }
+                });
+            });
+            this.start = first;
+            this.end = last;
+        }
+        async removeAndLoadTopRows(first, last) {
+            await new Promise(resolve => {
+                api_1.cursor(this.response.connectionId, this.end + 1, last, {
+                    end: () => resolve(),
+                    row: (rowNum, row) => {
+                        const newRow = this.newRow(rowNum, row);
+                        newRow.appendElementTo(this.table);
+                        const forDelete = this.rows.get(this.start);
+                        if (forDelete) {
+                            forDelete.remove();
+                            this.rows.delete(this.start);
+                            this.start++;
+                        }
+                        if (rowNum > this.end) {
+                            this.end = rowNum;
+                        }
+                        this.rows.set(rowNum, newRow);
+                    }
+                });
+            });
+        }
+        async loadTopRows(first, last) {
+            await new Promise(resolve => {
+                api_1.cursor(this.response.connectionId, this.end + 1, last, {
+                    end: () => resolve(),
+                    row: (rowNum, row) => {
+                        const newRow = this.newRow(rowNum, row);
+                        newRow.appendElementTo(this.table);
+                        if (rowNum > this.end) {
+                            this.end = rowNum;
+                        }
+                        this.rows.set(rowNum, newRow);
+                    }
+                });
+            });
+        }
+        async removeAndLoadBottomRows(first, last) {
+            await new Promise(resolve => {
+                let lastElement;
+                api_1.cursor(this.response.connectionId, first, this.start - 1, {
+                    end: () => resolve(),
+                    row: (rowNum, row) => {
+                        let newRow = this.newRow(rowNum, row);
+                        if (!lastElement) {
+                            this.header.after(newRow);
+                        }
+                        else {
+                            lastElement.after(newRow);
+                        }
+                        lastElement = newRow;
+                        const forDelete = this.rows.get(this.end);
+                        if (forDelete) {
+                            forDelete.remove();
+                            this.rows.delete(this.end);
+                            this.end--;
+                        }
+                        if (rowNum < this.start) {
+                            this.start = rowNum;
+                        }
+                        this.rows.set(rowNum, newRow);
+                    }
+                });
+            });
+        }
+        async loadBottomRows(first, last) {
+            await new Promise(resolve => {
+                let lastElement;
+                api_1.cursor(this.response.connectionId, first, this.start - 1, {
+                    end: () => resolve(),
+                    row: (rowNum, row) => {
+                        let newRow = this.newRow(rowNum, row);
+                        if (!lastElement) {
+                            this.header.after(newRow);
+                        }
+                        else {
+                            lastElement.after(newRow);
+                        }
+                        lastElement = newRow;
+                        if (rowNum < this.start) {
+                            this.start = rowNum;
+                        }
+                        this.rows.set(rowNum, newRow);
+                    }
+                });
+            });
         }
         headerCellMousemove(e) {
             if (this.moving) {
