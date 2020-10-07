@@ -18,5 +18,5 @@ namespace Pgcode.Connection
         public bool IsNewTran { get; set; } = false;
 
         public IList<ExecuteReply> Rows { get; set; }
-}
+    }
 }

@@ -14,10 +14,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Grpc.AspNetCore" Version="2.31.0" />
-    <PackageReference Include="Grpc.AspNetCore.Web" Version="2.31.0" />
-    <PackageReference Include="Npgsql" Version="4.1.4" />
-    <PackageReference Include="System.IO.Pipelines" Version="4.7.2" />
+    <PackageReference Include="Grpc.AspNetCore" Version="2.32.0" />
+    <PackageReference Include="Grpc.AspNetCore.Web" Version="2.32.0" />
+    <PackageReference Include="Npgsql" Version="5.0.0-alpha1" />
+    <PackageReference Include="System.IO.Pipelines" Version="5.0.0-rc.1.20451.14" />
   </ItemGroup>
 
   <ItemGroup>

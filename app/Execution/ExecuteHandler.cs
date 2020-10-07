@@ -86,6 +86,7 @@ namespace Pgcode.Execution
 
         private ExecuteResponse Execute()
         {
+            CleanupWs(_ws);
             if (_readContent != null)
             {
                 if (_execContent != null)
