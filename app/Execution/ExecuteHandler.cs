@@ -56,7 +56,12 @@ namespace Pgcode.Execution
             }
             _ws.Connection.Notice += NoticeHandler;
             _ws.ErrorOffset = null;
-
+            if (_ws.Rows != null)
+            {
+                _ws.Rows = null;
+                GC.Collect();
+            }
+            
             var stopwatch = new Stopwatch();
             
             try

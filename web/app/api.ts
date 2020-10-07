@@ -292,7 +292,6 @@ export const disposeConnection = async (id: string) => {
 export interface IExecuteResponse {
     executionTime: string;
     rowsAffected: number;
-    rowsFetched: number;
     message: string;
     header: Array<IField>;
     connectionId: string;

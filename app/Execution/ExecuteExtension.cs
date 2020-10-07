@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using Microsoft.AspNetCore.Mvc.TagHelpers.Cache;
 using Npgsql;
 using Pgcode.Connection;
 using Pgcode.Protos;
@@ -26,22 +28,24 @@ namespace Pgcode.Execution
                 RowsAffected = reader.RecordsAffected,
                 Header = GetHeaderFromReader(reader)
             };
-            ulong row = 1;
+            int row = 1;
 
             ws.Rows = new List<ExecuteReply>();
             while (reader.Read())
             {
-                ws.Rows.Add(GetRowReplyFromReader(row++, reader));
+                ws.Rows.Add(GetRowReplyFromReader((ulong)row++, reader));
+                /*
                 if (row - 1 == Program.Settings.ReadLimit)
                 {
                     break;
                 }
+                */
             }
 
             row = row > 0 ? row - 1 : 0;
             reader.Close();
 
-            response.RowsFetched = (uint) row;
+            response.RowsAffected = row;
             response.Message = "reader";
 
             return response;
@@ -74,7 +78,6 @@ namespace Pgcode.Execution
                 return new ExecuteResponse
                 {
                     RowsAffected = rows,
-                    RowsFetched = 0,
                     Header = GetHeaderFromReader(reader),
                     Message = "cursor"
                 };
@@ -87,15 +90,25 @@ namespace Pgcode.Execution
 
         public static IEnumerable<ExecuteReply> ExecuteCursorReader(this WorkspaceConnection ws, CursorRequest request)
         {
-            using var cmd = ws.Connection.CreateCommand();
-            cmd.Execute($"move absolute {request.From - 1} in \"{ws.Cursor}\"");
-            var row = request.From;
-            using var reader = cmd.Reader($"fetch {request.To - request.From + 1} in \"{ws.Cursor}\"");
-            while (reader.Read())
+            if (ws.Rows != null)
             {
-                yield return GetRowReplyFromReader(row++, reader);
+                foreach (var row in ws.Rows.Skip((int)request.From - 1).Take((int)(request.To - request.From + 1)))
+                {
+                    yield return row;
+                }
             }
-            reader.Close();
+            else
+            {
+                using var cmd = ws.Connection.CreateCommand();
+                cmd.Execute($"move absolute {request.From - 1} in \"{ws.Cursor}\"");
+                var row = request.From;
+                using var reader = cmd.Reader($"fetch {request.To - request.From + 1} in \"{ws.Cursor}\"");
+                while (reader.Read())
+                {
+                    yield return GetRowReplyFromReader(row++, reader);
+                }
+                reader.Close();
+            }
         }
 
         public static void CloseCursorIfExists(this WorkspaceConnection ws, NpgsqlCommand cmd)

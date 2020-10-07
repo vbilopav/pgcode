@@ -18,6 +18,5 @@ namespace Pgcode
         public string OsxOpenCommand { get; set; } = "open";
         public string LinuxOpenCommand { get; set; } = "xdg-open";
         public string FreeBsdOpenCommand { get; set; } = "xdg-open";
-        public ulong ReadLimit { get; set; } = 1000;
     }
 }
