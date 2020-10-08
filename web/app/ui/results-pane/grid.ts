@@ -231,8 +231,8 @@ export default class {
     }
 
     private async removeAndLoadAllRows(first: number, last: number) {
-        this.rows.forEach(r => r.remove());
-        this.rows.clear();
+        const keys = Array.from(this.rows.keys());
+        let len = keys.length;
         await new Promise<void>(resolve => {
             cursor(this.response.connectionId, first, last, {
                 end: () => resolve(),
@@ -240,9 +240,27 @@ export default class {
                     const newRow = this.newRow(rowNum, row);
                     newRow.appendElementTo(this.table);
                     this.rows.set(rowNum, newRow);
+                    if (len) {
+                        let key = keys.pop();
+                        const forDelete = this.rows.get(key);
+                        if (forDelete) {
+                            forDelete.remove();
+                            this.rows.delete(key);
+                            len--;
+                        }
+                    }
                 }
             });
         });
+        if (len) {
+            for(let key of keys) {
+                const forDelete = this.rows.get(key);
+                if (forDelete) {
+                    forDelete.remove();
+                    this.rows.delete(key);
+                }
+            }
+        }
         this.start = first;
         this.end = last;
     }
