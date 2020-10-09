@@ -148,6 +148,7 @@ export default class {
         if (!this.table) {
             return;
         }
+        this.scroll.showElement();
         this.table.css("height", this.element.clientHeight + "px");
         if (this.scroller.clientHeight > this.table.clientHeight) {
             this.scroll.showElement();

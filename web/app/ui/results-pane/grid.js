@@ -132,6 +132,7 @@ define(["require", "exports", "app/api", "app/_sys/timeout"], function (require,
             if (!this.table) {
                 return;
             }
+            this.scroll.showElement();
             this.table.css("height", this.element.clientHeight + "px");
             if (this.scroller.clientHeight > this.table.clientHeight) {
                 this.scroll.showElement();

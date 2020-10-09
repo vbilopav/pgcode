@@ -14,8 +14,10 @@
         background-color: $panel-background-color;
         margin-left: -4px;
         padding-right: 4px;
-        display: flex;
-        flex-wrap: wrap;
+        /*display: flex;
+        flex-wrap: wrap;*/
+        display: grid;
+        grid-template-columns: max-content max-content auto;
 
         // tab
         & > div.tab {
@@ -44,6 +46,17 @@
                 max-width: 360px;
                 padding-bottom: 1px;
             }
+            & > span.title > .badge {
+                font-size: 10px;
+                background-color: $panel-color;
+                color: $panel-item-active-background-color;
+                transition-duration: 0.4s;
+                border-radius: 50%;
+                padding: 2px 4px 2px 4px;
+                height: 10px;
+                display: inline-block;
+                text-align: center;
+            }
             & > .stripe {
                 grid-column: 1/4;
                 height: 3px;
@@ -60,12 +73,30 @@
             & > i.close {
                 visibility: visible;
             }
+            & > span.title > .badge {
+                background-color: $active-color;
+            }
         }
         & > div.tab:not(.active) > .stripe {
             display: none;
         }
         & > div.tab.active.upper-row {
             clip-path: inset(-5px -5px -5px -5px);
+        }
+        
+        & > div.side-info {
+            margin-left: 10px;
+            margin-right: 10px;
+            overflow-x: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            margin-top: auto;
+            margin-bottom: auto;
+            
+            & > code {
+                opacity: 0.5;
+            }
+            
         }
     }
 

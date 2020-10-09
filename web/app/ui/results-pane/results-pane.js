@@ -8,13 +8,23 @@ define(["require", "exports", "app/api", "app/ui/results-pane/grid", "app/ui/res
             <div>
                 <div class="tab" id="results" title="results">
                     <i class="icon-database"></i>
-                    <span class="title">Results</span>
+                    <span class="title">
+                        Results
+                        <span class="badge" style="visibility: hidden;"></span>
+                    </span>
+                    
                     <div class="stripe" style="background-color: ${api_1.getConnectionColor(data.connection)}"></div>
                 </div>
                 <div class="tab" id="messages" title="messages">
                     <i class="icon-database"></i>
-                    <span class="title">Messages</span>
+                    <span class="title">
+                        Messages
+                        <span class="badge" style="visibility: hidden;"></span>
+                    </span>
                     <div class="stripe" style="background-color: ${api_1.getConnectionColor(data.connection)}"></div>
+                </div>
+                <div class="side-info">
+                    <code></code>
                 </div>
             </div>
             <div>
@@ -38,6 +48,8 @@ define(["require", "exports", "app/api", "app/ui/results-pane/grid", "app/ui/res
             this.footerMsg = this.element.children[2].children[0].children[0];
             this.footerTime = this.element.children[2].children[1].children[0];
             this.footerRows = this.element.children[2].children[2].children[0];
+            this.resultsBadge = this.tabs[0].children[1].children[0];
+            this.messagesBadge = this.tabs[1].children[1].children[0];
             this.grid = new grid_1.default(id, this.panes[0]);
             this.messages = new messages_1.default(this.panes[1]);
             this.activateByTab(this.tabs[0]);
@@ -45,22 +57,27 @@ define(["require", "exports", "app/api", "app/ui/results-pane/grid", "app/ui/res
         setReady() {
             this.footerMsg.html("🔗 Connected.");
             this.footerTime.html("🕛 --:--:--").css("title", "");
-            this.footerRows.html("0 rows").css("title", "");
-            ;
+            this.footerRows.html("-").css("title", "");
+            this.clearBadges();
         }
         setDisconnected() {
             this.footerMsg.html("⛔ Disconnected.");
             this.footerTime.html("🕛 --:--:--").attr("title", "");
-            this.footerRows.html("0 rows").attr("title", "");
-            ;
+            this.footerRows.html("-").attr("title", "");
+            this.clearBadges();
+            this.tabs[2].children[0].html("");
         }
-        start() {
+        start(query, selection) {
             this.undock();
             this.footerMsg.html("Running...");
             this.footerTime.html("🕛 --:--:--").attr("title", "");
             this.footerRows.html(" - ");
             this.grid.init();
             this.messages.clear();
+            this.clearBadges();
+            this.query = query;
+            this.tabs[2].children[0].html(query);
+            this.selection = selection;
         }
         notice(e) {
             console.log("notice", e);
@@ -79,10 +96,21 @@ define(["require", "exports", "app/api", "app/ui/results-pane/grid", "app/ui/res
             }
             this.footerTime.html(`🕛 ${e.executionTime}`).attr("title", `total time: ${e.executionTime}`);
             this.footerRows.html(`${e.rowsAffected} rows`);
+            if (e.rowsAffected < 1) {
+                this.activateByTab(this.tabs[1]);
+            }
+            else {
+                this.activateByTab(this.tabs[0]);
+            }
             this.grid.done(e);
+            this.resultsBadge.html(e.rowsAffected.toString()).visible(true);
         }
         adjustGrid() {
             this.grid.adjust();
+        }
+        clearBadges() {
+            this.resultsBadge.html("").visible(false);
+            this.messagesBadge.html("").visible(false);
         }
         activateByTab(tab) {
             for (let current of this.tabs) {

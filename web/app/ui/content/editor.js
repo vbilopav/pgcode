@@ -173,7 +173,7 @@ define(["require", "exports", "app/api", "app/_sys/pubsub", "app/_sys/timeout", 
                 const selection = this.monaco.getSelection();
                 if (!selection.isEmpty()) {
                     const value = this.monaco.getModel().getValueInRange(selection);
-                    this.results.start();
+                    this.results.start(value, selection);
                     api_1.execute({
                         connection: this.data.connection,
                         schema: this.data.schema,

@@ -223,7 +223,7 @@ export class Editor implements IEditor {
             const selection = this.monaco.getSelection();
             if (!selection.isEmpty()) {
                 const value = this.monaco.getModel().getValueInRange(selection);
-                this.results.start();
+                this.results.start(value, selection);
 
                 execute({
                     connection: this.data.connection,

@@ -1,5 +1,8 @@
 ﻿import "vs/editor/editor.main";
 
+//const range = editor.getModel().getFullModelRange();
+//editor.setSelection(range);
+
 const deleteExcessActions = editor => {
     delete editor._actions["editor.action.insertCursorAbove"];
     delete editor._actions["editor.action.insertCursorBelow"];

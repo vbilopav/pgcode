@@ -6,7 +6,7 @@
     "google-protobuf": "^3.12.4",
     "grpc-web": "^1.2.0",
     "@microsoft/signalr": "^3.1.6",
-    "monaco-editor": "^0.21.2"
+    "monaco-editor": "^0.20.0"
   },
   "devDependencies": {
     "html-minifier": "^4.0.0",

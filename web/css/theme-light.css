@@ -579,8 +579,10 @@ body > div.container {
     background-color: #252526;
     margin-left: -4px;
     padding-right: 4px;
-    display: flex;
-    flex-wrap: wrap; }
+    /*display: flex;
+        flex-wrap: wrap;*/
+    display: grid;
+    grid-template-columns: max-content max-content auto; }
     .results-pane > div:nth-child(1) > div.tab {
       min-width: 100px;
       max-width: 400px;
@@ -603,6 +605,16 @@ body > div.container {
         white-space: nowrap;
         max-width: 360px;
         padding-bottom: 1px; }
+      .results-pane > div:nth-child(1) > div.tab > span.title > .badge {
+        font-size: 10px;
+        background-color: #C5C5C5;
+        color: #C5C5C5;
+        transition-duration: 0.4s;
+        border-radius: 50%;
+        padding: 2px 4px 2px 4px;
+        height: 10px;
+        display: inline-block;
+        text-align: center; }
       .results-pane > div:nth-child(1) > div.tab > .stripe {
         grid-column: 1/4;
         height: 3px; }
@@ -615,10 +627,22 @@ body > div.container {
       clip-path: inset(-5px -5px 0px -5px); }
       .results-pane > div:nth-child(1) > div.tab.active > i.close {
         visibility: visible; }
+      .results-pane > div:nth-child(1) > div.tab.active > span.title > .badge {
+        background-color: #252526; }
     .results-pane > div:nth-child(1) > div.tab:not(.active) > .stripe {
       display: none; }
     .results-pane > div:nth-child(1) > div.tab.active.upper-row {
       clip-path: inset(-5px -5px -5px -5px); }
+    .results-pane > div:nth-child(1) > div.side-info {
+      margin-left: 10px;
+      margin-right: 10px;
+      overflow-x: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      margin-top: auto;
+      margin-bottom: auto; }
+      .results-pane > div:nth-child(1) > div.side-info > code {
+        opacity: 0.5; }
   .results-pane > div:nth-child(2) {
     height: 100%;
     overflow: hidden; }
