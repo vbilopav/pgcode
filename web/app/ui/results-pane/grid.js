@@ -2,7 +2,7 @@ define(["require", "exports", "app/api", "app/_sys/timeout"], function (require,
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class default_1 {
-        constructor(id, element) {
+        constructor(id, element, resultsPane) {
             this.rows = new Map();
             this.table = null;
             this.header = null;
@@ -18,6 +18,7 @@ define(["require", "exports", "app/api", "app/_sys/timeout"], function (require,
             this.scroller = null;
             this.id = id;
             this.element = element;
+            this.resultsPane = resultsPane;
             window
                 .on("mousedown", (e) => this.mousedown(e))
                 .on("mouseup", (e) => this.mouseup(e))
@@ -57,6 +58,7 @@ define(["require", "exports", "app/api", "app/_sys/timeout"], function (require,
                 }
             }
             this.scroller.css("height", (this.response.rowsAffected * this.rowHeight) + this.headerHeight + "px");
+            this.initial = true;
             this.scrollTable().then(() => this.adjustGridScrollBars());
         }
         adjust() {
@@ -170,7 +172,10 @@ define(["require", "exports", "app/api", "app/_sys/timeout"], function (require,
                 this.performScroll();
                 return;
             }
-            else if ((first > this.end && last > this.end) || (first < this.start && last < this.start)) {
+            if (!this.initial) {
+                this.resultsPane.footer = "⏩ ⏩ ⏩ seeking ...";
+            }
+            if ((first > this.end && last > this.end) || (first < this.start && last < this.start)) {
                 await this.removeAndLoadAllRows(first, last);
             }
             if ((first == this.end && last > this.end) || (first < this.end && first > this.start && last > this.end)) {
@@ -188,6 +193,12 @@ define(["require", "exports", "app/api", "app/_sys/timeout"], function (require,
             else if (first < this.start && last > this.end) {
                 await this.loadTopRows(first, last);
                 await this.loadBottomRows(first, last);
+            }
+            if (!this.initial) {
+                this.resultsPane.footer = "✔️ Ready";
+            }
+            else {
+                this.initial = false;
             }
             this.performScroll();
         }

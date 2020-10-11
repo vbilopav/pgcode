@@ -1,4 +1,6 @@
 ﻿// ReSharper disable ClassNeverInstantiated.Global
+
+using System.Data.SQLite;
 using System.Threading.Tasks;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
@@ -9,26 +11,29 @@ using Pgcode.Protos;
 
 namespace Pgcode.Api
 {
-    public class CursorService : Protos.CursorService.CursorServiceBase
+    public class DataService : Protos.DataService.DataServiceBase
     {
         private readonly ConnectionManager _connectionManager;
         private readonly CookieMiddleware _cookieMiddleware;
         private readonly ILoggerFactory _loggerFactory;
         private readonly Settings _settings;
+        private readonly SQLiteConnection _localConnection;
 
-        public CursorService(
+        public DataService(
             ConnectionManager connectionManager, 
             CookieMiddleware cookieMiddleware, 
             ILoggerFactory loggerFactory, 
-            Settings settings)
+            Settings settings,
+            SQLiteConnection localConnection)
         {
             _connectionManager = connectionManager;
             _cookieMiddleware = cookieMiddleware;
             _loggerFactory = loggerFactory;
             _settings = settings;
+            _localConnection = localConnection;
         }
 
-        public override Task Read(CursorRequest request, IServerStreamWriter<ExecuteReply> responseStream, ServerCallContext context)
+        public override Task ReadPage(PageRequest request, IServerStreamWriter<DataReply> responseStream, ServerCallContext context)
         {
             LogRequest(context, request);
 
@@ -39,7 +44,7 @@ namespace Pgcode.Api
                 context.Status = new Status(StatusCode.NotFound, "404");
                 return Task.CompletedTask;
             }
-            ExecuteHandler.TryReadCursor(ws, request, responseStream);
+            new ExecuteHandler(ws, _localConnection).TryReadPage(request, responseStream);
             return Task.CompletedTask;
         }
 

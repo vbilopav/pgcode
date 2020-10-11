@@ -9,9 +9,11 @@ export default class  {
     private readonly element: Element;
     private readonly tabs: HTMLCollection;
     private readonly panes: HTMLCollection;
+
     private readonly footerMsg: Element;
     private readonly footerTime: Element;
     private readonly footerRows: Element;
+
     private readonly resultsBadge: Element;
     private readonly messagesBadge: Element;
     private readonly undock: ()=>void;
@@ -75,21 +77,21 @@ export default class  {
         this.resultsBadge = this.tabs[0].children[1].children[0];
         this.messagesBadge = this.tabs[1].children[1].children[0];
 
-        this.grid = new Grid(id, this.panes[0]);
+        this.grid = new Grid(id, this.panes[0], this);
         this.messages = new Messages(this.panes[1]);
 
         this.activateByTab(this.tabs[0]);
     }
 
     setReady() {
-        this.footerMsg.html("🔗 Connected.");
+        this.setFooterMsg("🔗 Connected.");
         this.footerTime.html("🕛 --:--:--").css("title", "");
         this.footerRows.html("-").css("title", "");
         this.clearBadges();
     }
 
     setDisconnected() {
-        this.footerMsg.html("⛔ Disconnected.");
+        this.setFooterMsg("⛔ Disconnected.");
         this.footerTime.html("🕛 --:--:--").attr("title", "");
         this.footerRows.html("-").attr("title", "");
         this.clearBadges();
@@ -99,7 +101,7 @@ export default class  {
     start(query: string, selection: Selection) {
         this.undock();
         
-        this.footerMsg.html("Running...");
+        this.setFooterMsg("Running...");
         this.footerTime.html("🕛 --:--:--").attr("title", "");
         this.footerRows.html(" - ");
 
@@ -118,7 +120,7 @@ export default class  {
 
     error(e: INotice) {
         console.log("error", e);
-        this.footerMsg.html(`⚠️ ${e.messageText}`);
+        this.setFooterMsg(`⚠️ ${e.messageText}`);
         this.messages.message(e);
     }
 
@@ -126,7 +128,7 @@ export default class  {
         console.log("end", e);
         this.messages.finished(e);
         if (e.message != "error") {
-            this.footerMsg.html("✔️ Query executed successfully.");
+            this.setFooterMsg("✔️ Query executed successfully.");
         }
         this.footerTime.html(`🕛 ${e.executionTime}`).attr("title", `total time: ${e.executionTime}`);
         this.footerRows.html(`${e.rowsAffected} rows`);
@@ -143,12 +145,27 @@ export default class  {
         this.grid.adjust();
     }
 
+    get footer() {
+        return this.footerMsg.html() as string;
+    }
+
+    set footer(value: string) {
+        this.footerMsg.html(value);
+    }
+
+    private setFooterMsg(msg: string) {
+        this.footerMsg.html(msg);
+    }
+
     private clearBadges() {
         this.resultsBadge.html("").visible(false);
         this.messagesBadge.html("").visible(false);
     }
 
     private activateByTab(tab: Element) {
+        if (!tab.hasClass("tab")) {
+            return
+        }
         for(let current of this.tabs) {
             current.toggleClass("active", tab.id == current.id);
         }

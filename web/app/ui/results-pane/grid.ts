@@ -1,10 +1,13 @@
 import { IExecuteResponse, cursor } from "app/api";
 import {Consumer} from "app/_sys/timeout";
+import ResultsPane from "app/ui/results-pane/results-pane"
 
 export default class {
     private readonly element: Element;
     private readonly id: string;
     private readonly rows = new Map<number, Element>();
+    private readonly resultsPane: ResultsPane;
+
     private table: HTMLElement = null;
     private header: Element = null;
     private headerHeight: number = null;
@@ -21,10 +24,12 @@ export default class {
     private scroller: Element = null;
 
     private scrollConsumer: Consumer;
+    private initial: boolean;
 
-    constructor(id: string, element: Element) {
+    constructor(id: string, element: Element, resultsPane: ResultsPane) {
         this.id = id;
         this.element = element;
+        this.resultsPane = resultsPane;
         window
             .on("mousedown", (e:MouseEvent)=>this.mousedown(e))
             .on("mouseup", (e:MouseEvent)=>this.mouseup(e))
@@ -66,6 +71,7 @@ export default class {
         }
 
         this.scroller.css("height", (this.response.rowsAffected * this.rowHeight) + this.headerHeight + "px");
+        this.initial = true;
         this.scrollTable().then(() => this.adjustGridScrollBars());
     }
 
@@ -181,14 +187,19 @@ export default class {
 
     private async scrollTable() {
         const {first, last} = this.getActualGridSize();
+
         if ((first == this.start) && (last == this.end)) {
             return;
         }
         if ((first == this.start && last < this.end) || (first > this.start && last < this.end) || (first > this.start && last == this.end)) {
             this.performScroll();
             return;
+        }
+        if (!this.initial) {
+            this.resultsPane.footer = "⏩ ⏩ ⏩ seeking ...";
+        }
 
-        } else if ((first > this.end && last > this.end) || (first < this.start && last < this.start)) {
+        if ((first > this.end && last > this.end) || (first < this.start && last < this.start)) {
             await this.removeAndLoadAllRows(first, last);
         }
         if ((first == this.end && last > this.end) || (first < this.end && first > this.start && last > this.end)) {
@@ -206,6 +217,11 @@ export default class {
         } else if (first < this.start && last > this.end) {
             await this.loadTopRows(first, last);
             await this.loadBottomRows(first, last);
+        }
+        if (!this.initial) {
+            this.resultsPane.footer = "✔️ Ready";
+        } else {
+            this.initial = false;
         }
         this.performScroll();
     }

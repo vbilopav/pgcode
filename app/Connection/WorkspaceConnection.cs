@@ -14,9 +14,8 @@ namespace Pgcode.Connection
         public NpgsqlConnection Connection { get; set; }
         public IClientProxy Proxy { get; set; }
         public string Cursor { get; set; } = null;
+        public string LocalTable { get; set; } = null;
         public int? ErrorOffset { get; set; } = null;
         public bool IsNewTran { get; set; } = false;
-
-        public IList<ExecuteReply> Rows { get; set; }
     }
 }

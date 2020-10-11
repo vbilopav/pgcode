@@ -250,7 +250,7 @@ define(["require", "exports", "app/_sys/pubsub", "libs/signalr/signalr.min.js", 
     ;
     const _cursor = (connectionId, from, to, stream) => new Promise(resolve => {
         grpc.serverStreaming({
-            service: "/api.CursorService/Read",
+            service: "/api.DataService/ReadPage",
             request: [grpc_service_1.GrpcType.String, grpc_service_1.GrpcType.Uint32, grpc_service_1.GrpcType.Uint32],
             reply: [{ rn: grpc_service_1.GrpcType.Uint32 }, { data: [grpc_service_1.GrpcType.String] }, { nullIndexes: grpc_service_1.GrpcType.PackedUint32 }]
         }, connectionId, from, to)

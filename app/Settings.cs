@@ -1,9 +1,6 @@
 namespace Pgcode
 {
-    public enum ExecutionMode
-    {
-        UseCursorWhenApplicable, Memory
-    }
+    public enum ExecutionMode { Cursor, Local }
 
     public class Settings
     {
@@ -23,7 +20,7 @@ namespace Pgcode
         public string OsxOpenCommand { get; set; } = "open";
         public string LinuxOpenCommand { get; set; } = "xdg-open";
         public string FreeBsdOpenCommand { get; set; } = "xdg-open";
-
-        public ExecutionMode ExecutionMode { get; set; } = ExecutionMode.UseCursorWhenApplicable;
+        public string LocalDb { get; set; } = "pgcode.db";
+        public ExecutionMode ExecutionMode { get; set; } = ExecutionMode.Local;
     }
 }

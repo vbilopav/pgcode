@@ -400,7 +400,7 @@ interface ICursorStream {
 
 const _cursor = (connectionId: string, from: number, to: number, stream: ICursorStream) => new Promise(resolve => {
     grpc.serverStreaming({
-        service: "/api.CursorService/Read",
+        service: "/api.DataService/ReadPage",
         request: [GrpcType.String, GrpcType.Uint32, GrpcType.Uint32],
         reply: [{rn: GrpcType.Uint32}, {data: [GrpcType.String]}, {nullIndexes: GrpcType.PackedUint32}]
     }, 

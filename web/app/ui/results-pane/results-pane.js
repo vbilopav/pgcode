@@ -50,18 +50,18 @@ define(["require", "exports", "app/api", "app/ui/results-pane/grid", "app/ui/res
             this.footerRows = this.element.children[2].children[2].children[0];
             this.resultsBadge = this.tabs[0].children[1].children[0];
             this.messagesBadge = this.tabs[1].children[1].children[0];
-            this.grid = new grid_1.default(id, this.panes[0]);
+            this.grid = new grid_1.default(id, this.panes[0], this);
             this.messages = new messages_1.default(this.panes[1]);
             this.activateByTab(this.tabs[0]);
         }
         setReady() {
-            this.footerMsg.html("🔗 Connected.");
+            this.setFooterMsg("🔗 Connected.");
             this.footerTime.html("🕛 --:--:--").css("title", "");
             this.footerRows.html("-").css("title", "");
             this.clearBadges();
         }
         setDisconnected() {
-            this.footerMsg.html("⛔ Disconnected.");
+            this.setFooterMsg("⛔ Disconnected.");
             this.footerTime.html("🕛 --:--:--").attr("title", "");
             this.footerRows.html("-").attr("title", "");
             this.clearBadges();
@@ -69,7 +69,7 @@ define(["require", "exports", "app/api", "app/ui/results-pane/grid", "app/ui/res
         }
         start(query, selection) {
             this.undock();
-            this.footerMsg.html("Running...");
+            this.setFooterMsg("Running...");
             this.footerTime.html("🕛 --:--:--").attr("title", "");
             this.footerRows.html(" - ");
             this.grid.init();
@@ -85,14 +85,14 @@ define(["require", "exports", "app/api", "app/ui/results-pane/grid", "app/ui/res
         }
         error(e) {
             console.log("error", e);
-            this.footerMsg.html(`⚠️ ${e.messageText}`);
+            this.setFooterMsg(`⚠️ ${e.messageText}`);
             this.messages.message(e);
         }
         end(e) {
             console.log("end", e);
             this.messages.finished(e);
             if (e.message != "error") {
-                this.footerMsg.html("✔️ Query executed successfully.");
+                this.setFooterMsg("✔️ Query executed successfully.");
             }
             this.footerTime.html(`🕛 ${e.executionTime}`).attr("title", `total time: ${e.executionTime}`);
             this.footerRows.html(`${e.rowsAffected} rows`);
@@ -108,11 +108,23 @@ define(["require", "exports", "app/api", "app/ui/results-pane/grid", "app/ui/res
         adjustGrid() {
             this.grid.adjust();
         }
+        get footer() {
+            return this.footerMsg.html();
+        }
+        set footer(value) {
+            this.footerMsg.html(value);
+        }
+        setFooterMsg(msg) {
+            this.footerMsg.html(msg);
+        }
         clearBadges() {
             this.resultsBadge.html("").visible(false);
             this.messagesBadge.html("").visible(false);
         }
         activateByTab(tab) {
+            if (!tab.hasClass("tab")) {
+                return;
+            }
             for (let current of this.tabs) {
                 current.toggleClass("active", tab.id == current.id);
             }

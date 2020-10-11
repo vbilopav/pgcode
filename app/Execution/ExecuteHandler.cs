@@ -1,6 +1,6 @@
 ﻿using System;
+using System.Data.SQLite;
 using System.Diagnostics;
-using System.Threading;
 using Grpc.Core;
 using Npgsql;
 using Pgcode.Connection;
@@ -8,66 +8,37 @@ using Pgcode.Protos;
 
 namespace Pgcode.Execution
 {
-    public class ExecuteHandler
+    public partial class ExecuteHandler
     {
         private readonly WorkspaceConnection _ws;
-        private readonly string _readContent;
-        private readonly string _cursorContent;
-        private readonly string _execContent;
+        private readonly SQLiteConnection _localConnection;
+        private readonly ExecutionMode _mode;
 
-        public ExecuteHandler(WorkspaceConnection ws, string content)
+        public ExecuteHandler(
+            WorkspaceConnection ws, 
+            SQLiteConnection localConnection,
+            ExecutionMode? mode = null)
         {
             _ws = ws;
-            content = content.Trim();
-            var parts = content.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
-            var len = parts.Length;
-            switch (len)
-            {
-                case 0:
-                    return;
-                case 1 when IsSuitableForCursor(content):
-                    _cursorContent = content;
-                    break;
-                case 1:
-                    _readContent = content;
-                    break;
-                default:
-                {
-                    var last = parts[^1].TrimStart();
-                    if (IsSuitableForCursor(last))
-                    {
-                        _cursorContent = last;
-                        _execContent = string.Join(";", parts[..^1]);
-                    }
-                    else
-                    {
-                        _execContent = content;
-                    }
-                    break;
-                }
-            }
+            _localConnection = localConnection;
+            _mode = mode ?? Program.Settings.ExecutionMode;
         }
 
-        public ExecuteResponse TryExecute()
+        public ExecuteResponse TryExecute(string content)
         {
             void NoticeHandler(object sender, NpgsqlNoticeEventArgs e)
             {
                 _ws.SendPgNotice(e.Notice);
             }
             _ws.Connection.Notice += NoticeHandler;
-            _ws.ErrorOffset = null;
-            if (_ws.Rows != null)
-            {
-                _ws.Rows = null;
-                GC.Collect();
-            }
-            
+            CleanupWs();
+
             var stopwatch = new Stopwatch();
             
             try
             {
                 stopwatch.Start();
-                var response = this.Execute();
+                var response = this.Execute(content);
                 stopwatch.Stop();
                 response.ExecutionTime = stopwatch.Elapsed.Format();
                return response;
@@ -89,77 +60,135 @@ namespace Pgcode.Execution
             }
         }
 
-        private ExecuteResponse Execute()
-        {
-            CleanupWs(_ws);
-            if (_readContent != null)
-            {
-                if (_execContent != null)
-                {
-                    _ws.ExecuteVoid(_execContent);
-                }
-
-                return _ws.ExecuteReader(_readContent);
-            }
-
-            if (_cursorContent != null)
-            {
-                if (_execContent != null)
-                {
-                    _ws.ExecuteVoid(_execContent);
-                }
-                try
-                {
-                    return _ws.ExecuteCursor(_cursorContent);
-                }
-                catch (PostgresException)
-                {
-                    CleanupWs(_ws);
-                    throw;
-                }
-            }
-
-            if (_execContent == null)
-            {
-                return new ExecuteResponse {Message = "empty"};
-            }
-            _ws.ExecuteVoid(_execContent);
-            return new ExecuteResponse{ Message = "execute" };
-        }
-
-        public static void TryReadCursor(WorkspaceConnection ws, CursorRequest request, IServerStreamWriter<ExecuteReply> responseStream)
+        public void TryReadPage(PageRequest request, IServerStreamWriter<DataReply> responseStream)
         {
             try
             {
-                foreach (var reply in ws.ExecuteCursorReader(request))
+                foreach (var reply in _mode == ExecutionMode.Cursor ? ReadPageCursor(request) : ReadPageLocal(request))
                 {
                     responseStream.WriteAsync(reply).GetAwaiter().GetResult();
                 }
             }
             catch (PostgresException e)
             {
-                CleanupWs(ws);
-                ws.SendPgError(e);
+                CleanupWs();
+                _ws.SendPgError(e);
             }
         }
 
-        private static void CleanupWs(WorkspaceConnection ws)
+        private ExecuteResponse Execute(string content)
         {
-            using var cmd = ws.Connection.CreateCommand();
-            if (ws.IsNewTran)
+            var (readContent, cursorContent, execContent) = ParseContent(content);
+
+            if (readContent != null)
             {
-                cmd.Execute("end");
+                if (execContent != null)
+                {
+                    ExecuteContent(execContent);
+                }
+
+                return ReadLocal(readContent);
             }
-            else
+
+            if (cursorContent != null)
             {
-                ws.CloseCursorIfExists(cmd);
+                if (execContent != null)
+                {
+                    ExecuteContent(execContent);
+                }
+                try
+                {
+                    return ReadCursor(cursorContent);
+                }
+                catch (PostgresException)
+                {
+                    CleanupWs();
+                    throw;
+                }
             }
-            ws.Cursor = null;
-            ws.IsNewTran = false;
+
+            if (execContent == null)
+            {
+                return new ExecuteResponse {Message = "empty"};
+            }
+
+            ExecuteContent(execContent);
+            return new ExecuteResponse{ Message = "execute" };
         }
 
-        private static bool IsSuitableForCursor(string content)
+        private void ExecuteContent(string content)
         {
+            using var cmd = _ws.Connection.CreateCommand();
+            cmd.Execute(content);
+        }
+
+        private void CleanupWs()
+        {
+            if (_ws.IsNewTran || _ws.Cursor != null)
+            {
+                using var cmd = _ws.Connection.CreateCommand();
+                if (_ws.IsNewTran)
+                {
+                    cmd.Execute("end");
+                }
+                else if (_ws.Cursor != null)
+                {
+                    CloseCursorIfExists(cmd);
+                }
+                _ws.Cursor = null;
+                _ws.IsNewTran = false;
+            }
+
+            if (_ws.LocalTable != null)
+            {
+                using var cmd = _localConnection.CreateCommand();
+                cmd.Execute($"drop table {_ws.LocalTable}");
+                _ws.LocalTable = null;
+            }
+
+            _ws.ErrorOffset = null;
+        }
+
+        private (string, string, string) ParseContent(string content)
+        {
+            string readContent = null, cursorContent = null, execContent = null;
+            content = content.Trim();
+            var parts = content.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+            var len = parts.Length;
+            switch (len)
+            {
+                case 0:
+                    return (null, null, null);
+                case 1 when IsSuitableForCursor(content):
+                    cursorContent = content;
+                    break;
+                case 1:
+                    readContent = content;
+                    break;
+                default:
+                {
+                    var last = parts[^1].TrimStart();
+                    if (IsSuitableForCursor(last))
+                    {
+                        cursorContent = last;
+                        execContent = string.Join(";", parts[..^1]);
+                    }
+                    else
+                    {
+                        execContent = content;
+                    }
+                    break;
+                }
+            }
+            return (readContent, cursorContent, execContent);
+        }
+
+        private bool IsSuitableForCursor(string content)
+        {
+            if (_mode != ExecutionMode.Cursor)
+            {
+                return false;
+            }
             content = content.ToLowerInvariant();
             if (content.StartsWith("select ", StringComparison.OrdinalIgnoreCase) ||
                 content.StartsWith("with ", StringComparison.OrdinalIgnoreCase) ||

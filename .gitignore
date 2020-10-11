@@ -266,3 +266,4 @@ __pycache__/
 /SqlApi/ - Copy.gitignore
 /SqlApi/.gitignore
 app/appsettings.Development.json
+/app/pgcode.db

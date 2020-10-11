@@ -1,4 +1,6 @@
 using System;
+using System.Data.SQLite;
+using System.IO;
 using System.IO.Compression;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -23,6 +25,20 @@ namespace Pgcode
             {
                 o.ClientTimeoutInterval = TimeSpan.MaxValue;
             });
+
+            services.AddSingleton<SQLiteConnection>(provider =>
+            {
+                var file = Path.Join(Directory.GetCurrentDirectory(), Program.Settings.LocalDb);
+                if (File.Exists(file))
+                {
+                    File.Delete(file);
+                }
+                var connection = new SQLiteConnection(new SQLiteConnectionStringBuilder {DataSource = file}.ToString());
+                connection.Open();
+                using var command = connection.CreateCommand();
+                command.Execute("PRAGMA synchronous = OFF; PRAGMA journal_mode = MEMORY;");
+                return connection;
+            });
             services.AddSingleton<ConnectionManager, ConnectionManager>();
             services.AddSingleton(Program.Settings);
             services.AddSingleton<CookieMiddleware, CookieMiddleware>();
@@ -34,7 +50,7 @@ namespace Pgcode
             app.UseGrpcWeb();
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapGrpcService<CursorService>().EnableGrpcWeb();
+                endpoints.MapGrpcService<DataService>().EnableGrpcWeb();
                 endpoints.MapHub<ConnectionsHub>("/connectionsHub");
                 endpoints.MapHub<ExecuteHub>("/executeHub", o =>
                 {
