@@ -64,9 +64,19 @@ namespace Pgcode.Execution
         {
             try
             {
-                foreach (var reply in _mode == ExecutionMode.Cursor ? ReadPageCursor(request) : ReadPageLocal(request))
+                if (_mode == ExecutionMode.Cursor)
                 {
-                    responseStream.WriteAsync(reply).GetAwaiter().GetResult();
+                    foreach (var reply in ReadPageCursor(request))
+                    {
+                        responseStream.WriteAsync(reply).GetAwaiter().GetResult();
+                    }
+                }
+                else if (_mode == ExecutionMode.Local || _mode == ExecutionMode.Mixed)
+                {
+                    foreach (var reply in ReadPageLocal(request))
+                    {
+                        responseStream.WriteAsync(reply).GetAwaiter().GetResult();
+                    }
                 }
             }
             catch (PostgresException e)
@@ -98,7 +108,13 @@ namespace Pgcode.Execution
                 }
                 try
                 {
-                    return ReadCursor(cursorContent);
+                    switch (_mode)
+                    {
+                        case ExecutionMode.Cursor:
+                            return ReadCursor(cursorContent);
+                        case ExecutionMode.Mixed:
+                            return ReadMixed(cursorContent);
+                    }
                 }
                 catch (PostgresException)
                 {
@@ -124,6 +140,19 @@ namespace Pgcode.Execution
 
         private void CleanupWs()
         {
+            if (_ws.CursorTaskToken != null)
+            {
+                if (!_ws.CursorTask.IsCompleted)
+                {
+                    _ws.CursorTaskToken.Cancel();
+                    _ws.CursorTask.GetAwaiter().GetResult();
+                }
+                _ws.CursorTaskToken.Dispose();
+                _ws.CursorTaskToken = null;
+                _ws.CursorTask.Dispose();
+                _ws.CursorTask = null;
+            }
+
             if (_ws.IsNewTran || _ws.Cursor != null)
             {
                 using var cmd = _ws.Connection.CreateCommand();
@@ -185,7 +214,7 @@ namespace Pgcode.Execution
 
         private bool IsSuitableForCursor(string content)
         {
-            if (_mode != ExecutionMode.Cursor)
+            if (_mode == ExecutionMode.Local)
             {
                 return false;
             }

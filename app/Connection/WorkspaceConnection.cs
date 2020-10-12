@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 using Npgsql;
 using Pgcode.Protos;
@@ -17,5 +19,7 @@ namespace Pgcode.Connection
         public string LocalTable { get; set; } = null;
         public int? ErrorOffset { get; set; } = null;
         public bool IsNewTran { get; set; } = false;
+        public CancellationTokenSource CursorTaskToken { get; set; }
+        public Task CursorTask { get; set; }
     }
 }

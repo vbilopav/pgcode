@@ -1,6 +1,6 @@
 namespace Pgcode
 {
-    public enum ExecutionMode { Cursor, Local }
+    public enum ExecutionMode { Cursor, Local, Mixed }
 
     public class Settings
     {
@@ -21,6 +21,6 @@ namespace Pgcode
         public string LinuxOpenCommand { get; set; } = "xdg-open";
         public string FreeBsdOpenCommand { get; set; } = "xdg-open";
         public string LocalDb { get; set; } = "pgcode.db";
-        public ExecutionMode ExecutionMode { get; set; } = ExecutionMode.Local;
+        public ExecutionMode ExecutionMode { get; set; } = ExecutionMode.Mixed;
     }
 }
