@@ -27,7 +27,7 @@ namespace Pgcode.Api
             CookieMiddleware cookieMiddleware, 
             ILoggerFactory loggerFactory) : base(settings, cookieMiddleware, loggerFactory)
         {
-            _connectionManager = connectionManager; ;
+            _connectionManager = connectionManager;
         }
 
         public InitialResponse GetInitial()

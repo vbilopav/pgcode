@@ -4,6 +4,7 @@ using System.Data.SQLite;
 using System.Threading;
 using System.Threading.Tasks;
 using Npgsql;
+using Pgcode.Connection;
 
 namespace Pgcode.Execution
 {
@@ -56,7 +57,7 @@ namespace Pgcode.Execution
                 row = row > 0 ? row - 1 : 0;
                 if (row == response.RowsAffected)
                 {
-                    CleanUpCursor(cmd);
+                    _ws.CleanUpCursor(cmd);
                     return response;
                 }
 
@@ -87,23 +88,10 @@ namespace Pgcode.Execution
                         break;
                     }
                 }
+                _ws.CleanUpCursor(cmd);
             }, token);
 
             return response;
-        }
-
-        private void CleanUpCursor(NpgsqlCommand cmd)
-        {
-            if (_ws.IsNewTran)
-            {
-                cmd.Execute("end");
-            }
-            else if (_ws.Cursor != null)
-            {
-                CloseCursorIfExists(cmd);
-            }
-            _ws.Cursor = null;
-            _ws.IsNewTran = false;
         }
     }
 }

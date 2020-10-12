@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Data;
+using System.Data.SQLite;
 using System.Linq;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -349,7 +350,7 @@ namespace Pgcode.Connection
             return pass;
         }
 
-        private static void ReleaseUnmanagedResources()
+        private static void ReleaseUnmanagedResources(SQLiteConnection localConnection)
         {
             foreach (var (_, data) in _connections)
             {
@@ -366,6 +367,7 @@ namespace Pgcode.Connection
                     data.Connection.Close();
                 }
                 data.Connection.Dispose();
+                data.CleanupWs(localConnection, false);
             }
         }
     }

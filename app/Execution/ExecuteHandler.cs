@@ -31,7 +31,7 @@ namespace Pgcode.Execution
                 _ws.SendPgNotice(e.Notice);
             }
             _ws.Connection.Notice += NoticeHandler;
-            CleanupWs();
+            _ws.CleanupWs(_localConnection);
 
             var stopwatch = new Stopwatch();
             
@@ -81,7 +81,7 @@ namespace Pgcode.Execution
             }
             catch (PostgresException e)
             {
-                CleanupWs();
+                _ws.CleanupWs(_localConnection);
                 _ws.SendPgError(e);
             }
         }
@@ -118,7 +118,7 @@ namespace Pgcode.Execution
                 }
                 catch (PostgresException)
                 {
-                    CleanupWs();
+                    _ws.CleanupWs(_localConnection);
                     throw;
                 }
             }
@@ -136,46 +136,6 @@ namespace Pgcode.Execution
         {
             using var cmd = _ws.Connection.CreateCommand();
             cmd.Execute(content);
-        }
-
-        private void CleanupWs()
-        {
-            if (_ws.CursorTaskToken != null)
-            {
-                if (!_ws.CursorTask.IsCompleted)
-                {
-                    _ws.CursorTaskToken.Cancel();
-                    _ws.CursorTask.GetAwaiter().GetResult();
-                }
-                _ws.CursorTaskToken.Dispose();
-                _ws.CursorTaskToken = null;
-                _ws.CursorTask.Dispose();
-                _ws.CursorTask = null;
-            }
-
-            if (_ws.IsNewTran || _ws.Cursor != null)
-            {
-                using var cmd = _ws.Connection.CreateCommand();
-                if (_ws.IsNewTran)
-                {
-                    cmd.Execute("end");
-                }
-                else if (_ws.Cursor != null)
-                {
-                    CloseCursorIfExists(cmd);
-                }
-                _ws.Cursor = null;
-                _ws.IsNewTran = false;
-            }
-
-            if (_ws.LocalTable != null)
-            {
-                using var cmd = _localConnection.CreateCommand();
-                cmd.Execute($"drop table {_ws.LocalTable}");
-                _ws.LocalTable = null;
-            }
-
-            _ws.ErrorOffset = null;
         }
 
         private (string, string, string) ParseContent(string content)

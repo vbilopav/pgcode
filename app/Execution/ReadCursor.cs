@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Npgsql;
+using Pgcode.Connection;
 
 namespace Pgcode.Execution
 {
@@ -20,7 +21,7 @@ namespace Pgcode.Execution
             }
             else
             {
-                CloseCursorIfExists(cmd);
+                _ws.CloseCursorIfExists(cmd);
             }
 
             var declareStatement = $"declare \"{cursor}\" scroll cursor for ";
@@ -40,14 +41,6 @@ namespace Pgcode.Execution
             finally
             {
                 reader?.Close();
-            }
-        }
-
-        public void CloseCursorIfExists(NpgsqlCommand cmd)
-        {
-            if (_ws.Cursor != null && cmd.Any($"select 1 from pg_cursors where name = '{_ws.Cursor}'"))
-            {
-                cmd.Execute($"close \"{_ws.Cursor}\"");
             }
         }
 

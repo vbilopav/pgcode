@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SQLite;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 using Npgsql;
@@ -19,6 +20,13 @@ namespace Pgcode.Connection
     
     public sealed partial class ConnectionManager : IDisposable
     {
+        private readonly SQLiteConnection _localConnection;
+
+        public ConnectionManager(SQLiteConnection localConnection)
+        {
+            _localConnection = localConnection;
+        }
+
         public IEnumerable<ConnectionData> GetConnectionsData() => _connections.Values;
 
         public ConnectionData GetConnectionDataByName(string connectionName)
@@ -79,17 +87,18 @@ namespace Pgcode.Connection
             }
             ws.Connection.Close();
             ws.Connection.Dispose();
+            ws.CleanupWs(_localConnection, false);
         }
 
         public void Dispose()
         {
-            ReleaseUnmanagedResources();
+            ReleaseUnmanagedResources(_localConnection);
             GC.SuppressFinalize(this);
         }
 
         ~ConnectionManager()
         {
-            ReleaseUnmanagedResources();
+            ReleaseUnmanagedResources(_localConnection);
         }
     }
 }
