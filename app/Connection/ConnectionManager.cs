@@ -4,6 +4,7 @@ using System.Data.SQLite;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 using Npgsql;
+using Pgcode.Execution;
 using Pgcode.Middleware;
 
 namespace Pgcode.Connection
