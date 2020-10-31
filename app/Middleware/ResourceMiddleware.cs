@@ -34,6 +34,9 @@ namespace Pgcode.Middleware
             "/fonts/icons.woff2",
             //"/manifest.json",
             //"/postgresql-512.png"
+            "/libs/google-protobuf/google-protobuf.js",
+            "/libs/grpc-web/index.js",
+            "/libs/signalr/signalr.min.js"
         };
 
         private static readonly Dictionary<string, (string resourceId, string mimeType, string size, bool isBinary)> Maps = 

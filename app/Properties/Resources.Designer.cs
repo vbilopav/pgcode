@@ -104,17 +104,16 @@ namespace Pgcode.Properties {
         ///    &lt;meta charset=&quot;utf-8&quot;&gt;
         ///    &lt;title&gt;&lt;/title&gt;
         ///    &lt;base href=&quot;/&quot; /&gt;
-        ///    &lt;link rel=&quot;icon&quot; type=&quot;image/x-icon&quot; href=&quot;favicon.ico?7415&quot; /&gt;
-        ///    &lt;link rel=&quot;stylesheet&quot; id=&quot;theme&quot; type=&quot;text/css&quot; href=&quot;css/theme-dark.css?7415&quot; /&gt;
-        ///    &lt;!-- &lt;link rel=&quot;manifest&quot; href=&quot;/manifest.json?7415&quot;&gt; --&gt;
+        ///    &lt;link rel=&quot;icon&quot; type=&quot;image/x-icon&quot; href=&quot;favicon.ico?0.0.0.19&quot; /&gt;
+        ///    &lt;link rel=&quot;stylesheet&quot; id=&quot;theme&quot; type=&quot;text/css&quot; href=&quot;css/theme-dark.css?0.0.0.19&quot; /&gt;
+        ///    &lt;!-- &lt;link rel=&quot;manifest&quot; href=&quot;/manifest.json?0.0.0.19&quot;&gt; --&gt;
         ///&lt;/head&gt;
         ///&lt;body&gt;
         ///    &lt;div id=&quot;loading&quot;&gt;
         ///        &amp;#8987;
         ///        &lt;script&gt;
-        ///            //navigator.serviceWorker.register(&quot;service-worker.js?7415&quot;);
-        ///            location.hash = &apos;7415&apos;;
-        ///       [rest of string was truncated]&quot;;.
+        ///            //navigator.serviceWorker.register(&quot;service-worker.js?0.0.0.19&quot;);
+        ///            location.hash = [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string _index_html {
             get {
@@ -123,12 +122,36 @@ namespace Pgcode.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to /*build: 2020-05-07 13:58:12:491, version: 7415, copyright VB-Consulting*/
-        ///(function(){&quot;use strict&quot;;const e=this;&quot;object&quot;==typeof global&amp;&amp;global;var t;!function(t){t.global=e;class i{constructor(){this._detected=!1,this._isWindows=!1,this._isWebWorker=!1}get isWindows(){return this._detect(),this._isWindows}get isWebWorker(){return this._detect(),this._isWebWorker}_detect(){this._detected||(this._detected=!0,this._isWindows=i._isWindows(),this._isWebWorker=&quot;function&quot;==typeof t.global.importScripts)}static _ [rest of string was truncated]&quot;;.
+        ///   Looks up a localized string similar to /*build: 2020-10-31 14:29:28:780, hash: b4a7, copyright VB-Consulting*/
+        ///(function(){&quot;use strict&quot;;const e=this;&quot;object&quot;==typeof global&amp;&amp;global;var t;!function(t){t.global=e;class i{constructor(){this._detected=!1,this._isWindows=!1,this._isWebWorker=!1}get isWindows(){return this._detect(),this._isWindows}get isWebWorker(){return this._detect(),this._isWebWorker}_detect(){this._detected||(this._detected=!0,this._isWindows=i._isWindows(),this._isWebWorker=&quot;function&quot;==typeof t.global.importScripts)}static _isW [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string _js_index_js {
             get {
                 return ResourceManager.GetString("/js/index.js", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to define(function (require, exports, module) {module.exports = exports; var $jscomp=$jscomp||{};$jscomp.scope={};$jscomp.findInternal=function(a,b,c){a instanceof String&amp;&amp;(a=String(a));for(var d=a.length,e=0;e&lt;d;e++){var f=a[e];if(b.call(c,f,e,a))return{i:e,v:f}}return{i:-1,v:void 0}};$jscomp.ASSUME_ES5=!1;$jscomp.ASSUME_NO_NATIVE_MAP=!1;$jscomp.ASSUME_NO_NATIVE_SET=!1;$jscomp.SIMPLE_FROUND_POLYFILL=!1;
+        ///$jscomp.defineProperty=$jscomp.ASSUME_ES5||&quot;function&quot;==typeof Object.defineProperties?Object.defineProperty [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string _libs_google_protobuf_google_protobuf_js {
+            get {
+                return ResourceManager.GetString("/libs/google-protobuf/google-protobuf.js", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to define(function (require, exports, module) {module.exports = exports; /*
+        ///
+        /// Copyright The Closure Library Authors.
+        /// SPDX-License-Identifier: Apache-2.0
+        ///*/
+        ///function aa(a){var b=0;return function(){return b&lt;a.length?{done:!1,value:a[b++]}:{done:!0}}}var ba=&quot;function&quot;==typeof Object.defineProperties?Object.defineProperty:function(a,b,c){a!=Array.prototype&amp;&amp;a!=Object.prototype&amp;&amp;(a[b]=c.value)};function ca(a){a=[&quot;object&quot;==typeof window&amp;&amp;window,&quot;object&quot;==typeof self&amp;&amp;self,&quot;object&quot;==typeof global&amp;&amp;global,a];for(var [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string _libs_grpc_web_index_js {
+            get {
+                return ResourceManager.GetString("/libs/grpc-web/index.js", resourceCulture);
             }
         }
         
@@ -215,6 +238,15 @@ namespace Pgcode.Properties {
         internal static string _libs_monaco_editor_min_vs_editor_editor_main_nls_js {
             get {
                 return ResourceManager.GetString("/libs/monaco-editor/min/vs/editor/editor.main.nls.js", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to (function webpackUniversalModuleDefinition(root,factory){if(typeof exports===&quot;object&quot;&amp;&amp;typeof module===&quot;object&quot;)module.exports=factory();else if(typeof define===&quot;function&quot;&amp;&amp;define.amd)define([],factory);else if(typeof exports===&quot;object&quot;)exports[&quot;signalR&quot;]=factory();else root[&quot;signalR&quot;]=factory()})(window,function(){return function(modules){var installedModules={};function __webpack_require__(moduleId){if(installedModules[moduleId]){return installedModules[moduleId].exports}var module=installedModules[module [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string _libs_signalr_signalr_min_js {
+            get {
+                return ResourceManager.GetString("/libs/signalr/signalr.min.js", resourceCulture);
             }
         }
     }

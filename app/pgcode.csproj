@@ -4,9 +4,9 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <RootNamespace>Pgcode</RootNamespace>
     <Win32Resource />
-    <Version>0.0.0.18</Version>
-    <FileVersion>0.0.0.18</FileVersion>
-    <InformationalVersion>0.0.0.18</InformationalVersion>
+    <Version>0.0.0.4</Version>
+    <FileVersion>0.0.0.4</FileVersion>
+    <InformationalVersion>0.0.0.4</InformationalVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -14,11 +14,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Grpc.AspNetCore" Version="2.32.0" />
-    <PackageReference Include="Grpc.AspNetCore.Web" Version="2.32.0" />
-    <PackageReference Include="Npgsql" Version="5.0.0-alpha1" />
-    <PackageReference Include="System.Data.SQLite.Core" Version="1.0.113.1" />
-    <PackageReference Include="System.IO.Pipelines" Version="5.0.0-rc.1.20451.14" />
+    <PackageReference Include="Grpc.AspNetCore" Version="2.33.1" />
+    <PackageReference Include="Grpc.AspNetCore.Web" Version="2.33.1" />
+    <PackageReference Include="Npgsql" Version="5.0.0-preview1" />
+    <PackageReference Include="System.Data.SQLite.Core" Version="1.0.113.5" />
+    <PackageReference Include="System.IO.Pipelines" Version="5.0.0-rc.2.20475.5" />
   </ItemGroup>
 
   <ItemGroup>
