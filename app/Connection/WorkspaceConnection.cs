@@ -19,7 +19,7 @@ namespace Pgcode.Connection
         public string LocalTable { get; set; } = null;
         public int? ErrorOffset { get; set; } = null;
         public bool IsNewTran { get; set; } = false;
-        public CancellationTokenSource CursorTaskToken { get; set; }
+        public CancellationTokenSource CursorTaskCancellationTokenSource { get; set; }
         public Task CursorTask { get; set; }
     }
 
@@ -27,17 +27,20 @@ namespace Pgcode.Connection
     {
         public static void CleanupWs(this WorkspaceConnection ws, SQLiteConnection localConnection, bool cleanUpCursor = true)
         {
-            if (ws.CursorTaskToken != null)
-            {
-                if (!ws.CursorTask.IsCompleted)
+            if (ws.CursorTaskCancellationTokenSource != null)
+            {   
+                ws.CursorTaskCancellationTokenSource.Cancel();
+                Task.Run(() =>
                 {
-                    ws.CursorTaskToken.Cancel();
-                    ws.CursorTask.GetAwaiter().GetResult();
-                }
-                ws.CursorTaskToken.Dispose();
-                ws.CursorTaskToken = null;
-                ws.CursorTask.Dispose();
-                ws.CursorTask = null;
+                    if (ws.CursorTask.Status == TaskStatus.Running || ws.CursorTask.Status == TaskStatus.WaitingForActivation)
+                    {
+                        while (!ws.CursorTask.IsCanceled) {};
+                    }
+                    ws.CursorTask.Dispose();
+                    ws.CursorTask = null;
+                }).GetAwaiter().GetResult();
+                ws.CursorTaskCancellationTokenSource.Dispose();
+                ws.CursorTaskCancellationTokenSource = null;
             }
 
             if (cleanUpCursor && (ws.IsNewTran || ws.Cursor != null))

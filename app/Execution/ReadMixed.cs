@@ -62,34 +62,41 @@ namespace Pgcode.Execution
                 }
 
             }
-            _ws.CursorTaskToken = new CancellationTokenSource();
-            var token = _ws.CursorTaskToken.Token;
-
+            _ws.CursorTaskCancellationTokenSource = new CancellationTokenSource();
+            var token = _ws.CursorTaskCancellationTokenSource.Token;
             _ws.CursorTask = Task.Run(async () =>
-            {
-                await using var local = _localConnection.CreateCommand();
-                await using var cmd = _ws.Connection.CreateCommand();
-                await using var reader = await cmd.ReaderAsync($"fetch all in \"{_ws.Cursor}\"", _ws.CursorTaskToken.Token);
-                while (await reader.ReadAsync(token))
                 {
-                    var values = new object[reader.FieldCount];
-                    var len = reader.GetProviderSpecificValues(values);
-                    local.Parameters.Clear();
-                    for (var index = 0; index < len; index++)
-                    {
-                        var value = values[index];
-                        var p = new SQLiteParameter(index.ToString()) {Value = value};
-                        local.Parameters.Add(p);
-                    }
-
-                    await local.ExecuteAsync(insert, token);
+                    await using var local = _localConnection.CreateCommand();
+                    await using var cmd = _ws.Connection.CreateCommand();
                     if (token.IsCancellationRequested)
                     {
-                        break;
+                        _ws.CleanUpCursor(cmd);
+                        token.ThrowIfCancellationRequested();
+                        return;
                     }
-                }
-                _ws.CleanUpCursor(cmd);
-            }, token);
+                    await using var reader = await cmd.ReaderAsync($"fetch all in \"{_ws.Cursor}\"", _ws.CursorTaskCancellationTokenSource.Token);
+                    while (await reader.ReadAsync(token))
+                    {
+                        if (token.IsCancellationRequested)
+                        {
+                            _ws.CleanUpCursor(cmd);
+                            token.ThrowIfCancellationRequested();
+                            return;
+                        }
+                        var values = new object[reader.FieldCount];
+                        var len = reader.GetProviderSpecificValues(values);
+                        local.Parameters.Clear();
+                        for (var index = 0; index < len; index++)
+                        {
+                            var value = values[index];
+                            var p = new SQLiteParameter(index.ToString()) { Value = value };
+                            local.Parameters.Add(p);
+                        }
+
+                        await local.ExecuteAsync(insert, token);
+                    }
+                    _ws.CleanUpCursor(cmd);
+                }, token);
 
             return response;
         }
