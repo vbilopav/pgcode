@@ -12,8 +12,8 @@ namespace Pgcode
         public string PgCodeSchema { get; set; } = "pgcode";
         public string DefaultSchema { get; set; } = "public";
         public string SkipSchemaPattern { get; set; } = "(pg_temp|pg_toast)%";
-        public bool LogRequests { get; set; } = true;
-        public bool LogPgCodeDbCommands { get; set; } = false;
+        public bool LogRequests { get; set; } = false;
+        public bool LogPgCodeDbCommands { get; set; } = true;
         public bool LogPgCodeCommandNotice { get; set; } = true;
         public string OpenCommandUrl { get; set; } = null; //"https://pgcode";
         public string WindowsOpenCommand { get; set; } = null;
@@ -22,5 +22,6 @@ namespace Pgcode
         public string FreeBsdOpenCommand { get; set; } = "xdg-open";
         public string LocalDb { get; set; } = "pgcode.db";
         public ExecutionMode ExecutionMode { get; set; } = ExecutionMode.Mixed;
+        public int MixedModeSyncLimit { get; set; } = 500;
     }
 }

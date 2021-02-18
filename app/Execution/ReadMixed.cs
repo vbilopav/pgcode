@@ -10,8 +10,6 @@ namespace Pgcode.Execution
 {
     public partial class ExecuteHandler
     {
-        private const int SyncReadLimit = 100;
-
         public ExecuteResponse ReadMixed(string content)
         {
             var response = ReadCursor(content);
@@ -37,7 +35,7 @@ namespace Pgcode.Execution
                 local.Execute("begin transaction");
                 
                 cmd.Execute($"move absolute 0 in \"{_ws.Cursor}\"");
-                using var reader = cmd.Reader($"fetch {SyncReadLimit} in \"{_ws.Cursor}\"");
+                using var reader = cmd.Reader($"fetch {Program.Settings.MixedModeSyncLimit} in \"{_ws.Cursor}\"");
                 while (reader.Read())
                 {
                     var values = new object[reader.FieldCount];

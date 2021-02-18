@@ -23,6 +23,8 @@ namespace Pgcode.Api
         {
             _connectionManager = connectionManager;
             _localConnection = localConnection;
+            
+            loggerFactory.CreateLogger("SQL");
         }
 
         public void InitConnection(string connection, string schema, string id)
