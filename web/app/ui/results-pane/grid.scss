@@ -73,7 +73,8 @@
         overflow-y: scroll;
         height: calc(100% + 16px);
         & > div {
-            width: 0px;
+            //width: 0px;
+            width: 16px;
         }
     }
 

@@ -243,7 +243,7 @@ export default class {
         if (this.start + ((this.end - this.start) / 2) < this.response.rowsAffected / 2) {
             this.table.scrollTo({top: ((this.start - 1) * this.rowHeight) + (this.scroll.scrollTop % this.rowHeight), behavior: 'auto'});
         } else {
-            this.table.scrollTo({top: (this.start * this.rowHeight) + (this.scroll.scrollTop % this.rowHeight), behavior: 'auto'})
+            this.table.scrollTo({top: ((this.start - 1) * this.rowHeight) + (this.scroll.scrollTop % this.rowHeight), behavior: 'auto'});
         }
     }
 

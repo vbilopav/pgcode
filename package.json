@@ -3,14 +3,14 @@
   "version": "1.0.0",
   "private": true,
   "dependencies": {
-    "google-protobuf": "^3.12.4",
-    "grpc-web": "^1.2.0",
-    "@microsoft/signalr": "^3.1.6",
-    "monaco-editor": "^0.20.0"
+    "@microsoft/signalr": "^3.1.15",
+    "google-protobuf": "^3.17.0",
+    "grpc-web": "^1.2.1",
+    "monaco-editor": "^0.24.0"
   },
   "devDependencies": {
     "html-minifier": "^4.0.0",
-    "node-sass": "^4.14.1",
+    "node-sass": "^5.0.0",
     "uglify-es": "^3.3.9"
   },
   "scripts": {

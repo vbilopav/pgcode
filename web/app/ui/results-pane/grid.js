@@ -218,7 +218,7 @@ define(["require", "exports", "app/api", "app/_sys/timeout"], function (require,
                 this.table.scrollTo({ top: ((this.start - 1) * this.rowHeight) + (this.scroll.scrollTop % this.rowHeight), behavior: 'auto' });
             }
             else {
-                this.table.scrollTo({ top: (this.start * this.rowHeight) + (this.scroll.scrollTop % this.rowHeight), behavior: 'auto' });
+                this.table.scrollTo({ top: ((this.start - 1) * this.rowHeight) + (this.scroll.scrollTop % this.rowHeight), behavior: 'auto' });
             }
         }
         async removeAndLoadAllRows(first, last) {
