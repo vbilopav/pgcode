@@ -10,7 +10,7 @@
   },
   "devDependencies": {
     "html-minifier": "^4.0.0",
-    "node-sass": "^5.0.0",
+    "node-sass": "^7.0.0",
     "uglify-es": "^3.3.9"
   },
   "scripts": {
